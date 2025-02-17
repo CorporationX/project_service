@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.project.DeleteProjectRequest;
 import faang.school.projectservice.dto.project.FilterProjectRequest;
 import faang.school.projectservice.dto.project.ProjectResponse;
 import faang.school.projectservice.dto.project.UpdateProjectRequest;
+import faang.school.projectservice.exception.ProjectAlreadyCanceledException;
 import faang.school.projectservice.exception.ProjectAlreadyExistsException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -98,6 +99,20 @@ public class ProjectService {
     private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+    }
+
+    public List<Project> findAllProjects(Long userId) {
+        validUser(userId);
+        return getVisibleProjectsForUser(projectRepository.findAll().stream(), userId)
+                .toList();
+    }
+
+    public Project getActiveProjectById(Long projectId) {
+        Project project = getProjectById(projectId);
+        if (project.getStatus().equals(ProjectStatus.CANCELLED)) {
+            throw new ProjectAlreadyCanceledException("Проект под айди %s уже закончен".formatted(project.getId()));
+        }
+        return project;
     }
 
     private void validUser(Long userId) {

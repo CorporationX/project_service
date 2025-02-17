@@ -1,4 +1,17 @@
+app:
+  config:
+    minio_bucket_name: "corpbucket"
+    minio_login: "user"
+    minio_password: "password"
+    minio_endpoint: "http://localhost:9000"
+    max_team_avatar_side_length: 512
+    max_team_avatar_size_in_mb: 5
+
+
 spring:
+  mvc:
+    servlet:
+      path: /api/v1
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -33,12 +46,22 @@ jira:
 server:
   port: 8082
 
+
 logging:
   level:
     root: info
 
 calculations_messages_processing:
   enabled: true
+
+google:
+  calendar:
+    settings:
+      calendarId: fcc4660e6d7a24a8ef8ee0f841f3e0acf298d0b1e7c6b92a8bc0c5c3bc5f2a97@group.calendar.google.com
+      zone: Europe/Moscow
+    credentials:
+      filePath: /google-credentials.json
+      tokensPath: tokens
 
 services:
   s3:

@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
 import faang.school.projectservice.dto.meet.MeetUpdateRequest;
-import faang.school.projectservice.service.MeetService;
+import faang.school.projectservice.service.meet.MeetService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

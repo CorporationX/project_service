@@ -5,12 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query(
-        "SELECT tm FROM TeamMember tm JOIN tm.team t "
-                + "WHERE tm.userId = :userId "
-                + "AND t.project.id = :projectId"
+            "SELECT tm FROM TeamMember tm JOIN tm.team t "
+                    + "WHERE tm.userId = :userId "
+                    + "AND t.project.id = :projectId"
     )
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
@@ -22,4 +23,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
                     + "WHERE t.project.id = :projectId"
     )
     List<TeamMember> findByProjectId(long projectId);
+
+    Optional<TeamMember> findByUserIdAndTeamId(long userId, long teamId);
+
+    List<TeamMember> findByTeamId(long teamId);
 }

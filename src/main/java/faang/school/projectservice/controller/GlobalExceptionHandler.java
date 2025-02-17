@@ -4,6 +4,7 @@ import faang.school.projectservice.exception.ErrorResponse;
 import faang.school.projectservice.exception.MeetingOwnershipRequiredException;
 import faang.school.projectservice.exception.ProjectAlreadyExistsException;
 import faang.school.projectservice.exception.TaskJiraKeyWasNotFound;
+import faang.school.projectservice.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(ProjectAlreadyExistsException.class)
+    @ExceptionHandler({ProjectAlreadyExistsException.class, MemberAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleProjectAlreadyExistsException(ProjectAlreadyExistsException ex, WebRequest request) {
         return ErrorResponse.builder()
@@ -45,7 +46,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, MeetingOwnershipRequiredException.class})
+    @ExceptionHandler({IllegalArgumentException.class, MeetingOwnershipRequiredException.class, PaymentFailedException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
         return ErrorResponse.builder()
@@ -63,7 +64,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler({RuntimeException.class, PaymentServiceConnectException.class, UserServiceConnectionException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(RuntimeException ex, WebRequest request) {
         return ErrorResponse.builder()

@@ -38,6 +38,8 @@ dependencies {
     * Amazon S3
     */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    implementation("io.minio:minio:8.5.17")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
 
     /**
     * Utils & Logging
@@ -50,11 +52,17 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
-    /**
+
      * Jira Impl
      */
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.1.0")
     implementation("io.atlassian.fugue:fugue:4.7.2")
+    
+     * API
+     */
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
 
     /**
     * Test containers
