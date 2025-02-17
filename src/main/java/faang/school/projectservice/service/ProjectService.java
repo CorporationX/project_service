@@ -47,6 +47,7 @@ public class ProjectService {
                 ));
     }
 
+    @Transactional
     public ProjectDto addProjectCover(Long projectId, MultipartFile file) {
         Project project = getProject(projectId);
 
@@ -60,13 +61,14 @@ public class ProjectService {
                 file.getContentType()
         );
 
-        String folder = project.getId() + project.getName();
+        String folder = String.format("%d_%s", project.getId(), project.getName());
         String key = amazonS3Client.uploadFile(resizedImageBytes, folder);
         project.setCoverImageId(key);
         Project updatedProject = projectRepository.save(project);
         return projectMapper.toDto(updatedProject);
     }
 
+    @Transactional
     public ProjectDto deleteProjectCover(Long projectId) {
         Project project = getProject(projectId);
         amazonS3Client.deleteFile(project.getCoverImageId());

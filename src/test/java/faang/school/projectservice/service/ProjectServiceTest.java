@@ -61,7 +61,6 @@ class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
-
     @Spy
     private ResourceMapperImpl resourceMapper;
 
@@ -76,14 +75,6 @@ class ProjectServiceTest {
 
     @InjectMocks
     private ProjectService projectService;
-
-
-//    private final Long projectId = 1L;
-//    private final Project project = Project.builder()
-//            .id(projectId)
-//            .coverImageId("coverImageId")
-//            .build();
-
 
     private final String KEY = "key";
     private final Long RESOURCE_ID = 1L;

@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,8 +53,8 @@ class ImageProcessingUtilsTest {
         byte[] result = imageProcessingUtils.resizeImage(file);
 
         Assertions.assertNotNull(result);
-        verify(imageConfig, times(1)).getMaxRectangleWidth();
-        verify(imageConfig, times(1)).getMaxRectangleHeight();
+        verify(imageConfig).getMaxRectangleWidth();
+        verify(imageConfig).getMaxRectangleHeight();
     }
 
     @Test
@@ -90,8 +89,8 @@ class ImageProcessingUtilsTest {
         byte[] result = imageProcessingUtils.resizeImage(file);
 
         Assertions.assertNotNull(result);
-        verify(imageConfig, times(1)).getMaxRectangleWidth();
-        verify(imageConfig, times(1)).getMaxRectangleHeight();
+        verify(imageConfig).getMaxRectangleWidth();
+        verify(imageConfig).getMaxRectangleHeight();
     }
 
     @Test

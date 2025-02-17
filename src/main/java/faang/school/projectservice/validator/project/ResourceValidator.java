@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class ResourceValidator {
@@ -48,9 +50,7 @@ public class ResourceValidator {
             return false;
         }
         String extension = originalFilename.substring(originalFilename.lastIndexOf('.')).toLowerCase();
-        return extension.endsWith(".jpg")
-                || extension.endsWith(".jpeg")
-                || extension.endsWith(".png")
-                || extension.endsWith(".gif");
+        var allowedExtensions = Set.of(".jpg", ".jpeg", ".png", ".gif");
+        return allowedExtensions.contains(extension);
     }
 }
