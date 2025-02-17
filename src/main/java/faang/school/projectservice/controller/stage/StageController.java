@@ -1,10 +1,11 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.filter.stage.StageRoleAndCountFilter;
 import faang.school.projectservice.service.stage.StageService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/stage")
@@ -31,15 +31,15 @@ public class StageController {
 //     которые гарантированно будут задействованы на этапе.
 
     @PostMapping("/create")
-    public StageDto createStage(@RequestBody @Valid StageDto stageDto) {
-        return stageService.createStage(stageDto);
+    public StageDto createStage(@RequestBody @Valid StageDto stageDto, StageRolesDto stageRolesDto) {
+        return stageService.createStage(stageDto, stageRolesDto);
     }
 
 //    Получить все этапы проекта с фильтром по ролям (OWNER, MANAGER и др)
 //     и статусу задач (есть задачи в статусе In progress, все задачи в статусе done и др).
 
     @GetMapping("/filter/{userId}")
-    public List<StageDto> getAllStagesByRole(StageFilter filter, @PathVariable Long userId) {
+    public List<StageDto> getAllStagesByRole(StageRoleAndCountFilter filter, @PathVariable Long userId) {
         return stageService.getAllStagesByRole(filter, userId);
     }
 

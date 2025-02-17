@@ -1,35 +1,41 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.dto.stage.StageRolesDto;
+import faang.school.projectservice.filter.stage.StageRoleAndCountFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
+import faang.school.projectservice.mapper.stage.StageRolesMapper;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class StageService {
     private final StageRepository stageRepository;
-    private final List<StageFilter> stageFilter;
+    private final StageRolesMapper stageRolesMapper;
     private final StageMapper stageMapper;
 
     @Transactional
-    public StageDto createStage(StageDto stageDto) {
+    public StageDto createStage(StageDto stageDto, StageRolesDto stageRolesDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         stage = stageRepository.save(stage);
+
+
+        StageRoles stageRoles = stageRolesMapper.toEntity(stageRolesDto);
+        stageRoles = stageRepository.save(stageRolesDto)
+
         return stageMapper.toDto(stage);
     }
 
     @Transactional
-    public List<StageDto> getAllStagesByRole(StageFilter stageFilter, Long userId) {
+    public List<StageDto> getAllStagesByRole(StageRoleAndCountFilter stageRoleAndCountFilter, Long userId) {
 
     }
 
