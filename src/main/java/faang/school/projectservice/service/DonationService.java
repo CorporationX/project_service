@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.donation.DonationFilter;
+import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
@@ -31,7 +31,6 @@ public class DonationService {
     private final DonationMapper donationMapper;
     private final CampaignService campaignService;
     private final PaymentServiceClient paymentServiceClient;
-    private final List<DonationFilter> donationFilters;
     private final CampaignValidator campaignValidator;
     private final UserServiceClient userServiceClient;
 
@@ -51,13 +50,15 @@ public class DonationService {
         donation.setPaymentNumber(paymentNumber);
 
         try {
-            paymentServiceClient.sendPayment(new PaymentRequest(
+            if (!paymentServiceClient.sendPayment(new PaymentRequest(
                     paymentNumber,
                     donation.getAmount(),
                     donation.getCurrency()
-            ));
+            )).status().equals("SUCCESS")) {
+                throw new PaymentFailedException("Payment with number " + paymentNumber + " failed");
+            }
         } catch (FeignException e) {
-            throw new DataValidationException("Payment with number " + paymentNumber + " failed");
+            throw new PaymentFailedException("Payment with number " + paymentNumber + " failed", e);
         }
 
         donation.setCampaign(campaign);
@@ -78,14 +79,15 @@ public class DonationService {
     }
 
     public List<DonationDto> getAllDonationsByUser(Long userId, DonationFilterDto filters) {
-        Stream<Donation> donations = donationRepository.findAllByUserIdAndSortedByDate(userId).stream();
-        if (filters != null) {
-            for (DonationFilter filter : donationFilters) {
-                if (filter.isApplicable(filters)) {
-                    donations = filter.apply(donations, filters);
-                }
-            }
-        }
+        Stream<Donation> donations = donationRepository.findAllByUserIdFilteredAndThenSortedByDate(
+                        userId,
+                        filters.getStartDate(),
+                        filters.getEndDate(),
+                        filters.getCurrency(),
+                        filters.getMaxAmount(),
+                        filters.getMinAmount())
+                .stream();
+
         return donations
                 .map(donationMapper::toDto)
                 .toList();

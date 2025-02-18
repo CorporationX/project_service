@@ -4,11 +4,12 @@ import faang.school.projectservice.dto.client.Currency;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class DonationFilterDto {
-    private LocalDate date;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private Currency currency;
     private BigDecimal maxAmount;
     private BigDecimal minAmount;

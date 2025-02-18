@@ -5,8 +5,6 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
-import faang.school.projectservice.filter.donation.DonationCurrencyFilter;
-import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.CampaignRepository;
@@ -21,7 +19,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,17 +45,13 @@ public class DonationServiceTest {
     private DonationService donationService;
 
     private DonationFilterDto donationFilterDto;
-    private List<DonationFilter> filters;
-    private DonationFilter filter;
 
     @BeforeEach
     void setUp() {
         donationFilterDto = new DonationFilterDto();
-        filters = new ArrayList<>();
-        filter = new DonationCurrencyFilter();
 
         donationService = new DonationService(donationRepository, campaignRepository,
-                donationMapper, campaignService, paymentServiceClient, filters, campaignValidator, userServiceClient);
+                donationMapper, campaignService, paymentServiceClient, campaignValidator, userServiceClient);
     }
 
 
@@ -81,35 +74,25 @@ public class DonationServiceTest {
         assertEquals(donationMapper.toDto(donation), donationService.getDonationByIdAndUserId(2L, 1L));
     }
 
-    @Test
-    void testGetAllDonationsByUser_ShouldReturnOriginalListWhenFilterListIsEmpty() {
-        Donation donation1 = Donation.builder().id(1L).userId(1L).build();
-        Donation donation2 = Donation.builder().id(2L).userId(1L).build();
-        Donation donation3 = Donation.builder().id(3L).userId(1L).build();
-
-        List<Donation> input = List.of(donation1, donation2, donation3);
-
-        when(donationRepository.findAllByUserIdAndSortedByDate(1L)).thenReturn(input);
-
-        List<DonationDto> expected = input.stream().map(donationMapper::toDto).toList();
-        List<DonationDto> actual = donationService.getAllDonationsByUser(1L, donationFilterDto);
-
-        assertEquals(expected, actual);
-    }
 
     @Test
     void testGetAllDonationsByUser_ShouldReturnFilteredList() {
-        Donation donation1 = Donation.builder().currency(Currency.USD).userId(1L).build();
-        Donation donation2 = Donation.builder().currency(Currency.EUR).userId(1L).build();
+        Donation donation1 = Donation.builder().currency(Currency.EUR).userId(1L).build();
 
-        filters.add(filter);
+        List<Donation> input = List.of(donation1);
+
         donationFilterDto.setCurrency(Currency.EUR);
 
-        List<Donation> input = List.of(donation1, donation2);
+        when(donationRepository.findAllByUserIdFilteredAndThenSortedByDate(
+                1L,
+                donationFilterDto.getStartDate(),
+                donationFilterDto.getEndDate(),
+                donationFilterDto.getCurrency(),
+                donationFilterDto.getMaxAmount(),
+                donationFilterDto.getMinAmount()
+        )).thenReturn(input);
 
-        when(donationRepository.findAllByUserIdAndSortedByDate(1L)).thenReturn(input);
-
-        List<DonationDto> expected = List.of(donationMapper.toDto(donation2));
+        List<DonationDto> expected = List.of(donationMapper.toDto(donation1));
         List<DonationDto> actual = donationService.getAllDonationsByUser(1L, donationFilterDto);
 
         assertEquals(expected, actual);
