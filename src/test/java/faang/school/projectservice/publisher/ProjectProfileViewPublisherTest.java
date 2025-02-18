@@ -10,13 +10,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.LocalDateTime;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectProfileViewPublisherTest {
-    private final static String PROJECT_PROFILE_VIEW_TOPIC = "ProfileView";
+
+    @Value("${spring.data.redis.topics.profile_view}")
+    private String profileViewTopic;
     @Mock
     private RedisTemplate<String, Object> redisTemplateMock;
     @Mock
@@ -37,6 +40,6 @@ class ProjectProfileViewPublisherTest {
         Mockito.when(objectMapper.writeValueAsString(event)).thenReturn(json);
         projectProfileViewPublisher.publish(event);
         Mockito.verify(redisTemplateMock, Mockito.times(1))
-                .convertAndSend(PROJECT_PROFILE_VIEW_TOPIC, json);
+                .convertAndSend(profileViewTopic, json);
     }
 }
