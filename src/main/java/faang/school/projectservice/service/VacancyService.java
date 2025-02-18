@@ -60,7 +60,7 @@ public class VacancyService {
         return vacancyMapper.toCoverDto(vacancy);
     }
 
-    public Vacancy findById(@NotNull Long vacancyId) {
+    private Vacancy findById(@NotNull Long vacancyId) {
         return vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException("Вакансия с таким id не найдена"));
     }
@@ -89,13 +89,10 @@ public class VacancyService {
         int originalHeight = image.getHeight();
         int originalWidth = image.getWidth();
 
-        if (originalHeight > originalWidth) {
-            newHeight = maxSize;
-            newWidth = (int) (originalWidth * ((double) maxSize / originalHeight));
-        } else {
-            newWidth = maxSize;
-            newHeight = (int) (originalHeight * ((double) maxSize / originalWidth));
-        }
+        int scaleSize = (int) (originalWidth * ((double) maxSize / originalHeight));
+
+        newHeight = (originalHeight > originalWidth) ? maxSize : scaleSize;
+        newWidth = (originalHeight > originalWidth) ? scaleSize : maxSize;
 
         var resizedImage = new BufferedImage(
                 newWidth,

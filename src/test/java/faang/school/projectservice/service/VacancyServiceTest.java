@@ -85,14 +85,7 @@ class VacancyServiceTest {
     @Test
     void shouldThrowFindById() {
         Mockito.when(vacancyRepository.findById(ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> vacancyService.findById(ID));
-        Mockito.verify(vacancyRepository).findById(ID);
-    }
-
-    @Test
-    void shouldFindById() {
-        Mockito.when(vacancyRepository.findById(ID)).thenReturn(Optional.of(vacancy));
-        Assertions.assertEquals(vacancy, vacancyService.findById(ID));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> vacancyService.addVacancyCover(ID, Mockito.any()));
         Mockito.verify(vacancyRepository).findById(ID);
     }
 
