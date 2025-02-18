@@ -7,7 +7,6 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -16,7 +15,6 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -34,7 +32,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,21 +55,6 @@ public class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
-    List<VacancyFilter> vacancyFilters = new ArrayList<>();
-
-    @BeforeEach
-    void init() {
-        vacancyFilters.add(mock(VacancyFilter.class));
-        vacancyFilters.add(mock(VacancyFilter.class));
-
-        vacancyService = new VacancyService(
-                vacancyRepository,
-                projectRepository,
-                vacancyFilters,
-                vacancyMapper,
-                vacancyValidator);
-    }
-
     @Test
     public void create_ShouldCreateVacancySuccessfully() {
         CreateVacancyRequest createRequest = new CreateVacancyRequest();
@@ -93,7 +75,9 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(createdVacancy);
 
-        final CreateVacancyResponse createResponse = vacancyService.create(createRequest);
+        long userId = 1;
+
+        final CreateVacancyResponse createResponse = vacancyService.create(createRequest, userId);
 
         verify(vacancyMapper, times(1)).fromCreateRequest(createRequest);
         verify(vacancyValidator, times(1))
@@ -132,7 +116,8 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(updatedVacancy);
 
-        final UpdateVacancyResponse updateResponse = vacancyService.update(updateRequest);
+        long userId = 1;
+        final UpdateVacancyResponse updateResponse = vacancyService.update(updateRequest, userId);
 
         verify(vacancyMapper, times(1)).update(updateRequest, vacancy);
         verify(vacancyValidator, times(1))
@@ -162,7 +147,7 @@ public class VacancyServiceTest {
     }
 
     @Test
-    public void getVacancyById_ShouldReturnSuccessfully() {
+    public void getByFiltersVacancyById_ShouldReturnSuccessfully() {
         long id = 333L;
 
         when(vacancyRepository.findById(id))
@@ -174,7 +159,7 @@ public class VacancyServiceTest {
     }
 
     @Test
-    public void getVacancyById_ShouldThrowVacancyExceptionWhenDoesNotExist() {
+    public void getByFiltersVacancyById_ShouldThrowVacancyExceptionWhenDoesNotExist() {
         long id = 333L;
 
         when(vacancyRepository.findById(id)).thenReturn(Optional.empty());
@@ -183,26 +168,27 @@ public class VacancyServiceTest {
     }
 
     @Test
-    public void getAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
-        List<Vacancy> vacancies = List.of(
-                Vacancy.builder().id(1L).name("vacancy1").position(TeamRole.DEVELOPER).candidates(List.of()).build(),
-                Vacancy.builder().id(2L).name("vacancy2").position(TeamRole.DEVELOPER).candidates(List.of()).build()
-        );
-
+    public void getByFiltersAll_ShouldReturnAllVacanciesVacanciesSuccessfully() {
         VacancyFilterDto filters = new VacancyFilterDto();
+        filters.setNamePattern("vacancy1");
+        filters.setPositionPattern(TeamRole.DEVELOPER);
 
-        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        Vacancy vacancy = Vacancy.builder()
+                .id(1L)
+                .name("vacancy1")
+                .position(TeamRole.DEVELOPER)
+                .candidates(List.of())
+                .build();
 
-        List<GetVacancyResponse> response = vacancyService.get(filters);
+        when(vacancyRepository.findAllByFilters(filters.getNamePattern(), filters.getPositionPattern()))
+                .thenReturn(List.of(vacancy));
 
-        assertEquals(2, response.size());
+        List<GetVacancyResponse> response = vacancyService.getByFilters(filters);
+
+        assertEquals(1, response.size());
 
         assertEquals(1L, response.get(0).getId());
         assertEquals("vacancy1", response.get(0).getName());
         assertEquals(TeamRole.DEVELOPER, response.get(0).getPosition());
-
-        assertEquals(2L, response.get(1).getId());
-        assertEquals("vacancy2", response.get(1).getName());
-        assertEquals(TeamRole.DEVELOPER, response.get(1).getPosition());
     }
 }

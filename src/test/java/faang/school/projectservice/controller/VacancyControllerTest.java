@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.CreateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
@@ -40,6 +41,9 @@ public class VacancyControllerTest {
     @Mock
     private VacancyService vacancyService;
 
+    @Mock
+    private UserContext userContext;
+
     @InjectMocks
     private VacancyController vacancyController;
 
@@ -49,7 +53,7 @@ public class VacancyControllerTest {
     }
 
     @Test
-    public void testGetVacancy() throws Exception {
+    public void testGetVacancyById() throws Exception {
         GetVacancyResponse response = GetVacancyResponse.builder()
                 .id(1L)
                 .name("vacancy")
@@ -60,7 +64,7 @@ public class VacancyControllerTest {
 
         when(vacancyService.getById(1)).thenReturn(response);
 
-        mockMvc.perform(get("/vacancies/{id}", 1))
+        mockMvc.perform(get("/api/v1/vacancies/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("vacancy"))
@@ -79,13 +83,16 @@ public class VacancyControllerTest {
                 .name("vacancy")
                 .build();
 
-        when(vacancyService.create(request)).thenReturn(response);
+        long userId = 1;
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyService.create(request, userId)).thenReturn(response);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/vacancies")
-                        .header("x-user-id", 1)
+        mockMvc.perform(post("/api/v1/vacancies")
+                        .header("x-user-id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
                 .andExpect(status().isOk())
@@ -104,13 +111,16 @@ public class VacancyControllerTest {
                 .name("name")
                 .build();
 
-        when(vacancyService.update(request)).thenReturn(response);
+        long userId = 1;
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyService.update(request, userId)).thenReturn(response);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(put("/vacancies/{id}", 1)
-                        .header("x-user-id", 1)
+        mockMvc.perform(put("/api/v1/vacancies/{id}", 1)
+                        .header("x-user-id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
                 .andExpect(status().isOk())
@@ -118,7 +128,7 @@ public class VacancyControllerTest {
     }
 
     @Test
-    public void testGetAllVacancies() throws Exception {
+    public void testGetAllVacanciesByFilters() throws Exception {
         GetVacancyResponse response = GetVacancyResponse.builder()
                 .id(1L)
                 .name("vacancy")
@@ -132,9 +142,9 @@ public class VacancyControllerTest {
         filters.setPositionPattern(TeamRole.DEVELOPER);
         filters.setNamePattern("vacancy");
 
-        when(vacancyService.get(filters)).thenReturn(vacancies);
+        when(vacancyService.getByFilters(filters)).thenReturn(vacancies);
 
-        mockMvc.perform(get("/vacancies")
+        mockMvc.perform(get("/api/v1/vacancies")
                         .param("positionPattern", "DEVELOPER")
                         .param("namePattern", "vacancy"))
                 .andExpect(status().isOk())
