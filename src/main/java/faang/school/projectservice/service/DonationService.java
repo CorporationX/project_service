@@ -18,6 +18,7 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +35,7 @@ public class DonationService {
     private final CampaignValidator campaignValidator;
     private final UserServiceClient userServiceClient;
 
+    @Transactional
     public DonationDto sendDonation(DonationCreateDto donationCreateDto, Long userId) {
         Donation donation = donationMapper.toEntity(donationCreateDto);
         Campaign campaign = campaignService.findCampaignById(donationCreateDto.getCampaignId());
@@ -71,6 +73,7 @@ public class DonationService {
         return donationMapper.toDto(donationRepository.save(donation));
     }
 
+    @Transactional(readOnly = true)
     public DonationDto getDonationByIdAndUserId(Long donationId, Long userId) {
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Donation with id " + donationId
@@ -78,6 +81,7 @@ public class DonationService {
         return donationMapper.toDto(donation);
     }
 
+    @Transactional(readOnly = true)
     public List<DonationDto> getAllDonationsByUser(Long userId, DonationFilterDto filters) {
         Stream<Donation> donations = donationRepository.findAllByUserIdFilteredAndThenSortedByDate(
                         userId,
