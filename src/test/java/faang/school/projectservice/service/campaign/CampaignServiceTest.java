@@ -12,11 +12,11 @@ import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.campaignfilter.CampaignFilter;
-import faang.school.projectservice.service.campaignfilter.CampaignStatusFilter;
-import faang.school.projectservice.validator.CampaignValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -50,25 +51,28 @@ class CampaignServiceTest {
     private ProjectService projectService;
     @Mock
     private UserContext userContext;
-    @Mock
-    private CampaignValidator campaignValidator;
+
     @Spy
     private CampaignMapperImpl campaignMapper;
-    @Mock
-    private List<CampaignFilter> filters;
-    private CampaignStatusFilter statusFilter;
-    @InjectMocks
-    private CampaignService campaignService;
+
     @Captor
     private ArgumentCaptor<Campaign> captor;
+    private CampaignFilterDto campaignFilterDto;
     private CampaignDto campaignDto;
     private Campaign campaign;
     private CampaignUpdateDto updateDto;
     private UserDto userDto;
 
+    @InjectMocks
+    private CampaignService campaignService;
+    private List<TeamMember> testTeams;
+    private Project project;
+
     @BeforeEach
     void setup() {
-        statusFilter = new CampaignStatusFilter();
+        Project project = new Project();
+        project.setId(1L);
+
         campaignDto = CampaignDto.builder()
                 .amountRaised(BigDecimal.ZERO)
                 .currency(Currency.USD)
@@ -76,10 +80,17 @@ class CampaignServiceTest {
                 .projectId(1L)
                 .status(CampaignStatus.ACTIVE)
                 .build();
+
+        campaignFilterDto = CampaignFilterDto.builder()
+                .createdAt(LocalDateTime.now())
+                .createdBy(2L)
+                .status(CampaignStatus.ACTIVE)
+                .build();
+
         campaign = Campaign.builder()
                 .id(1L)
                 .amountRaised(BigDecimal.ZERO)
-                .title("title")
+                .title("Test Campaign")
                 .createdBy(1L)
                 .description("descr")
                 .currency(Currency.USD)
@@ -97,8 +108,21 @@ class CampaignServiceTest {
 
     @Test
     void publishCampaign_OK() {
+
+        Team java = Team.builder()
+                .id(1L)
+                .teamMembers(testTeams)
+                .build();
         Project project = Project.builder().build();
-        //  when(userServiceClient.getUser(u)userContext.getUserId()).id()).thenReturn(1L);
+        project.setId(1L);
+        project.setTeams(List.of(java));
+
+        TeamMember teamMember = TeamMember.builder()
+                .id(1L)
+                .userId(1L)
+                .roles(List.of(TeamRole.MANAGER))
+                .build();
+        java.setTeamMembers(List.of(teamMember));
 
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUser(1L)).thenReturn(userDto);
@@ -157,28 +181,23 @@ class CampaignServiceTest {
     }
 
     @Test
-    void testGetAllCampaignsByFilter_OK() {
-        CampaignFilterDto filterDto = CampaignFilterDto.builder()
+    void TestGetCampaignsByProjectIdAndFilter_ShouldReturnCampaignList() {
+
+        campaignFilterDto = CampaignFilterDto.builder()
+                .createdAt(LocalDateTime.now())
+                .createdBy(2L)
                 .status(CampaignStatus.ACTIVE)
                 .build();
-        when(campaignRepository.findAll()).thenReturn(List.of(campaign));
+        List<Campaign> campaigns = List.of(campaign);
 
-        List<CampaignDto> allCampaigns = campaignService.getAllCampaignsByFilter(filterDto);
+        when(campaignRepository.findAllByFiltersAndProjectId(1l, campaignFilterDto.getCreatedBy(),
+                campaignFilterDto.getCreatedAt(), campaignFilterDto.getStatus()))
+                .thenReturn(campaigns);
 
-        verify(campaignRepository).findAll();
-        assertEquals(1, allCampaigns.size());
-    }
+        List<Campaign> result = campaignService.getCampaignsByProjectIdAndFilter(1L, campaignFilterDto);
 
-    @Test
-    void testGetAllCampaignsByFilter_OKButNoCampaigns() {
-        CampaignFilterDto filterDto = CampaignFilterDto.builder()
-                .status(CampaignStatus.COMPLETED)
-                .build();
-        when(campaignRepository.findAll()).thenReturn(List.of(campaign));
-
-        List<CampaignDto> allCampaigns = campaignService.getAllCampaignsByFilter(filterDto);
-
-        verify(campaignRepository).findAll();
-        assertEquals(1, allCampaigns.size());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Test Campaign", result.get(0).getTitle());
     }
 }

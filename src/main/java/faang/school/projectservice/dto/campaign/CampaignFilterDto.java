@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 @Data
 public class CampaignFilterDto {
 
+    Long createdBy;
     LocalDateTime createdAt;
     CampaignStatus status;
-    Long createdBy;
+
 }

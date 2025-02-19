@@ -6,20 +6,18 @@ import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.exeption.EntityCampaignNotFoundException;
+import faang.school.projectservice.exeption.NotAccessRoleCompaignException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.campaignfilter.CampaignFilter;
-import faang.school.projectservice.validator.CampaignValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +26,14 @@ public class CampaignService {
     private final UserContext userContext;
     private final ProjectService projectService;
     private final CampaignRepository campaignRepository;
-    private final CampaignValidator validatorCampaign;
     private final CampaignMapper campaignMapper;
-    private final List<CampaignFilter> filters;
 
     @Transactional
     public CampaignDto publishCampaign(CampaignDto campaignDto) {
         long authorId = userServiceClient.getUser(userContext.getUserId()).id();
 
         Project project = projectService.findProjectById(campaignDto.getProjectId());
-        validatorCampaign.validateCampaignAuthor(authorId, project);
+        validateCampaignAuthor(authorId, project);
         Campaign campaign = campaignMapper.toEntity(campaignDto);
         campaign.setCreatedBy(authorId);
         campaign.setUpdatedBy(authorId);
@@ -78,17 +74,25 @@ public class CampaignService {
                         .formatted(id)));
     }
 
-    @Transactional()
-    public List<CampaignDto> getAllCampaignsByFilter(CampaignFilterDto filterDto) {
-        Stream<Campaign> campaigns = campaignRepository.findAll().stream();
-        List<Campaign> campaignsList = filters
-                .stream()
-                .filter(filter -> filter.isApplicable(filterDto))
-                .reduce(campaigns, (stream, filter) -> filter.apply(stream, filterDto),
-                        (newStream, oldStream) -> newStream)
-                .sorted(Comparator.comparing(Campaign::getCreatedAt).reversed())
-                .toList();
-        return campaignMapper.toDtoList(campaignsList);
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Campaign> getCampaignsByProjectIdAndFilter(Long projectId, CampaignFilterDto filter) {
+        return campaignRepository.findAllByFiltersAndProjectId(projectId, filter.getCreatedBy(),filter.getCreatedAt(),
+                filter.getStatus());
     }
+
+    private void validateCampaignAuthor(long authorId, Project project) {
+
+        project.getTeams()
+                .stream()
+                .flatMap(team -> team.getTeamMembers()
+                        .stream())
+                .filter(teamMember -> teamMember.getUserId().equals(authorId))
+                .filter(teamMember -> teamMember.getRoles().contains(TeamRole.MANAGER) ||
+                        teamMember.getRoles().contains(TeamRole.OWNER))
+                .findAny()
+                .orElseThrow(() -> new NotAccessRoleCompaignException("Role User is not an owner or manager of the project"));
+    }
+
+
 }
 

@@ -3,12 +3,17 @@ package faang.school.projectservice.controller.subproject.compaign;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
+import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.service.campaign.CampaignService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/campaigns")
 public class CampaignController {
     private final CampaignService campaignService;
+
+    private final CampaignMapper campaignMapper;
 
     @PostMapping("/campaign")
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,8 +58,12 @@ public class CampaignController {
         return campaignService.getCampaign(id);
     }
 
-    @GetMapping("/campaigns-list")
-    public List<CampaignDto> getAllCampaignsOfProject(@RequestBody CampaignFilterDto filterDto) {
-        return campaignService.getAllCampaignsByFilter(filterDto);
+    @PostMapping("/get-by-project/{projectId}")
+    public ResponseEntity<List<CampaignDto>> getFilteredCampaignsByProject(@PathVariable @Positive @NotNull Long projectId,
+                                                                           @RequestBody CampaignFilterDto campaignFilterDto) {
+
+        List<Campaign> campaignList = campaignService.getCampaignsByProjectIdAndFilter(projectId, campaignFilterDto);
+        List<CampaignDto> campaignDtoList = campaignMapper.toDtoList(campaignList);
+        return ResponseEntity.ok().body(campaignDtoList);
     }
 }
