@@ -16,7 +16,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

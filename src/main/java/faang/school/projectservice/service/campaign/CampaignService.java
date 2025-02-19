@@ -12,7 +12,7 @@ import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -90,9 +90,7 @@ public class CampaignService {
                 .filter(teamMember -> teamMember.getRoles().contains(TeamRole.MANAGER) ||
                         teamMember.getRoles().contains(TeamRole.OWNER))
                 .findAny()
-                .orElseThrow(() -> new NotAccessRoleCompaignException("Role User is not an owner or manager of the project"));
+                .orElseThrow(() -> new NotAccessRoleCompaignException("Role User is not an owner or manager of project"));
     }
-
-
 }
 
