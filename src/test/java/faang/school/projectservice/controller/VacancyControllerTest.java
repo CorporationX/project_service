@@ -64,7 +64,7 @@ public class VacancyControllerTest {
 
         when(vacancyService.getById(1)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/vacancies/{id}", 1))
+        mockMvc.perform(get("/vacancies/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("vacancy"))
@@ -91,7 +91,7 @@ public class VacancyControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(post("/api/v1/vacancies")
+        mockMvc.perform(post("/vacancies")
                         .header("x-user-id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
@@ -119,7 +119,7 @@ public class VacancyControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBodyJson = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(put("/api/v1/vacancies/{id}", 1)
+        mockMvc.perform(put("/vacancies/{id}", 1)
                         .header("x-user-id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBodyJson))
@@ -144,7 +144,7 @@ public class VacancyControllerTest {
 
         when(vacancyService.getByFilters(filters)).thenReturn(vacancies);
 
-        mockMvc.perform(get("/api/v1/vacancies")
+        mockMvc.perform(get("/vacancies")
                         .param("positionPattern", "DEVELOPER")
                         .param("namePattern", "vacancy"))
                 .andExpect(status().isOk())

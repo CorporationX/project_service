@@ -21,33 +21,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("vacancies")
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
     private final UserContext userContext;
 
-    @PostMapping("/vacancies")
+    @PostMapping
     public CreateVacancyResponse createVacancy(@RequestBody CreateVacancyRequest createRequest) {
         return vacancyService.create(createRequest, userContext.getUserId());
     }
 
-    @PutMapping("/vacancies/{id}")
+    @PutMapping("/{id}")
     public UpdateVacancyResponse updateVacancy(@PathVariable long id, @RequestBody UpdateVacancyRequest updateRequest) {
         return vacancyService.update(updateRequest, userContext.getUserId());
     }
 
-    @DeleteMapping("/vacancies/{id}")
+    @DeleteMapping("/{id}")
     public void deleteVacancy(@PathVariable long id) {
         vacancyService.delete(id);
     }
 
-    @GetMapping("/vacancies/{id}")
+    @GetMapping("/{id}")
     public GetVacancyResponse getVacancyById(@PathVariable long id) {
         return vacancyService.getById(id);
     }
 
-    @GetMapping("/vacancies")
+    @GetMapping
     public List<GetVacancyResponse> getAllVacanciesByFilters(VacancyFilterDto filters) {
         return vacancyService.getByFilters(filters);
     }
