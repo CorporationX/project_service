@@ -5,6 +5,7 @@ import faang.school.projectservice.model.CampaignStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class CampaignDto {
@@ -17,4 +18,5 @@ public class CampaignDto {
     private long projectId;
     private Currency currency;
     private long createdBy;
+    private LocalDateTime createdAt;
 }

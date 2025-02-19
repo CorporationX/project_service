@@ -2,7 +2,6 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
-import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,18 +16,18 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
 
     @Query("""
             SELECT c FROM Campaign c
-            WHERE c.project = :project
-            AND(:namePattern IS NULL OR c.title LIKE %:namePattern%)
-            AND (:minGoal IS NULL OR c.goal >= :minGoal)
-            AND (:maxGoal IS NULL OR c.goal <= :maxGoal)
-            AND (:status IS NULL OR c.status = :status)
-            AND (:createdBy IS NULL OR c.createdBy = :createdBy)
-            AND (:startDate IS NULL OR c.createdAt >= :startDate)
-            AND (:endDate IS NULL OR c.createdAt <= :endDate)
+            WHERE (COALESCE(:projectId, c.project.id) = c.project.id)
+            AND (:namePattern IS NULL OR c.title LIKE CONCAT('%', :namePattern, '%'))
+            AND (COALESCE(:minGoal, c.goal) <= c.goal)
+            AND (COALESCE(:maxGoal, c.goal) >= c.goal)
+            AND (COALESCE(:status, c.status) = c.status)
+            AND (COALESCE(:createdBy, c.createdBy) = c.createdBy)
+            AND (COALESCE(:startDate, c.createdAt) <= c.createdAt)
+            AND (COALESCE(:endDate, c.createdAt) >= c.createdAt)
             ORDER BY c.createdAt DESC
             """
     )
-    List<Campaign> findAllByFilters(@Param("project") Project project,
+    List<Campaign> findAllByFilters(@Param("projectId") Long projectId,
                                     @Param("namePattern") String namePattern,
                                     @Param("minGoal") BigDecimal minGoal,
                                     @Param("maxGoal") BigDecimal maxGoal,

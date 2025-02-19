@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class CampaignFilterDto {
+    private Long projectId;
     private String namePattern;
     private BigDecimal minGoal;
     private BigDecimal maxGoal;
