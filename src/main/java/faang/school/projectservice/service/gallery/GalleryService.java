@@ -10,6 +10,5 @@ public interface GalleryService {
 
     void deleteFiles(List<String> keys);
 
-
     List<String> downloadImagesAsBase64(long projectId);
 }

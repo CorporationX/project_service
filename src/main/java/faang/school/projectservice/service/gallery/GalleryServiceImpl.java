@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.List;
@@ -55,27 +56,35 @@ public class GalleryServiceImpl implements GalleryService {
     }
 
     @Override
+    @Transactional
     public List<String> downloadImagesAsBase64(long projectId) {
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project project = getProjectById(projectId);
 
         List<String> keys = project.getGalleryFileKeys();
 
         return keys.stream()
-                .map(key -> {
-                    log.info("Processing key: " + key);
-                    InputStream inputStream = s3Client.downloadFile(key);
-                    try {
-                        byte[] imageBytes = IOUtils.toByteArray(inputStream);
-                        return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-                    } catch (Exception e) {
-                        log.error("Failed to encode image to Base64: " + e.getMessage());
-                        throw new RuntimeException("Failed to encode image to Base64", e);
-                    }
-                })
+                .map(this::convertToBase64)
                 .toList();
     }
+
+    private Project getProjectById(long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+    }
+
+    private String convertToBase64(String key) {
+        log.info("Processing key: " + key);
+        InputStream inputStream = s3Client.downloadFile(key);
+        try {
+            byte[] imageBytes = IOUtils.toByteArray(inputStream);
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            log.error("Failed to encode image to Base64: " + e.getMessage());
+            throw new RuntimeException("Failed to encode image to Base64", e);
+        }
+    }
+
 
     private void updateProjectGalleryFileKeys(Project project, List<String> keys) {
         List<String> currentGalleryFileKeys = project.getGalleryFileKeys();
