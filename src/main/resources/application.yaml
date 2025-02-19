@@ -73,6 +73,6 @@ services:
 project:
   gallery:
     image:
-      link_expiration_time: 60 * 1000
+      link_expiration_time_ms: 60000
     max_gallery_size: 50
     max_image_size_mb: 5

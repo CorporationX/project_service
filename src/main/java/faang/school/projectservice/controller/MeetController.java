@@ -1,4 +1,4 @@
-package faang.school.projectservice.contoller;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.meet.CreateMeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
