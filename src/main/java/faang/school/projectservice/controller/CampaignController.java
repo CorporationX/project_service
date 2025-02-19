@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Validated
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/campaigns")
 public class CampaignController {
