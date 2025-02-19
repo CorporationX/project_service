@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,10 @@ public class Donation {
     private BigDecimal amount;
 
     private LocalDateTime donationTime;
+    @PrePersist
+    public void setDonationTime() {
+        this.donationTime = LocalDateTime.now(); // Устанавливаем текущее время перед сохранением
+    }
 
     @ManyToOne
     @JoinColumn(name = "campaign_id")
