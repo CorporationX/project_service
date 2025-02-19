@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.resource;
 
-public record ResourceCreateDto(
+public record CreateResourceDto(
         String originalFilename,
         String uploadedKey,
         long size,

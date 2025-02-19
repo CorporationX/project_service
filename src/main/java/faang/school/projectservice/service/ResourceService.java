@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.AppConfig;
-import faang.school.projectservice.dto.resource.ResourceCreateDto;
+import faang.school.projectservice.dto.resource.CreateResourceDto;
 import faang.school.projectservice.dto.resource.ResourceResultDto;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.mapper.ResourceResultMapper;
@@ -13,11 +12,12 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.MinioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class ResourceService {
         }
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Проект не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Проект не найден"));
 
         BigInteger currentSize = project.getStorageSize() == null ? BigInteger.ZERO : project.getStorageSize();
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
@@ -60,16 +60,17 @@ public class ResourceService {
 
         String key = "project-" + projectId + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-        try {
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file.getBytes());
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file.getBytes())) {
             minioService.uploadFile(byteArrayInputStream, key, file.getContentType(), file.getSize());
         } catch (IOException e) {
+            log.error("Ошибка при получении потока файла", e);
             throw new RuntimeException("Ошибка при получении потока файла", e);
         } catch (Exception e) {
+            log.error("Ошибка загрузки файла в MinIO", e);
             throw new RuntimeException("Ошибка загрузки файла в MinIO", e);
         }
 
-        ResourceCreateDto dto = new ResourceCreateDto(
+        CreateResourceDto dto = new CreateResourceDto(
                 file.getOriginalFilename(),
                 key,
                 file.getSize(),
@@ -90,14 +91,14 @@ public class ResourceService {
 
     public void deleteResource(Long resourceId, Long teamMemberId) {
         Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new IllegalArgumentException("Ресурс не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ресурс не найден"));
 
         TeamMember currentUser = teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
 
         if (!resource.getCreatedBy().getId().equals(teamMemberId)
                 && !currentUser.getRoles().contains(TeamRole.MANAGER)) {
-            throw new IllegalArgumentException("У пользователя нет прав для удаления данного файла");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "У пользователя нет прав для удаления данного файла");
         }
 
         if (resource.getKey() != null) {

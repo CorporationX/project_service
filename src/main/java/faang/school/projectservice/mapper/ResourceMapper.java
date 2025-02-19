@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.resource.ResourceCreateDto;
+import faang.school.projectservice.dto.resource.CreateResourceDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
@@ -30,7 +30,7 @@ public interface ResourceMapper {
     @Mapping(source = "contentType", target = "type", qualifiedByName = "convertContentType")
     @Mapping(target = "allowedRoles", expression = "java(getDefaultRoles(dto.teamMemberId()))")
     @Mapping(target = "status", constant = "ACTIVE")
-    Resource toResource(ResourceCreateDto dto);
+    Resource toResource(CreateResourceDto dto);
 
     @Named("mapTeamMember")
     default TeamMember mapTeamMember(Long teamMemberId) {
