@@ -30,9 +30,9 @@ public class ProjectDto {
 
     private ProjectVisibility visibility;
 
-    @JsonFormat(pattern = "yyyy-mm-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @JsonFormat(pattern = "yyyy-mm-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }

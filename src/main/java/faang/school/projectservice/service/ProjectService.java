@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.BadRequestException;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -10,10 +11,14 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.service.minio.ProjectCoverMinioService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +26,12 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectService implements ProjectServiceInterface {
+public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectRepositoryAdapter projectRepositoryAdapter;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+    private final ProjectCoverMinioService projectCoverMinioService;
 
     public ProjectDto createProject(ProjectDto projectDto) {
         projectDto.setName(nameAdjustment(projectDto.getName()));
@@ -69,8 +76,7 @@ public class ProjectService implements ProjectServiceInterface {
     }
 
     public ProjectDto getProjectById(long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("This project does not found"));
+        Project project = projectRepositoryAdapter.getById(projectId);
         return projectMapper.toDto(project);
     }
 
@@ -107,5 +113,57 @@ public class ProjectService implements ProjectServiceInterface {
             }
         }
         return availableProjects;
+    }
+
+    @Transactional
+    public String addProjectCover(long projectId, MultipartFile file, long userId) {
+        Project project = projectRepositoryAdapter.getById(projectId);
+
+        if (project.getOwnerId() != userId) {
+            throw new BadRequestException("Only the owner of the project can add a cover");
+        }
+
+        if (project.getCoverImageId() != null) {
+            throw new BadRequestException("The project with ID " + projectId + " already has a cover");
+        }
+
+        String key = projectCoverMinioService.uploadProjectCover(file);
+
+        project.setCoverImageId(key);
+
+        return key;
+    }
+
+    @Transactional
+    public String deleteProjectCover(long projectId, long userId) {
+        Project project = projectRepositoryAdapter.getById(projectId);
+
+        if (project.getOwnerId() != userId) {
+            throw new BadRequestException("Only the creator of the project can remove a cover");
+        }
+
+        String projectCoverKey = project.getCoverImageId();
+
+        if (projectCoverKey == null) {
+            throw new BadRequestException("The project with ID " + projectId + " does not have a cover");
+        }
+
+        String key = projectCoverMinioService.removeProjectCover(projectCoverKey);
+
+        project.setCoverImageId(null);
+
+        return key;
+    }
+
+    public InputStream getProjectCover(long projectId) {
+        Project project = projectRepositoryAdapter.getById(projectId);
+
+        String projectCoverKey = project.getCoverImageId();
+
+        if (projectCoverKey == null) {
+            throw new BadRequestException("The project with ID " + projectId + " does not have a cover");
+        }
+
+        return projectCoverMinioService.getProjectCover(projectCoverKey);
     }
 }

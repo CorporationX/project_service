@@ -44,6 +44,14 @@ avatar:
   max-file-size: 5242880
   max-image-size: 512
 
+project-cover:
+  max-file-size: 5242880
+  max-vertical-image-resolution: 512
+  max-horizontal-image-resolution: 1080
+  image-output-quality: 0.5
+  image-output-scale: 1
+  folder-name: projects_covers
+
 services:
   s3:
     endpoint: http://localhost:9000
