@@ -82,7 +82,7 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    private Project getProject(Long id) {
+    public Project getProject(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Проект с id=" + id + " не найден"));
     }

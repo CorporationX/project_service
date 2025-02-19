@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipReadDto;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.TeamMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipCreateMapper;
@@ -12,8 +14,6 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.team_member.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class InternshipService {
         internshipValidator.validateInternshipCreation(internshipDto);
         Internship internship = internshipCreateMapper.toEntity(internshipDto);
 
-        internship.setProject(projectService.findById(internshipDto.getProjectId()));
+        internship.setProject(projectService.getProject(internshipDto.getProjectId()));
         internship.setMentorId(teamMemberService.findById(internshipDto.getMentorId()));
         internship.setInterns(getInternsById(internshipDto.getInternsIds()));
 
