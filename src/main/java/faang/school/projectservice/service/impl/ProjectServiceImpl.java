@@ -80,7 +80,7 @@ public class ProjectServiceImpl implements ProjectService {
         return specificationFilters.stream()
                 .filter(spec -> spec.isApplicable(filter))
                 .map(spec -> spec.apply(filter))
-                .reduce((spec1, spec2) -> spec1.and(spec2))
+                .reduce(Specification::and)
                 .orElse(null);
     }
 
@@ -96,6 +96,20 @@ public class ProjectServiceImpl implements ProjectService {
     public Project getProject(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
+    }
+
+    public Project validateProjectStatus(Project project) {
+        if (project.getStatus().equals(ProjectStatus.COMPLETED)) {
+            throw new IllegalArgumentException("Project is completed");
+        }
+
+        if (project.getVisibility().equals(ProjectVisibility.PRIVATE) && project.getChildren() != null) {
+            project.getChildren().forEach(child -> {
+                child.setVisibility(ProjectVisibility.PRIVATE);
+                projectRepository.save(child);
+            });
+        }
+        return project;
     }
 
 }
