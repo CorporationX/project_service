@@ -2,7 +2,9 @@ package faang.school.projectservice.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -41,9 +43,31 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Vacancy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
+    @Column(nullable = false)
+    private UUID projectId;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private int slots;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VacancyStatus status;
+
+    @Column(nullable = false)
+    private UUID createdBy;
+
+    private LocalDateTime createdAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Candidate> candidates;
+    
     @NotBlank
     private String name;
 
@@ -52,33 +76,15 @@ public class Vacancy {
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(nullable = false)
     private TeamRole position;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-
-    @OneToMany(mappedBy = "vacancy")
-    private List<Candidate> candidates;
-
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @CreatedBy
-    private Long createdBy;
-
+    
     @LastModifiedBy
     private Long updatedBy;
-
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private VacancyStatus status;
 
     private Double salary;
 
@@ -94,4 +100,5 @@ public class Vacancy {
 
     @Column(name = "cover_image_key")
     private String coverImageKey;
+
 }

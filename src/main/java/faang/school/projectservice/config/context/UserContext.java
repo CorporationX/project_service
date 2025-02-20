@@ -15,6 +15,7 @@ public class UserContext {
         return userIdHolder.get();
     }
 
+
     public void clear() {
         userIdHolder.remove();
     }

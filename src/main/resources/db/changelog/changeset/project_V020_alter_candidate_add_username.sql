@@ -1,0 +1,2 @@
+ALTER TABLE candidate
+ADD COLUMN username VARCHAR(20) NOT NULL;

@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V018_alter_file_columns_and_create_gallery_table.sql
   - include:
       file: db/changelog/changeset/project_V019_alter_internship_add_role.sql
+  - include:
+      file: db/changelog/changeset/project_V020_alter_candidate_add_username.sql
