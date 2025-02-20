@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,9 @@ public class ProjectDto {
     @NotNull(message = "Owner id can't be null")
     @Min(value = 1, message = "Owner id should be more than 0")
     private long ownerId;
+
+    @NotNull(message = "Visibility can't be null")
+    private ProjectVisibility visibility;
 
     private ProjectStatus status;
 }

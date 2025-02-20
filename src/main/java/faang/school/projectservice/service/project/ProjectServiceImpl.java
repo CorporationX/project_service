@@ -34,8 +34,7 @@ public class ProjectServiceImpl implements ProjectService {
             ));
         }
         Project project = buildProject(dto);
-        projectRepository.save(project);
-        return null;
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Override
