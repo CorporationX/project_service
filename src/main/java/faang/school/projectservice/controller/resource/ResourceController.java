@@ -2,6 +2,8 @@ package faang.school.projectservice.controller.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -19,18 +21,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
+@Tag(name = "Ресурсы/Файлы")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${domain.path}/resources")
 public class ResourceController {
     private final ResourceService resourceService;
 
+    @Operation(description = "Загрузить файл в проект")
     @PostMapping("/project/{projectId}/upload")
     public ResponseEntity<ResourceDto> uploadFile(@PathVariable("projectId") long projectId,
                                                   @RequestBody MultipartFile file) {
         return new ResponseEntity<>(resourceService.uploadFile(projectId, file), HttpStatus.OK);
     }
 
+    @Operation(description = "Скачать файл по ID")
     @GetMapping("/{id}")
     public ResponseEntity<InputStreamResource> downloadFile(@PathVariable("id") String id) {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -40,6 +45,7 @@ public class ResourceController {
         return new ResponseEntity<>(new InputStreamResource(inputStream), httpHeaders, HttpStatus.OK);
     }
 
+    @Operation(description = "Удалить файл по ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFile(@PathVariable("id") String id) {
         resourceService.deleteFile(id);
