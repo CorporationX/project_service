@@ -85,7 +85,3 @@ spring:
 logging:
   level:
     root: info
-
-
-coverImageVacancy:
-  maxSizeFile: 5242880 # 5 * 1024 * 1024

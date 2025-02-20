@@ -22,7 +22,7 @@ public class CoverImageVacancyController {
 
     private final CoverImageService coverImageService;
 
-    @Value("${coverImageVacancy.maxSizeFile}")
+    @Value("${cover.max-image-size}")
     private int maxSizeFile;
 
     @PostMapping("/{currentUserId}/{vacancyId}/resources")
