@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.coverImageVacancy;
+package faang.school.projectservice.dto.CoverImageVacancyReadDto;
 
 import faang.school.projectservice.model.ResourceStatus;
 import lombok.AllArgsConstructor;

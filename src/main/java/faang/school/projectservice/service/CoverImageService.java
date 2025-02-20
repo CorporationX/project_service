@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.coverImageVacancy.ResourceDto;
+import faang.school.projectservice.dto.CoverImageVacancyReadDto.ResourceDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Resource;
@@ -33,7 +33,6 @@ public class CoverImageService {
     private final ResourceMapper resourceMapper;
 
 
-    @Transactional
     public ResourceDto uploadCover(Long currentUserId, Long vacancyId, MultipartFile file) {
         Vacancy vacancy = coverImageValidator.validateUploadCover(currentUserId, vacancyId);
         String folder = vacancyId + vacancy.getName();
@@ -55,7 +54,6 @@ public class CoverImageService {
             if (vacancy.getCoverImageKey() != null && vacancy.getCoverImageKey().equals(resource.getKey())) {
                 vacancy.setCoverImageKey(null);
                 vacancyRepository.save(vacancy);
-                log.debug("CoverImageKey успешно удален из vacancy ID {}", vacancy.getId());
                 return;
             }
         }
@@ -69,14 +67,17 @@ public class CoverImageService {
     private MultipartFile compressImage(MultipartFile file) {
         final int maximumPixelSize = 512;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        if (!file.getContentType().startsWith("image/")) {
+            log.error("Файл не является изображением: {}", file.getContentType());
+            throw new BusinessException("Файл не является изображением");
+        }
         try {
             Thumbnails.of(file.getInputStream())
                     .size(maximumPixelSize, maximumPixelSize)
                     .outputFormat("jpg")
                     .toOutputStream(outputStream);
-            log.debug("Изображение успешно прошло сжатие");
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Ошибка при сжатии изображения: {}", e.getMessage(), e);
             throw new BusinessException("Не удалось сжать изображение");
         }
         return new CustomMultipartFile(outputStream.toByteArray(),

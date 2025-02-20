@@ -65,6 +65,11 @@ public class S3ServiceCover {
     }
 
     public InputStream getCoverImage(Resource resource) {
-        return amazonS3.getObject(bucketName, resource.getKey()).getObjectContent();
+        try {
+            return amazonS3.getObject(bucketName, resource.getKey()).getObjectContent();
+        } catch (RuntimeException e) {
+            log.error("Ошибка при получении файла из S3: {}", e.getMessage());
+            throw new BusinessException("Ошибка при получении файла из облачного хранилища"); // Обернули в BusinessException
+        }
     }
 }

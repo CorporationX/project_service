@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.coverImageVacancy.ResourceDto;
+import faang.school.projectservice.dto.CoverImageVacancyReadDto.ResourceDto;
 import faang.school.projectservice.model.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

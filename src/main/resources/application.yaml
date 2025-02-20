@@ -51,7 +51,5 @@ services:
     host: http://localhost
     port: 8080
 
-aws:
-  accessKeyId: YOUR_ACCESS_KEY_ID
-  secretKey: YOUR_SECRET_ACCESS_KEY
-  region: YOUR_REGION
+coverImageVacancy:
+  maxSizeFile: 5242880 # 5 * 1024 * 1024

@@ -19,14 +19,11 @@ public class CoverImageValidator {
 
     public Vacancy validateUploadCover(Long currentUserId, Long vacancyId) {
         if (!vacancyRepository.existsById(vacancyId)) {
-            log.error("Вакансия с ID {} не найдена в базе данных", vacancyId);
-            throw new EntityNotFoundException("Вакансии с id " + vacancyId + "не существует");
+            throw new EntityNotFoundException("Вакансии с id " + vacancyId + " не существует");
         }
         Vacancy vacancy = vacancyRepository.findById(vacancyId).get();
 
         if (!currentUserId.equals(vacancy.getProject().getOwnerId())) {
-            log.error("Пользователь с ID {} не имеет прав загружать обложку для вакансии с ID {}",
-                    currentUserId, vacancyId);
             throw new BusinessException("У вас нет прав загрузить обложку в данную вакансию");
         }
         return vacancy;
@@ -37,7 +34,6 @@ public class CoverImageValidator {
         Resource resource = resourceRepository.findById(resourceId).get();
 
         if (!currentUserId.equals(resource.getProject().getOwnerId())) {
-            log.error("Пользователь с ID {} не имеет прав удалять обложку ID {}", currentUserId, resourceId);
             throw new BusinessException("У вас нет прав удалять обложку из данной вакансии");
         }
         return resource;
@@ -45,7 +41,6 @@ public class CoverImageValidator {
 
     public void validateResource(Long resourceId) {
         if (!resourceRepository.existsById(resourceId)) {
-            log.error("Обложки с ID {} не найдено в базе данных", resourceId);
             throw new EntityNotFoundException("Обложка не найдена");
         }
     }
