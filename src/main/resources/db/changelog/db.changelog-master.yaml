@@ -29,5 +29,3 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V017_alter_team_member_add_nickname.sql
   - include:
       file: db/changelog/changeset/project_V018_alter_file_columns_and_create_gallery_table.sql
-  - include:
-      file: db/changelog/changeset/project_V019_create_users.sql
