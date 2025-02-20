@@ -36,10 +36,3 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
-
-      - name: Publish Test Results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results
-          path: build/test-results/test
