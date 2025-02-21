@@ -1,8 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.resource.CreateResourceDto;
 import faang.school.projectservice.dto.resource.ResourceResultDto;
-import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.mapper.ResourceResultMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -36,10 +34,9 @@ public class ResourceService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final MinioService minioService;
-    private final ResourceMapper resourceMapper;
     private final ResourceResultMapper resourceResultMapper;
 
-    @Value("${app.сonfig.max-project-storage-size}")
+    @Value("${app.config.max_project_storage_size}")
     private long defaultMaxProjectStorageSize;
 
     public Resource getResourceRefById(long id) {
