@@ -39,7 +39,7 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final ResourceResultMapper resourceResultMapper;
 
-    @Value("${app.max-project-storage-size}")
+    @Value("${app.сonfig.max-project-storage-size}")
     private long defaultMaxProjectStorageSize;
 
     public Resource getResourceRefById(long id) {
