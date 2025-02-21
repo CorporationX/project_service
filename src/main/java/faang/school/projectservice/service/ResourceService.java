@@ -51,12 +51,11 @@ public class ResourceService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The project was not found"));
 
-        BigInteger currentSize = project.getStorageSize() == null ? BigInteger.ZERO : project.getStorageSize();
+        BigInteger currentSize = Objects.requireNonNullElse(project.getStorageSize(), BigInteger.ZERO);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
 
-        BigInteger maxSize = project.getMaxStorageSize() == null
-                ? BigInteger.valueOf(defaultMaxProjectStorageSize)
-                : project.getMaxStorageSize();
+        BigInteger maxSize = Objects.requireNonNullElse(project.getMaxStorageSize(),
+                BigInteger.valueOf(defaultMaxProjectStorageSize));
         if (currentSize.add(fileSize).compareTo(maxSize) > 0) {
             throw new IllegalArgumentException("The project storage limit has been exceeded");
         }
