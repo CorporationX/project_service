@@ -60,7 +60,9 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void validateAndCheckFileSizes(List<MultipartFile> files, long maxSize) {
-        validateNonEmptyFileList(files);
+        if (files.isEmpty()) {
+            throw new DataValidationException("No files to upload");
+        }
         long totalSize = calculateTotalSize(files);
 
         if (totalSize > maxSize) {
@@ -101,12 +103,6 @@ public class S3ServiceImpl implements S3Service {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-    }
-
-    private void validateNonEmptyFileList(List<MultipartFile> files) {
-        if (files.isEmpty()) {
-            throw new DataValidationException("No files to upload");
-        }
     }
 
     private long calculateTotalSize(List<MultipartFile> files) {

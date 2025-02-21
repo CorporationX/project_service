@@ -11,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GalleryResponseDto {
     private long projectId;
-    List<String> keys;
+    private List<String> keys;
 }

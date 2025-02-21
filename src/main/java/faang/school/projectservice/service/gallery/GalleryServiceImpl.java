@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.properties.GalleryProperties;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,19 +30,24 @@ public class GalleryServiceImpl implements GalleryService {
     private final ProjectRepository projectRepository;
     private final GalleryProperties galleryProperties;
 
+    private long maxFileSizeInBytes;
+    private int maxImages;
+
+    @PostConstruct
+    private void init() {
+        this.maxFileSizeInBytes = galleryProperties.getMaxFileSizeGalleryInBytes();
+        this.maxImages = galleryProperties.getMaxImages();
+    }
+
     @Override
     @Transactional
     public GalleryResponseDto uploadFiles(long projectId, List<MultipartFile> files) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-        s3Client.validateAndCheckFileSizes(files, galleryProperties.getMaxFileSizeGalleryInBytes());
-
+        s3Client.validateAndCheckFileSizes(files, maxFileSizeInBytes);
         int totalFiles = getTotalFilesByProjectId(projectId);
-        int maxImages = galleryProperties.getMaxImages();
         if (totalFiles + files.size() > maxImages) {
             throw new DataValidationException(String.format("Gallery is full, you can add only %d files", (maxImages - totalFiles)));
         }
-
+        Project project = getProjectById(projectId);
         List<String> keys = s3Client.uploadFiles(files, projectId);
         updateProjectGalleryFileKeys(project, keys);
         projectRepository.save(project);
@@ -58,11 +64,8 @@ public class GalleryServiceImpl implements GalleryService {
     @Override
     @Transactional
     public List<String> downloadImagesAsBase64(long projectId) {
-
         Project project = getProjectById(projectId);
-
         List<String> keys = project.getGalleryFileKeys();
-
         return keys.stream()
                 .map(this::convertToBase64)
                 .toList();
@@ -70,7 +73,7 @@ public class GalleryServiceImpl implements GalleryService {
 
     private Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with ID %d not found", projectId)));
     }
 
     private String convertToBase64(String key) {
@@ -85,16 +88,14 @@ public class GalleryServiceImpl implements GalleryService {
         }
     }
 
-
     private void updateProjectGalleryFileKeys(Project project, List<String> keys) {
         List<String> currentGalleryFileKeys = project.getGalleryFileKeys();
         currentGalleryFileKeys.addAll(keys);
         project.setGalleryFileKeys(currentGalleryFileKeys);
     }
 
-
     private int getTotalFilesByProjectId(long projectId) {
-        Optional<Project> project = projectRepository.findById(projectId);
-        return project.get().getGalleryFileKeys().size();
+        Project project = getProjectById(projectId);
+        return project.getGalleryFileKeys().size();
     }
 }

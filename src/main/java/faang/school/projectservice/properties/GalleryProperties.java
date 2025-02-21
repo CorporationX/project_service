@@ -11,7 +11,6 @@ public class GalleryProperties {
     private String maxFileSize;
     private Integer maxImages;
 
-
     public long getMaxFileSizeGalleryInBytes() {
         return parseSizeToBytes(maxFileSize);
     }
