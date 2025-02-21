@@ -1,6 +1,6 @@
 package faang.school.projectservice.publishers;
 
-import faang.school.projectservice.events.FundRaisedEvent;
+import faang.school.projectservice.model.events.FundRaisedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FundRaisedEventPublisher {
     private final KafkaTemplate<String, FundRaisedEvent> kafkaTemplate;
-    @Value("${kafka.topic.fund-raised-event}")
+    @Value("${topic.fund-raised-event}")
     private String topic;
 
     public void publish(FundRaisedEvent event) {

@@ -19,8 +19,6 @@ spring:
         format_sql: true
 
   kafka:
-    topic:
-      fund-raised-event: fund_raised_event
     producer:
       bootstrap-servers: localhost:9092
       acks: all
@@ -28,7 +26,7 @@ spring:
         protocol: PLAINTEXT
       retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       batch-size: 1000
       properties:
         linger-ms: 30000
@@ -76,3 +74,6 @@ project:
       link_expiration_time_ms: 60000
     max_gallery_size: 50
     max_image_size_mb: 5
+
+topic:
+  fund-raised-event: fund_raised_event

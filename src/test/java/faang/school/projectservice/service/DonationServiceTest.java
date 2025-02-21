@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.publishers.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.validator.CampaignValidator;
@@ -40,6 +41,8 @@ public class DonationServiceTest {
     private CampaignService campaignService;
     @Mock
     private UserServiceClient userServiceClient;
+    @Mock
+    private FundRaisedEventPublisher fundRaisedEventPublisher;
     @Spy
     private DonationMapperImpl donationMapper;
     private DonationService donationService;
@@ -51,7 +54,8 @@ public class DonationServiceTest {
         donationFilterDto = new DonationFilterDto();
 
         donationService = new DonationService(donationRepository, campaignRepository,
-                donationMapper, campaignService, paymentServiceClient, campaignValidator, userServiceClient);
+                donationMapper, campaignService, paymentServiceClient,
+                campaignValidator, userServiceClient, fundRaisedEventPublisher);
     }
 
 
