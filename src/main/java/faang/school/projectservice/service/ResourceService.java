@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.ResourceResultMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,6 +15,7 @@ import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -36,69 +39,75 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final ResourceResultMapper resourceResultMapper;
 
+    @Value("${app.max-project-storage-size}")
+    private long defaultMaxProjectStorageSize;
+
     public Resource getResourceRefById(long id) {
         return resourceRepository.getReferenceById(id);
     }
 
     public ResourceResultDto uploadResource(MultipartFile file, Long projectId, Long teamMemberId) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("Файл пустой");
+            throw new IllegalArgumentException("The file is empty");
         }
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Проект не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The project was not found"));
 
         BigInteger currentSize = project.getStorageSize() == null ? BigInteger.ZERO : project.getStorageSize();
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
 
         BigInteger maxSize = project.getMaxStorageSize() == null
-                ? BigInteger.valueOf(2L * 1024 * 1024 * 1024)
+                ? BigInteger.valueOf(defaultMaxProjectStorageSize)
                 : project.getMaxStorageSize();
         if (currentSize.add(fileSize).compareTo(maxSize) > 0) {
-            throw new IllegalArgumentException("Превышен лимит хранилища проекта");
+            throw new IllegalArgumentException("The project storage limit has been exceeded");
         }
 
-        String key = "project-" + projectId + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String key = String.format("project-%d/%s_%s", projectId, UUID.randomUUID(), file.getOriginalFilename());
 
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file.getBytes())) {
             minioService.uploadFile(byteArrayInputStream, key, file.getContentType(), file.getSize());
         } catch (IOException e) {
-            log.error("Ошибка при получении потока файла", e);
-            throw new RuntimeException("Ошибка при получении потока файла", e);
+            log.error("Error receiving the file stream", e);
+            throw new RuntimeException("Error receiving the file stream", e);
         } catch (Exception e) {
-            log.error("Ошибка загрузки файла в MinIO", e);
-            throw new RuntimeException("Ошибка загрузки файла в MinIO", e);
+            log.error("Error uploading a file to MinIO", e);
+            throw new RuntimeException("Error uploading a file to MinIO", e);
         }
 
-        CreateResourceDto dto = new CreateResourceDto(
-                file.getOriginalFilename(),
-                key,
-                file.getSize(),
-                file.getContentType(),
-                teamMemberId,
-                projectId
-        );
-
-        Resource resource = resourceMapper.toResource(dto);
+        Resource resource = Resource.builder()
+                .name(file.getOriginalFilename())
+                .key(key)
+                .size(BigInteger.valueOf(file.getSize()))
+                .allowedRoles(TeamRole.getAll())
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(TeamMember.builder().id(teamMemberId).build())
+                .updatedBy(TeamMember.builder().id(teamMemberId).build())
+                .project(Project.builder().id(projectId).build())
+                .build();
         Resource savedResource = resourceRepository.save(resource);
 
         project.setStorageSize(currentSize.add(fileSize));
         projectRepository.save(project);
 
-        log.info("Файл '{}' успешно загружен в проект '{}'", file.getOriginalFilename(), project.getName());
+        log.info("The file '{}' has been successfully uploaded to the project '{}'",
+                file.getOriginalFilename(), project.getName());
         return resourceResultMapper.toResultDto(savedResource);
     }
 
     public void deleteResource(Long resourceId, Long teamMemberId) {
         Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ресурс не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The resource was not found"));
 
         TeamMember currentUser = teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The user was not found"));
 
         if (!resource.getCreatedBy().getId().equals(teamMemberId)
                 && !currentUser.getRoles().contains(TeamRole.MANAGER)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "У пользователя нет прав для удаления данного файла");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "The user does not have the rights to delete this file.");
         }
 
         if (resource.getKey() != null) {
@@ -106,8 +115,8 @@ public class ResourceService {
         }
 
         Project project = resource.getProject();
-        BigInteger currentSize = project.getStorageSize() == null ? BigInteger.ZERO : project.getStorageSize();
-        BigInteger fileSize = resource.getSize() == null ? BigInteger.ZERO : resource.getSize();
+        BigInteger currentSize = Objects.requireNonNullElse(project.getStorageSize(), BigInteger.ZERO);
+        BigInteger fileSize = Objects.requireNonNullElse(resource.getSize(), BigInteger.ZERO);
         if (currentSize.compareTo(fileSize) >= 0) {
             project.setStorageSize(currentSize.subtract(fileSize));
         } else {
@@ -115,16 +124,13 @@ public class ResourceService {
         }
         projectRepository.save(project);
 
-        resource.setKey(null);
         resource.setSize(BigInteger.ZERO);
         resource.setStatus(ResourceStatus.DELETED);
-
-        TeamMember updater = new TeamMember();
-        updater.setId(teamMemberId);
-        resource.setUpdatedBy(updater);
+        resource.setUpdatedBy(currentUser);
 
         resourceRepository.save(resource);
 
-        log.info("Ресурс с ID {} успешно удалён пользователем с ID {}", resourceId, teamMemberId);
+        log.info("The resource with the ID {} was successfully deleted by the user with the ID {}",
+                resourceId, teamMemberId);
     }
 }

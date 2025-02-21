@@ -6,6 +6,7 @@ app:
     minio_endpoint: "http://localhost:9000"
     max_team_avatar_side_length: 512
     max_team_avatar_size_in_mb: 5
+    max-project-storage-size: 2147483648
 
 spring:
   datasource:

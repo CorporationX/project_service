@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,16 +24,14 @@ public class ResourceController {
     public ResponseEntity<ResourceResultDto> uploadResource(
             @RequestParam("file") MultipartFile file,
             @RequestParam("projectId") Long projectId,
-            @RequestParam("teamMemberId") Long teamMemberId
-    ) {
+            @RequestHeader("x-user-id") Long teamMemberId) {
         return ResponseEntity.ok(resourceService.uploadResource(file, projectId, teamMemberId));
     }
 
     @DeleteMapping("/{resourceId}")
     public ResponseEntity<Void> deleteResource(
             @PathVariable Long resourceId,
-            @RequestParam("teamMemberId") Long teamMemberId
-    ) {
+            @RequestHeader("x-user-id") Long teamMemberId) {
         resourceService.deleteResource(resourceId, teamMemberId);
         return ResponseEntity.noContent().build();
     }
