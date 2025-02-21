@@ -113,7 +113,7 @@ public class ResourceServiceTest {
     }
 
     @Test
-    void testUploadResourceProjectNotFound() throws Exception {
+    void uploadResource_ProjectNotFound() throws Exception {
         byte[] content = "test".getBytes();
         MultipartFile file = createMockMultipartFile("test.txt", "text/plain", content);
         Long projectId = 1L;
@@ -126,7 +126,7 @@ public class ResourceServiceTest {
     }
 
     @Test
-    void testDeleteResourceSuccess() {
+    void deleteResource_Success() {
         Long resourceId = 1L;
         Long teamMemberId = 2L;
         Project project = createProject(1L, BigInteger.valueOf(200), BigInteger.valueOf(defaultMaxProjectStorageSize));
@@ -153,7 +153,7 @@ public class ResourceServiceTest {
     }
 
     @Test
-    void testDeleteResourceNotFound() {
+    void deleteResource_NotFound() {
         Long resourceId = 1L;
         Long teamMemberId = 2L;
         when(resourceRepository.findById(resourceId)).thenReturn(Optional.empty());
@@ -165,7 +165,7 @@ public class ResourceServiceTest {
     }
 
     @Test
-    void testDeleteResourceUserNotFound() {
+    void deleteResource_UserNotFound() {
         Long resourceId = 1L;
         Long teamMemberId = 2L;
         Resource resource = Resource.builder().id(resourceId).build();
@@ -179,7 +179,7 @@ public class ResourceServiceTest {
     }
 
     @Test
-    void testDeleteResourceNoPermission() {
+    void deleteResource_NoPermission() {
         Long resourceId = 1L;
         Long teamMemberId = 2L;
         Project project = createProject(1L, BigInteger.valueOf(200), BigInteger.valueOf(defaultMaxProjectStorageSize));
