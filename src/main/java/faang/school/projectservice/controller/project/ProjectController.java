@@ -35,9 +35,9 @@ public class ProjectController {
     }
 
     @Operation(description = "Обновить проект по ID")
-    @PutMapping("/{id}")
-    public ProjectDto updateProject(@PathVariable long id, @RequestBody ProjectDto projectDto) {
-        return projectService.updateProject(id, projectDto);
+    @PutMapping()
+    public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
+        return projectService.updateProject(projectDto);
     }
 
     @Operation(description = "Получить все проекты")

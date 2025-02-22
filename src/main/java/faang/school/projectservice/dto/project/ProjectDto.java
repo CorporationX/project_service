@@ -27,7 +27,7 @@ public class ProjectDto {
     private long ownerId;
 
     @NotNull(message = "Visibility can't be null")
-    private ProjectVisibility visibility;
+    private String visibility;
 
-    private ProjectStatus status;
+    private String status;
 }

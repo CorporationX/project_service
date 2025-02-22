@@ -9,7 +9,7 @@ public interface ProjectService {
 
     ProjectDto createProject(ProjectDto dto);
 
-    ProjectDto updateProject(long id, ProjectDto dto);
+    ProjectDto updateProject(ProjectDto dto);
 
     List<ProjectDto> getAllProjects(int pageNumber, int pageSize, ProjectFilterDto filters);
 

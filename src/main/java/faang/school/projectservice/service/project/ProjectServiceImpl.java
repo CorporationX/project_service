@@ -38,9 +38,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto updateProject(long id, ProjectDto dto) {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format(
-                "Project with id = %d not found", id
+    public ProjectDto updateProject(ProjectDto dto) {
+        Project project = projectRepository.findById(dto.getId()).orElseThrow(() -> new EntityNotFoundException(String.format(
+                "Project with id = %d not found", dto.getId()
         )));
         Project updatedProject = projectMapper.update(dto, project);
         updatedProject.setUpdatedAt(LocalDateTime.now());
