@@ -7,15 +7,18 @@ import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.exception.UserNotFoundException;
+import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -44,11 +47,9 @@ public class MeetValidation {
         }
     }
 
-    public void meetExists(Long meetId) {
-        if (!meetRepository.existsById(meetId)) {
-            log.warn("Meeting not found {}", meetId);
-            throw new DataNotFoundException("Meeting not found with id:" + meetId);
-        }
+    public Meet getMeet(Long meetId) {
+        Optional<Meet> meetOptional = meetRepository.findById(meetId);
+        return meetOptional.orElseThrow(() -> new EntityNotFoundException("Meet not found with id: " + meetId));
     }
 
     public void permissionCheck(Long userId, Long creatorId) {
@@ -58,4 +59,5 @@ public class MeetValidation {
             throw new SecurityException("Only the meeting creator can modify the appointment");
         }
     }
+
 }
