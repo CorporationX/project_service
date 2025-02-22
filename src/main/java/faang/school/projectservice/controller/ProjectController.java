@@ -53,8 +53,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ProjectResponseDto getProjectById(@PathVariable Long id) {
-        return projectService.getProjectDtoById(id);
+    public ProjectResponseDto getProjectById(@PathVariable Long id, @RequestHeader("x-user-id") Long userId) {
+        return projectService.getProjectDtoById(id, userId);
     }
 
     @DeleteMapping("/{id}")
