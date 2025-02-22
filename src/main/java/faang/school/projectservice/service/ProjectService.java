@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.event.ProjectCreateEvent;
 import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
@@ -47,9 +48,12 @@ public class ProjectService {
     private final ProjectGalleryValidator projectGalleryValidator;
     private final List<ProjectFilter> projectFilters;
     private final KafkaTemplate<String, ProjectViewEvent> projectViewEventKafkaTemplate;
+    private final KafkaTemplate<String, ProjectCreateEvent> projectCreateEventKafkaTemplate;
 
-    @Value("${spring.kafka.topics.project-view.topic}")
+    @Value("${spring.kafka.producer.project_view.topic}")
     private String projectViewEventTopic;
+    @Value("${spring.kafka.producer.project-create.topic}")
+    private String projectCreateEventTopic;
 
     public ProjectCreateResponseDto createProject(ProjectCreateRequestDto projectCreateRequestDto) {
         Long ownerId = projectCreateRequestDto.getOwnerId();
@@ -62,6 +66,10 @@ public class ProjectService {
 
         project.setStatus(ProjectStatus.CREATED);
         Project savedProject = projectRepository.save(project);
+
+        ProjectCreateEvent projectCreateEvent = new ProjectCreateEvent(savedProject.getOwnerId(), savedProject.getId());
+        projectCreateEventKafkaTemplate.send(projectCreateEventTopic, projectCreateEvent);
+
         return projectMapper.toCreateResponseDto(savedProject);
     }
 

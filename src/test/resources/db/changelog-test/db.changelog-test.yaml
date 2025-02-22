@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog-test/changeset/project_V000__initial.sql
+  - include:
+      file: db/changelog-test/changeset/project_V001_calendar_id.sql

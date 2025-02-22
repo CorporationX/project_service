@@ -1,0 +1,6 @@
+{
+  "name": "Test Project",
+  "description": "This is a test project",
+  "ownerId": 123,
+  "visibility": "PUBLIC"
+}
