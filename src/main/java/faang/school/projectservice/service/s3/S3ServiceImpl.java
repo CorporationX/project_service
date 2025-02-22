@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.UploadResourceException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -46,6 +48,26 @@ public class S3ServiceImpl implements S3Service {
         }
         s3Client.putObject(putObjectRequest);
         return buildResource(file, key);
+    }
+
+    @Override
+    public List<String> uploadFiles(List<MultipartFile> files, Long folder) {
+        checkBucketExists(s3Properties.getBucketName());
+        return files.stream()
+                .map(file -> uploadFileToBucket(file, folder))
+                .toList();
+    }
+
+    @Override
+    public void validateAndCheckFileSizes(List<MultipartFile> files, long maxSize) {
+        if (files.isEmpty()) {
+            throw new DataValidationException("No files to upload");
+        }
+        long totalSize = calculateTotalSize(files);
+
+        if (totalSize > maxSize) {
+            throw new DataValidationException(String.format("Total file size exceeds the maximum allowed size of %d bytes", maxSize));
+        }
     }
 
     @Override
@@ -81,5 +103,21 @@ public class S3ServiceImpl implements S3Service {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    private long calculateTotalSize(List<MultipartFile> files) {
+        return files.stream()
+                .mapToLong(MultipartFile::getSize)
+                .sum();
+    }
+
+    private String uploadFileToBucket(MultipartFile file, Long folder) {
+        String key = String.format("%s-%s-%s", LocalDateTime.now(), folder, file.getOriginalFilename());
+        try {
+            s3Client.putObject(s3Properties.getBucketName(), key, file.getInputStream(), null);
+        } catch (IOException e) {
+            throw new RuntimeException("Error uploading file to S3", e);
+        }
+        return key;
     }
 }
