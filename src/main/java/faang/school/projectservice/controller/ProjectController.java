@@ -1,7 +1,6 @@
 package faang.school.projectservice.controller;
 
 
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.dto.project.ProjectDtoResponse;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.service.project.ProjectService;
@@ -20,24 +19,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("api/v1/projects")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping("/{projectId}/presentation")
-    public ProjectDtoResponse generatePdf(@PathVariable Long projectId) {
-
-        return projectService.creatingPresentation(projectId);
+    public void generatePdf(@PathVariable Long projectId) {
+        projectService.createPresentation(projectId);
     }
 
-    @GetMapping("/download/{projectId}/presentation")
+    @GetMapping("/{projectId}/presentation/download")
     public ResponseEntity<InputStreamResource> downloadFile(@Valid @NotNull @PathVariable Long projectId) {
 
         S3ObjectDto obj = projectService.downloadPdf(projectId);
-        S3ObjectInputStream objectContent = obj.s3Object().getObjectContent();
-        InputStreamResource body = new InputStreamResource(objectContent);
+        InputStreamResource body = projectService.getPresentation(obj);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,

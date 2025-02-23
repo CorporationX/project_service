@@ -1,25 +1,21 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.project.ProjectDtoResponse;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectTeamMemberDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
-import java.util.Collections;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class ProjectMapper {
-
-    @Mapping(target = "parentProjectId", source = "parentProject.id")
-    public abstract ProjectDtoResponse toDto(Project project);
 
     @Mapping(target = "title", source = "project.name")
     @Mapping(target = "createdDate", source = "project.createdAt")
