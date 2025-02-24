@@ -34,7 +34,7 @@ public class GalleryServiceImpl implements GalleryService {
     private int maxImages;
 
     @PostConstruct
-    private void init() {
+    public void init() {
         this.maxFileSizeInBytes = galleryProperties.getMaxFileSizeGalleryInBytes();
         this.maxImages = galleryProperties.getMaxImages();
     }
