@@ -30,6 +30,7 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
     mvc:
       path: /api/v1
 
@@ -59,6 +60,11 @@ services:
 
 domain:
   path: /api/v1
+
+gallery:
+  upload:
+    max-file-size: 5MB
+    max-images: 50
 
 jira:
   url: https://bortsovamariia.atlassian.net/rest/api/2
