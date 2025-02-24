@@ -60,6 +60,7 @@ services:
 
 domain:
   path: /api/v1
+
 gallery:
   upload:
     max-file-size: 5MB
