@@ -6,6 +6,7 @@ import faang.school.projectservice.properties.GalleryProperties;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +37,13 @@ public class GalleryServiceTest {
     @Mock
     private GalleryProperties galleryProperties;
 
+    @BeforeEach
+    public void setUp() {
+        when(galleryProperties.getMaxFileSizeGalleryInBytes()).thenReturn(1024L);
+        when(galleryProperties.getMaxImages()).thenReturn(10);
+        galleryService.init();
+    }
+
     @Test
     public void testUploadFilesValid() {
         long projectId = 1L;
@@ -45,8 +53,6 @@ public class GalleryServiceTest {
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(s3Client.uploadFiles(files, projectId)).thenReturn(Arrays.asList("file1", "file2"));
-        when(galleryProperties.getMaxFileSizeGalleryInBytes()).thenReturn(1024L);
-        when(galleryProperties.getMaxImages()).thenReturn(10);
 
         GalleryResponseDto response = galleryService.uploadFiles(projectId, files);
 
