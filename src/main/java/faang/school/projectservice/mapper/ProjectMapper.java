@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectTeamMemberDto;

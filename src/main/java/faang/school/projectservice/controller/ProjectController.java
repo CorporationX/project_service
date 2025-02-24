@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
-import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import faang.school.projectservice.service.project.ProjectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.core.io.InputStreamResource;
-
 
 import java.util.List;
 
