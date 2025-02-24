@@ -37,7 +37,7 @@ public class InternshipService {
         internshipValidator.validateInternshipCreation(internshipDto);
         Internship internship = internshipCreateMapper.toEntity(internshipDto);
 
-        internship.setProject(projectService.findById(internshipDto.getProjectId()));
+        internship.setProject(projectService.getProjectById(internshipDto.getProjectId()));
         internship.setMentorId(teamMemberService.findById(internshipDto.getMentorId()));
         internship.setInterns(getInternsById(internshipDto.getInternsIds()));
 
