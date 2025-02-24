@@ -41,8 +41,9 @@ public class ProjectManagementService {
         Project project = projectEntityMapper.toEntity(projectCreateDto);
         project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
-        publishProjectCreateEvent(project.getId(), userId);
-        return projectEntityMapper.toProjectDto(projectRepository.save(project));
+        Project newProject = projectRepository.save(project);
+        publishProjectCreateEvent(newProject.getId(), userId);
+        return projectEntityMapper.toProjectDto(newProject);
     }
 
     public ProjectReadDto updateProject(ProjectUpdateDto projectUpdateDto, long projectId, long userId) {
@@ -105,7 +106,7 @@ public class ProjectManagementService {
                 .anyMatch(member -> member.getId().equals(userId));
     }
 
-    private void publishProjectCreateEvent(long projectId, long userId) {
+    protected void publishProjectCreateEvent(long projectId, long userId) {
         projectCreateEventPublisher.publish(ProjectEvent.builder()
                 .projectId(projectId)
                 .userId(userId)
