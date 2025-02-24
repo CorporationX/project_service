@@ -32,7 +32,7 @@ import java.util.List;
 @Entity
 @Table(name = "task")
 @Builder
-@ToString(exclude = {"parentTask", "linkedTasks", "parentTask", "stage"})
+@ToString(exclude = {"parentTask", "linkedTasks", "stage"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
