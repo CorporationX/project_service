@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import faang.school.projectservice.service.project.ProjectService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.InputStreamResource;
 
 
 import java.util.List;
@@ -64,7 +66,6 @@ public class ProjectController {
 
     @GetMapping("/{projectId}/presentation/download")
     public ResponseEntity<InputStreamResource> downloadFile(@Valid @NotNull @PathVariable Long projectId) {
-
         S3ObjectDto obj = projectService.downloadPdf(projectId);
         InputStreamResource body = projectService.getPresentation(obj);
 

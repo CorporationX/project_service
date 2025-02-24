@@ -19,18 +19,16 @@ import org.mapstruct.Named;
 import java.util.Collections;
 import java.util.List;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class ProjectMapper {
 
-    Project toProjectEntity(ProjectCreateRequestDto dto);
+    public abstract Project toProjectEntity(ProjectCreateRequestDto dto);
 
-    ProjectResponseDto toProjectResponseDto(Project entity);
+    public abstract ProjectResponseDto toProjectResponseDto(Project entity);
 
-    List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
+    public abstract List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
 
-    void update(ProjectUpdateRequestDto projectUpdateRequestDto, @MappingTarget Project project);
+    public abstract void update(ProjectUpdateRequestDto projectUpdateRequestDto, @MappingTarget Project project);
 
     @Mapping(target = "title", source = "project.name")
     @Mapping(target = "createdDate", source = "project.createdAt")
