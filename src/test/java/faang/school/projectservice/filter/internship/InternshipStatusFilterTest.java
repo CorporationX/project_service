@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StatusFilterTest {
+class InternshipStatusFilterTest {
     private static final InternshipStatus STATUS = InternshipStatus.COMPLETED;
 
-    private final StatusFilter statusFilter = new StatusFilter();
+    private final InternshipStatusFilter statusFilter = new InternshipStatusFilter();
 
     @Test
     void testIsApplicableIsTrue() {
