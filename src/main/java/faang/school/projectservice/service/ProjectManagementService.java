@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.dto.project.event.ProjectEvent;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoAccessException;
@@ -12,11 +13,13 @@ import faang.school.projectservice.mapper.ProjectEntityMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectCreateEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -28,6 +31,7 @@ public class ProjectManagementService {
     private final ProjectRepository projectRepository;
     private final ProjectEntityMapper projectEntityMapper;
     private final List<ProjectFilter> projectFilters;
+    private final ProjectCreateEventPublisher projectCreateEventPublisher;
 
     public ProjectReadDto createProject(ProjectCreateDto projectCreateDto, long userId) {
         if (projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.getName())) {
@@ -37,6 +41,7 @@ public class ProjectManagementService {
         Project project = projectEntityMapper.toEntity(projectCreateDto);
         project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
+        publishProjectCreateEvent(project.getId(), userId);
         return projectEntityMapper.toProjectDto(projectRepository.save(project));
     }
 
@@ -100,4 +105,11 @@ public class ProjectManagementService {
                 .anyMatch(member -> member.getId().equals(userId));
     }
 
+    private void publishProjectCreateEvent(long projectId, long userId) {
+        projectCreateEventPublisher.publish(ProjectEvent.builder()
+                .projectId(projectId)
+                .userId(userId)
+                .createAt(LocalDateTime.now())
+                .build());
+    }
 }
