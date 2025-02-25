@@ -40,7 +40,8 @@ public class ProjectServiceTest {
         NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
         StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
         List<SpecificationFilter> specificationFilters = List.of(nameSpecification, statusSpecification);
-        projectService = new ProjectServiceImpl(projectRepository, projectMapper, specificationFilters);
+        projectService = new ProjectServiceImpl(projectRepository, projectMapper, specificationFilters,
+                null, null, null, null);
 
         projectCaptor = ArgumentCaptor.forClass(Project.class);
 

@@ -35,6 +35,7 @@ import java.util.List;
 public class ProjectServiceImpl implements ProjectService {
 
     public static final String PDF_FILE_NAME = "presentation.pdf";
+
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<SpecificationFilter> specificationFilters;
