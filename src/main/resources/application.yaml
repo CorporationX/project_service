@@ -38,6 +38,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+jira:
+  url: "https://faang-school.atlassian.net"
+  user: secret_email
+  token: secret_token
+
 server:
   port: 8082
 

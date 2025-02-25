@@ -29,6 +29,7 @@ public class TestDataFactory {
     public static TaskResult taskResult() {
         return TaskResult.builder()
                 .description("Hello world")
+                .performerUserId(2L)
                 .id(1L)
                 .build();
     }
@@ -53,6 +54,7 @@ public class TestDataFactory {
         return Task.builder()
                 .id(1L)
                 .description("Hello world")
+                .performerUserId(2L)
                 .project(project)
                 .build();
     }

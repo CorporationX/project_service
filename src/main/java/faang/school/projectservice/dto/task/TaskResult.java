@@ -20,5 +20,6 @@ public record TaskResult(
         Long parentTaskId,
         List<Long> linkedTaskIds,
         Long projectId,
-        Long stageId
+        Long stageId,
+        String jiraTaskUrl
 ) {}

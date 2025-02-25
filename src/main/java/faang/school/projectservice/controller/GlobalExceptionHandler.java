@@ -1,5 +1,9 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.exception.ErrorResponse;
+import faang.school.projectservice.exception.MeetingOwnershipRequiredException;
+import faang.school.projectservice.exception.ProjectAlreadyExistsException;
+import faang.school.projectservice.exception.TaskJiraKeyWasNotFound;
 import faang.school.projectservice.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -51,7 +55,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
+    @ExceptionHandler({EntityNotFoundException.class, TaskJiraKeyWasNotFound.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex, WebRequest request) {
         return ErrorResponse.builder()

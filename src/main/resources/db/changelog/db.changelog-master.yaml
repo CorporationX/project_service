@@ -30,6 +30,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V018_alter_file_columns_and_create_gallery_table.sql
   - include:
+      file: db/changelog/changeset/project_V019_add_jira_taskkey.sql
+  - include:
       file: db/changelog/changeset/project_V019_meet_alter_google_event_id.sql
   - include:
       file: db/changelog/changeset/project_V020__create_project_and_team_member.sql

@@ -17,6 +17,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.factory.TestDataFactory;
 import faang.school.projectservice.service.filter.task.TaskGetting;
+import faang.school.projectservice.service.jira.JiraService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,8 @@ public class TaskServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private StageRepository stageRepository;
+    @Mock
+    private JiraService jiraService;
     @Mock
     private UserServiceClient client;
     @Spy
@@ -90,6 +93,7 @@ public class TaskServiceTest {
         Mockito.when(client.getUsersByIds(List.of(createTaskDto.performerUserId(), createTaskDto.reporterUserId())))
                 .thenReturn(List.of(userDto1, userDto2));
         Mockito.when(taskRepository.save(Mockito.any(Task.class))).thenReturn(task);
+        Mockito.when(client.getUser(Mockito.any(Long.class))).thenReturn(userDto1);
 
         TaskResult providedResult = taskService.createTask(createTaskDto);
         Assertions.assertEquals(providedResult, taskResult);
@@ -154,7 +158,7 @@ public class TaskServiceTest {
         Mockito.when(taskRepository.findById(task.getId()))
                 .thenReturn(Optional.ofNullable(task));
         Mockito.when(client.getUsersByIds(Mockito.anyList())).thenReturn(new ArrayList<>(List.of(userDto1)));
-
+        Mockito.when(client.getUser(Mockito.any(Long.class))).thenReturn(userDto1);
 
         TaskResult providedResult = taskService.updateTask(updateTaskDto, task.getId(), userId);
         Assertions.assertEquals(providedResult, taskResult);

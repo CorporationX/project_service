@@ -46,4 +46,9 @@ public class TaskController {
     public TaskResult getTaskById(@PathVariable Long taskId) {
         return taskService.findTaskByIdToDto(taskId);
     }
+
+    @GetMapping
+    public List<TaskResult> getTasksJira() {
+        return taskService.getAllTasksJira();
+    }
 }

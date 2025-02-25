@@ -1,10 +1,8 @@
 package faang.school.projectservice.service;
 
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.task.CreateTaskDto;
-import faang.school.projectservice.dto.task.TaskGettingDto;
-import faang.school.projectservice.dto.task.TaskResult;
-import faang.school.projectservice.dto.task.UpdateTaskDto;
+import faang.school.projectservice.dto.task.*;
 import faang.school.projectservice.exception.*;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Project;
@@ -14,9 +12,11 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.filter.task.TaskGetting;
+import faang.school.projectservice.service.jira.JiraService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.codehaus.jettison.json.JSONException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +35,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final UserServiceClient userServiceClient;
     private final List<TaskGetting> filters;
+    private final JiraService jiraService;
 
     @Transactional
     public TaskResult createTask(CreateTaskDto createTaskDto) {
@@ -46,7 +47,6 @@ public class TaskService {
 
         Stage stage = findStageById(createTaskDto.stageId());
         Task parentTask = findTaskById(createTaskDto.parentTaskId());
-
         Task task = taskMapper.toTask(createTaskDto);
         task.setProject(project);
         task.setParentTask(parentTask);
@@ -56,6 +56,17 @@ public class TaskService {
             List<Task> linkedTasks = taskRepository.findAllById(createTaskDto.linkedTaskIds());
             task.setLinkedTasks(linkedTasks);
         }
+
+        String username = userServiceClient.getUser(task.getPerformerUserId()).username();
+        JiraCreateIssueDto jiraCreateIssueDto = JiraCreateIssueDto.builder()
+                .description(task.getDescription())
+                .issueType(10005L)
+                .username(username)
+                .summary(task.getName())
+                .build();
+        String generatedJiraKey = jiraService.createIssueInJira(jiraCreateIssueDto);
+
+        task.setJiraKey(generatedJiraKey);
 
         project.getTasks().add(task);
         task = taskRepository.save(task);
@@ -71,11 +82,14 @@ public class TaskService {
         areUsersInSystem(userId);
 
         taskMapper.updateTaskFromDto(updateTaskDto, task);
+        String username = userServiceClient.getUser(task.getPerformerUserId()).username();
 
         if (!updateTaskDto.linkedTaskIds().isEmpty()) {
             List<Task> linkedTasks = findLinkedTasksByIds(updateTaskDto.linkedTaskIds());
             task.setLinkedTasks(linkedTasks);
         }
+
+        jiraService.updateIssueInJira(task.getJiraKey(), task, username);
 
         log.info("Task with id : {}, was updated by user with id: {}", taskId, userId);
         return taskMapper.toDto(task);
@@ -166,5 +180,14 @@ public class TaskService {
     private Project findByProjectId(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectWasNotFoundException("Project was not found with id : " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskResult> getAllTasksJira() {
+        return taskRepository.findAll()
+                .stream()
+                .filter(task -> task.getJiraKey() != null)
+                .map(taskMapper::toDto)
+                .toList();
     }
 }

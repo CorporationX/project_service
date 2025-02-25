@@ -80,6 +80,9 @@ public class Task {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @Column(name = "jira_key")
+    private String jiraKey;
+
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
