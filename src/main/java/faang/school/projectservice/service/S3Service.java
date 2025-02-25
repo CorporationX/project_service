@@ -5,7 +5,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 public interface S3Service {
+
     void uploadFile(MultipartFile file, String key);
+
     void deleteFile(String key);
+
+    void putFileInStore(String key, InputStream stream);
+
     InputStream downloadFile(String key);
 }

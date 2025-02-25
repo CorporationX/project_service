@@ -3,7 +3,6 @@ package faang.school.projectservice.dto.resource;
 import lombok.Builder;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @Builder
 public record ResourceRequestDto(

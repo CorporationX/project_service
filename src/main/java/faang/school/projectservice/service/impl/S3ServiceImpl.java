@@ -44,6 +44,20 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public void putFileInStore(String key, InputStream stream) {
+        putFileInStore(key, stream, null);
+    }
+
+    private void putFileInStore(String key, InputStream stream, ObjectMetadata metadata) {
+        try {
+            s3Client.putObject(bucketName, key, stream, metadata);
+        } catch (Exception ex) {
+            log.error("Error when saving a file in S3", ex);
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    @Override
     public InputStream downloadFile(String key) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, key);

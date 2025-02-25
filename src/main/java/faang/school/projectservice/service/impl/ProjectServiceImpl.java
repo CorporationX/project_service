@@ -1,9 +1,15 @@
 package faang.school.projectservice.service.impl;
 
+
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.project.ProjectPresentationDto;
+import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -12,11 +18,14 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.pdf.ProjectPdfService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,9 +34,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
+    public static final String PDF_FILE_NAME = "presentation.pdf";
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<SpecificationFilter> specificationFilters;
+    private final S3Service s3client;
+    private final ProjectPdfService projectPdfService;
+    private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
 
     @Override
     public ProjectResponseDto save(ProjectCreateRequestDto projectDto) {
@@ -68,6 +82,56 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toProjectResponseDtos(projects);
     }
 
+    @Override
+    public List<Long> getProjectResourceIds(Long projectId) {
+        Project project = getProject(projectId);
+        return project.getResources().stream()
+                .map(Resource::getId)
+                .sorted()
+                .toList();
+    }
+
+    public Project getProject(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
+    }
+
+    @Override
+    public ProjectResponseDto creatingPresentation(long projectId) {
+        Project project = getProjectById(projectId);
+        final long userId = getUserId();
+        validateUserIsOwner(userId, project);
+
+        UserDto owner = userServiceClient.getUser(userId);
+
+        ProjectPresentationDto presentationDto = projectMapper.toProjectPresentationDto(project, owner);
+
+        InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto);
+        String presentationFileKey = String.format("%s_%s_%s_%d", project.getName(), project.getId(), PDF_FILE_NAME,
+                System.currentTimeMillis());
+
+        s3client.putFileInStore(presentationFileKey, pdfInputStream);
+
+        project.setPresentationFileKey(presentationFileKey);
+        project.setPresentationGeneratedAt(LocalDateTime.now());
+
+        projectRepository.save(project);
+        return projectMapper.toProjectResponseDto(project);
+    }
+
+    @Override
+    public String getPresentationFileKey(long projectId) {
+        Project project = getProjectById(projectId);
+        return project.getPresentationFileKey();
+    }
+
+    @Override
+    public S3ObjectDto downloadPdf(Long projectId) {
+        String presentationFileKey = getPresentationFileKey(projectId);
+        InputStream file = s3client.downloadFile(presentationFileKey);
+        return new S3ObjectDto(PDF_FILE_NAME, file, ResourceType.PDF.name());
+    }
+
     private void validateProject(ProjectCreateRequestDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(projectDto.ownerId(), projectDto.name())) {
             throw new IllegalArgumentException(String.format(
@@ -84,18 +148,19 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElse(null);
     }
 
-    @Override
-    public List<Long> getProjectResourceIds(Long projectId) {
-        Project project = getProject(projectId);
-        return project.getResources().stream()
-                .map(Resource::getId)
-                .sorted()
-                .toList();
-    }
-
-    public Project getProject(Long projectId) {
+    private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Project with ID %s not found!", projectId)));
     }
 
+    private void validateUserIsOwner(long userId, Project project) {
+        if (userId != project.getOwnerId()) {
+            throw new IllegalArgumentException("Only the project owner can request a presentation!");
+        }
+    }
+
+    private long getUserId() {
+        return userContext.getUserId();
+    }
 }

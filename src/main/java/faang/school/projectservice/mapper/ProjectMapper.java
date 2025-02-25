@@ -3,17 +3,17 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
-import faang.school.projectservice.model.Project;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectTeamMemberDto;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,11 +23,15 @@ public abstract class ProjectMapper {
 
     public abstract Project toProjectEntity(ProjectCreateRequestDto dto);
 
-    public abstract ProjectResponseDto toProjectResponseDto(Project entity);
+    //@Mapping(target = "parentProjectId", source = "parentProject.id")
+    public abstract ProjectResponseDto toProjectResponseDto(Project project);
 
     public abstract List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
 
     public abstract void update(ProjectUpdateRequestDto projectUpdateRequestDto, @MappingTarget Project project);
+
+//    @Mapping(target = "parentProjectId", source = "parentProject.id")
+//    public abstract ProjectDtoResponse toDto(Project project);
 
     @Mapping(target = "title", source = "project.name")
     @Mapping(target = "createdDate", source = "project.createdAt")
