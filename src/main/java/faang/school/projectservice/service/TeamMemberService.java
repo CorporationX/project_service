@@ -16,6 +16,13 @@ public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
 
+    public TeamMember findById(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Пользователь с ID %d не найден", teamMemberId)
+                ));
+    }
+
     public TeamMember findById(@NotNull Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId)
                 .orElseThrow(() -> new EntityNotFoundException(
