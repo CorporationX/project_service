@@ -12,6 +12,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -116,6 +117,8 @@ class ProjectServiceTest {
                 resourceRepository,
                 projectRepository,
                 resourceMapper,
+                teamMemberRepository,
+                userContext,
                 projectMapper,
                 imageProcessingUtils);
     }
@@ -231,35 +234,6 @@ class ProjectServiceTest {
         assertThrows(DataValidationException.class, () -> projectService.getGallery(PROJECT_ID));
     }
 
-//    @Test
-//    void testSuccessDeleteResource() {
-//        Resource resource = Resource
-//                .builder()
-//                .id(RESOURCE_ID)
-//                .name("file.png")
-////                .name(file.getName())
-//                .key(KEY)
-//                .size(BigInteger.ONE)
-////                .size(BigInteger.valueOf(file.getSize()))
-//                .createdAt(LocalDateTime.now())
-//                .type(ResourceType.IMAGE)
-//                .build();
-//        project.getResources().add(resource);
-//        project.getGalleryFileKeys().add(KEY);
-//
-//        when(userContext.getUserId()).thenReturn(USER_ID);
-//        when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
-//        when(projectRepository.save(project)).thenReturn(project);
-//
-//        ResourceReadDto result = projectService.deleteResource(PROJECT_ID, RESOURCE_ID);
-//        verify(amazonS3Client).deleteFile(KEY);
-//        verify(projectRepository).save(project);
-//        assertEquals("", resource.getKey());
-//        assertEquals(BigInteger.ZERO, resource.getSize());
-//        assertEquals(ResourceStatus.DELETED, resource.getStatus());
-//        assertEquals(USER_ID, result.updatedById());
-//    }
-
     @Test
     void testSuccessDeleteResource() {
         Resource resource = Resource.builder()
@@ -315,11 +289,17 @@ class ProjectServiceTest {
                 .status(ResourceStatus.ACTIVE)
                 .build();
 
+        TeamMember user = TeamMember.builder()
+                .userId(USER_ID)
+                .roles(List.of(TeamRole.DEVELOPER))
+                .build();
+
         project.getResources().add(resource);
         project.getGalleryFileKeys().add(KEY);
 
         when(userContext.getUserId()).thenReturn(2L);
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(user);
 
         assertThrows(AccessDeniedException.class, () -> projectService.deleteResource(PROJECT_ID, RESOURCE_ID));
     }
@@ -337,7 +317,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testAddingValidProjectCover() {
+    void testAddingValidProjectCover() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
         when(imageProcessingUtils.resizeImage(file)).thenReturn(new byte[0]);
         when(imageProcessingUtils.convertByteToMultipartFile(any(), any(), any())).thenReturn(file);
@@ -356,7 +336,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testDeletingProjectCover() {
+    void testDeletingProjectCover() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
         when(projectRepository.save(project)).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
