@@ -1,14 +1,19 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.resource.ResourceValidator;
@@ -31,55 +36,89 @@ public class ProjectService {
     private final AmazonS3Service amazonS3Client;
     private final ProjectRepository projectRepository;
     private final ResourceMapper resourceMapper;
+    private final TeamMemberRepository teamMemberRepository;
     private final ResourceRepository resourceRepository;
+    private final UserContext userContext;
 
     @Transactional
-    public ResourceReadDto uploadResourceToGallery(long projectId, MultipartFile file) {
+    public ResourceReadDto uploadResource(long projectId, long resourceId, MultipartFile file) {
         resourceValidator.validateResource(file);
 
+        long userId = userContext.getUserId();
         Project project = getProject(projectId);
         String folder = projectId + project.getName();
+        TeamMember user = getUserInProject(userId, projectId);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
-        BigInteger newStorageSize = project.getStorageSize().add(fileSize);
+        BigInteger newStorageSize;
+
+        if (resourceRepository.existsById(resourceId)) {
+            Resource oldResource = project.getResources().stream()
+                    .filter(resource -> resource.getId().equals(resourceId))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new EntityNotFoundException("Изменение невозможно: такого файла нет в проекте"));
+            newStorageSize = project.getStorageSize().subtract(oldResource.getSize()).add(fileSize);
+        } else {
+            newStorageSize = project.getStorageSize().add(fileSize);
+        }
 
         projectValidator.validateProjectStorageSize(newStorageSize, project, fileSize);
 
         Resource uploadedResource = uploadResourceToStorage(file, folder);
 
         uploadedResource.setProject(project);
-        project.getGalleryFileKeys().add(uploadedResource.getKey());
+
+        if (uploadedResource.getType().equals(ResourceType.IMAGE)) {
+            project.getGalleryFileKeys().add(uploadedResource.getKey());
+
+        }
+
         project.getResources().add(uploadedResource);
         project.setStorageSize(newStorageSize);
+        uploadedResource.setUpdatedBy(user);
 
         projectRepository.save(project);
 
         return resourceMapper.toDto(resourceRepository.save(uploadedResource));
     }
 
-    public List<ResourceReadDto> getAllProjectResources(long projectId) {
+    public List<ResourceReadDto> getGallery(long projectId) {
         Project project = getProject(projectId);
-        if (project.getGalleryFileKeys().isEmpty() && project.getResources().isEmpty()) {
+        if (project.getGalleryFileKeys().isEmpty() || project.getResources().isEmpty()) {
             throw new DataValidationException("Галерея проекта пуста");
         }
 
-        return project.getResources().stream().map(resourceMapper::toDto).toList();
+        return project.getResources().stream().filter(image -> image.getType().equals(ResourceType.IMAGE)).map(resourceMapper::toDto).toList();
     }
 
     @Transactional
-    public void deleteResourceFromGallery(long projectId, long resourceId) {
+    public ResourceReadDto deleteResource(long projectId, long resourceId) {
+        long userId = userContext.getUserId();
         Project project = getProject(projectId);
         Resource findingResource = project.getResources().stream()
                 .filter(resource -> resource.getId().equals(resourceId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Удаление невозможно: такого изображения нет в галерее проекта"));
+                        new EntityNotFoundException("Удаление невозможно: такого файла нет в проекте"));
+        TeamMember user = getUserInProject(userId, projectId);
         BigInteger storageSizeAfterDelete = project.getStorageSize().subtract(findingResource.getSize());
+
+        if (!(project.getOwnerId().equals(userId)) && !(user.getRoles().contains(TeamRole.MANAGER))) {
+            throw new AccessDeniedException("У вас нет доступа для удаления файла");
+        }
+
         project.setStorageSize(storageSizeAfterDelete);
-        project.getGalleryFileKeys().remove(findingResource.getKey());
+
+        if (findingResource.getType().equals(ResourceType.IMAGE)) {
+            project.getGalleryFileKeys().remove(findingResource.getKey());
+
+        }
 
         amazonS3Client.deleteFile(findingResource.getKey());
-        resourceRepository.deleteById(resourceId);
+        Resource updatedResource = changeResourceStatusToDeleted(findingResource, user);
         projectRepository.save(project);
+
+        return resourceMapper.toDto(updatedResource);
     }
 
     public Project getProject(Long id) {
@@ -98,5 +137,18 @@ public class ProjectService {
                 .status(ResourceStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    private Resource changeResourceStatusToDeleted(Resource resource, TeamMember user) {
+        resource.setKey("");
+        resource.setSize(BigInteger.ZERO);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedBy(user);
+
+        return resourceRepository.save(resource);
+    }
+
+    private TeamMember getUserInProject(long userId, long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 }

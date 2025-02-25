@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception.handler;
 
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.IntegrationException;
@@ -70,6 +71,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
     @ExceptionHandler(PaymentFailedException.class)
     public ErrorResponse handlePaymentFailedException(PaymentFailedException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

@@ -12,6 +12,7 @@ public record ResourceReadDto(
         BigInteger size,
         ResourceType type,
         LocalDateTime createdAt,
+        Long updatedById,
         Long projectId
 ) {
 }

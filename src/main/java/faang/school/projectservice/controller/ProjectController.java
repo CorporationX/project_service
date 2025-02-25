@@ -21,19 +21,19 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/{projectId}/resources")
-    public ResourceReadDto uploadResource(@PathVariable long projectId, @RequestBody MultipartFile file) {
-        return projectService.uploadResourceToGallery(projectId, file);
+    @PostMapping("/{projectId}/resources/{resourceId}")
+    public ResourceReadDto uploadResource(@PathVariable long projectId, @PathVariable long resourceId, @RequestBody MultipartFile file) {
+        return projectService.uploadResource(projectId, resourceId, file);
     }
 
-    @GetMapping("/{projectId}/resources/list")
-    public List<ResourceReadDto> getAllResources(@PathVariable long projectId) {
-        return projectService.getAllProjectResources(projectId);
+    @GetMapping("/{projectId}/gallery")
+    public List<ResourceReadDto> getGallery(@PathVariable long projectId) {
+        return projectService.getGallery(projectId);
     }
 
-    @DeleteMapping("/{projectId}/resources/list/{resourceId}")
+    @DeleteMapping("/{projectId}/resources/{resourceId}")
     public String deleteResource(@PathVariable long projectId, @PathVariable long resourceId) {
-        projectService.deleteResourceFromGallery(projectId, resourceId);
+        projectService.deleteResource(projectId, resourceId);
         return String.format("Ресурс с id %d удален из проекта с id %d", resourceId, projectId);
     }
 }
