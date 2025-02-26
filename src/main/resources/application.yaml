@@ -54,3 +54,10 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+resource:
+  max-size: 5242880 #5 MB
+  image:
+    max-rectangle-width: 1080
+    max-rectangle-height: 566
+    max-square-dimension: 1080
