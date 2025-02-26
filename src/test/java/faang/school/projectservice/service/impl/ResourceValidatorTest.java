@@ -48,36 +48,37 @@ class ResourceValidatorTest {
         Project privateProject = Project.builder().id(privateProjectId).build();
         Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
         Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, publicProject)).thenReturn(true);
-        resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProjectId);
+        resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProject);
 
         Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
         Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProject)).thenReturn(true);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadFromProject(userInProjectId, privateProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userInProjectId, privateProject));
 
         Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
         Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, publicProject)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, publicProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, publicProject));
 
         Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
         Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, privateProject)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, privateProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, privateProject));
     }
 
     @Test
     @DisplayName("Test overload resource to project")
     void validateResourcesOversize() {
         Long projectId = 222L;
+        Project project = Project.builder().id(projectId).build();
         Mockito.when(projectServiceMock.getProjectResourceIds(projectId)).thenReturn(resourceIds);
         Mockito.when(galleryPropertiesMock.getMaxFiles()).thenReturn(50);
 
-        resourceValidator.validateResourcesOversize(projectId);
+        resourceValidator.validateResourcesOversize(project);
         resourceIds.add(1050L);
-        resourceValidator.validateResourcesOversize(projectId);
+        resourceValidator.validateResourcesOversize(project);
         resourceIds.add(10005L);
         Assert.assertThrows(RuntimeException.class,
-                () -> resourceValidator.validateResourcesOversize(projectId));
+                () -> resourceValidator.validateResourcesOversize(project));
     }
 }

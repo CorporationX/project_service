@@ -17,21 +17,20 @@ public class ResourceValidator {
     private final ProjectValidator projectValidator;
     private final GalleryProperties galleryProperties;
 
-    void validateUserCanDownloadFromProject(Long userId, Long projectId) {
-        Project project = projectService.getProject(projectId);
+    void validateUserCanDownloadFromProject(Long userId, Project project) {
         boolean isProjectNotPublic = !projectValidator.isProjectPublic(project);
         boolean isUserNotInProject = !projectValidator.isUserParticipatedInProject(userId, project);
         if (isUserNotInProject || isProjectNotPublic) {
             throw new IllegalArgumentException("User with id "
                     + userId + " has not access to resources of project "
-                    + projectId + " at this moment");
+                    + project.getName() + " at this moment");
         }
     }
 
-    void validateResourcesOversize(Long projectId) {
+    void validateResourcesOversize(Project project) {
         int maxFilesPerProjectQuantity = galleryProperties.getMaxFiles();
 
-        if (projectService.getProjectResourceIds(projectId).size() > maxFilesPerProjectQuantity) {
+        if (projectService.getProjectResourceIds(project.getId()).size() > maxFilesPerProjectQuantity) {
             throw new RuntimeException("Limit resources of project is reached [" + maxFilesPerProjectQuantity + "]");
         }
     }

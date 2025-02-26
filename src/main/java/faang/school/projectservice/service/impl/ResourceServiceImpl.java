@@ -40,7 +40,7 @@ public class ResourceServiceImpl implements ResourceService {
     public ResourceResponseDto addResource(Long userId, Long projectId, MultipartFile file) {
         Project project = projectService.getProject(projectId);
         projectValidator.validateUserInProject(userId, project);
-        resourceValidator.validateResourcesOversize(projectId);
+        resourceValidator.validateResourcesOversize(project);
         TeamMember teamMember = getTeamMember(userId);
         String folder = FOLDER_PREFIX + projectId;
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
@@ -52,8 +52,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public InputStream downloadResource(Long userId, Long resourceId) {
         Resource resource = getResourceById(resourceId);
-        Long projectId = resource.getProject().getId();
-        resourceValidator.validateUserCanDownloadFromProject(userId, projectId);
+        resourceValidator.validateUserCanDownloadFromProject(userId, resource.getProject());
         return s3Service.downloadFile(resource.getKey());
     }
 
