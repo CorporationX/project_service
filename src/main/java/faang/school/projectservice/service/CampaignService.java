@@ -12,6 +12,7 @@ import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.repository.specification.CampaignSpecification;
 import faang.school.projectservice.validator.CampaignValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignService {
     private final CampaignMapper mapper;
     private final CampaignRepositoryAdapter campaignRepositoryAdapter;
@@ -30,8 +32,8 @@ public class CampaignService {
     private final CampaignValidator validator;
     private final UserContext userContext;
 
-    @Transactional
     public CampaignDto createCampaign(CampaignDto campaignDto) {
+        log.info("Creating campaign from {}", campaignDto);
         validator.userStatusValidation(campaignDto.getProjectId());
         validator.statusByCreateValidation(campaignDto.getStatus());
 
@@ -47,7 +49,8 @@ public class CampaignService {
     }
 
     @Transactional
-    public CampaignDto updateCampaign(CampaignDto campaignDto, Long campaignId) {
+    public CampaignDto updateCampaign(CampaignDto campaignDto, long campaignId) {
+        log.info("Updating campaign with id {} to {}", campaignId, campaignDto);
         Campaign targetCampaign = campaignRepositoryAdapter.findById(campaignId);
         validator.userStatusValidation(targetCampaign.getProject().getId());
         campaignDto.setUpdatedBy(userContext.getUserId());
@@ -57,6 +60,7 @@ public class CampaignService {
 
     @Transactional
     public void deleteCampaign(long id) {
+        log.info("Deleting campaign with id {}", id);
         Campaign campaign = campaignRepositoryAdapter.findById(id);
         validator.userStatusValidation(campaign.getProject().getId());
         campaignRepositoryAdapter.delete(id);
@@ -64,6 +68,7 @@ public class CampaignService {
 
     @Transactional(readOnly = true)
     public CampaignDto getCampaign(long id) {
+        log.info("Getting campaign with id {} from db", id);
         Campaign campaign = campaignRepositoryAdapter.findById(id);
         return mapper.toDto(campaign);
     }
@@ -71,6 +76,7 @@ public class CampaignService {
     @Transactional(readOnly = true)
     public List<CampaignDto> getCampaigns(CampaignFilterDto filterDto) {
         List<Specification<Campaign>> specs = new ArrayList<>();
+        log.info("Getting all campaign with filters: {}", filterDto);
 
     if (filterDto.getCreatedAt() != null) {
         specs.add(specification.getByCreatedAt(filterDto.getCreatedAt()));
@@ -82,7 +88,7 @@ public class CampaignService {
         if (filterDto.getCreatorId() > 0) {
             specs.add(specification.getByCreatorId(filterDto.getCreatorId()));
         } else {
-            throw new DataValidateException("creatorId must be > 0");
+            throw new DataValidateException("CreatorId must be > 0");
         }
     }
     specs.add(specification.getOrderedByDate());

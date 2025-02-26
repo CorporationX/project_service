@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.campaign;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.CampaignStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -37,10 +38,12 @@ public class CampaignDto {
     @NotNull
     private Currency currency;
     @Null
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @Null
     private Long createdBy;
     @Null
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
     @Null
     private Long updatedBy;

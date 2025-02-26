@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "Campaign", description = "Api for campaign management")
-@RequestMapping("/api/v1/Campaigns")
-@Valid
+@RequestMapping("/api/v1/campaigns")
 public class CampaignController {
     private final CampaignService service;
 
@@ -53,8 +51,8 @@ public class CampaignController {
     })
     @PutMapping("/{campaignId}")
     public CampaignDto updateCampaign(@Valid @RequestBody CampaignDto campaignDto,
-                                      @PathVariable @Valid @Positive long campaignId) {
-         return service.updateCampaign(campaignDto, campaignId);
+                                      @PathVariable long campaignId) {
+        return service.updateCampaign(campaignDto, campaignId);
     }
 
     @Operation(summary = "Delete campaign by id")
@@ -63,9 +61,9 @@ public class CampaignController {
             @ApiResponse(responseCode = "400", description = "Bad request data"),
             @ApiResponse(responseCode = "404", description = "Campaign with received id not found")
     })
-    @DeleteMapping("/{id}")
-    public void deleteCampaign(@PathVariable @Valid @Positive long id) {
-        service.deleteCampaign(id);
+    @DeleteMapping("/{campaignId}")
+    public void deleteCampaign(@PathVariable long campaignId) {
+        service.deleteCampaign(campaignId);
     }
 
     @Operation(summary = "Get campaign by id")
@@ -74,9 +72,9 @@ public class CampaignController {
             @ApiResponse(responseCode = "400", description = "Bad request data"),
             @ApiResponse(responseCode = "404", description = "Campaign with received id not found")
     })
-    @GetMapping("/{id}")
-    public CampaignDto getCampaign(@PathVariable @Valid @Positive long id) {
-        return service.getCampaign(id);
+    @GetMapping("/{campaignId}")
+    public CampaignDto getCampaign(@PathVariable long campaignId) {
+        return service.getCampaign(campaignId);
     }
 
     @Operation(summary = "Get campaigns with filters")
@@ -85,7 +83,7 @@ public class CampaignController {
             @ApiResponse(responseCode = "400", description = "Bad request data")
     })
     @GetMapping
-    public List<CampaignDto> getCampaignsByProject(CampaignFilterDto filterDto) {
+    public List<CampaignDto> getCampaigns(CampaignFilterDto filterDto) {
         return service.getCampaigns(filterDto);
     }
 }
