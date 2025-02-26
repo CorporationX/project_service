@@ -1,7 +1,9 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.config.filestorage.GalleryProperties;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,12 +16,11 @@ public class ResourceValidator {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
     private final GalleryProperties galleryProperties;
-    //@Value("${gallery.maxFiles}")
-    //private final int maxFilesPerProject;
 
     void validateUserCanDownloadFromProject(Long userId, Long projectId) {
-        boolean isProjectNotPublic = !projectValidator.isProjectPublic(projectId);
-        boolean isUserNotInProject = !projectValidator.isUserParticipatedInProject(userId, projectId);
+        Project project = projectService.getProject(projectId);
+        boolean isProjectNotPublic = !projectValidator.isProjectPublic(project);
+        boolean isUserNotInProject = !projectValidator.isUserParticipatedInProject(userId, project);
         if (isUserNotInProject || isProjectNotPublic) {
             throw new IllegalArgumentException("User with id "
                     + userId + " has not access to resources of project "
@@ -29,7 +30,6 @@ public class ResourceValidator {
 
     void validateResourcesOversize(Long projectId) {
         int maxFilesPerProjectQuantity = galleryProperties.getMaxFiles();
-        //int maxFilesPerProjectQuantity = maxFilesPerProject;
 
         if (projectService.getProjectResourceIds(projectId).size() > maxFilesPerProjectQuantity) {
             throw new RuntimeException("Limit resources of project is reached [" + maxFilesPerProjectQuantity + "]");

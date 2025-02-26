@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.config.filestorage.GalleryProperties;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,22 +44,24 @@ class ResourceValidatorTest {
         Long userNotInProjectId = 2L;
         Long publicProjectId = 222L;
         Long privateProjectId = 223L;
-        Mockito.when(projectValidatorMock.isProjectPublic(publicProjectId)).thenReturn(true);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, publicProjectId)).thenReturn(true);
+        Project publicProject = Project.builder().id(publicProjectId).build();
+        Project privateProject = Project.builder().id(privateProjectId).build();
+        Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, publicProject)).thenReturn(true);
         resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProjectId);
 
-        Mockito.when(projectValidatorMock.isProjectPublic(privateProjectId)).thenReturn(false);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProjectId)).thenReturn(true);
+        Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProject)).thenReturn(true);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userInProjectId, privateProjectId));
 
-        Mockito.when(projectValidatorMock.isProjectPublic(publicProjectId)).thenReturn(true);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, publicProjectId)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, publicProject)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, publicProjectId));
 
-        Mockito.when(projectValidatorMock.isProjectPublic(privateProjectId)).thenReturn(false);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, privateProjectId)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, privateProject)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, privateProjectId));
     }

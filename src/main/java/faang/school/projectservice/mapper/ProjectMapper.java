@@ -1,19 +1,19 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
-import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
-import faang.school.projectservice.model.Project;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.ProjectTeamMemberDto;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.Collections;
 import java.util.List;
