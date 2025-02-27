@@ -1,9 +1,13 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.filestorage.AwsProperties;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.NameSpecification;
 import faang.school.projectservice.filter.SpecificationFilter;
@@ -11,8 +15,12 @@ import faang.school.projectservice.filter.StatusSpecification;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.publisher.ProjectProfileViewPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
+import faang.school.projectservice.service.pdf.ProjectPdfService;
+import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,15 +40,27 @@ public class ProjectServiceTest {
     private ProjectServiceImpl projectService;
     private ArgumentCaptor<Project> projectCaptor;
     private ProjectCreateRequestDto projectRequest;
+    private ProjectProfileViewPublisher projectProfileViewPublisher;
 
     @BeforeEach
     void init() {
+
         projectRepository = Mockito.mock(ProjectRepository.class);
         ProjectMapperImpl projectMapper = Mockito.spy(ProjectMapperImpl.class);
+        UserContext userContext = Mockito.spy(UserContext.class);
         NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
         StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
         List<SpecificationFilter> specificationFilters = List.of(nameSpecification, statusSpecification);
-        projectService = new ProjectServiceImpl(projectRepository, projectMapper, specificationFilters);
+        S3Service s3Service = Mockito.mock(S3Service.class);
+        AwsProperties s3Properties = Mockito.mock(AwsProperties.class);
+        AmazonS3 s3client = Mockito.mock(AmazonS3.class);
+        ProjectPdfService projectPdfService = Mockito.mock(ProjectPdfService.class);
+        UserServiceClient userServiceClient = Mockito.mock(UserServiceClient.class);
+        ProjectValidator projectValidator = Mockito.mock(ProjectValidator.class);
+
+        projectService = new ProjectServiceImpl(
+                projectRepository, projectMapper, specificationFilters, projectProfileViewPublisher, userContext,
+                s3Service, s3Properties, s3client, projectPdfService, userServiceClient, projectValidator);
 
         projectCaptor = ArgumentCaptor.forClass(Project.class);
 

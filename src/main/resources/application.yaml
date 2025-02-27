@@ -24,6 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+      topics:
+        profile_view: profile_view
 
   servlet:
     multipart:
