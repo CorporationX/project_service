@@ -1,8 +1,12 @@
 package faang.school.projectservice.dto.client;
 
-public record UserDto (
-    Long id,
-    String username,
-    String email
-) {
+import lombok.Data;
+
+@Data
+public class UserDto{
+    private Long id;
+    private String username;
+    private String email;
 }
+
+

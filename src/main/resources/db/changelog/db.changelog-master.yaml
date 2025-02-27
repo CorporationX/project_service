@@ -30,6 +30,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V018_alter_file_columns_and_create_gallery_table.sql
   - include:
-      file: db/changelog/changeset/project_V019_create_project_reports.sql
-- include:
-      file: db/changelog/changeset/project_V020_add_google_event_id_to_meet_and_schedule.sql
+      file: db/changelog/changeset/project_V019_add_google_event_id_to_meet_and_schedule.sql
+  - include:
+      file: db/changelog/changeset/project_V020_create_project_reports.sql

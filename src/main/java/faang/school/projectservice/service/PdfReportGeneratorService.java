@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.client.feign.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
@@ -80,7 +80,7 @@ public class PdfReportGeneratorService {
         }
         try {
             return Optional.ofNullable(userServiceClient.getUser(ownerId))
-                    .map(UserDto::username)
+                    .map(response -> response.getBody().getUsername())
                     .orElse("Unknown User");
         } catch (FeignException.NotFound e) {
             log.warn("User with ID {} not found", ownerId);

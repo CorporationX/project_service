@@ -98,6 +98,11 @@ dependencies {
      */
     implementation("net.coobird:thumbnailator:0.4.20")
 
+
+    /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 }
 
 jacoco {
