@@ -141,11 +141,11 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testUploadResourceIfFileIsImage() {
+    void testCreateResourceIfFileIsImage() {
         String expectedFolder = project.getId() + project.getName();
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(TeamMember.builder().userId(USER_ID).build());
+        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(Optional.of(TeamMember.builder().userId(USER_ID).build()));
         when(amazonS3Client.uploadFile(file, expectedFolder)).thenReturn(KEY);
         when(projectRepository.save(project)).thenReturn(project);
         when(file.getSize()).thenReturn(1L);
@@ -162,7 +162,7 @@ class ProjectServiceTest {
                 .build();
         when(resourceRepository.save(any())).thenReturn(expectedResource);
 
-        ResourceReadDto expectedDto = projectService.uploadResource(PROJECT_ID, RESOURCE_ID, file);
+        ResourceReadDto expectedDto = projectService.createResource(PROJECT_ID, file);
         assertEquals(KEY, expectedDto.key());
         assertEquals(file.getName(), expectedDto.name());
         assertNotNull(expectedDto.createdAt());
@@ -172,11 +172,11 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testUploadResourceIfFileIsNotImage() {
+    void testCreateResourceIfFileIsNotImage() {
         String expectedFolder = project.getId() + project.getName();
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(TeamMember.builder().userId(USER_ID).build());
+        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(Optional.of(TeamMember.builder().userId(USER_ID).build()));
         when(amazonS3Client.uploadFile(file, expectedFolder)).thenReturn(KEY);
         when(projectRepository.save(project)).thenReturn(project);
         when(file.getSize()).thenReturn(1L);
@@ -193,7 +193,7 @@ class ProjectServiceTest {
                 .build();
         when(resourceRepository.save(any())).thenReturn(expectedResource);
 
-        ResourceReadDto expectedDto = projectService.uploadResource(PROJECT_ID, RESOURCE_ID, file);
+        ResourceReadDto expectedDto = projectService.createResource(PROJECT_ID, file);
         assertEquals(KEY, expectedDto.key());
         assertEquals(file.getName(), expectedDto.name());
         assertNotNull(expectedDto.createdAt());
@@ -203,10 +203,10 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testUploadResourceThrowExceptionIfProjectNotExists() {
+    void testCreateResourceThrowExceptionIfProjectNotExists() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.uploadResource(PROJECT_ID, RESOURCE_ID, file));
+        assertThrows(EntityNotFoundException.class, () -> projectService.createResource(PROJECT_ID, file));
     }
 
     @Test
@@ -255,7 +255,7 @@ class ProjectServiceTest {
 
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(user);
+        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(Optional.of(user));
         when(resourceRepository.save(any(Resource.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(resourceMapper.toDto(any(Resource.class))).thenAnswer(invocation -> {
@@ -299,7 +299,7 @@ class ProjectServiceTest {
 
         when(userContext.getUserId()).thenReturn(2L);
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
-        when(teamMemberRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(user);
+        when(teamMemberRepository.findByUserIdAndProjectId(2L, PROJECT_ID)).thenReturn(Optional.of(user));
 
         assertThrows(AccessDeniedException.class, () -> projectService.deleteResource(PROJECT_ID, RESOURCE_ID));
     }

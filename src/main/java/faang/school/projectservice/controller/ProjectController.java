@@ -34,9 +34,14 @@ public class ProjectController {
         return projectService.deleteProjectCover(projectId);
     }
 
-    @PostMapping("/{projectId}/resources/{resourceId}")
-    public ResourceReadDto uploadResource(@PathVariable long projectId, @PathVariable long resourceId, @RequestBody MultipartFile file) {
-        return projectService.uploadResource(projectId, resourceId, file);
+    @PostMapping("/{projectId}/resources")
+    public ResourceReadDto createResource(@PathVariable long projectId, @RequestParam("file") MultipartFile file) {
+        return projectService.createResource(projectId, file);
+    }
+
+    @PutMapping("/{projectId}/resources/{resourceId}")
+    public ResourceReadDto editResource(@PathVariable long projectId, @PathVariable long resourceId, @RequestParam("file") MultipartFile file) {
+        return projectService.editResource(projectId, resourceId, file);
     }
 
     @GetMapping("/{projectId}/gallery")
