@@ -7,9 +7,9 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.multipartFile.CustomMultipartFile;
 import faang.school.projectservice.service.s3.S3ServiceCover;
 import faang.school.projectservice.service.validator.CoverImageValidator;
+import faang.school.projectservice.util.ByteArrayMultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -80,7 +80,8 @@ public class CoverImageService {
             log.error("Ошибка при сжатии изображения: {}", e.getMessage(), e);
             throw new BusinessException("Не удалось сжать изображение");
         }
-        return new CustomMultipartFile(outputStream.toByteArray(),
-                file.getName(), file.getOriginalFilename(), "image/jpeg");
+        return new ByteArrayMultipartFile(outputStream.toByteArray(),
+                file.getOriginalFilename(),
+                "image/jpeg");
     }
 }
