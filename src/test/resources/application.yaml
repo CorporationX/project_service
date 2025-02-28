@@ -3,12 +3,6 @@ spring:
     servlet:
       path: /api/v1
 
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: user
-    password: password
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
