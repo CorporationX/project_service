@@ -17,5 +17,7 @@ public class TeamEventPublisher extends AbstractEventPublisher<TeamEvent> {
     }
 
     @Override
-    public Class<TeamEvent> getInstance(){return TeamEvent.class;}
+    public Class<TeamEvent> getInstance(){
+        return TeamEvent.class;
+    }
 }

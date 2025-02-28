@@ -18,7 +18,7 @@ public abstract class AbstractEventPublisher<T> implements MessagePublisher<T>{
     public void publish(T event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            log.info(json);
+            log.debug(json);
             redisTemplate.convertAndSend(channelTopic.getTopic(), event);
         } catch (JsonProcessingException e) {
             log.error("JSON processing error " + e);

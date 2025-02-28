@@ -54,22 +54,6 @@ public class FundRaisedPublisherTest {
         assertEquals(fundRaisedEvent, actualEvent);
     }
 
-//    @Test
-//    void testPublishEventToRedisSuccess() throws JsonProcessingException {
-//        String json = "{\"userId\":1,\"projectId\":100,\"paymentAmount\":500,\"localDateTime\":\"2024-12-12T10:00:00\"}";
-//        when(objectMapper.writeValueAsString(fundRaisedEvent)).thenReturn(json);
-//        when(donationTopic.getTopic()).thenReturn("donation-topic");
-//
-//        fundRaisedEventPublisher.publish(fundRaisedEvent);
-//
-//        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-//        verify(redisTemplate, times(1)).
-//                convertAndSend(eq("donation-topic"), argumentCaptor.capture());
-//
-//        String actualJson = argumentCaptor.getValue();
-//        assertEquals(json, actualJson);
-//    }
-
     @Test
     void testPublishEventToRedisWithJSONProcessingException() throws JsonProcessingException {
         when(objectMapper.writeValueAsString(fundRaisedEvent)).thenThrow(JsonProcessingException.class);
