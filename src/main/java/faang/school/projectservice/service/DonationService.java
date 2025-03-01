@@ -13,6 +13,8 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.exception.PaymentServiceConnectException;
 import faang.school.projectservice.exception.UserServiceConnectionException;
+import faang.school.projectservice.kafka.events.FundRaisedEvent;
+import faang.school.projectservice.kafka.producer.FundRaisedEventProducer;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
@@ -40,6 +42,7 @@ public class DonationService {
     private final PaymentServiceClient paymentServiceClient;
     private final List<DonationFilter> donationFilters;
     private final CampaignService campaignService;
+    private final FundRaisedEventProducer fundRaisedEventProducer;
     private final Random random = new Random();
 
 
@@ -68,6 +71,14 @@ public class DonationService {
             throw new PaymentFailedException("Payment Failed !");
         }
 
+        FundRaisedEvent event = FundRaisedEvent.builder()
+                .userId(donationDto.userId())
+                .projectId(donationDto.campaignId())
+                .amount(donationDto.amount().doubleValue())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        fundRaisedEventProducer.sendEvent(event);
         return donationMapper.toDto(donation);
     }
 

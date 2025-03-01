@@ -18,6 +18,14 @@ spring:
     username: user
     password: password
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    topics:
+      fundraise: fundraise-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

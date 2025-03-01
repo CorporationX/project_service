@@ -13,6 +13,7 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.exception.PaymentServiceConnectException;
 import faang.school.projectservice.exception.UserServiceConnectionException;
+import faang.school.projectservice.kafka.producer.FundRaisedEventProducer;
 import faang.school.projectservice.mapper.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
@@ -58,6 +59,8 @@ public class DonationServiceTest {
     private DonationRepository donationRepository;
     @Mock
     private CampaignService campaignService;
+    @Mock
+    private FundRaisedEventProducer fundRaisedEventProducer;
     @InjectMocks
     private DonationService donationService;
 
