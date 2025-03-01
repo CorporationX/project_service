@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProjectPdfServiceImpl implements  ProjectPdfService{
+public class ProjectPdfServiceImpl implements ProjectPdfService {
 
     public static final String DATE_MASK_FORMAT = "yyyy-MM-dd HH:mm";
     public static final String FONT_REGULAR = "fontRegular";
@@ -59,17 +59,21 @@ public class ProjectPdfServiceImpl implements  ProjectPdfService{
     }
 
     private Map<String, PDType0Font> getFonts(PDDocument document) throws IOException {
+        try (InputStream fontStreamRegular = getClass().getResourceAsStream(FONTS_ARIAL_TTF);
+             InputStream fontStreamBold = getClass().getResourceAsStream(FONTS_ARIAL_BOLD_TTF)) {
 
-        InputStream fontStreamRegular = getClass().getResourceAsStream(FONTS_ARIAL_TTF);
-        InputStream fontStreamBold = getClass().getResourceAsStream(FONTS_ARIAL_BOLD_TTF);
+            if (fontStreamRegular == null || fontStreamBold == null) {
+                throw new IOException("Font resource not found");
+            }
 
-        PDType0Font fontRegular = PDType0Font.load(document, fontStreamRegular);
-        PDType0Font fontBold = PDType0Font.load(document, fontStreamBold);
+            PDType0Font fontRegular = PDType0Font.load(document, fontStreamRegular);
+            PDType0Font fontBold = PDType0Font.load(document, fontStreamBold);
 
-        Map<String, PDType0Font> mapFonts = new HashMap<>();
-        mapFonts.put(FONT_REGULAR, fontRegular);
-        mapFonts.put(FONT_BOLD, fontBold);
-        return mapFonts;
+            Map<String, PDType0Font> mapFonts = new HashMap<>();
+            mapFonts.put(FONT_REGULAR, fontRegular);
+            mapFonts.put(FONT_BOLD, fontBold);
+            return mapFonts;
+        }
     }
 
     private void bodyDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,

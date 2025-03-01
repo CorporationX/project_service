@@ -46,4 +46,7 @@ public class MomentController {
     public MomentResponseDto getMoment(@PathVariable("id") Long momentId) {
         return momentService.getMoment(momentId);
     }
+
+
+
 }

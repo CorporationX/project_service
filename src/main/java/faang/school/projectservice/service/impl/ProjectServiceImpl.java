@@ -5,26 +5,30 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.service.pdf.ProjectPdfService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,39 +102,50 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponseDto creatingPresentation(long projectId) {
+    public S3ObjectDto downloadPdf(Long projectId) {
+        try {
+            String presentationFileKey = getPresentationFileKey(projectId);
+            InputStream file = s3client.downloadFile(presentationFileKey);
+
+            if (file == null) {
+                throw new FileNotFoundException("Downloaded file is null for key: " + presentationFileKey);
+            }
+            return new S3ObjectDto(PDF_FILE_NAME, new InputStreamResource(file), ResourceType.PDF.name());
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Unexpected error while downloading PDF", ex);
+        }
+    }
+
+
+    @Override
+    public void createPresentation(Long projectId) {
         Project project = getProjectById(projectId);
         final long userId = getUserId();
+
         validateUserIsOwner(userId, project);
 
         UserDto owner = userServiceClient.getUser(userId);
-
         ProjectPresentationDto presentationDto = projectMapper.toProjectPresentationDto(project, owner);
 
-        InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto);
-        String presentationFileKey = String.format("%s_%s_%s_%d", project.getName(), project.getId(), PDF_FILE_NAME,
-                System.currentTimeMillis());
+        String presentationFileKey = String.format("%s_%s_%s_%d",
+                project.getName(), project.getId(), PDF_FILE_NAME, System.currentTimeMillis());
 
-        s3client.putFileInStore(presentationFileKey, pdfInputStream);
+        try (InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto)) {
+            s3client.putFileInStore(presentationFileKey, pdfInputStream);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to create project presentation", ex);
+        }
 
         project.setPresentationFileKey(presentationFileKey);
         project.setPresentationGeneratedAt(LocalDateTime.now());
 
         projectRepository.save(project);
-        return projectMapper.toProjectResponseDto(project);
     }
 
-    @Override
-    public String getPresentationFileKey(long projectId) {
+    private String getPresentationFileKey(long projectId) {
         Project project = getProjectById(projectId);
         return project.getPresentationFileKey();
-    }
-
-    @Override
-    public S3ObjectDto downloadPdf(Long projectId) {
-        String presentationFileKey = getPresentationFileKey(projectId);
-        InputStream file = s3client.downloadFile(presentationFileKey);
-        return new S3ObjectDto(PDF_FILE_NAME, file, ResourceType.PDF.name());
     }
 
     private void validateProject(ProjectCreateRequestDto projectDto) {

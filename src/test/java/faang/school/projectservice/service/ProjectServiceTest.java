@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.NameSpecification;

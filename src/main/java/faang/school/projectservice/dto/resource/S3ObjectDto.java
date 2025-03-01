@@ -1,13 +1,12 @@
 package faang.school.projectservice.dto.resource;
 
 import lombok.Builder;
-
-import java.io.InputStream;
+import org.springframework.core.io.InputStreamResource;
 
 @Builder
 public record S3ObjectDto(
         String fileName,
-        InputStream inputStream,
+        InputStreamResource inputStream,
         String contentType
 ) {
 }

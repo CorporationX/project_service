@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ProjectPresentationDto(
+
          String title,
          LocalDateTime createdDate,
          String ownerName,

@@ -2,8 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectResponseDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
@@ -38,6 +38,11 @@ public class ProjectController {
         return projectService.save(projectDto);
     }
 
+    @PostMapping("/{projectId}/presentation")
+    public void generatePdf(@PathVariable Long projectId) {
+        projectService.createPresentation(projectId);
+    }
+
     @PutMapping("/{id}")
     public ProjectResponseDto update(@PathVariable Long id, @RequestBody ProjectUpdateRequestDto projectDto) {
         log.info("#ProjectContoller: request for updating project:[{}] with id: {} has been received", projectDto, id);
@@ -62,17 +67,10 @@ public class ProjectController {
         return projectService.findById(id);
     }
 
-    @PostMapping("/{projectId}/presentation")
-    public ProjectResponseDto generatePdf(@PathVariable Long projectId) {
-
-        return projectService.creatingPresentation(projectId);
-    }
-
     @GetMapping("/{projectId}/presentation/download")
     public ResponseEntity<InputStreamResource> downloadFile(@Valid @NotNull @PathVariable Long projectId) {
-
         S3ObjectDto obj = projectService.downloadPdf(projectId);
-        InputStreamResource body = new InputStreamResource(obj.inputStream());
+        InputStreamResource body = obj.inputStream();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
