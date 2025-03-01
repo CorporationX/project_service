@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,4 +11,5 @@ public class ProjectCreateResponseDto {
     private String description;
     private Long ownerId;
     private LocalDateTime createdAt;
+    private ProjectVisibility visibility;
 }
