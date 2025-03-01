@@ -1,36 +1,37 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.service.ProjectService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ProjectValidator {
 
-    public void validateUserInProject(Long userId, Project project) {
-        if (!isUserParticipatedInProject(userId, project)) {
+    private final ProjectService projectService;
+
+    void validateUserInProject(Long userId, Long projectId) {
+        if (!isUserParticipatedInProject(userId, projectId)) {
             throw new IllegalArgumentException("User with id "
                     + userId + " not in project "
-                    + project.getId() + " at this moment");
+                    + projectId + " at this moment");
         }
     }
 
-    public boolean isUserParticipatedInProject(Long userId, Project project) {
+    boolean isUserParticipatedInProject(Long userId, Long projectId) {
+        Project project = projectService.getProject(projectId);
         return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId).anyMatch(usrId -> usrId.equals(userId));
     }
 
-    public boolean isProjectPublic(Project project) {
+    boolean isProjectPublic(Long projectId) {
+        Project project = projectService.getProject(projectId);
         return ProjectVisibility.PUBLIC.equals(project.getVisibility());
-    }
-
-    public void validateUserIsOwner(long userId, Project project) {
-        if (userId != project.getOwnerId()) {
-            throw new IllegalArgumentException("Only the project owner can request a presentation!");
-        }
     }
 }

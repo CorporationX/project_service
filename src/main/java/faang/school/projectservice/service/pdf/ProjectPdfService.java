@@ -7,5 +7,6 @@ import java.io.InputStream;
 
 
 public interface ProjectPdfService {
+
     InputStream createProjectPresentation(ProjectPresentationDto dto);
 }

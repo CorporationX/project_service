@@ -1,13 +1,8 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -73,33 +69,37 @@ class ProjectValidatorTest {
     void validateUserInProject() {
         Long userId = 1L;
         Long userNotInProjectId = 11L;
-
-        projectValidator.validateUserInProject(userId, project);
+        Long projectId = 222L;
+        Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
+        projectValidator.validateUserInProject(userId, projectId);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> projectValidator.validateUserInProject(userNotInProjectId, project));
+                () -> projectValidator.validateUserInProject(userNotInProjectId, projectId));
     }
 
     @Test
     @DisplayName("Test if user is in project")
     void testIsUserInProject() {
         long userId = 1L;
-
-        Assertions.assertTrue(projectValidator.isUserParticipatedInProject(userId, project));
+        long projectId = 222L;
+        Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
+        Assertions.assertTrue(projectValidator.isUserParticipatedInProject(userId, projectId));
         userId = 33L;
-        Assertions.assertFalse(projectValidator.isUserParticipatedInProject(userId, project));
+        Assertions.assertFalse(projectValidator.isUserParticipatedInProject(userId, projectId));
     }
 
     @Test
     @DisplayName("Test is project public or not")
     void testIsProjectPublic() {
-
+        long projectId = 1010L;
+        long privateProjectId = 1011L;
         Project privateProject = Project.builder()
                 .id(1011L)
                 .name("test project 11")
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
-
-        Assertions.assertTrue(projectValidator.isProjectPublic(project));
-        Assertions.assertFalse(projectValidator.isProjectPublic(privateProject));
+        Mockito.when(projectServiceMock.getProject(projectId)).thenReturn(project);
+        Assertions.assertTrue(projectValidator.isProjectPublic(projectId));
+        Mockito.when(projectServiceMock.getProject(privateProjectId)).thenReturn(privateProject);
+        Assertions.assertFalse(projectValidator.isProjectPublic(privateProjectId));
     }
 }

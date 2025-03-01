@@ -35,6 +35,7 @@ public class ProjectPdfServiceImpl implements ProjectPdfService {
 
     @Override
     public InputStream createProjectPresentation(ProjectPresentationDto dto) {
+
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
@@ -58,21 +59,26 @@ public class ProjectPdfServiceImpl implements ProjectPdfService {
     }
 
     private Map<String, PDType0Font> getFonts(PDDocument document) throws IOException {
-        Map<String, PDType0Font> mapFonts = new HashMap<>();
         try (InputStream fontStreamRegular = getClass().getResourceAsStream(FONTS_ARIAL_TTF);
              InputStream fontStreamBold = getClass().getResourceAsStream(FONTS_ARIAL_BOLD_TTF)) {
+
+            if (fontStreamRegular == null || fontStreamBold == null) {
+                throw new IOException("Font resource not found");
+            }
 
             PDType0Font fontRegular = PDType0Font.load(document, fontStreamRegular);
             PDType0Font fontBold = PDType0Font.load(document, fontStreamBold);
 
+            Map<String, PDType0Font> mapFonts = new HashMap<>();
             mapFonts.put(FONT_REGULAR, fontRegular);
             mapFonts.put(FONT_BOLD, fontBold);
+            return mapFonts;
         }
-        return mapFonts;
     }
 
-    protected void bodyDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
-                            Map<String, PDType0Font> fonts) throws IOException {
+    private void bodyDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
+                          Map<String, PDType0Font> fonts) throws IOException {
+
         contentStream.setFont(fonts.get(FONT_BOLD), 14);
         spaceLinesDraw(contentStream);
         contentStream.showText("Список задач:");
@@ -99,17 +105,20 @@ public class ProjectPdfServiceImpl implements ProjectPdfService {
     }
 
     private void spaceLinesDraw(PDPageContentStream contentStream, int countLine) throws IOException {
+
         for (int i = 0; i < countLine; i++) {
             contentStream.newLine();
         }
     }
 
     private void spaceLinesDraw(PDPageContentStream contentStream) throws IOException {
+
         spaceLinesDraw(contentStream, 1);
     }
 
     private void footerDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
                             Map<String, PDType0Font> fonts) throws IOException {
+
         spaceLinesDraw(contentStream);
         contentStream.setFont(fonts.get(FONT_BOLD), 14);
         spaceLinesDraw(contentStream);
@@ -123,6 +132,7 @@ public class ProjectPdfServiceImpl implements ProjectPdfService {
 
     private void headerDraw(ProjectPresentationDto dto, PDPageContentStream contentStream,
                             Map<String, PDType0Font> fonts) throws IOException {
+
         contentStream.setLeading(14.5f);
         contentStream.beginText();
         contentStream.setFont(fonts.get(FONT_BOLD), 18);
@@ -140,6 +150,7 @@ public class ProjectPdfServiceImpl implements ProjectPdfService {
     }
 
     private Map<String, String> getMapHeader(ProjectPresentationDto dto) {
+
         Map<String, String> projectDetails = new LinkedHashMap<>();
         projectDetails.put("Название проекта", dto.title());
         projectDetails.put("Описание проекта", dto.description());

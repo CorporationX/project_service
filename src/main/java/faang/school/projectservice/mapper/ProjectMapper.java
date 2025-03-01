@@ -23,7 +23,7 @@ public abstract class ProjectMapper {
 
     public abstract Project toProjectEntity(ProjectCreateRequestDto dto);
 
-    public abstract ProjectResponseDto toProjectResponseDto(Project entity);
+    public abstract ProjectResponseDto toProjectResponseDto(Project project);
 
     public abstract List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
 

@@ -2,16 +2,11 @@ package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ResourceService;
-import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,10 +33,10 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional
     @Override
     public ResourceResponseDto addResource(Long userId, Long projectId, MultipartFile file) {
-        Project project = projectService.getProject(projectId);
-        projectValidator.validateUserInProject(userId, project);
-        resourceValidator.validateResourcesOversize(project);
+        projectValidator.validateUserInProject(userId, projectId);
+        resourceValidator.validateResourcesOversize(projectId);
         TeamMember teamMember = getTeamMember(userId);
+        Project project = projectService.getProject(projectId);
         String folder = FOLDER_PREFIX + projectId;
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
         Resource resource = resourceRepository.save(createResource (key, file, project, teamMember));
@@ -52,7 +47,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public InputStream downloadResource(Long userId, Long resourceId) {
         Resource resource = getResourceById(resourceId);
-        resourceValidator.validateUserCanDownloadFromProject(userId, resource.getProject());
+        Long projectId = resource.getProject().getId();
+        resourceValidator.validateUserCanDownloadFromProject(userId, projectId);
         return s3Service.downloadFile(resource.getKey());
     }
 
@@ -60,7 +56,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public void deleteResource(Long userId, Long resourceId) {
         Resource resource = getResourceById(resourceId);
-        projectValidator.validateUserInProject(userId, resource.getProject());
+        projectValidator.validateUserInProject(userId, resource.getProject().getId());
         resourceRepository.deleteById(resourceId);
         String key = resource.getKey();
         s3Service.deleteFile(key);
