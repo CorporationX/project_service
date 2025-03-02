@@ -100,12 +100,14 @@ public class DonationServiceTest {
 
     @Test
     void testSendDonation_ShouldThrowExceptionWhenPaymentFailed() {
-        when(paymentServiceClient.sendPayment(any(PaymentRequest.class))).thenThrow(FeignException.errorStatus("exception",
-                Response.builder()
-                        .status(500)
-                        .request(Request.create(Request.HttpMethod.POST, "/api/payment", Map.of(), null, null, null))
-                        .body("error message".getBytes())
-                        .build()));
+        when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
+                .thenThrow(FeignException.errorStatus("exception",
+                        Response.builder()
+                                .status(500)
+                                .request(Request.create(Request.HttpMethod.POST,
+                                        "/api/payment", Map.of(), null, null, null))
+                                .body("error message".getBytes())
+                                .build()));
 
         assertThrows(PaymentFailedException.class,
                 () -> donationService.sendDonation(donationCreateDto, 1L));
@@ -115,16 +117,6 @@ public class DonationServiceTest {
     void testSendDonation_Success() {
         BigDecimal amount = new BigDecimal(500);
         LocalDateTime donationTime = LocalDateTime.now();
-
-        DonationDto donationDto = DonationDto.builder()
-                .id(1L)
-                .paymentNumber(111L)
-                .amount(amount)
-                .donationTime(donationTime)
-                .campaignId(1L)
-                .currency(Currency.EUR)
-                .userId(1L)
-                .build();
         Project project = Project.builder().id(1L).build();
         Campaign campaign = Campaign.builder()
                 .id(1L)
@@ -132,12 +124,6 @@ public class DonationServiceTest {
                 .goal(new BigDecimal(1000))
                 .amountRaised(new BigDecimal(0))
                 .project(project)
-                .build();
-
-        DonationCreateDto dto = DonationCreateDto.builder()
-                .amount(amount)
-                .campaignId(1L)
-                .currency(Currency.EUR)
                 .build();
 
         Donation donation = Donation.builder()
@@ -150,12 +136,29 @@ public class DonationServiceTest {
                 .userId(1L)
                 .build();
 
-        PaymentResponse paymentResponse = new PaymentResponse("SUCCESS", 1, 1L, amount, Currency.EUR, "message");
+        PaymentResponse paymentResponse = new PaymentResponse("SUCCESS", 1, 1L,
+                amount, Currency.EUR, "message");
 
         when(campaignService.findCampaignById(1L)).thenReturn(campaign);
         when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
                 .thenReturn(paymentResponse);
         when(donationRepository.save(any(Donation.class))).thenReturn(donation);
+
+        DonationDto donationDto = DonationDto.builder()
+                .id(1L)
+                .paymentNumber(111L)
+                .amount(amount)
+                .donationTime(donationTime)
+                .campaignId(1L)
+                .currency(Currency.EUR)
+                .userId(1L)
+                .build();
+
+        DonationCreateDto dto = DonationCreateDto.builder()
+                .amount(amount)
+                .campaignId(1L)
+                .currency(Currency.EUR)
+                .build();
 
         assertEquals(donationDto, donationService.sendDonation(dto, 1L));
     }
