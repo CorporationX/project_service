@@ -31,6 +31,9 @@ spring:
       properties:
         linger-ms: 30000
 
+    fund-raised:
+      topic: fund-raised
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
@@ -74,6 +77,3 @@ project:
       link_expiration_time_ms: 60000
     max_gallery_size: 50
     max_image_size_mb: 5
-
-topic:
-  fund-raised-event: fund_raised_event
