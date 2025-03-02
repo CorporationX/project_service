@@ -20,6 +20,10 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Задача с id: " + taskId + " не существует"));
 
+        if (task.getStatus() == TaskStatus.DONE) {
+            return;
+        }
+
         task.setStatus(TaskStatus.DONE);
         taskRepository.save(task);
 
