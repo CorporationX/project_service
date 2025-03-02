@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -21,10 +22,13 @@ import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.validator.project.ProjectGalleryValidator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,6 +46,10 @@ public class ProjectService {
     private final S3Service s3Service;
     private final ProjectGalleryValidator projectGalleryValidator;
     private final List<ProjectFilter> projectFilters;
+    private final KafkaTemplate<String, ProjectViewEvent> projectViewEventKafkaTemplate;
+
+    @Value("${spring.kafka.producer.project_view.topic}")
+    private String projectViewEventTopic;
 
     public ProjectCreateResponseDto createProject(ProjectCreateRequestDto projectCreateRequestDto) {
         Long ownerId = projectCreateRequestDto.getOwnerId();
@@ -93,8 +101,13 @@ public class ProjectService {
                 .toList();
     }
 
-    public ProjectResponseDto getProjectDtoById(Long id) {
-        return projectMapper.toResponseDto(getProjectById(id));
+    public ProjectResponseDto getProjectDtoById(Long id, Long userId) {
+        Project project = getProjectById(id);
+        if (!project.getOwnerId().equals(userId)) {
+            ProjectViewEvent projectViewEvent = new ProjectViewEvent(project.getId(), userId, LocalDateTime.now());
+            projectViewEventKafkaTemplate.send(projectViewEventTopic, projectViewEvent);
+        }
+        return projectMapper.toResponseDto(project);
     }
 
     public Project getProjectById(Long id) {

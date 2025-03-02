@@ -1,6 +1,7 @@
 
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.event.ProjectViewEvent;
 import faang.school.projectservice.dto.project.*;
 import faang.school.projectservice.dto.project.gallery.AddImageResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -41,7 +43,8 @@ class ProjectServiceTest {
     private ProjectGalleryValidator projectGalleryValidator;
     @Mock
     private ProjectRepository projectRepository;
-
+    @Mock
+    private KafkaTemplate<String, ProjectViewEvent> projectViewEventKafkaTemplate;
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
@@ -77,6 +80,7 @@ class ProjectServiceTest {
 
         project = new Project();
         project.setId(1L);
+        project.setOwnerId(2L);
     }
 
     @Test
@@ -160,9 +164,27 @@ class ProjectServiceTest {
     void getProjectDtoById_ShouldReturnProjectWhenExists() {
         doReturn(project).when(projectService).getProjectById(1L);
 
-        ProjectResponseDto result = projectService.getProjectDtoById(1L);
+        ProjectResponseDto result = projectService.getProjectDtoById(1L, 2L);
 
         assertEquals(projectMapper.toResponseDto(project), result);
+    }
+
+    @Test
+    void getProjectDtoById_ShouldSendEventWhenUserIsNotOwner() {
+        doReturn(project).when(projectService).getProjectById(1L);
+
+        projectService.getProjectDtoById(1L, 1L);
+
+        verify(projectViewEventKafkaTemplate, times(1)).send(any(), any(ProjectViewEvent.class));
+    }
+
+    @Test
+    void getProjectDtoById_ShouldNotSendEventWhenUserIsNotOwner() {
+        doReturn(project).when(projectService).getProjectById(1L);
+
+        projectService.getProjectDtoById(1L, 2L);
+
+        verify(projectViewEventKafkaTemplate, never()).send(any(), any());
     }
 
     @Test

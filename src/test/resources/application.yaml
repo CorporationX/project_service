@@ -3,12 +3,6 @@ spring:
     servlet:
       path: /api/v1
 
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: user
-    password: password
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -19,9 +13,9 @@ spring:
         format_sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
     producer:
       acks: all
+      bootstrap-servers: localhost:9092
       security:
         protocol: PLAINTEXT
       retries: 5
@@ -31,8 +25,6 @@ spring:
         spring.json.add.type.headers: false
       project_view:
         topic: "project-view"
-      fund-raised:
-        topic: fund-raised
 
 
   liquibase:
