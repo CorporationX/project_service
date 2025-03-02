@@ -76,7 +76,7 @@ public class DonationService {
         Donation savedDonation = donationRepository.save(donation);
         fundRaisedEventPublisher.publish(new FundRaisedEvent(
                 userId,
-                campaign.getId(),
+                campaign.getProject().getId(),
                 donation.getAmount(),
                 donation.getDonationTime()));
 
