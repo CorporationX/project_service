@@ -63,7 +63,7 @@ public class CampaignService {
 
         validateUserOwnerOrManager(campaign.getProject(), userId);
 
-        campaign.setStatus(CampaignStatus.DELETED);
+        campaign.setStatus(CampaignStatus.CANCELED);
         campaignRepository.save(campaign);
     }
 
