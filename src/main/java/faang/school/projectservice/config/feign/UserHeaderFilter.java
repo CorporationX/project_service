@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.context;
+package faang.school.projectservice.config.feign;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

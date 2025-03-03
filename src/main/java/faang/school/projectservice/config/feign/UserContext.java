@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.context;
+package faang.school.projectservice.config.feign;
 
 import org.springframework.stereotype.Component;
 
