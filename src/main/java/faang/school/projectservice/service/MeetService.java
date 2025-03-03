@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.meet.MeetFilter;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
@@ -62,12 +61,13 @@ public class MeetService {
     }
 
     @Transactional
-    public void deleteMeetById(Long meetId) {
+    public Long deleteMeetById(Long meetId) {
         Meet meetEntity = meetValidation.getMeet(meetId);
         meetValidation.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
         meetRepository.deleteById(meetId);
 
         log.info("Meeting deleted meetId : {}", meetId);
+        return meetId;
     }
 
     public List<MeetDto> findMeetsByProject(Long projectId, MeetFilterDto filterDto) {

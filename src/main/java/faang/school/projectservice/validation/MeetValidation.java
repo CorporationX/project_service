@@ -4,7 +4,6 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.meet.MeetDto;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.exception.UserNotFoundException;
 import faang.school.projectservice.model.Meet;
@@ -16,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.AccessDeniedException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component

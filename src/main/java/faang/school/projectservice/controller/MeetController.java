@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller;
 
-
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.MeetFilterDto;
 import faang.school.projectservice.service.MeetService;
@@ -34,12 +33,12 @@ public class MeetController {
     }
 
     @DeleteMapping("/meets/{meetId}")
-    public MeetDto deleteMeetById(@PathVariable @Valid Long meetId) {
+    public Long deleteMeetById(@PathVariable @Valid Long meetId) {
         return meetService.deleteMeetById(meetId);
     }
 
-    @PostMapping("/meets/{projectId}")
-    public List<MeetDto> findMeetsByProject(@PathVariable @Valid Long projectId,
+    @PostMapping("/meets")
+    public List<MeetDto> findMeetsByProject(@RequestParam @Valid Long projectId,
                                             @RequestBody(required = false) MeetFilterDto filter) {
         return meetService.findMeetsByProject(projectId, filter);
     }
