@@ -14,7 +14,7 @@ public class FileValidator {
         if (mimeType == null || !mimeType.startsWith("image")) {
             throw new DataValidateException("File is not an image");
         }
-        if (file.getSize() > MAX_FILE_SIZE){
+        if (file.getSize() > MAX_FILE_SIZE) {
             throw new DataValidateException("File size exceeds 5MB");
         }
     }
