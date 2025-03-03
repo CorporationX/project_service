@@ -25,6 +25,17 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+   multipart:
+    max-file-size: 100MB
+    max-request-size: 100MB
+
+jira:
+  url: https://testcorpx.atlassian.net/jira
+  username: username
+  api-token: token
+  max-results: 1000
+
 server:
   port: 8082
   servlet:
@@ -37,6 +48,11 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+cover:
+  max-image-size: 5242880
+  max-image-width: 1080
+  max-image-height-horizontal: 566
+
 services:
   s3:
     endpoint: http://localhost:9000
@@ -47,6 +63,31 @@ services:
   payment-service:
     host: http://localhost
     port: 9080
+    url: ${services.user-service.host}:${services.user-service.port}
   user-service:
     host: http://localhost
     port: 8080
+    path: /users/api/v1
+    url: ${services.user-service.host}:${services.user-service.port}${services.user-service.path}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    root: debug
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info

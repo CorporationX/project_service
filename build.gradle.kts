@@ -11,12 +11,16 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
     /**
      * Spring boot starters
      */
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -45,6 +49,12 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("dev.mccue:imgscalr:2023.09.03")
+    implementation("com.itextpdf:itext7-core:7.2.0")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:6.0.1")
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
+    implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
+    implementation("io.atlassian.fugue:fugue:6.1.1")
 
     /**
      * Test containers
@@ -52,6 +62,7 @@ dependencies {
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:minio:1.19.8")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 
     /**
