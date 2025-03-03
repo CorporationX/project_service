@@ -1,10 +1,14 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +18,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/vacancy")
 @RequiredArgsConstructor
 public class VacancyController {
-    public final VacancyService service;
-    public final VacancyMapper mapper;
-    public TeamRole role;
+    private final VacancyService service;
+    private final VacancyMapper mapper;
+    private final UserContext userContext;
 
     @PostMapping("/create")
-    public void createVacancy(@RequestBody VacancyDto vacancyDto) {
+    public void createVacancy(@Parameter(
+            name = "x-user-id",
+            description = "ID user",
+            required = true,
+            in = ParameterIn.HEADER,
+            schema = @Schema(type = "string"),
+            example = "1"
+    ) @RequestHeader("x-user-id") String userId, @RequestBody VacancyDto vacancyDto) {
+        userContext.setUserId(Long.parseLong(userId));
         vacancyDto = isDataValid(vacancyDto);
         Vacancy vacancy = mapperToEntity(vacancyDto);
         log.info("Received request to create vacancy: {}", vacancy);
@@ -28,7 +40,15 @@ public class VacancyController {
     }
 
     @PutMapping("/update")
-    public void updateVacancy(@RequestBody VacancyDto vacancyDto) {
+    public void updateVacancy(@Parameter(
+            name = "x-user-id",
+            description = "ID user",
+            required = true,
+            in = ParameterIn.HEADER,
+            schema = @Schema(type = "string"),
+            example = "1"
+    ) @RequestHeader("x-user-id") String userId, @RequestBody VacancyDto vacancyDto) {
+        userContext.setUserId(Long.parseLong(userId));
         vacancyDto = isDataValid(vacancyDto);
         Vacancy vacancy = mapperToEntity(vacancyDto);
         log.info("Received request to update vacancy: {}", vacancy);
@@ -48,8 +68,8 @@ public class VacancyController {
                 || vacancyDto.getProjectId() == null
                 || vacancyDto.getRoleId() == null) {
             throw new NullPointerException("You are use illegal data: position and project must be not null");
-        } else if (vacancyDto.getRoleId() != role.getAll().get(0).ordinal()
-                || vacancyDto.getRoleId() != role.getAll().get(1).ordinal()) {
+        } else if (vacancyDto.getRoleId() != TeamRole.getAll().get(0).ordinal()
+                && vacancyDto.getRoleId() != TeamRole.getAll().get(1).ordinal()) {
             throw new IllegalArgumentException("You are use illegal data: curator must be OWNER or MANAGER");
         }
         return vacancyDto;
@@ -58,5 +78,5 @@ public class VacancyController {
         Vacancy vacancy;
         return vacancy = mapper.toEntity(vacancyDto);
     }
-
 }
+
