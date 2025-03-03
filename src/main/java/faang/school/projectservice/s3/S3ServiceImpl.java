@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Service
-public class S3ServiceImpl implements S3Service{
+public class S3ServiceImpl implements S3Service {
     private final S3Client s3Client;
     private final String bucketName;
 
@@ -40,7 +40,7 @@ public class S3ServiceImpl implements S3Service{
     }
 
     public static InputStream resizeImage(MultipartFile file, int maxSize, String format) throws IOException {
-        
+
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
         int originalWidth = originalImage.getWidth();
@@ -89,6 +89,7 @@ public class S3ServiceImpl implements S3Service{
             throw new RuntimeException("Error uploading to S3", e);
         }
     }
+
     public void deleteFromS3(String keyName) {
         try {
             s3Client.deleteObject(b -> b.bucket(bucketName).key(keyName));

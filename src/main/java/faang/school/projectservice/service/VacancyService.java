@@ -23,7 +23,7 @@ public class VacancyService {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new NotFoundException("Vacancy not found"));
 
-        if (!isUserAuthorizedToModifyVacancy(vacancy, userId)){
+        if (!isUserAuthorizedToModifyVacancy(vacancy, userId)) {
             throw new AccessDeniedException("You do not have permission to modify this vacancy.");
         }
         FileValidator.validateFile(file);
@@ -38,10 +38,11 @@ public class VacancyService {
 
             vacancy.setCoverImageKey(keyName);
             vacancyRepository.save(vacancy);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("Error processing the image", e);
         }
     }
+
     public void deleteVacancyCoverImage(Long vacancyId, Long userId) throws AccessDeniedException {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new NotFoundException("Vacancy not found"));
@@ -61,5 +62,4 @@ public class VacancyService {
     private boolean isUserAuthorizedToModifyVacancy(Vacancy vacancy, Long userId) {
         return vacancy.getCreatedBy().equals(userId) || vacancy.getProject().getOwnerId().equals(userId);
     }
-
 }
