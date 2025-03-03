@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -12,4 +13,6 @@ public class ProjectCreateRequestDto {
     private String description;
     @Positive
     private Long ownerId;
+    @NotBlank
+    private ProjectVisibility visibility;
 }
