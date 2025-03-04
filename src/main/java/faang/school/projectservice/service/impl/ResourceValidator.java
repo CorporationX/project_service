@@ -14,8 +14,6 @@ public class ResourceValidator {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
     private final GalleryProperties galleryProperties;
-    //@Value("${gallery.maxFiles}")
-    //private final int maxFilesPerProject;
 
     void validateUserCanDownloadFromProject(Long userId, Long projectId) {
         boolean isProjectNotPublic = !projectValidator.isProjectPublic(projectId);
@@ -29,7 +27,6 @@ public class ResourceValidator {
 
     void validateResourcesOversize(Long projectId) {
         int maxFilesPerProjectQuantity = galleryProperties.getMaxFiles();
-        //int maxFilesPerProjectQuantity = maxFilesPerProject;
 
         if (projectService.getProjectResourceIds(projectId).size() > maxFilesPerProjectQuantity) {
             throw new RuntimeException("Limit resources of project is reached [" + maxFilesPerProjectQuantity + "]");
