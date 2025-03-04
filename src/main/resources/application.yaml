@@ -19,9 +19,9 @@ spring:
         format_sql: true
 
   kafka:
+    bootstrap-servers: localhost:9092
     producer:
       acks: all
-      bootstrap-servers: localhost:9092
       security:
         protocol: PLAINTEXT
       retries: 5
@@ -31,6 +31,8 @@ spring:
         spring.json.add.type.headers: false
       project_view:
         topic: "project-view"
+      fund-raised:
+        topic: fund-raised
 
 
   liquibase:

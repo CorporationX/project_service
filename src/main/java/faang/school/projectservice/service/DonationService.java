@@ -6,11 +6,13 @@ import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.model.events.FundRaisedEvent;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.publishers.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.validator.CampaignValidator;
@@ -34,6 +36,7 @@ public class DonationService {
     private final PaymentServiceClient paymentServiceClient;
     private final CampaignValidator campaignValidator;
     private final UserServiceClient userServiceClient;
+    private final FundRaisedEventPublisher fundRaisedEventPublisher;
 
     @Transactional
     public DonationDto sendDonation(DonationCreateDto donationCreateDto, Long userId) {
@@ -70,7 +73,14 @@ public class DonationService {
         campaign.setAmountRaised(campaign.getAmountRaised().add(donation.getAmount()));
         campaignRepository.save(campaign);
 
-        return donationMapper.toDto(donationRepository.save(donation));
+        Donation savedDonation = donationRepository.save(donation);
+        fundRaisedEventPublisher.publish(new FundRaisedEvent(
+                userId,
+                campaign.getProject().getId(),
+                donation.getAmount(),
+                donation.getDonationTime()));
+
+        return donationMapper.toDto(savedDonation);
     }
 
     @Transactional(readOnly = true)
