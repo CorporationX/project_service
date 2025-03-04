@@ -9,6 +9,7 @@ import org.mapstruct.Named;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Mapper(componentModel = "spring")
 interface InternshipMapperHelper {
     @Named("mapProjectIdToProject")
@@ -19,7 +20,7 @@ interface InternshipMapperHelper {
         return Project.builder().id(projectId).build();
     }
 
-    @Named("mapInternIdsToTeamMembers")
+    @Named("mapMentorIdToMentor")
     default TeamMember mapMentorIdToMentor(Long mentorId) {
         if (mentorId == null) {
             throw new IllegalArgumentException("Data cannot be null");

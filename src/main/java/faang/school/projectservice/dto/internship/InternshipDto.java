@@ -32,5 +32,5 @@ public class InternshipDto {
     private String description;
     @NotBlank
     private String name;
-    private Schedule schedule;
+    private Schedule scheduleId;
 }
