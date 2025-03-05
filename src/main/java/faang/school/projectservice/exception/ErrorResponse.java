@@ -19,7 +19,7 @@ public class ErrorResponse {
     private String message;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private final LocalDateTime timestamp = LocalDateTime.now();
 
     public ErrorResponse(String message, String error, HttpStatus status) {
         this.message = message;

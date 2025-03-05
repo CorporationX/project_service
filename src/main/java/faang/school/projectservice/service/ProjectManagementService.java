@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectReadDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
-import faang.school.projectservice.dto.project.event.ProjectEvent;
+import faang.school.projectservice.event.ProjectEvent;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoAccessException;

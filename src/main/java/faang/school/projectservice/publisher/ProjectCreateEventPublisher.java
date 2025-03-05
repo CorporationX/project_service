@@ -1,20 +1,18 @@
 package faang.school.projectservice.publisher;
 
-import faang.school.projectservice.dto.project.event.ProjectEvent;
+import faang.school.projectservice.event.ProjectEvent;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ProjectCreateEventPublisher extends RedisEventPublisher<ProjectEvent> {
 
     public ProjectCreateEventPublisher(RedisTemplate<String, Object> redisTemplate,
-                                       ChannelTopic topic) {
-        super(redisTemplate, topic);
-    }
-
-    @Override
-    public void publish(ProjectEvent event) {
-        super.publish(event);
+                                       @Qualifier("projectChannels") List<ChannelTopic> channelTopics) {
+        super(redisTemplate, channelTopics);
     }
 }
