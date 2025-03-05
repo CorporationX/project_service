@@ -32,6 +32,12 @@ spring:
     max-file-size: 100MB
     max-request-size: 100MB
 
+jira:
+  url: https://testcorpx.atlassian.net/jira
+  username: username
+  api-token: token
+  max-results: 1000
+
 server:
   port: 8082
   servlet:
