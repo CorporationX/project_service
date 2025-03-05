@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.services.s3.transfer.UploadContext;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
@@ -159,13 +158,18 @@ public class ProjectService {
 
         long userId = userContext.getUserId();
         Project project = getProject(projectId);
-        String folder = projectId + project.getName();
+        String folder = projectId + "/" + project.getName();
         TeamMember user = getUserFromProject(userId, projectId);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
 
         return new UploadData(project, user, fileSize, folder);
     }
 
+    private void validateUserHasAccess(Project project, TeamMember user, long userId) {
+        if (!(project.getOwnerId().equals(userId)) && !(user.getRoles().contains(TeamRole.MANAGER))) {
+            throw new AccessDeniedException("У вас нет доступа для удаления файла");
+        }
+    }
 
     private ResourceReadDto uploadResource(Project project, TeamMember user, MultipartFile file, BigInteger fileSize, String folder, BigInteger storageSize) {
         projectValidator.validateProjectStorageSize(storageSize, project, fileSize);
@@ -175,9 +179,8 @@ public class ProjectService {
         uploadedResource.setUpdatedBy(user);
         uploadedResource.setProject(project);
 
-        if (uploadedResource.getType().equals(ResourceType.IMAGE)) {
+        if (ResourceType.IMAGE.equals(uploadedResource.getType())) {
             project.getGalleryFileKeys().add(uploadedResource.getKey());
-
         }
 
         project.getResources().add(uploadedResource);
@@ -186,12 +189,6 @@ public class ProjectService {
         projectRepository.save(project);
 
         return resourceMapper.toDto(resourceRepository.save(uploadedResource));
-    }
-
-    private void validateUserHasAccess(Project project, TeamMember user, long userId) {
-        if (!(project.getOwnerId().equals(userId)) && !(user.getRoles().contains(TeamRole.MANAGER))) {
-            throw new AccessDeniedException("У вас нет доступа для удаления файла");
-        }
     }
 
     private Resource uploadResourceToStorage(MultipartFile file, String folder) {
