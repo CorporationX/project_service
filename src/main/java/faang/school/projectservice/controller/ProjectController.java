@@ -70,7 +70,7 @@ public class ProjectController {
     @GetMapping("/{projectId}/presentation/download")
     public ResponseEntity<InputStreamResource> downloadFile(@Valid @NotNull @PathVariable Long projectId) {
         S3ObjectDto obj = projectService.downloadPdf(projectId);
-        InputStreamResource body = projectService.getPresentation(obj);
+        InputStreamResource body = obj.inputStream();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
