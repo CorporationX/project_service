@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.exception.BusinessException;
@@ -67,9 +68,16 @@ public class S3ServiceCover {
     public InputStream getCoverImage(Resource resource) {
         try {
             return amazonS3.getObject(bucketName, resource.getKey()).getObjectContent();
-        } catch (RuntimeException e) {
+        } catch (AmazonS3Exception e) {
+            if (e.getStatusCode() == 404) {
+                log.error("Файл не найден в S3: {}", resource.getKey());
+                throw new BusinessException("Файл не найден в облачном хранилище");
+            }
             log.error("Ошибка при получении файла из S3: {}", e.getMessage());
-            throw new BusinessException("Ошибка при получении файла из облачного хранилища"); // Обернули в BusinessException
+            throw new BusinessException("Ошибка при получении файла из облачного хранилища");
+        } catch (Exception e){
+            log.error("Неизвестная ошибка при получении файла из S3: {}", e.getMessage());
+            throw new BusinessException("Внутренняя ошибка при получении файла");
         }
     }
 }

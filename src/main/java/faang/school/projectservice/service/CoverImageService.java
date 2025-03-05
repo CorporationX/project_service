@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
@@ -32,10 +31,10 @@ public class CoverImageService {
     private final CoverImageValidator coverImageValidator;
     private final ResourceMapper resourceMapper;
 
-
+    @Transactional
     public ResourceDto uploadCover(Long currentUserId, Long vacancyId, MultipartFile file) {
         Vacancy vacancy = coverImageValidator.validateUploadCover(currentUserId, vacancyId);
-        String folder = vacancyId + vacancy.getName();
+        String folder = vacancyId + "/" + vacancy.getName();
         Resource resource = s3ServiceCover.uploadFile(compressImage(file), folder);
         resource.setProject(vacancy.getProject());
         resource = resourceRepository.save(resource);
@@ -49,14 +48,14 @@ public class CoverImageService {
         Resource resource = coverImageValidator.validateDeleteCover(currentUserId, resourceId);
         s3ServiceCover.deleteResource(resource);
         resourceRepository.delete(resource);
-        List<Vacancy> vacancies = resource.getProject().getVacancies();
-        for (Vacancy vacancy : vacancies) {
-            if (vacancy.getCoverImageKey() != null && vacancy.getCoverImageKey().equals(resource.getKey())) {
-                vacancy.setCoverImageKey(null);
-                vacancyRepository.save(vacancy);
-                return;
-            }
-        }
+        resource.getProject().getVacancies().stream()
+                .filter(vacancy -> vacancy.getCoverImageKey() != null &&
+                        vacancy.getCoverImageKey().equals(resource.getKey()))
+                .findFirst()
+                .ifPresent(vacancy -> {
+                    vacancy.setCoverImageKey(null);
+                    vacancyRepository.save(vacancy);
+                });
     }
 
     public InputStream getCoverImage(Long resourceId) {

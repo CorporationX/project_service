@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -18,30 +20,24 @@ public class CoverImageValidator {
     private final ResourceRepository resourceRepository;
 
     public Vacancy validateUploadCover(Long currentUserId, Long vacancyId) {
-        if (!vacancyRepository.existsById(vacancyId)) {
+       Optional <Vacancy> vacancy = vacancyRepository.findById(vacancyId);
+        if (vacancy.isEmpty()) {
             throw new EntityNotFoundException("Вакансии с id " + vacancyId + " не существует");
         }
-        Vacancy vacancy = vacancyRepository.findById(vacancyId).get();
-
-        if (!currentUserId.equals(vacancy.getProject().getOwnerId())) {
+        if (!currentUserId.equals(vacancy.get().getProject().getOwnerId())) {
             throw new BusinessException("У вас нет прав загрузить обложку в данную вакансию");
         }
-        return vacancy;
+        return vacancy.get();
     }
 
     public Resource validateDeleteCover(Long currentUserId, Long resourceId) {
-        validateResource(resourceId);
-        Resource resource = resourceRepository.findById(resourceId).get();
-
-        if (!currentUserId.equals(resource.getProject().getOwnerId())) {
-            throw new BusinessException("У вас нет прав удалять обложку из данной вакансии");
+        Optional<Resource> resource = resourceRepository.findById(resourceId);
+        if (resource.isEmpty()) {
+            throw new EntityNotFoundException("Обложка c Id" + resourceId + " не найдена");
         }
-        return resource;
-    }
-
-    public void validateResource(Long resourceId) {
-        if (!resourceRepository.existsById(resourceId)) {
-            throw new EntityNotFoundException("Обложка не найдена");
+        if (!currentUserId.equals(resource.get().getProject().getOwnerId())) {
+            throw new BusinessException("У вас нет прав удалять обложку с id " + resourceId + " из данной вакансии");
         }
+        return resource.get();
     }
 }
