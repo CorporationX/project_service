@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CoverImageVacancyReadDto.ResourceDto;
 import faang.school.projectservice.exception.BusinessException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Vacancy;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
@@ -59,8 +61,11 @@ public class CoverImageService {
     }
 
     public InputStream getCoverImage(Long resourceId) {
-        coverImageValidator.validateResource(resourceId);
-        return s3ServiceCover.getCoverImage(resourceRepository.findById(resourceId).get());
+        Optional<Resource> resource = resourceRepository.findById(resourceId);
+        if (resource.isEmpty()) {
+            throw new EntityNotFoundException("Обложка c Id" + resourceId + " не найдена");
+        }
+        return s3ServiceCover.getCoverImage(resource.get());
     }
 
     private MultipartFile compressImage(MultipartFile file) {

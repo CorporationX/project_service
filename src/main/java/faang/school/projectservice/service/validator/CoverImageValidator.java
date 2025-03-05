@@ -20,7 +20,7 @@ public class CoverImageValidator {
     private final ResourceRepository resourceRepository;
 
     public Vacancy validateUploadCover(Long currentUserId, Long vacancyId) {
-       Optional <Vacancy> vacancy = vacancyRepository.findById(vacancyId);
+        Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
         if (vacancy.isEmpty()) {
             throw new EntityNotFoundException("Вакансии с id " + vacancyId + " не существует");
         }

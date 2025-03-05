@@ -75,7 +75,7 @@ public class S3ServiceCover {
             }
             log.error("Ошибка при получении файла из S3: {}", e.getMessage());
             throw new BusinessException("Ошибка при получении файла из облачного хранилища");
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Неизвестная ошибка при получении файла из S3: {}", e.getMessage());
             throw new BusinessException("Внутренняя ошибка при получении файла");
         }

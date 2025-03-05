@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CoverImageVacancyReadDto.ResourceDto;
 import faang.school.projectservice.exception.BusinessException;
-import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Vacancy;
@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -87,20 +86,37 @@ public class CoverImageServiceTest {
     }
 
     @Test
-    void testGetCoverImage_Success() throws IOException {
+    void testGetCoverImage_Success() {
+        Long currentUserId = 1L;
         Long resourceId = 1L;
-        InputStream mockInputStream = new ByteArrayInputStream("test image".getBytes());
+        Project mockProject = new Project();
+        List<Vacancy> vacancies = List.of(mockVacancy);
+        mockVacancy.setCoverImageKey("test-key");
+        mockProject.setVacancies(vacancies);
+        mockResource.setProject(mockProject);
 
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(mockResource));
-        when(s3ServiceCover.getCoverImage(mockResource)).thenReturn(mockInputStream);
+        when(coverImageValidator.validateDeleteCover(currentUserId, resourceId)).thenReturn(mockResource);
 
-        InputStream result = coverImageService.getCoverImage(resourceId);
+        coverImageService.deleteCover(currentUserId, resourceId);
 
-        assertNotNull(result);
-        assertEquals("test image", new String(result.readAllBytes()));
+        assertNull(mockVacancy.getCoverImageKey());
 
-        verify(coverImageValidator, times(1)).validateResource(resourceId);
-        verify(s3ServiceCover, times(1)).getCoverImage(mockResource);
+        verify(coverImageValidator, times(1)).validateDeleteCover(currentUserId, resourceId);
+        verify(s3ServiceCover, times(1)).deleteResource(mockResource);
+        verify(resourceRepository, times(1)).delete(mockResource);
+        verify(vacancyRepository, times(1)).save(mockVacancy);
+    }
+
+    @Test
+    void testGetCoverImage_ResourceNotFound() {
+        Long resourceId = 1L;
+
+        when(resourceRepository.findById(resourceId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> coverImageService.getCoverImage(resourceId));
+
+        verify(resourceRepository, times(1)).findById(resourceId);
+        verify(s3ServiceCover, never()).getCoverImage(any());
     }
 
     @Test
