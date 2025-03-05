@@ -77,6 +77,11 @@ dependencies {
      */
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
+    /**
+     * Image compression
+     */
+    implementation ("net.coobird:thumbnailator:0.4.14")
+
 }
 
 // JACOCO
