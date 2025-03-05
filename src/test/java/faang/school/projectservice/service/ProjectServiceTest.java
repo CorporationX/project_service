@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -271,7 +272,7 @@ class ProjectServiceTest {
         ResourceReadDto result = projectService.deleteResource(PROJECT_ID, RESOURCE_ID);
         verify(amazonS3Client).deleteFile(KEY);
         verify(projectRepository).save(project);
-        assertEquals("", resource.getKey());
+        assertNull(resource.getKey());
         assertEquals(BigInteger.ZERO, resource.getSize());
         assertEquals(ResourceStatus.DELETED, resource.getStatus());
         assertEquals(USER_ID, result.updatedById());

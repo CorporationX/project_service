@@ -158,7 +158,7 @@ public class ProjectService {
 
         long userId = userContext.getUserId();
         Project project = getProject(projectId);
-        String folder = projectId + "/" + project.getName();
+        String folder = projectId + project.getName();
         TeamMember user = getUserFromProject(userId, projectId);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
 
