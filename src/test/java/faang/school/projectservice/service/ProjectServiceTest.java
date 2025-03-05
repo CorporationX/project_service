@@ -12,6 +12,7 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.NameSpecification;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.filter.StatusSpecification;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -51,16 +52,14 @@ public class ProjectServiceTest {
         NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
         StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
         List<SpecificationFilter> specificationFilters = List.of(nameSpecification, statusSpecification);
-        S3Service s3Service = Mockito.mock(S3Service.class);
-        AwsProperties s3Properties = Mockito.mock(AwsProperties.class);
-        AmazonS3 s3client = Mockito.mock(AmazonS3.class);
+        S3Service s3client = Mockito.mock(S3Service.class);
         ProjectPdfService projectPdfService = Mockito.mock(ProjectPdfService.class);
         UserServiceClient userServiceClient = Mockito.mock(UserServiceClient.class);
         ProjectValidator projectValidator = Mockito.mock(ProjectValidator.class);
 
         projectService = new ProjectServiceImpl(
                 projectRepository, projectMapper, specificationFilters, projectProfileViewPublisher, userContext,
-                s3Service, s3Properties, s3client, projectPdfService, userServiceClient, projectValidator);
+                s3client, projectPdfService, userServiceClient, projectValidator);
 
         projectCaptor = ArgumentCaptor.forClass(Project.class);
 
