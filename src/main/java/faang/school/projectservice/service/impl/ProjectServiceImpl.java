@@ -1,11 +1,7 @@
 package faang.school.projectservice.service.impl;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.config.filestorage.AwsProperties;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
@@ -34,6 +30,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,9 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final List<SpecificationFilter> specificationFilters;
     private final ProjectProfileViewPublisher projectProfileViewPublisher;
     private final UserContext userContext;
-    private final S3Service s3Service;
-    private final AwsProperties s3Properties;
-    private final AmazonS3 s3client;
+    private final S3Service s3client;
     private final ProjectPdfService projectPdfService;
     private final UserServiceClient userServiceClient;
     private final ProjectValidator projectValidator;
@@ -102,39 +98,43 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public void createPresentation(long projectId) {
-
         Project project = getProjectById(projectId);
         final long userId = getUserId();
 
         projectValidator.validateUserIsOwner(userId, project);
-        UserDto owner = userServiceClient.getUser(userId);
 
+        UserDto owner = userServiceClient.getUser(userId);
         ProjectPresentationDto presentationDto = projectMapper.toProjectPresentationDto(project, owner);
 
-        InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto);
-        final String presentationFileKey = String.format("%s_%s_%s_%d", project.getName(), project.getId(),
-                PDF_FILE_NAME, System.currentTimeMillis());
+        String presentationFileKey = String.format("%s_%s_%s_%d",
+                project.getName(), project.getId(), PDF_FILE_NAME, System.currentTimeMillis());
+
+        try (InputStream pdfInputStream = projectPdfService.createProjectPresentation(presentationDto)) {
+            s3client.putFileInStore(presentationFileKey, pdfInputStream);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to create project presentation", ex);
+        }
 
         project.setPresentationFileKey(presentationFileKey);
         project.setPresentationGeneratedAt(LocalDateTime.now());
-        projectRepository.save(project);
 
-        s3Service.putFileInStore(presentationFileKey, pdfInputStream);
+        projectRepository.save(project);
     }
 
     @Override
     public S3ObjectDto downloadPdf(Long projectId) {
+        try {
+            String presentationFileKey = getPresentationFileKey(projectId);
+            InputStream file = s3client.downloadFile(presentationFileKey);
 
-        String presentationFileKey = getPresentationFileKey(projectId);
-        S3Object object = s3client.getObject(s3Properties.getBucketName(), presentationFileKey);
+            if (file == null) {
+                throw new FileNotFoundException("Downloaded file is null for key: " + presentationFileKey);
+            }
+            return new S3ObjectDto(PDF_FILE_NAME, new InputStreamResource(file), ResourceType.PDF.name());
 
-        return new S3ObjectDto(PDF_FILE_NAME, object, ResourceType.PDF.name());
-    }
-
-    @Override
-    public InputStreamResource getPresentation(S3ObjectDto obj) {
-        S3ObjectInputStream objectContent = obj.s3Object().getObjectContent();
-        return new InputStreamResource(objectContent);
+        } catch (Exception ex) {
+            throw new RuntimeException("Unexpected error while downloading PDF", ex);
+        }
     }
 
     @Override
