@@ -23,6 +23,4 @@ public interface ProjectService {
     List<Long> getProjectResourceIds(Long projectId);
 
     Project getProject(Long projectId);
-
-    Project validateProjectStatus(Project subProject);
 }

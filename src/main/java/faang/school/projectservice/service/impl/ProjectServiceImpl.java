@@ -98,18 +98,4 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new IllegalArgumentException("Not found project with Id = " + projectId));
     }
 
-    public Project validateProjectStatus(Project project) {
-        if (project.getStatus().equals(ProjectStatus.COMPLETED)) {
-            throw new IllegalArgumentException("Project is completed");
-        }
-
-        if (project.getVisibility().equals(ProjectVisibility.PRIVATE) && project.getChildren() != null) {
-            project.getChildren().forEach(child -> {
-                child.setVisibility(ProjectVisibility.PRIVATE);
-                projectRepository.save(child);
-            });
-        }
-        return project;
-    }
-
 }

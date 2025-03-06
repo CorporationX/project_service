@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NameSubProject implements SubProjectFilter {
+public class NameSubProjectFilter implements SubProjectFilter {
 
     @Override
     public boolean isApplicable(SubProjectFilterDto filters) {

@@ -9,7 +9,6 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubProjectMapper {
 
@@ -19,6 +18,4 @@ public interface SubProjectMapper {
     SubProjectResponseDto toSubProjectResponseDto(Project entity);
 
     List<SubProjectResponseDto> toSubProjectResponseDtos(List<Project> entities);
-
 }
-

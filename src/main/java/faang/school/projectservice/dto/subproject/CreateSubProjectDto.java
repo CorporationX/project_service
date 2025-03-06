@@ -1,14 +1,14 @@
 package faang.school.projectservice.dto.subproject;
 
-import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Builder;
-
-import java.util.List;
 
 @Builder
 public record CreateSubProjectDto(
-    Long parentId,
-    Long id,
-    List<Long> subProjectIds,
-    Stage stage
-){}
+        Long parentId,
+        ProjectVisibility visibility,
+        String name,
+        String description,
+        ProjectStatus status
+) {}
