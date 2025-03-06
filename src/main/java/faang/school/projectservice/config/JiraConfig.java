@@ -1,5 +1,6 @@
 package faang.school.projectservice.config;
 
+import faang.school.projectservice.properties.ProjectServiceProperties;
 import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +14,12 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class JiraConfig {
 
-    private final JiraProperties jiraProperties;
+    private final ProjectServiceProperties properties;
 
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            String auth = jiraProperties.getUsername() + ":" + jiraProperties.getToken();
+            String auth = properties.getJira().getUsername() + ":" + properties.getJira().getToken();
             String encodedAuth = Base64.getEncoder()
                     .encodeToString(auth.getBytes(StandardCharsets.UTF_8));
             template.header(HttpHeaders.AUTHORIZATION, "Basic " + encodedAuth);

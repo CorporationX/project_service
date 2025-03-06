@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${domain.base-path}/project")
+@RequestMapping("${jira-service.api-version}/project")
 public class ProjectController {
     private final ProjectService projectService;
 

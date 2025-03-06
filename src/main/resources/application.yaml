@@ -17,15 +17,24 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  data:
-    redis:
-      port: 6379
-      host: localhost
-      channels:
-        calculations_channel:
-          name: calculations_channel
   config:
     import: optional:file:.env
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: project-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring:
+        json:
+          trusted:
+            packages: faang.school.projectservice.dto
 
 server:
   port: 8082
@@ -37,13 +46,20 @@ logging:
 calculations_messages_processing:
   enabled: true
 
-jira:
-  url: https://shakhzodkamolov.atlassian.net/rest/api/2
-  username: ${JIRA_USERNAME}
-  token: ${JIRA_TOKEN}
+project-service:
+  api-version: /api/v1
+  jira:
+    url: https://shakhzodkamolov.atlassian.net/rest/api/2
+    username: ${JIRA_USERNAME}
+    token: ${JIRA_TOKEN}
+  redis:
+    port: 6379
+    host: localhost
+    channel:
+      calculations_channel: calculations_channel
+  kafka:
+    topic: team_topic
 
-domain:
-  base-path: /api/v1
 
 services:
   s3:

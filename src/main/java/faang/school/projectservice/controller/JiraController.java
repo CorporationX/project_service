@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("${domain.base-path}/jira")
+@RequestMapping("${jira-service.api-version}/jira")
 @RequiredArgsConstructor
 public class JiraController {
 
