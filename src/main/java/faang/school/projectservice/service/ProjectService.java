@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -9,10 +11,14 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.AmazonS3Service;
+import faang.school.projectservice.service.upload.UploadData;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import faang.school.projectservice.validator.project.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,8 +43,11 @@ public class ProjectService {
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final ResourceMapper resourceMapper;
+    private final TeamMemberRepository teamMemberRepository;
+    private final UserContext userContext;
     private final ProjectMapper projectMapper;
     private final ImageProcessingUtils imageProcessingUtils;
+
 
     public Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
@@ -78,57 +87,108 @@ public class ProjectService {
     }
 
     @Transactional
-    public ResourceReadDto uploadResourceToGallery(long projectId, MultipartFile file) {
+    public ResourceReadDto createResource(long projectId, MultipartFile file) {
         resourceValidator.validateResource(file);
 
-        Project project = getProject(projectId);
-        String folder = projectId + project.getName();
-        BigInteger fileSize = BigInteger.valueOf(file.getSize());
-        BigInteger newStorageSize = project.getStorageSize().add(fileSize);
+        UploadData data = prepareUploadData(projectId, file);
+        BigInteger newStorageSize = data.project().getStorageSize().add(data.fileSize());
 
-        projectValidator.validateProjectStorageSize(newStorageSize, project, fileSize);
-
-        Resource uploadedResource = uploadResourceToStorage(file, folder);
-
-        uploadedResource.setProject(project);
-        project.getGalleryFileKeys().add(uploadedResource.getKey());
-        project.getResources().add(uploadedResource);
-        project.setStorageSize(newStorageSize);
-
-        projectRepository.save(project);
-
-        return resourceMapper.toDto(resourceRepository.save(uploadedResource));
-    }
-
-    public List<ResourceReadDto> getAllProjectResources(long projectId) {
-        Project project = getProject(projectId);
-        if (project.getGalleryFileKeys().isEmpty() && project.getResources().isEmpty()) {
-            throw new DataValidationException("Галерея проекта пуста");
-        }
-
-        return project.getResources().stream().map(resourceMapper::toDto).toList();
+        return uploadResource(data.project(), data.user(), file, data.fileSize(), data.folder(), newStorageSize);
     }
 
     @Transactional
-    public void deleteResourceFromGallery(long projectId, long resourceId) {
+    public ResourceReadDto editResource(long projectId, long resourceId, MultipartFile file) {
+        resourceValidator.validateResource(file);
+
+        UploadData data = prepareUploadData(projectId, file);
+        Resource oldResource = data.project().getResources().stream()
+                .filter(resource -> resource.getId().equals(resourceId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Изменение невозможно: такого файла нет в проекте"));
+        BigInteger newStorageSize = data.project().getStorageSize().subtract(oldResource.getSize()).add(data.fileSize());
+
+        return uploadResource(data.project(), data.user(), file, data.fileSize(), data.folder(), newStorageSize);
+    }
+
+    public List<ResourceReadDto> getGallery(long projectId) {
         Project project = getProject(projectId);
+        if (project.getGalleryFileKeys().isEmpty() || project.getResources().isEmpty()) {
+            throw new DataValidationException("Галерея проекта пуста");
+        }
+
+        return project.getResources().stream().filter(image -> image.getType().equals(ResourceType.IMAGE)).map(resourceMapper::toDto).toList();
+    }
+
+    @Transactional
+    public ResourceReadDto deleteResource(long projectId, long resourceId) {
+        long userId = userContext.getUserId();
+        Project project = getProject(projectId);
+        TeamMember user = getUserFromProject(userId, projectId);
+        validateUserHasAccess(project, user, userId);
+
         Resource findingResource = project.getResources().stream()
                 .filter(resource -> resource.getId().equals(resourceId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Удаление невозможно: такого изображения нет в галерее проекта"));
+                        new EntityNotFoundException("Удаление невозможно: такого файла нет в проекте"));
         BigInteger storageSizeAfterDelete = project.getStorageSize().subtract(findingResource.getSize());
+
         project.setStorageSize(storageSizeAfterDelete);
-        project.getGalleryFileKeys().remove(findingResource.getKey());
+
+        if (findingResource.getType().equals(ResourceType.IMAGE)) {
+            project.getGalleryFileKeys().remove(findingResource.getKey());
+
+        }
 
         amazonS3Client.deleteFile(findingResource.getKey());
-        resourceRepository.deleteById(resourceId);
+        Resource updatedResource = changeResourceStatusToDeleted(findingResource, user);
         projectRepository.save(project);
+
+        return resourceMapper.toDto(updatedResource);
     }
 
     public Project getProject(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Проект с id=" + id + " не найден"));
+    }
+
+    private UploadData prepareUploadData(long projectId, MultipartFile file) {
+        resourceValidator.validateResource(file);
+
+        long userId = userContext.getUserId();
+        Project project = getProject(projectId);
+        String folder = projectId + project.getName();
+        TeamMember user = getUserFromProject(userId, projectId);
+        BigInteger fileSize = BigInteger.valueOf(file.getSize());
+
+        return new UploadData(project, user, fileSize, folder);
+    }
+
+    private void validateUserHasAccess(Project project, TeamMember user, long userId) {
+        if (!(project.getOwnerId().equals(userId)) && !(user.getRoles().contains(TeamRole.MANAGER))) {
+            throw new AccessDeniedException("У вас нет доступа для удаления файла");
+        }
+    }
+
+    private ResourceReadDto uploadResource(Project project, TeamMember user, MultipartFile file, BigInteger fileSize, String folder, BigInteger storageSize) {
+        projectValidator.validateProjectStorageSize(storageSize, project, fileSize);
+
+        Resource uploadedResource = uploadResourceToStorage(file, folder);
+
+        uploadedResource.setUpdatedBy(user);
+        uploadedResource.setProject(project);
+
+        if (ResourceType.IMAGE.equals(uploadedResource.getType())) {
+            project.getGalleryFileKeys().add(uploadedResource.getKey());
+        }
+
+        project.getResources().add(uploadedResource);
+        project.setStorageSize(storageSize);
+
+        projectRepository.save(project);
+
+        return resourceMapper.toDto(resourceRepository.save(uploadedResource));
     }
 
     private Resource uploadResourceToStorage(MultipartFile file, String folder) {
@@ -142,5 +202,19 @@ public class ProjectService {
                 .status(ResourceStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    private Resource changeResourceStatusToDeleted(Resource resource, TeamMember user) {
+        resource.setKey(null);
+        resource.setSize(BigInteger.ZERO);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedBy(user);
+
+        return resourceRepository.save(resource);
+    }
+
+    private TeamMember getUserFromProject(long userId, long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с ID %d в проекте %d не найден", userId, projectId)));
     }
 }

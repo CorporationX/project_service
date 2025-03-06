@@ -35,18 +35,23 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/resources")
-    public ResourceReadDto uploadResource(@PathVariable long projectId, @RequestBody MultipartFile file) {
-        return projectService.uploadResourceToGallery(projectId, file);
+    public ResourceReadDto createResource(@PathVariable long projectId, @RequestParam("file") MultipartFile file) {
+        return projectService.createResource(projectId, file);
     }
 
-    @GetMapping("/{projectId}/resources/list")
-    public List<ResourceReadDto> getAllResources(@PathVariable long projectId) {
-        return projectService.getAllProjectResources(projectId);
+    @PutMapping("/{projectId}/resources/{resourceId}")
+    public ResourceReadDto editResource(@PathVariable long projectId, @PathVariable long resourceId, @RequestParam("file") MultipartFile file) {
+        return projectService.editResource(projectId, resourceId, file);
     }
 
-    @DeleteMapping("/{projectId}/resources/list/{resourceId}")
+    @GetMapping("/{projectId}/gallery")
+    public List<ResourceReadDto> getGallery(@PathVariable long projectId) {
+        return projectService.getGallery(projectId);
+    }
+
+    @DeleteMapping("/{projectId}/resources/{resourceId}")
     public String deleteResource(@PathVariable long projectId, @PathVariable long resourceId) {
-        projectService.deleteResourceFromGallery(projectId, resourceId);
+        projectService.deleteResource(projectId, resourceId);
         return String.format("Ресурс с id %d удален из проекта с id %d", resourceId, projectId);
     }
 }

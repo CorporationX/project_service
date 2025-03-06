@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception.handler;
 
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileManagementException;
@@ -77,6 +78,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileManagementException.class)
     public ErrorResponse handleFileManagementException(FileManagementException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
