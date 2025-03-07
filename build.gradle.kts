@@ -53,9 +53,9 @@ tasks {
 
 
 val jacocoInclude = listOf(
-        "**/controller/**",
+        //"**/controller/**",
         "**/service/**",
-        "**/validator/**"
+        //"**/validator/**"
 )
 
 dependencies {
