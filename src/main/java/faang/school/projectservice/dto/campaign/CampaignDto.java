@@ -19,4 +19,5 @@ public class CampaignDto {
     private Currency currency;
     private long createdBy;
     private LocalDateTime createdAt;
+    private long updatedBy;
 }

@@ -44,7 +44,7 @@ public class CampaignController {
     }
 
     @GetMapping
-    public List<CampaignDto> getFilteredCampaignsByProject(@ModelAttribute CampaignFilterDto campaignFilterDto) {
-        return campaignService.getAllCampaignsByProject(campaignFilterDto);
+    public List<CampaignDto> getFilteredCampaigns(@ModelAttribute CampaignFilterDto campaignFilterDto) {
+        return campaignService.getFilteredCampaigns(campaignFilterDto);
     }
 }
