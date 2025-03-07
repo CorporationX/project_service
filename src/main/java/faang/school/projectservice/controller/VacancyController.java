@@ -1,11 +1,13 @@
 package faang.school.projectservice.controller;
-
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
+import faang.school.projectservice.validations.annotations.IsCreateDataValid;
+import faang.school.projectservice.validations.annotations.IsUpdateDataValid;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +25,7 @@ public class VacancyController {
     private final UserContext userContext;
 
     @PostMapping("/create")
+    @IsCreateDataValid
     public void createVacancy(@Parameter(
             name = "x-user-id",
             description = "ID user",
@@ -30,16 +33,16 @@ public class VacancyController {
             in = ParameterIn.HEADER,
             schema = @Schema(type = "string"),
             example = "1"
-    ) @RequestHeader("x-user-id") String userId, @RequestBody VacancyDto vacancyDto) {
+    ) @RequestHeader("x-user-id") String userId, @Valid @RequestBody VacancyCreateDto vacancyDto) {
         userContext.setUserId(Long.parseLong(userId));
-        vacancyDto = isDataValid(vacancyDto);
-        Vacancy vacancy = mapperToEntity(vacancyDto);
+        Vacancy vacancy = createMapperToEntity(vacancyDto);
         log.info("Received request to create vacancy: {}", vacancy);
         service.createVacancy(vacancy);
         log.info("Vacancy created successfully: {}", vacancy);
     }
 
     @PutMapping("/update")
+    @IsUpdateDataValid
     public void updateVacancy(@Parameter(
             name = "x-user-id",
             description = "ID user",
@@ -47,10 +50,10 @@ public class VacancyController {
             in = ParameterIn.HEADER,
             schema = @Schema(type = "string"),
             example = "1"
-    ) @RequestHeader("x-user-id") String userId, @RequestBody VacancyDto vacancyDto) {
+    ) @RequestHeader("x-user-id") String userId, @Valid @RequestBody VacancyUpdateDto vacancyDto) {
         userContext.setUserId(Long.parseLong(userId));
-        vacancyDto = isDataValid(vacancyDto);
-        Vacancy vacancy = mapperToEntity(vacancyDto);
+        Vacancy existingVacancy = service.getVacancyById(vacancyDto.getId());
+        Vacancy vacancy = updateMapperToEntity(existingVacancy, vacancyDto);
         log.info("Received request to update vacancy: {}", vacancy);
         service.updateVacancy(vacancy);
         log.info("Vacancy updated successfully: {}", vacancy);
@@ -62,21 +65,12 @@ public class VacancyController {
         service.deleteVacancy(vacancyId);
         log.info("Vacancy deleted successfully: {}", vacancyId);
     }
-
-    public VacancyDto isDataValid(VacancyDto vacancyDto) {
-        if (vacancyDto.getPositionId() == null
-                || vacancyDto.getProjectId() == null
-                || vacancyDto.getRoleId() == null) {
-            throw new NullPointerException("You are use illegal data: position and project must be not null");
-        } else if (vacancyDto.getRoleId() != TeamRole.getAll().get(0).ordinal()
-                && vacancyDto.getRoleId() != TeamRole.getAll().get(1).ordinal()) {
-            throw new IllegalArgumentException("You are use illegal data: curator must be OWNER or MANAGER");
-        }
-        return vacancyDto;
-    }
-    public Vacancy mapperToEntity(VacancyDto vacancyDto) {
+    public Vacancy createMapperToEntity(VacancyCreateDto vacancyDto) {
         Vacancy vacancy;
         return vacancy = mapper.toEntity(vacancyDto);
     }
-}
+    public Vacancy updateMapperToEntity(Vacancy vacancy, VacancyUpdateDto vacancyDto) {
+        return vacancy = mapper.update(vacancy, vacancyDto);
+    }
 
+}

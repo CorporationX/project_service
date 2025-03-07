@@ -1,6 +1,6 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.*;
@@ -63,9 +63,10 @@ public class VacancyServiceTest {
    }
    @Test
    public void testDeleteVacancy () {
-        VacancyDto vacancyDto = new VacancyDto();
+        VacancyUpdateDto vacancyDto = new VacancyUpdateDto();
         dtoInitializer(vacancyDto);
-        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
+        Vacancy vacancy = new Vacancy();
+        vacancyMapper.update(vacancy,vacancyDto);
         List <Candidate> candidates = vacancy.getCandidates();
         candidates.stream().allMatch(candidate -> candidate.getCandidateStatus() == null);
         when(vacancyRepository.findById(vacancyDto.getId())).thenReturn(Optional.of(vacancy));
@@ -73,7 +74,7 @@ public class VacancyServiceTest {
        verify(vacancyRepository, times(1)).deleteById(vacancy.getId());
     }
 
-    public void dtoInitializer (VacancyDto vacancyDto) {
+    public void dtoInitializer (VacancyUpdateDto vacancyDto) {
         vacancyDto.setRoleId(0L);
         vacancyDto.setProjectId(1L);
         vacancyDto.setPositionId(3);
