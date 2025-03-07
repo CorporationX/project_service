@@ -33,8 +33,4 @@ public class TeamMemberService {
     public List<TeamMember> getTeamMembersByUserId(Long userId) {
         return teamMemberRepository.findByUserId(userId);
     }
-
-    public TeamMember getTeamMembersByUserIdAndProjectId(Long userId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-    }
 }
