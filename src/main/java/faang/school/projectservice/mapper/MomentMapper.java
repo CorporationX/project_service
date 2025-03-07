@@ -23,6 +23,4 @@ public interface MomentMapper {
     List<MomentResponseDto> toMomentResponseDtos(List<Moment> moments);
 
     List<ProjectResponseDto> toProjectDtos(List<Project> projects);
-
-
 }

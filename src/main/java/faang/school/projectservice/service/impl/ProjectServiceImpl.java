@@ -179,7 +179,7 @@ public class ProjectServiceImpl implements ProjectService {
         return specificationFilters.stream()
                 .filter(spec -> spec.isApplicable(filter))
                 .map(spec -> spec.apply(filter))
-                .reduce((spec1, spec2) -> spec1.and(spec2))
+                .reduce(Specification::and)
                 .orElse(null);
     }
 }
