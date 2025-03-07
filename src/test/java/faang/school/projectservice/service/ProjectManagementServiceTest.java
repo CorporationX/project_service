@@ -94,10 +94,9 @@ public class ProjectManagementServiceTest {
     @Test
     void createProjectShouldSaveProjectSuccessfully() {
         mockExistByOwnerIdAndName(false);
-        Project savedProject = new Project();
-        savedProject.setId(1L);
 
-        when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(Project.builder().id(1L).build());
 
         projectManagementService.createProject(createDto, OWNER_ID);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
