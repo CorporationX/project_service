@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FundRaisedEventPublisher {
     private final KafkaTemplate<String, FundRaisedEvent> kafkaTemplate;
-    @Value("${spring.kafka.fund-raised.topic}")
+    @Value("${spring.kafka.topics.fund-raised.topic}")
     private String topic;
 
     public void publish(FundRaisedEvent event) {

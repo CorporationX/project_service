@@ -48,7 +48,7 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
     private final KafkaTemplate<String, ProjectViewEvent> projectViewEventKafkaTemplate;
 
-    @Value("${spring.kafka.producer.project_view.topic}")
+    @Value("${spring.kafka.topics.project-view.topic}")
     private String projectViewEventTopic;
 
     public ProjectCreateResponseDto createProject(ProjectCreateRequestDto projectCreateRequestDto) {
