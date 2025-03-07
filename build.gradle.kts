@@ -5,10 +5,6 @@ plugins {
     id("checkstyle")
 }
 
-checkstyle {
-    toolVersion = "10.3"
-}
-
 group = "faang.school"
 version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
@@ -87,6 +83,12 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+checkstyle {
+    toolVersion = "10.17.0"
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    checkstyle.enableExternalDtdLoad.set(true)
 }
 
 tasks.checkstyleMain {
