@@ -6,14 +6,17 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StageInvitationUpdateDto {
+
     @Positive
     @NotNull
-    private final Long id;
+    private Long id;
 
     @NotBlank
     private String description;

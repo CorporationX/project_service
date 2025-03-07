@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +14,6 @@ import java.util.List;
 public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
-
-    public TeamMember findById(long teamMemberId) {
-        return teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Пользователь с ID %d не найден", teamMemberId)
-                ));
-    }
 
     public TeamMember findById(@NotNull Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId)
@@ -38,7 +30,11 @@ public class TeamMemberService {
         });
     }
 
-    private List<TeamMember> getTeamMembersByUserId(Long userId) {
+    public List<TeamMember> getTeamMembersByUserId(Long userId) {
         return teamMemberRepository.findByUserId(userId);
+    }
+
+    public TeamMember getTeamMembersByUserIdAndProjectId(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 }
