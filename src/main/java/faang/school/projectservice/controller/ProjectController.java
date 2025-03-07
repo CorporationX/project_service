@@ -104,12 +104,12 @@ public class ProjectController {
     public ResponseEntity<String> uploadCover(@PathVariable Long projectId,
                                               @RequestParam("file") MultipartFile file) {
         projectService.uploadProjectCover(projectId, file);
-        return ResponseEntity.ok("Cover uploaded");
+        return ResponseEntity.ok("Cover uploaded successfully");
     }
 
     @DeleteMapping("/{projectId}/cover")
     public ResponseEntity<String> deleteCover(@PathVariable Long projectId) {
         projectService.deleteCover(projectId);
-        return ResponseEntity.ok("Cover deleted");
+        return ResponseEntity.ok("Cover deleted successfully");
     }
 }

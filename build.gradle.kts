@@ -99,9 +99,9 @@ dependencies {
     implementation("org.glassfish.jersey.core:jersey-common:2.27")
     implementation("io.atlassian.fugue:fugue:5.0.2")
     /**
-     * ImageResizer
+     * Imgscalr
      */
-    implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
 
 
     /**

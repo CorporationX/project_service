@@ -43,6 +43,9 @@ services:
     secret-key: password
     bucket-name: corpbucket
     isMocked: false
+    max-file-size: 5MB
+    target-width: 1080
+    target-height: 566
 
   payment-service:
     host: http://localhost

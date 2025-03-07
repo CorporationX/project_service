@@ -1,28 +1,24 @@
 package faang.school.projectservice.service;
 
 import com.google.api.services.calendar.model.Calendar;
+import faang.school.projectservice.config.ProjectProperties;
 import faang.school.projectservice.model.Meet;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import faang.school.projectservice.config.S3.S3Config;
-import faang.school.projectservice.exception.ImageResizeException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.google.GoogleCalendarService;
+import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.validator.FileValidator;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -38,12 +34,10 @@ public class ProjectService {
     private final GoogleCalendarService googleCalendarService;
     private final ProjectScheduleService projectScheduleService;
     private final ProjectMeetService projectMeetService;
-
-    private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
+    private final S3Service s3Service;
+    private final ProjectProperties projectProperties;
+    private final FileValidator fileValidator;
     private final ImageResizer imageResizer;
-    private final S3Config s3Config;
-    @Value("${services.s3.bucketName}")
-    private String bucketName;
 
     @Transactional
     public Project createProject(Project project, Long ownerId) {
@@ -199,35 +193,32 @@ public class ProjectService {
 
     @Transactional
     public void uploadProjectCover(Long projectId, MultipartFile file) {
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new MaxUploadSizeExceededException(file.getSize());
-        }
-
-        byte[] resizedImage;
-        try {
-            resizedImage = imageResizer.resizeImage(file.getBytes(), 1080, 566);
-        } catch (IOException e) {
-            throw new ImageResizeException("Failed to resize image " + file.getOriginalFilename());
-        }
-
-        if (resizedImage == null) {
-            throw new ImageResizeException("Resized image is null");
-        }
-
-        String objectName = "project-" + projectId + "-cover.jpg";
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(resizedImage.length);
-        objectMetadata.setContentType(file.getContentType());
-
-        s3Config.amazonS3Client().putObject(
-                bucketName,
-                objectName,
-                new ByteArrayInputStream(resizedImage),
-                objectMetadata);
-
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
-        project.setCoverImageId(objectName);
+
+        if (project.getCoverImageId() != null) {
+            throw new IllegalStateException("Project cover already exists. " +
+                    "Delete the existing cover before uploading a new one.");
+        }
+
+        fileValidator.validateFile(file);
+
+        byte[] imageBytes;
+        try {
+            imageBytes = file.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        byte[] resizedImageBytes = imageResizer.resizeImage(
+                imageBytes,
+                projectProperties.getTargetWidth(),
+                projectProperties.getTargetHeight());
+
+        MultipartFile resizedFile = new ResizedMultipartFile(file, resizedImageBytes);
+        Resource resource = s3Service.uploadFile(resizedFile, "covers");
+
+        project.setCoverImageId(resource.getKey());
         projectRepository.save(project);
     }
 
@@ -235,15 +226,13 @@ public class ProjectService {
     public void deleteCover(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
-        String objectName = project.getCoverImageId();
 
-        if (objectName != null) {
-            s3Config.amazonS3Client().deleteObject(bucketName, objectName);
+        if (project.getCoverImageId() != null) {
+            s3Service.deleteFile(project.getCoverImageId());
+            project.setCoverImageId(null);
+            projectRepository.save(project);
         } else {
-            throw new IllegalArgumentException("Cover image not found");
+            throw new IllegalStateException("Project cover does not exist. Nothing to delete.");
         }
-
-        project.setCoverImageId(null);
-        projectRepository.save(project);
     }
 }
