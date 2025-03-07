@@ -1,0 +1,72 @@
+spring:
+  mvc:
+    servlet:
+      path: /api/v1
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    producer:
+      acks: all
+      bootstrap-servers: localhost:9092
+      security:
+        protocol: PLAINTEXT
+      retries: 5
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+      project_view:
+        topic: "project-view"
+
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      channels:
+        calculations_channel:
+          name: calculations_channel
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: info
+
+calculations_messages_processing:
+  enabled: true
+
+services:
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    bucketName: corpbucket
+    isMocked: true
+  payment-service:
+    host: http://localhost
+    port: 9080
+    path: /api/v1
+  user-service:
+    host: http://localhost
+    port: 8080
+    path: /api/v1
+
+project:
+  gallery:
+    image:
+      link_expiration_time_ms: 60000
+    max_gallery_size: 50
+    max_image_size_mb: 5
