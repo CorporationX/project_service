@@ -21,8 +21,8 @@ public abstract class AbstractEventPublisher<T> implements EventPublisher<T> {
             String json = objectMapper.writeValueAsString(event);
             redisTemplate.convertAndSend(getTopic(), json);
         } catch (JsonProcessingException e) {
-            String errorMessage = "Ошибка при сериализации ивента " + event.getClass() + " : " + e.getMessage();
-            log.error(errorMessage);
+            String errorMessage = "Ошибка при публикации ивента";
+            log.error("{} {} : {}", errorMessage, event.getClass().getSimpleName(), e.getMessage());
             throw new PublishEventException(errorMessage, e);
         }
     }
