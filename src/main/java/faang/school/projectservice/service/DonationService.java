@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.dto.payment.PaymentRequest;
@@ -29,7 +28,6 @@ public class DonationService {
     private final DonationMapper donationMapper;
     private final List<DonationFilter> donationFilters;
     private final PaymentServiceClient paymentServiceClient;
-    private final UserContext userContext;
 
     public DonationDto sendDonation(DonationDto donationDto) {
         log.info("Отправка доната: {}", donationDto);
