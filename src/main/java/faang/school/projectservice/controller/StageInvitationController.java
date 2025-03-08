@@ -43,7 +43,7 @@ public class StageInvitationController {
         return stageInvitationService.acceptStageInvitation(dto);
     }
 
-    @GetMapping("/list/{invitedId}")
+    @GetMapping("/member/{invitedId}")
     public List<StageInvitationDto> getStageInvitationForTeamMember(@PathVariable Long invitedId) {
         return stageInvitationService.getStageInvitationForTeamMember(invitedId);
     }
