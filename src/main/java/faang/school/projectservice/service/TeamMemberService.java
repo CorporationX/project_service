@@ -104,4 +104,9 @@ public class TeamMemberService {
         TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(projectId, memberId);
         return teamMemberMapper.teamMemberToTeamMemberDto(teamMember);
     }
+
+    public TeamMember get(Long memberId){
+        return teamMemberRepository.findById(memberId).
+                orElseThrow(() -> new EntityNotFoundException("Участника с id: " + memberId + " не существует."));
+    }
 }
