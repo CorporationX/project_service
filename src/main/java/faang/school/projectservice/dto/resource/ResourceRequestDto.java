@@ -3,7 +3,6 @@ package faang.school.projectservice.dto.resource;
 import lombok.Builder;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @Builder
 public record ResourceRequestDto(
@@ -12,4 +11,5 @@ public record ResourceRequestDto(
         String status,
         String type,
         String name
-        ) {}
+) {
+}
