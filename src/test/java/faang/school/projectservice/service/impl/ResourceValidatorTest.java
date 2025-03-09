@@ -44,7 +44,7 @@ class ResourceValidatorTest {
         Long publicProjectId = 222L;
         Long privateProjectId = 223L;
         Project publicProject = Project.builder().id(publicProjectId).build();
-        Project privateProject = Project.builder().id(privateProjectId).build();
+
         Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
 
         Long userInProjectId = 1L;
@@ -52,6 +52,7 @@ class ResourceValidatorTest {
                 .thenReturn(true);
         resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProject);
 
+        Project privateProject = Project.builder().id(privateProjectId).build();
         Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
         Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProject))
                 .thenReturn(true);

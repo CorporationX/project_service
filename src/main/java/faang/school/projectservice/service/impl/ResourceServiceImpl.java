@@ -26,7 +26,7 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
 
-    private final static String FOLDER_PREFIX = "project_";
+    private static final String FOLDER_PREFIX = "project_";
 
     private final ResourceRepository resourceRepository;
     private final S3Service s3Service;

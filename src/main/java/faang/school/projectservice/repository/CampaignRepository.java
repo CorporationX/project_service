@@ -14,8 +14,8 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     Optional<Campaign> findByTitleAndProjectId(String title, Long projectId);
 
     @Query(
-            "SELECT c FROM Campaign c " +
-                    "WHERE (:namePattern IS NULL OR c.title LIKE %:namePattern%) "
+            "SELECT c FROM Campaign c "
+                    + "WHERE (:namePattern IS NULL OR c.title LIKE %:namePattern%) "
                     + "AND (:minGoal IS NULL OR c.goal >= :minGoal) "
                     + "AND (:maxGoal IS NULL OR c.goal <= :maxGoal) "
                     + "AND (:status IS NULL OR c.status = :status)"
