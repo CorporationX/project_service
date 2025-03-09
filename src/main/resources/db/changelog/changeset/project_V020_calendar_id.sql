@@ -1,0 +1,1 @@
+ALTER TABLE project ADD COLUMN IF NOT EXISTS google_calendar_id VARCHAR(128);

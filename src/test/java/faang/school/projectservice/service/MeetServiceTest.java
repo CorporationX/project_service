@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Events;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.dto.meet.CreateMeetDto;
@@ -21,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +53,8 @@ public class MeetServiceTest {
     private ProjectService projectService;
     @Mock
     private UserServiceClient userServiceClient;
+    @Mock
+    private Calendar calendar;
     @InjectMocks
     private MeetService meetService;
 
@@ -66,6 +73,8 @@ public class MeetServiceTest {
         meet = new Meet();
         meet.setId(1L);
         meet.setStatus(MeetStatus.PENDING);
+        meet.setStartsAt(LocalDateTime.now());
+        meet.setProject(new Project());
     }
 
     @Test
@@ -173,5 +182,52 @@ public class MeetServiceTest {
 
         // Then
         verify(meetRepository, times(1)).delete(any(Meet.class));
+    }
+
+    @Test
+    void addMeetToCalendar_ShouldCreateCalendarAndSaveMeet() throws Exception {
+        //Given
+        final var calendars = mock(Calendar.Calendars.class);
+        final var events = mock(Calendar.Events.class);
+        final var calendarInsert = mock(Calendar.Calendars.Insert.class);
+        final var eventInsert = mock(Calendar.Events.Insert.class);
+        final var executeResult = new com.google.api.services.calendar.model.Calendar();
+        executeResult.setId("1");
+        when(calendar.calendars()).thenReturn(calendars);
+        when(calendar.events()).thenReturn(events);
+        when(calendars.insert(any())).thenReturn(calendarInsert);
+        when(calendarInsert.execute()).thenReturn(executeResult);
+        when(events.insert(any(), any())).thenReturn(eventInsert);
+        when(eventInsert.setSendNotifications(any())).thenReturn(eventInsert);
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userServiceClient.getUsersByIds(any())).thenReturn(Collections.emptyList());
+
+        //When
+        meetService.addMeetToCalendar(1L);
+
+        //Then
+        verify(meetRepository, times(1)).save(any());
+        verify(calendars, times(1)).insert(any());
+        verify(events, times(1)).insert(any(), any());
+    }
+
+    @Test
+    void getProjectCalendarMeets_ShouldCallGoogleApi() throws Exception {
+        //Given
+        final var events = mock(Calendar.Events.class);
+        final var list = mock(Calendar.Events.List.class);
+        final var eventExecute = new Events();
+        meet.setProject(Project.builder().id(1L).googleCalendarId("1").build());
+        eventExecute.setItems(Collections.emptyList());
+        when(calendar.events()).thenReturn(events);
+        when(projectService.getProjectById(anyLong())).thenReturn(meet.getProject());
+        when(events.list(any())).thenReturn(list);
+        when(list.execute()).thenReturn(eventExecute);
+
+        //When
+        meetService.getProjectCalendarMeets(1L);
+
+        //Then
+        verify(list, times(1)).execute();
     }
 }

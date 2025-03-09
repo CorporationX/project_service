@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -31,6 +27,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "project")
 @Data
@@ -57,6 +57,9 @@ public class Project {
 
     @Column(name = "owner_id")
     private Long ownerId;
+
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
 
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "parent_project_id")

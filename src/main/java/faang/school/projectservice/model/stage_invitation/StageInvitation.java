@@ -1,7 +1,7 @@
 package faang.school.projectservice.model.stage_invitation;
 
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

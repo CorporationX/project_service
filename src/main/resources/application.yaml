@@ -29,10 +29,11 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
-      project_view:
+    topics:
+      project-view:
         topic: "project-view"
       fund-raised:
-        topic: fund-raised
+        topic: "fund-raised"
 
 
   liquibase:

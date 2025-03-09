@@ -3,7 +3,6 @@ package faang.school.projectservice.stratagy.stage;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
 @Component
