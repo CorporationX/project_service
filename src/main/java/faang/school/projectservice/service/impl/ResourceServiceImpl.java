@@ -26,7 +26,7 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
 
-    private final static String FOLDER_PREFIX = "project_";
+    private static final String FOLDER_PREFIX = "project_";
 
     private final ResourceRepository resourceRepository;
     private final S3Service s3Service;
@@ -44,7 +44,7 @@ public class ResourceServiceImpl implements ResourceService {
         TeamMember teamMember = getTeamMember(userId);
         String folder = FOLDER_PREFIX + projectId;
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        Resource resource = resourceRepository.save(createResource (key, file, project, teamMember));
+        Resource resource = resourceRepository.save(createResource(key, file, project, teamMember));
         s3Service.uploadFile(file, key);
         return resourceMapper.toResourceResponseDto(resource);
     }
@@ -76,7 +76,7 @@ public class ResourceServiceImpl implements ResourceService {
                 .build();
     }
 
-    private Resource createResource (String key, MultipartFile file, Project project, TeamMember teamMember) {
+    private Resource createResource(String key, MultipartFile file, Project project, TeamMember teamMember) {
         return Resource.builder()
                 .key(key)
                 .size(BigInteger.valueOf(file.getSize()))

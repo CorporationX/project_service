@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Builder
-public record ResourceResponseDto (
+public record ResourceResponseDto(
         Long id,
         String key,
         BigInteger size,

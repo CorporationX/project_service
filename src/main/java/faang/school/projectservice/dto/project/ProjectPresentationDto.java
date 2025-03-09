@@ -5,11 +5,11 @@ import java.util.List;
 
 public record ProjectPresentationDto(
 
-         String title,
-         LocalDateTime createdDate,
-         String ownerName,
-         String status,
-         String description,
-         List<String>completedTasks,
-         List<List<ProjectTeamMemberDto>> teams) {
+        String title,
+        LocalDateTime createdDate,
+        String ownerName,
+        String status,
+        String description,
+        List<String> completedTasks,
+        List<List<ProjectTeamMemberDto>> teams) {
 }

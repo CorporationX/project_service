@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 public interface ResourceService {
     ResourceResponseDto addResource(Long userId, Long projectId, MultipartFile file);
+
     InputStream downloadResource(Long userId, Long resourceId);
+
     void deleteResource(Long userId, Long resourceId);
 }

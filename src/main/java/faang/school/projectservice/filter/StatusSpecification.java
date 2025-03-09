@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StatusSpecification implements SpecificationFilter{
+public class StatusSpecification implements SpecificationFilter {
 
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {

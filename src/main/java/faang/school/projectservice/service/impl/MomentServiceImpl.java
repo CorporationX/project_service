@@ -107,23 +107,27 @@ public class MomentServiceImpl implements MomentService {
         List<Long> addedProjectTeamMembersIds
                 = getProjectsTeamMemberIds(projects);
         List<Long> initialTeamMembersIds = initialMoment.getUserIds();
-        Set<Long> resultTeamMemberIds = new HashSet<>() {{
-            addAll(initialTeamMembersIds);
-            addAll(initialAllProjectTeamMembersIds);
-            addAll(addedProjectTeamMembersIds);
-            addAll(addedTeamMembersIds);
-        }};
+        Set<Long> resultTeamMemberIds = new HashSet<>() {
+            {
+                addAll(initialTeamMembersIds);
+                addAll(initialAllProjectTeamMembersIds);
+                addAll(addedProjectTeamMembersIds);
+                addAll(addedTeamMembersIds);
+            }
+        };
         return new ArrayList<>(resultTeamMemberIds);
     }
 
     private List<Project> getUpdatedMomentProjects(Moment initialMoment,
-                                                List<Long> addedProjectIds) {
+                                                   List<Long> addedProjectIds) {
         List<Project> initialAllProjects = initialMoment.getProjects();
         List<Project> addedProjects = getProjectsByIds(addedProjectIds);
-        Set<Project> resultProjects = new HashSet<>() {{
-            addAll(initialAllProjects);
-            addAll(addedProjects);
-        }};
+        Set<Project> resultProjects = new HashSet<>() {
+            {
+                addAll(initialAllProjects);
+                addAll(addedProjects);
+            }
+        };
         return new ArrayList<>(resultProjects);
     }
 
@@ -144,7 +148,7 @@ public class MomentServiceImpl implements MomentService {
                 .toList();
     }
 
-    private List<Project> getProjectsByIds (List<Long> projectIds) {
+    private List<Project> getProjectsByIds(List<Long> projectIds) {
         return projectRepository.findAllById(projectIds);
     }
 }

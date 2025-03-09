@@ -4,8 +4,9 @@ import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import faang.school.projectservice.dto.client.StageDto;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "Spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
 
     @Mapping(target = "id", source = "stageId")

@@ -16,6 +16,7 @@ class MomentProjectsFilterTest {
     private MomentFilterDto momentFilterDto;
     private final MomentProjectsFilter filter = new MomentProjectsFilter();
     private List<Moment> allMoments;
+
     @BeforeEach
     void setUp() {
         allMoments = TestData.getSomeMoments();

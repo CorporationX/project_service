@@ -30,6 +30,7 @@ class ProjectValidatorTest {
     @InjectMocks
     ProjectValidator projectValidator;
     private Project project;
+
     @BeforeEach
     void setUp() {
         TeamMember teamMember1 = TeamMember.builder()

@@ -33,16 +33,19 @@ public class SubProjectController {
     }
 
     @PutMapping("/{id}")
-    public SubProjectResponseDto updateSubProject(@PathVariable Long id, @RequestBody UpdateSubProjectDto updateSubProjectDto) {
+    public SubProjectResponseDto updateSubProject(@PathVariable Long id,
+                                                  @RequestBody UpdateSubProjectDto updateSubProjectDto) {
         log.info("#SubProjectController: Updating subproject with id: {} and data: {}", id, updateSubProjectDto);
         return subProjectService.updateSubProject(id, updateSubProjectDto);
     }
 
     @GetMapping("/search")
     public List<SubProjectResponseDto> findAllByFilter(SubProjectFilterDto filter) {
-        log.info("#SubProjectController: request to find all subprojects matching the filter:[{}] has been received", filter);
+        log.info("#SubProjectController: request to find all subprojects matching the filter:[{}] has been received",
+                filter);
         return subProjectService.findAllByFilter(filter);
     }
+
     @GetMapping
     public List<SubProjectResponseDto> findAll() {
         log.info("#SubProjectController: request to find all subprojects has been received");
@@ -54,4 +57,4 @@ public class SubProjectController {
         log.info("#SubProjectContoller: request to find a subproject by its id:{} has been received", id);
         return subProjectService.findById(id);
     }
-    }
+}
