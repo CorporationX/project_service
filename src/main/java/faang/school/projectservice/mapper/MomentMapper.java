@@ -17,7 +17,7 @@ public interface MomentMapper {
     Moment toMomentEntity(MomentCreateRequestDto momentCreateResponseDto);
 
     @Mapping(source = "userIds", target = "teamMembersIds")
-    MomentResponseDto toMomentResponseDto (Moment moment);
+    MomentResponseDto toMomentResponseDto(Moment moment);
 
     @Mapping(source = "userIds", target = "teamMembersIds")
     List<MomentResponseDto> toMomentResponseDtos(List<Moment> moments);

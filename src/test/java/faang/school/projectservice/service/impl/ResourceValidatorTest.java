@@ -40,28 +40,34 @@ class ResourceValidatorTest {
     @Test
     @DisplayName("Test user can download resource")
     void validateUserCanDownloadResource() {
-        Long userInProjectId = 1L;
-        Long userNotInProjectId = 2L;
+
         Long publicProjectId = 222L;
         Long privateProjectId = 223L;
         Project publicProject = Project.builder().id(publicProjectId).build();
         Project privateProject = Project.builder().id(privateProjectId).build();
         Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, publicProject)).thenReturn(true);
+
+        Long userInProjectId = 1L;
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, publicProject))
+                .thenReturn(true);
         resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProject);
 
         Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProject)).thenReturn(true);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userInProjectId, privateProject))
+                .thenReturn(true);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userInProjectId, privateProject));
 
+        Long userNotInProjectId = 2L;
         Mockito.when(projectValidatorMock.isProjectPublic(publicProject)).thenReturn(true);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, publicProject)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, publicProject))
+                .thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, publicProject));
 
         Mockito.when(projectValidatorMock.isProjectPublic(privateProject)).thenReturn(false);
-        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, privateProject)).thenReturn(false);
+        Mockito.when(projectValidatorMock.isUserParticipatedInProject(userNotInProjectId, privateProject))
+                .thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, privateProject));
     }

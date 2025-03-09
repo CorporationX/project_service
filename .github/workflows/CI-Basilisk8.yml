@@ -29,5 +29,4 @@ jobs:
 
       - name: Checkstyle verification
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
-##        run: ./gradlew checkstyleMain checkstyleTest --stacktrace --debug
 

@@ -36,6 +36,7 @@ public class TestData {
 
         return activeProjects;
     }
+
     static List<Project> getSomeNotActiveProjects() {
         List<Project> activeProjects = new ArrayList<>();
 

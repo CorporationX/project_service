@@ -85,7 +85,10 @@ class VacancyServiceImplTest {
 
     @Test
     public void testGetVacancySuccess() {
-        Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
+        Vacancy vacancy = TestData.createVacancy(
+                1L,
+                "test vacancy",
+                TeamRole.DEVELOPER);
         long id = vacancy.getId();
         Mockito.when(vacancyRepository.findById(id)).thenReturn(Optional.of(vacancy));
 
@@ -106,11 +109,19 @@ class VacancyServiceImplTest {
     @Test
     public void testCreateSuccess() {
         vacancyMapper.setCandidateMapper(candidateMapper);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
-                1L, null, VacancyStatus.OPEN, 2);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                null,
+                1L,
+                null,
+                VacancyStatus.OPEN,
+                2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId())).thenReturn(member);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
+                .thenReturn(member);
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
         vacancyService.createVacancy(dto);
@@ -124,10 +135,18 @@ class VacancyServiceImplTest {
     @Test
     public void testCreateIfRequestedUserDoesNotHaveRequiredRolesFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
-                1L, null, VacancyStatus.OPEN, 2);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                null,
+                1L,
+                null,
+                VacancyStatus.OPEN,
+                2);
         TeamMember member = new TeamMember();
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId())).thenReturn(member);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
+                .thenReturn(member);
 
         assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(dto));
     }
@@ -135,11 +154,19 @@ class VacancyServiceImplTest {
     @Test
     public void testCreateIfProjectNotFoundFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
-                1L, null, VacancyStatus.OPEN, 2);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                null,
+                1L,
+                null,
+                VacancyStatus.OPEN,
+                2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId())).thenReturn(member);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
+                .thenReturn(member);
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.createVacancy(dto));
@@ -149,11 +176,19 @@ class VacancyServiceImplTest {
     public void testUpdateSuccess() {
         vacancyMapper.setCandidateMapper(candidateMapper);
         Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
-                1L, 1L, VacancyStatus.OPEN, 2);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                null,
+                1L,
+                1L,
+                VacancyStatus.OPEN,
+                2);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId())).thenReturn(member);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
+                .thenReturn(member);
         Mockito.when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
@@ -168,8 +203,15 @@ class VacancyServiceImplTest {
     public void testUpdateIfUpdatedByNullFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
         Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L, null,
-                1L, null, VacancyStatus.OPEN, 2);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                null,
+                1L,
+                null,
+                VacancyStatus.OPEN,
+                2);
 
         assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(dto, vacancy.getId()));
     }
@@ -178,11 +220,19 @@ class VacancyServiceImplTest {
     public void testUpdateIfClosedButCandidatesCountNotMatchFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
         Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L,
-                List.of(), 1L, 1L, VacancyStatus.CLOSED, 1);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                List.of(),
+                1L,
+                1L,
+                VacancyStatus.CLOSED,
+                1);
         TeamMember member = new TeamMember();
         member.setRoles(List.of(TeamRole.MANAGER));
-        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId())).thenReturn(member);
+        Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
+                .thenReturn(member);
         Mockito.when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         Mockito.when(projectRepository.findById(dto.projectId())).thenReturn(Optional.of(new Project()));
 
@@ -192,9 +242,15 @@ class VacancyServiceImplTest {
     @Test
     public void testUpdateIfClosedButCandidatesDoNotHaveAssignedRoleFailed() {
         vacancyMapper.setCandidateMapper(candidateMapper);
-        Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
-        VacancyRequestDto dto = TestData.createVacancyRequestDto("test vacancy", TeamRole.DEVELOPER, 1L,
-                List.of(1L), 1L, 1L, VacancyStatus.CLOSED, 1);
+        VacancyRequestDto dto = TestData.createVacancyRequestDto(
+                "test vacancy",
+                TeamRole.DEVELOPER,
+                1L,
+                List.of(1L),
+                1L,
+                1L,
+                VacancyStatus.CLOSED,
+                1);
         TeamMember memberManager = new TeamMember();
         memberManager.setRoles(List.of(TeamRole.MANAGER));
 
@@ -204,6 +260,8 @@ class VacancyServiceImplTest {
         candidate.setUserId(5L);
         TeamMember memberCandidate = new TeamMember();
         memberCandidate.setRoles(List.of(TeamRole.INTERN));
+
+        Vacancy vacancy = TestData.createVacancy(1L, "test vacancy", TeamRole.DEVELOPER);
 
         Mockito.when(teamMemberRepository.findByUserIdAndProjectId(dto.createdBy(), dto.projectId()))
                 .thenReturn(memberManager);

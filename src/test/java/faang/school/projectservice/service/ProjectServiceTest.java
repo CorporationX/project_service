@@ -1,9 +1,7 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.services.s3.AmazonS3;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.config.filestorage.AwsProperties;
 import faang.school.projectservice.dto.ProjectCreateRequestDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.dto.ProjectUpdateRequestDto;
@@ -12,7 +10,6 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.NameSpecification;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.filter.StatusSpecification;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -88,7 +85,8 @@ public class ProjectServiceTest {
 
     @Test
     public void testSaveSuccess() {
-        Mockito.when(projectRepository.existsByOwnerIdAndName(projectRequest.ownerId(), projectRequest.name())).thenReturn(false);
+        Mockito.when(projectRepository.existsByOwnerIdAndName(projectRequest.ownerId(), projectRequest.name()))
+                .thenReturn(false);
         Mockito.when(projectRepository.save(any())).thenReturn(new Project());
 
         ProjectResponseDto result = projectService.save(projectRequest);

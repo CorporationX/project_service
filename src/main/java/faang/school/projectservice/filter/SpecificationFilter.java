@@ -8,5 +8,5 @@ public interface SpecificationFilter {
 
     boolean isApplicable(ProjectFilterDto filters);
 
-    Specification<Project> apply (ProjectFilterDto filters);
+    Specification<Project> apply(ProjectFilterDto filters);
 }

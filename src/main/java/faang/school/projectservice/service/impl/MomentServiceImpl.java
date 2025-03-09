@@ -117,7 +117,7 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private List<Project> getUpdatedMomentProjects(Moment initialMoment,
-                                                List<Long> addedProjectIds) {
+                                                   List<Long> addedProjectIds) {
         List<Project> initialAllProjects = initialMoment.getProjects();
         List<Project> addedProjects = getProjectsByIds(addedProjectIds);
         Set<Project> resultProjects = new HashSet<>() {{
@@ -144,7 +144,7 @@ public class MomentServiceImpl implements MomentService {
                 .toList();
     }
 
-    private List<Project> getProjectsByIds (List<Long> projectIds) {
+    private List<Project> getProjectsByIds(List<Long> projectIds) {
         return projectRepository.findAllById(projectIds);
     }
 }
