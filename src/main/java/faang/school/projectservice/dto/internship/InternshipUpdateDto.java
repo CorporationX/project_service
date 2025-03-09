@@ -14,6 +14,6 @@ import java.util.List;
 public class InternshipUpdateDto {
     @Min(1)
     private long id;
-    private List<Long> internsId;
+    private List<Long> internsIds;
     private InternshipStatus status;
 }

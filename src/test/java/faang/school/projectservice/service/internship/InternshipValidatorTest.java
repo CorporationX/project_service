@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.internship.InternshipCreateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.model.*;
@@ -24,7 +24,7 @@ public class InternshipValidatorTest {
     @Spy
     private InternshipValidator internshipValidator;
     private Internship internship;
-    private InternshipCreateDto internshipCreateDto;
+    private InternshipDto internshipDto;
     private InternshipUpdateDto internshipUpdateDto;
     private Project project;
     private Team team;
@@ -52,17 +52,17 @@ public class InternshipValidatorTest {
         interns = List.of(intern);
         startDate = LocalDateTime.now();
         endDate = LocalDateTime.now().plusDays(MAX_DURATION);
-        internshipCreateDto = InternshipCreateDto.builder()
+        internshipDto = InternshipDto.builder()
                 .projectId(project.getId())
                 .mentorId(mentor.getId())
-                .internsId(List.of(intern.getId()))
+                .internsIds(List.of(intern.getId()))
                 .status(InternshipStatus.IN_PROGRESS)
                 .startDate(LocalDateTime.now())
                 .role(TeamRole.DEVELOPER)
                 .build();
 
         internshipUpdateDto = InternshipUpdateDto.builder()
-                .internsId(List.of(intern.getId()))
+                .internsIds(List.of(intern.getId()))
                 .status(InternshipStatus.COMPLETED)
                 .build();
 
@@ -80,7 +80,7 @@ public class InternshipValidatorTest {
 
     @Test
     public void InternshipCreateValidatorWrongMentorTest() {
-        Project wrongProject = new Project();
+        var wrongProject = new Project();
         mentor = TeamMember.builder()
                 .team(Team.builder()
                         .project(wrongProject)
@@ -93,7 +93,7 @@ public class InternshipValidatorTest {
 
     @Test
     public void InternshipCreateValidatorWrongInternTest() {
-        Project wrongProject = new Project();
+        var wrongProject = new Project();
         intern = TeamMember.builder()
                 .team(Team.builder()
                         .project(wrongProject)
@@ -115,7 +115,7 @@ public class InternshipValidatorTest {
     @Test
     public void completedInternshipValidatorInternsUpdateTest() {
         internship.setStartDate(LocalDateTime.now().minusDays(1));
-        internshipUpdateDto.setInternsId(List.of(2L, 3L));
+        internshipUpdateDto.setInternsIds(List.of(2L, 3L));
 
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto));

@@ -1,9 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.internship.InternshipCreateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.InternshipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,22 +17,22 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping
-    public InternshipCreateDto createInternship(@Valid @RequestBody InternshipCreateDto internshipCreateDto) {
-        return internshipService.create(internshipCreateDto);
+    public InternshipDto createInternship(@Valid @RequestBody InternshipDto internshipDto) {
+        return internshipService.create(internshipDto);
     }
 
     @PutMapping
-    public InternshipCreateDto updateInternship( @Valid @RequestBody InternshipUpdateDto internshipUpdateDto) {
-        return internshipService.updateInternship(internshipUpdateDto);
+    public InternshipDto updateInternship(@Valid @RequestBody InternshipUpdateDto internshipUpdateDto) {
+        return internshipService.update(internshipUpdateDto);
     }
 
     @GetMapping("/{id}")
-    public InternshipCreateDto getInternship(@PathVariable("id") long id ) {
-        return internshipService.getInternship(id);
+    public InternshipDto getInternship(@PathVariable("id") long id ) {
+        return internshipService.get(id);
     }
 
     @GetMapping
-    public List<InternshipCreateDto> getInternshipByFilter(@RequestBody InternshipFilterDto filter) {
-        return internshipService.getInternshipByFilter(filter);
+    public List<InternshipDto> getInternshipByFilter(@RequestBody InternshipFilterDto filter) {
+        return internshipService.getByFilter(filter);
     }
 }

@@ -46,19 +46,19 @@ public class InternshipValidator {
     }
 
     public boolean isInternsListNotEqualNotEmpty(Internship internship, InternshipUpdateDto updateDto) {
-        if (updateDto.getInternsId() != null && !updateDto.getInternsId().isEmpty()) {
+        if (updateDto.getInternsIds() != null && !updateDto.getInternsIds().isEmpty()) {
             Set<Long> oldInternsIds = internship.getInterns().stream()
                     .map(TeamMember::getId)
                     .collect(Collectors.toSet());
-            Set<Long> newInternsIds = new HashSet<>(updateDto.getInternsId());
+            Set<Long> newInternsIds = new HashSet<>(updateDto.getInternsIds());
             return !oldInternsIds.equals(newInternsIds);
         }
         return false;
     }
 
-    public boolean internValidation(TeamMember intern, List<Task> tasks) {
+    public boolean internValidation(Long internId, List<Task> tasks) {
         return tasks.stream()
-                .filter(task -> task.getPerformerUserId().equals(intern.getId()))
+                .filter(task -> task.getPerformerUserId().equals(internId))
                 .allMatch(task -> task.getStatus().equals(InternshipStatus.COMPLETED));
     }
 

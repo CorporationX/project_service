@@ -1,15 +1,18 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.config.audit.AuditorAwareImpl;
-import faang.school.projectservice.dto.internship.InternshipCreateDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.team.TeamMemberDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.InternshipMapperImpl;
+import faang.school.projectservice.mapper.TeamMemberMapper;
+import faang.school.projectservice.mapper.TeamMemberMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.InternshipService;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.service.validator.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +34,9 @@ public class InternshipServiceTest {
     @Mock
     private InternshipRepository internshipRepository;
     @Mock
-    private ProjectRepository projectRepository;
+    private ProjectService projectService;
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private TeamMemberService teamMemberService;
     @Mock
     private InternshipValidator internshipValidator;
     @Mock
@@ -43,15 +46,18 @@ public class InternshipServiceTest {
     private InternshipService internshipService;
     @Spy
     private InternshipMapperImpl mapper;
+    @Spy
+    private TeamMemberMapperImpl teamMemberMapper;
 
     private Internship internship;
-    private InternshipCreateDto internshipCreateDto;
+    private InternshipDto internshipDto;
     private InternshipUpdateDto internshipUpdateDto;
     private Project project;
     private TeamMember mentor;
     private TeamMember intern;
     private List<TeamMember> interns;
     private Long createdBy = 1L;
+    private TeamRole role = TeamRole.DEVELOPER;
 
     @BeforeEach
     public void setUp() {
@@ -67,20 +73,20 @@ public class InternshipServiceTest {
                 .build();
         interns = List.of(intern);
 
-        internshipCreateDto = InternshipCreateDto.builder()
+        internshipDto = InternshipDto.builder()
                 .projectId(project.getId())
                 .mentorId(mentor.getId())
-                .internsId(List.of(intern.getId()))
+                .internsIds(List.of(intern.getId()))
                 .status(InternshipStatus.IN_PROGRESS)
-                .role(TeamRole.DEVELOPER)
+                .role(role)
                 .build();
 
         internshipUpdateDto = InternshipUpdateDto.builder()
-                .internsId(List.of(intern.getId()))
+                .internsIds(List.of(intern.getId()))
                 .status(InternshipStatus.COMPLETED)
                 .build();
 
-        internship = mapper.toEntity(internshipCreateDto);
+        internship = mapper.toEntity(internshipDto);
         internship.setProject(project);
         internship.setMentor(mentor);
         internship.setInterns(interns);
@@ -89,46 +95,26 @@ public class InternshipServiceTest {
 
     @Test
     public void CreateInternshipSuccess() {
-        when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
-        when(teamMemberRepository.findById(mentor.getId())).thenReturn(Optional.of(mentor));
-        when(teamMemberRepository.findById(intern.getId())).thenReturn(Optional.of(intern));
+        when(projectService.getProjectById(project.getId())).thenReturn(project);
+        when(teamMemberService.get(mentor.getId())).thenReturn(mentor);
+        when(teamMemberService.get(intern.getId())).thenReturn(intern);
         when(auditor.getCurrentAuditor()).thenReturn(Optional.of(1L));
 
-        internshipService.create(internshipCreateDto);
+        internshipService.create(internshipDto);
 
         verify(internshipValidator, atLeastOnce()).internshipCreateValidate(internship);
         verify(internshipRepository, atLeastOnce()).save(internship);
-        verify(projectRepository, atLeastOnce()).findById(project.getId());
-        verify(teamMemberRepository, atLeastOnce()).findById(mentor.getId());
-        verify(teamMemberRepository, atLeastOnce()).findById(intern.getId());
+        verify(projectService, atLeastOnce()).getProjectById(project.getId());
+        verify(teamMemberService, atLeastOnce()).get(mentor.getId());
+        verify(teamMemberService, atLeastOnce()).get(intern.getId());
     }
 
     @Test
-    public void getProjectProjectNotExist() {
-        when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
-        ;
+    public void getInternInterns() {
+        when(teamMemberService.get(intern.getId())).thenReturn(intern);
 
-        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
-                () -> internshipService.getProject(project.getId()));
-        assertEquals(ex.getMessage(), "Проекта с id: " + project.getId() + " не существует!!!");
-    }
-
-    @Test
-    public void getMentorMentorNotExists() {
-        when(teamMemberRepository.findById(mentor.getId())).thenReturn(Optional.empty());
-
-        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
-                () -> internshipService.getMentor(mentor.getId()));
-        assertEquals(ex.getMessage(), "Ментора с id: " + mentor.getId() + " не существует!!!");
-    }
-
-    @Test
-    public void getInternInternNotExists() {
-        when(teamMemberRepository.findById(intern.getId())).thenReturn(Optional.empty());
-
-        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
-                () -> internshipService.getInterns(List.of(intern.getId())));
-        assertEquals(ex.getMessage(), "Стажера с id: " + intern.getId() + " не существует!!!");
+        List<TeamMember> interns = internshipService.getInterns(List.of(intern.getId()));
+        assertEquals(intern, interns.get(0));
     }
 
     @Test
@@ -136,7 +122,7 @@ public class InternshipServiceTest {
         when(internshipRepository.findById(internship.getId())).thenReturn(Optional.empty());
 
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
-                () -> internshipService.getInternship(internship.getId()));
+                () -> internshipService.get(internship.getId()));
         assertEquals(ex.getMessage(), "Стажировки с id: " + internship.getId() + " не существует");
     }
 
@@ -146,18 +132,23 @@ public class InternshipServiceTest {
             "false"
     })
     public void updateInternshipCompletionParametrizedTest(boolean isComplete) {
-        mockInternshipUpdateDependencies();
+        when(internshipRepository.findById(internshipUpdateDto.getId())).thenReturn(Optional.of(internship));
         when(internshipValidator.internValidation(any(), any())).thenReturn(isComplete);
+        when(auditor.getCurrentAuditor()).thenReturn(Optional.of(createdBy));
+        TeamMemberDto teamMemberDto = teamMemberMapper.teamMemberToTeamMemberDto(intern);
 
-        internshipService.updateInternship(internshipUpdateDto);
+        internshipService.update(internshipUpdateDto);
 
-        verify(teamMemberRepository, atLeastOnce()).save(intern);
         verify(internshipRepository, atLeastOnce()).save(internship);
         if (isComplete) {
-            assertEquals(intern.getRoles().get(0), internship.getRole());
+            teamMemberDto.setRoles(List.of(role));
+//            verify(teamMemberService, atLeastOnce()).updateMember(teamMemberDto, createdBy, project.getId());
+//            assertEquals(intern.getRoles().get(0), internship.getRole());
         } else {
-            assertEquals(intern.getRoles(), List.of());
+            teamMemberDto.setRoles(List.of());
+//            assertEquals(intern.getRoles(), List.of());
         }
+        verify(teamMemberService, atLeastOnce()).updateMember(teamMemberDto, createdBy, project.getId());
     }
 
     @Test
@@ -165,24 +156,20 @@ public class InternshipServiceTest {
         TeamMember newIntern = TeamMember.builder()
                 .id(3L)
                 .build();
-        Internship newInternship = mapper.toEntity(internshipCreateDto);
+        Internship newInternship = mapper.toEntity(internshipDto);
         newInternship.setInterns(List.of(intern, newIntern));
 
-        internshipUpdateDto.setInternsId(List.of(intern.getId(), newIntern.getId()));
+        internshipUpdateDto.setInternsIds(List.of(intern.getId(), newIntern.getId()));
         internshipUpdateDto.setStatus(InternshipStatus.IN_PROGRESS);
 
-        mockInternshipUpdateDependencies();
-        when(teamMemberRepository.findById(newIntern.getId())).thenReturn(Optional.of(newIntern));
-        when(teamMemberRepository.findById(intern.getId())).thenReturn(Optional.of(intern));
+        when(internshipRepository.findById(internshipUpdateDto.getId())).thenReturn(Optional.of(internship));
+        when(teamMemberService.get(newIntern.getId())).thenReturn(newIntern);
+        when(teamMemberService.get(intern.getId())).thenReturn(intern);
         when(internshipValidator.isInternsListNotEqualNotEmpty(internship, internshipUpdateDto)).thenReturn(true);
+        when(auditor.getCurrentAuditor()).thenReturn(Optional.of(createdBy));
 
-        internshipService.updateInternship(internshipUpdateDto);
+        internshipService.update(internshipUpdateDto);
 
         assertEquals(internship.getInterns(), newInternship.getInterns());
-    }
-
-    private void mockInternshipUpdateDependencies() {
-        when(internshipRepository.findById(internshipUpdateDto.getId())).thenReturn(Optional.of(internship));
-        when(mapper.toEntity(any())).thenReturn(internship);
     }
 }

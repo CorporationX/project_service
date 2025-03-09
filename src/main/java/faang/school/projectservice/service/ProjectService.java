@@ -165,7 +165,7 @@ public class ProjectService {
         S3service.deleteFile(key);
     }
 
-    private Project getProjectById(Long projectId) {
+    public Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Проект с ID "
                         + projectId + " не найден"));
