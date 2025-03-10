@@ -63,4 +63,15 @@ public class MeetController {
     public void deleteMeet(@PathVariable long id) {
         meetService.deleteMeet(id);
     }
+
+
+    @PostMapping("/{id}/googleCalendar")
+    public void addMeetToCalendar(@PathVariable long id) {
+        meetService.addMeetToCalendar(id);
+    }
+
+    @GetMapping("/{projectId}/googleCalendar")
+    public List<MeetResponseDto> getProjectCalendarMeets(@PathVariable long projectId) {
+        return meetService.getProjectCalendarMeets(projectId);
+    }
 }
