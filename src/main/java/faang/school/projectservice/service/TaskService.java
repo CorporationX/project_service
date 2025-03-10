@@ -42,7 +42,6 @@ public class TaskService {
     public TaskReadDto update(TaskUpdateDto updateDto) {
         Task task = getTaskById(updateDto.getId());
         verifyUserProjectMembership(task.getProject().getId());
-//TODO Разобраться с маппером полей сущности
         taskMapper.updateEntityFromDto(task, updateDto);
         taskRepository.save(task);
         return taskMapper.toDto(task);

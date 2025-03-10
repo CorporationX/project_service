@@ -10,6 +10,11 @@ public class TaskCreateDto {
     @NotNull
     private String name;
     private String description;
-    private long projectId;
-    private long parentTaskId;
+    @NotNull
+    private Long projectId;
+    @NotNull
+    private Long performerUserId;
+    @NotNull
+    private Long reporterUserId;
+    private Long parentTaskId;
 }
