@@ -1,7 +1,7 @@
 package faang.school.projectservice.kafka;
 
-import faang.school.projectservice.properties.ProjectServiceProperties;
 import faang.school.projectservice.dto.TeamEvent;
+import faang.school.projectservice.properties.ProjectServiceProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,6 @@ public class TeamEventPublisher {
   private final ProjectServiceProperties properties;
 
   public void publishTeamEvent(TeamEvent event) {
-    kafkaTemplate.send(properties.getKafka().getTopic(), event);
+    kafkaTemplate.send(properties.getKafka().getTeamTopic(), event);
   }
 }

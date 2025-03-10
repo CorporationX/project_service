@@ -58,7 +58,7 @@ project-service:
     channel:
       calculations_channel: calculations_channel
   kafka:
-    topic: team_topic
+    team-topic: team_topic
 
 
 services:

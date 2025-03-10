@@ -34,6 +34,6 @@ public class ProjectServiceProperties {
 
   @Data
   public static class Kafka {
-    private String topic;
+    private String teamTopic;
   }
 }

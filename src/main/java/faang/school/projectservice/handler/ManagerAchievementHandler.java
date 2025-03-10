@@ -4,8 +4,6 @@ import faang.school.projectservice.dto.TeamEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.beans.EventHandler;
-
 @Component
 @RequiredArgsConstructor
 public class ManagerAchievementHandler implements KafkaEventHandler {
