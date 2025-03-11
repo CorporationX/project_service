@@ -1,9 +1,6 @@
 package faang.school.projectservice.controller.integrationTests;
 
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -11,7 +8,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -28,30 +24,20 @@ public class CampaignControllerIT {
     public static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
             new PostgreSQLContainer<>("postgres:latest");
 
+//    @Container
+//    public GenericContainer<?> minioContainer = new GenericContainer<>(MINIO_IMAGE)
+//            .withExposedPorts(9000)
+//            .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
+//            .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
+//            .withCommand("server", "/data")
+//            .waitingFor(Wait.forHttp("/minio/health/ready").forPort(9000));
+
     @Container
-    public GenericContainer<?> minioContainer = new GenericContainer<>(MINIO_IMAGE)
-            .withExposedPorts(9000)
-            .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
-            .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
-            .withCommand("server", "/data")
-            .waitingFor(Wait.forHttp("/minio/health/ready").forPort(9000));
-
-    @BeforeEach
-    public void init() throws Exception {
-        String endpoint = "http://" + minioContainer.getHost() + ":" +
-                minioContainer.getMappedPort(9000);
-
-        // Создаем клиент Minio
-        MinioClient minioClient = MinioClient.builder()
-                .endpoint(endpoint)
-                .credentials(ACCESS_KEY, SECRET_KEY)
-                .build();
-
-        // Создаем тестовый бакет
-        String bucketName = "test-bucket";
-        minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-    }
-
+    public static GenericContainer<?> minioContainer = new GenericContainer<>("minio/minio:latest")
+            .withExposedPorts(9000, 9001)
+            .withEnv("MINIO_ROOT_USER", "minioadmin")
+            .withEnv("MINIO_ROOT_PASSWORD", "minioadmin")
+            .withCommand("server /data --console-address :9001");
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
@@ -62,5 +48,10 @@ public class CampaignControllerIT {
 
     @Test
     void contextLoad() {
+        MinioClient minioClient = MinioClient.builder()
+                .endpoint("http://localhost:" + minioContainer.getMappedPort(9000))
+                .credentials("minioadmin", "minioadmin")
+                .build();
+
     }
 }

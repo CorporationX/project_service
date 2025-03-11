@@ -34,6 +34,8 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    testImplementation("software.amazon.awssdk:s3:2.30.36")
+
 
     /**
      * Utils & Logging
@@ -69,7 +71,6 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
-//    testImplementation("org.testcontainers:minio:1.20.6")
 
 
 
