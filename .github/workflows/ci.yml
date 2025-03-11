@@ -2,7 +2,7 @@ name: project-service CI
 on:
   pull_request:
     branches:
-      - triton-master-stream8
+      - triton-master-stream8-shakhzod
 
 jobs:
   build:
