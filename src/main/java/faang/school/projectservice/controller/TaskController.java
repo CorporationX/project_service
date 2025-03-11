@@ -35,7 +35,7 @@ public class TaskController {
         return taskService.update(updateDto);
     }
 
-    @PutMapping("/project/{projectId}/filter")
+    @GetMapping("/project/{projectId}/filter")
     public List<TaskReadDto> getAllFilteredTasksByProjectId(@PathVariable long projectId, @RequestBody TaskFilterDto filterDto) {
         return taskService.getAllFilteredTasksByProjectId(projectId, filterDto);
     }

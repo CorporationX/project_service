@@ -18,6 +18,7 @@ import faang.school.projectservice.publisher.TaskEventPublisher;
 import faang.school.projectservice.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,22 +44,31 @@ public class TaskService {
         Task task = getTaskById(updateDto.getId());
         verifyUserProjectMembership(task.getProject().getId());
         taskMapper.updateEntityFromDto(task, updateDto);
+        taskMapper.mapIdsToTasks(task, updateDto, taskRepository);
         taskRepository.save(task);
         return taskMapper.toDto(task);
     }
 
     public List<TaskReadDto> getAllFilteredTasksByProjectId(long projectId, TaskFilterDto filterDto) {
-        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        Specification<Task> spec = taskFilters.stream()
+                .map(filter -> filter.toSpecification(filterDto))
+                .reduce(Specification::and)
+                .orElse((root, query, criteriaBuilder) -> criteriaBuilder.conjunction());
+
+        spec = spec.and((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("project").get("id"), projectId)
+        );
+
+        List<Task> tasks = taskRepository.findAll(spec);
 
         return tasks.stream()
-                .filter(subProject -> taskFilters.stream().filter(filter -> filter.isApplicable(filterDto))
-                        .anyMatch(filter -> filter.filterEntity(subProject, filterDto)))
                 .map(taskMapper::toDto)
                 .toList();
     }
 
     public List<TaskReadDto> getAllTasksByProjectId(long projectId) {
         verifyUserProjectMembership(projectId);
+        Specification<Task> spec = Specification.where(null);
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
 
         return tasks.stream()

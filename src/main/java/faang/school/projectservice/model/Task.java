@@ -20,10 +20,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -70,12 +73,13 @@ public class Task {
     private Task parentTask;
 
     @ManyToMany
+    @Cascade(CascadeType.ALL)
     @JoinTable(
             name = "task_linked_tasks",
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "linked_task_id")
     )
-    private List<Task> linkedTasks;
+    private List<Task> linkedTasks = new ArrayList<>();;
 
     @ManyToOne
     @JoinColumn(name = "project_id")

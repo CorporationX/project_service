@@ -11,6 +11,7 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.slf4j.ILoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,15 +51,23 @@ public interface TaskMapper {
 
     @AfterMapping
     default void mapIdsToTasks(@MappingTarget Task task, TaskUpdateDto updateDto, @Context TaskRepository repository) {
+        if (task == null || updateDto == null || repository == null) {
+            throw new IllegalArgumentException("Переданы null параметры в метод mapIdsToTasks");
+        }
+
         if (updateDto.getParentTaskId() != null) {
-            task.setParentTask(repository.getReferenceById(updateDto.getParentTaskId()));
+            Task referenceById = repository.getReferenceById(updateDto.getParentTaskId());
+            task.setParentTask(referenceById);
+            System.out.printf("Получил объект под ID %s = %s%n", updateDto.getParentTaskId(), referenceById.getName());
         }
 
         if (updateDto.getLinkedTasksId() != null) {
             List<Task> linkedTasks = updateDto.getLinkedTasksId().stream()
                     .map(repository::getReferenceById)
+                    .peek(peekTask -> System.out.println(peekTask.getName()))
                     .toList();
-            task.setLinkedTasks(linkedTasks);
+            task.getLinkedTasks().clear();
+            task.getLinkedTasks().addAll(linkedTasks);
         }
     }
 }

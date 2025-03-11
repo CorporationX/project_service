@@ -2,17 +2,17 @@ package faang.school.projectservice.filter.task;
 
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.model.Task;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
+@Component
 public class TaskPerformerUserFilter implements TaskFilter {
     @Override
-    public boolean isApplicable(TaskFilterDto filters) {
-        return filters.getPerformerUserId() != null;
-    }
-
-    @Override
-    public boolean filterEntity(Task task, TaskFilterDto filters) {
-        return Objects.equals(task.getPerformerUserId(), filters.getPerformerUserId());
+    public Specification<Task> toSpecification(TaskFilterDto filter) {
+        if (filter.getPerformerUserId() != null) {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("performerUserId"), filter.getPerformerUserId());
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
     }
 }

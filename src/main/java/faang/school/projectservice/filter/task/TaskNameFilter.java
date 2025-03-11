@@ -2,15 +2,17 @@ package faang.school.projectservice.filter.task;
 
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.model.Task;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TaskNameFilter implements TaskFilter {
     @Override
-    public boolean isApplicable(TaskFilterDto filters) {
-        return filters.getNamePattern() != null;
-    }
-
-    @Override
-    public boolean filterEntity(Task task, TaskFilterDto filters) {
-        return task.getName().contains(filters.getNamePattern());
+    public Specification<Task> toSpecification(TaskFilterDto filter) {
+        if (filter.getNamePattern() != null) {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("name"), "%" + filter.getNamePattern() + "%");
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
     }
 }
