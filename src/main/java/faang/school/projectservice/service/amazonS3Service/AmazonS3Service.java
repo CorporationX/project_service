@@ -1,20 +1,23 @@
 package faang.school.projectservice.service.amazonS3Service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamRole;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -59,6 +62,13 @@ public class AmazonS3Service {
         amazonS3.deleteObject(bucketName, key);
     }
 
+        public String generatePresignedUrl(String fileKey) {
+            GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                    new GeneratePresignedUrlRequest(bucketName, fileKey)
+                            .withMethod(HttpMethod.GET);
+            return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+        }
+
     private void createBucket() {
         boolean foundBucket = amazonS3.doesBucketExistV2(bucketName);
 
@@ -86,7 +96,7 @@ public class AmazonS3Service {
             amazonS3.putObject(putObjectRequest);
         } catch (Exception e) {
             log.error("Image uploading " + e);
-            throw new RuntimeException("Error upload image");
+            throw new AmazonServiceException("Error upload image");
         }
     }
 }

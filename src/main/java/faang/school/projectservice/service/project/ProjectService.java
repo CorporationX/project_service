@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +33,9 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
+        project.setStorageSize(BigInteger.valueOf(0L));
+        project.setMaxStorageSize(BigInteger.valueOf(1024L * 1024 * 1024));
+
         Project savedProject = projectRepository.save(project);
         log.info("Project #{} successfully created.", savedProject.getId());
 
@@ -100,6 +104,7 @@ public class ProjectService {
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
+
     public void validateUniqueProject(Project project) {
         Long ownerId = project.getOwnerId();
         String name = project.getName();
@@ -115,12 +120,12 @@ public class ProjectService {
 
     public Project getProject(long projectId) {
         return projectRepository.findById(projectId).orElseThrow(
-            () -> new jakarta.persistence.EntityNotFoundException(
-                String.format("Project not found by id: %s", projectId))
+                () -> new jakarta.persistence.EntityNotFoundException(
+                        String.format("Project not found by id: %s", projectId))
         );
     }
 
-    public void saveProject(Project project){
+    public void saveProject(Project project) {
         projectRepository.save(project);
     }
 
