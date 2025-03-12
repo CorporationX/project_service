@@ -1,19 +1,18 @@
 package faang.school.projectservice.publisher;
 
-import faang.school.projectservice.event.TaskCompletedEvent;
-import lombok.RequiredArgsConstructor;
+import faang.school.projectservice.event.InviteSentEvent;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-@RequiredArgsConstructor
-public class InviteSentEventPublisher {
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic channelTopic;
+import java.util.List;
 
-    public void publish(Long userId, Long taskId, Long projectId) {
-        TaskCompletedEvent taskCompletedEvent = new TaskCompletedEvent(userId, taskId, projectId);
-        redisTemplate.convertAndSend(channelTopic.getTopic(), taskCompletedEvent);
+@Component
+public class InviteSentEventPublisher extends RedisEventPublisher<InviteSentEvent>{
+
+    public InviteSentEventPublisher(RedisTemplate<String, Object> redisTemplate,
+                                    @Qualifier("invitationChannels") List<ChannelTopic> channelTopics) {
+        super(redisTemplate, channelTopics);
     }
 }
