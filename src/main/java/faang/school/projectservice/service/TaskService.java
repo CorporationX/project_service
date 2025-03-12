@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.event.TaskCompletedEvent;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -27,6 +28,6 @@ public class TaskService {
         task.setStatus(TaskStatus.DONE);
         taskRepository.save(task);
 
-        taskEventPublisher.publish(userId, taskId, projectId);
+        taskEventPublisher.publish(new TaskCompletedEvent(userId, taskId, projectId));
     }
 }

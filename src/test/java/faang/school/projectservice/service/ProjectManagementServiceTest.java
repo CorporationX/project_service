@@ -11,23 +11,33 @@ import faang.school.projectservice.fillters.project.ProjectFilter;
 import faang.school.projectservice.fillters.project.impl.ProjectNameFilter;
 import faang.school.projectservice.fillters.project.impl.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectEntityMapperImpl;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectCreateEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectManagementServiceTest {
@@ -37,6 +47,8 @@ public class ProjectManagementServiceTest {
     private ProjectRepository projectRepository;
     private ProjectEntityMapperImpl projectMapper;
     private ProjectManagementService projectManagementService;
+    @Mock
+    private ProjectCreateEventPublisher projectCreateEventPublisher;
     private List<ProjectFilter> projectFilters;
     @Captor
     private ArgumentCaptor<Project> projectCaptor;
@@ -46,7 +58,7 @@ public class ProjectManagementServiceTest {
     private ProjectFilterDto filterDto;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         createDto = new ProjectCreateDto();
         createDto.setName("Test Project");
         createDto.setDescription("Test Description");
@@ -62,7 +74,8 @@ public class ProjectManagementServiceTest {
         projectRepository = mock(ProjectRepository.class);
         projectMapper = spy(ProjectEntityMapperImpl.class);
         projectFilters = List.of(mock(ProjectNameFilter.class), mock(ProjectStatusFilter.class));
-        projectManagementService = new ProjectManagementService(projectRepository, projectMapper, projectFilters);
+        projectManagementService = new ProjectManagementService(projectRepository,
+                projectMapper, projectFilters, projectCreateEventPublisher);
     }
 
     @Test
@@ -82,12 +95,14 @@ public class ProjectManagementServiceTest {
     void createProjectShouldSaveProjectSuccessfully() {
         mockExistByOwnerIdAndName(false);
 
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(Project.builder().id(1L).build());
+
         projectManagementService.createProject(createDto, OWNER_ID);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project project = projectCaptor.getValue();
         assertEquals(createDto.getName(), project.getName());
         assertEquals(ProjectStatus.CREATED, project.getStatus());
-
     }
 
     @Test
@@ -139,7 +154,6 @@ public class ProjectManagementServiceTest {
         assertEquals(1, filteredProjects.size());
         assertEquals("Test Project 1", filteredProjects.get(0).getName());
     }
-
 
 
     @Test
