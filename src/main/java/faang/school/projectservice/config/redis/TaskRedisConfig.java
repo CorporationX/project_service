@@ -7,7 +7,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 @Configuration
 public class TaskRedisConfig {
 
-    @Bean
+    @Bean(name = "taskChannel")
     public ChannelTopic channelTopic() {
         return new ChannelTopic("task_channel");
     }
