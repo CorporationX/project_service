@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.CreateSubProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -20,8 +22,9 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final StageRepository stageRepository;
     private final CreateSubProjectMapper subProjectMapper;
+    private final ProjectMapper projectMapper;
 
-    public CreateSubProjectDto create(CreateSubProjectDto subProjectDto) {
+    public ProjectDto create(CreateSubProjectDto subProjectDto) {
         Project parentProject = validateAndRetrieveParentProject(subProjectDto);
         Project subProject = subProjectMapper.toEntity(subProjectDto);
         subProject.setParentProject(parentProject);
@@ -43,12 +46,12 @@ public class ProjectService {
         if (!subProjectDto.getChildren().isEmpty()) {
             List<Project> children = subProjectDto.getChildren().stream()
                     .peek(child -> child.setParentProject(savedSubProject.getId()))
-                    .map(child -> subProjectMapper.toEntity(create(child)))
+                    .map(child -> projectMapper.toEntity(create(child)))
                     .toList();
             savedSubProject.setChildren(children);
         }
 
-        return subProjectMapper.toDto(projectRepository.save(savedSubProject));
+        return projectMapper.toDto(projectRepository.save(savedSubProject));
     }
 
     private Project validateAndRetrieveParentProject(CreateSubProjectDto subProjectDto) {

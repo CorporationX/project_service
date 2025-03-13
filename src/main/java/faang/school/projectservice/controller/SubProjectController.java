@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ public class SubProjectController {
     private final ProjectService service;
 
     @PostMapping("/create")
-    public CreateSubProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
+    public ProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
         return service.create(subProjectDto);
     }
 }
