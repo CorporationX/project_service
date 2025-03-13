@@ -83,5 +83,10 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    // Метод для проверки завершенности задачи
+    public boolean isCompleted() {
+        return status == TaskStatus.DONE;
+    }
 }
 

@@ -51,4 +51,12 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    public void addRole(TeamRole role) {
+        this.roles.add(role);
+    }
+
+    public void removeRole(TeamRole role) {
+        this.roles.remove(role);
+    }
 }
