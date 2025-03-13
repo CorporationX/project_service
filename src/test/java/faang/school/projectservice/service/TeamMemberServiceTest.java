@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.publisher.InviteSentEventPublisher;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.validator.TeamMemberValidator;
@@ -41,6 +42,9 @@ class TeamMemberServiceTest {
 
     @Mock
     private TeamMemberValidator teamMemberValidator;
+
+    @Mock
+    private InviteSentEventPublisher inviteSentEventPublisher;
 
     @InjectMocks
     private TeamMemberService teamMemberService;
