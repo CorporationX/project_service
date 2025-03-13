@@ -7,7 +7,6 @@ import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -73,32 +72,13 @@ public class InternshipService {
             // стажировка идет
         } else {
             log.info("Стажировка еще идет");
-            List<TeamMember> internsCompletionTask = internship.getInterns().stream()
-                    .filter(this::checkAllTasksCompleted)
-                    .toList();
-            if (!internsCompletionTask.isEmpty()) {
-                internsCompletionTask.forEach(intern -> {
-                    intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
-                    intern.getRoles().remove(TeamRole.INTERN);// Убираем роль стажера
-                    internship.getInterns().remove(intern);// Убираем из списка стажеров
-                    log.info("Завершенные стажеры: {}", internsCompletionTask);
-                });
-            } else {
-                log.info("нет стажеров заблаговременно завершивших все задачи");
-            }
+            handleOngoingInterns(internship);
 
-            if(LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(2)){
+
+            if (LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(2))) {
                 log.info("Прошло более двух месяцев с даты начала стажировки.");
                 //список интернов которые по истечению 2 месяцем все задачи со статусом 1todo
-                List<TeamMember> internsNotCompletionTask = internship.getInterns().stream()
-                        .filter(this::checkAllTasksNotCompleted)
-                        .toList();
-                if (!internsNotCompletionTask.isEmpty()) {
-                    internsNotCompletionTask.forEach(intern -> {
-                        internship.getInterns().remove(intern);// Убираем из списка стажеров
-                        log.info("Уволенные стажеры: {}", internsCompletionTask);
-                    });
-                }
+                handleInternsNotCompletedTasks(internship);
             }
         }
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
@@ -175,6 +155,7 @@ public class InternshipService {
             internship.getInterns().addAll(newInterns);
         }
     }
+
     private boolean checkAllTasksNotCompleted(TeamMember intern) {
         List<Stage> stages = intern.getStages();
         if (stages.isEmpty()) {
@@ -189,5 +170,35 @@ public class InternshipService {
         }
         // Если все задачи завершены на всех стадиях, возвращаем true
         return true;
+    }
 
+    private void handleOngoingInterns(Internship internship) {
+        List<TeamMember> internsCompletionTask = internship.getInterns().stream()
+                .filter(this::checkAllTasksCompleted)
+                .toList();
+
+        if (!internsCompletionTask.isEmpty()) {
+            internsCompletionTask.forEach(intern -> {
+                intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
+                intern.getRoles().remove(TeamRole.INTERN); // Убираем роль стажера
+                internship.getInterns().remove(intern); // Убираем из списка стажеров
+                log.info("Завершенные стажеры: {}", intern); // Логируем каждого завершенного стажера
+            });
+        } else {
+            log.info("Нет стажеров, заблаговременно завершивших все задачи");
+        }
+    }
+
+    private void handleInternsNotCompletedTasks(Internship internship) {
+        List<TeamMember> internsNotCompletionTask = internship.getInterns().stream()
+                .filter(this::checkAllTasksNotCompleted)
+                .toList();
+
+        if (!internsNotCompletionTask.isEmpty()) {
+            internsNotCompletionTask.forEach(intern -> {
+                internship.getInterns().remove(intern); // Убираем из списка стажеров
+                log.info("Уволенные стажеры: {}", intern);
+            });
+        }
+    }
 }
