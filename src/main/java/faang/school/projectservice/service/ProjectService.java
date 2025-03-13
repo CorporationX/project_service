@@ -11,13 +11,16 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final StageRepository stageRepository;
@@ -31,23 +34,23 @@ public class ProjectService {
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
 
-        if (!subProjectDto.getStages().isEmpty()) {
-            List<Stage> stages = subProjectDto.getStages().stream()
-                    .map(stageName -> {
-                        Stage stage = new Stage();
-                        stage.setProject(savedSubProject);
-                        stage.setStageName(stageName);
-                        return stageRepository.save(stage);
-                    })
-                    .toList();
+        if (subProjectDto.getStages()!=null && !subProjectDto.getStages().isEmpty()) {
+            List<Stage> stages = new ArrayList<>();
+            for (String stageName : subProjectDto.getStages()) {
+                Stage stage = new Stage();
+                stage.setProject(savedSubProject);
+                stage.setStageName(stageName);
+                stages.add(stageRepository.save(stage));
+            }
             savedSubProject.setStages(stages);
         }
 
-        if (!subProjectDto.getChildren().isEmpty()) {
-            List<Project> children = subProjectDto.getChildren().stream()
-                    .peek(child -> child.setParentProject(savedSubProject.getId()))
-                    .map(child -> projectMapper.toEntity(create(child)))
-                    .toList();
+        if (subProjectDto.getChildren()!=null && !subProjectDto.getChildren().isEmpty()) {
+            List<Project> children = new ArrayList<>();
+            for (CreateSubProjectDto child : subProjectDto.getChildren()) {
+                child.setParentProject(savedSubProject.getId());
+                children.add(projectMapper.toEntity(create(child)));
+            }
             savedSubProject.setChildren(children);
         }
 
@@ -58,6 +61,10 @@ public class ProjectService {
         if (subProjectDto.getParentProject() == null) {
             throw new IllegalArgumentException("Parent project is required");
         }
+        if (subProjectDto.getVisibility() == null) {
+            throw new IllegalArgumentException("Visibility project is required");
+        }
+
         var parentId = subProjectDto.getParentProject();
         Project parentProject = projectRepository.findById(parentId)
                 .orElseThrow(() -> new EntityNotFoundException("Parent project with id = " + parentId + " doesn't exist"));
