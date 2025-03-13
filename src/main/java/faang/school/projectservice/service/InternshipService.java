@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -18,6 +19,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
+
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
@@ -59,24 +62,44 @@ public class InternshipService {
     public InternshipDto updateInternship(InternshipDto internshipDto) {
         Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
                 -> new NotFoundException("Internship not found"));
-        //логика
-        if (internship.getEndDate().isBefore(LocalDateTime.now())) {
-            List<TeamMember> completedInterns = internship.getInterns().stream()
+        //если стажировка еще не началась
+        if (internship.getStartDate().isAfter(LocalDateTime.now())) {
+            addNewInterns(internship, internshipDto.getInternsId());
+
+            //если стажировка закончилась
+        } else if (internship.getEndDate().isBefore(LocalDateTime.now())) {
+            completeInternship(internship);
+
+            // стажировка идет
+        } else {
+            log.info("Стажировка еще идет");
+            List<TeamMember> internsCompletionTask = internship.getInterns().stream()
                     .filter(this::checkAllTasksCompleted)
                     .toList();
-            completedInterns.forEach(intern -> {
-                intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
-                intern.getRoles().remove(TeamRole.INTERN); // Убираем роль стажера
-            });
-            List<TeamMember> notCompletedInterns = internship.getInterns().stream()
-                    .filter(intern -> !checkAllTasksCompleted(intern))
-                    .toList();
-            internship.getInterns().removeAll(notCompletedInterns);
-            log.info("Стажировка завершена. Завершенные стажеры: {}", completedInterns);
-            log.info("Удаленные стажеры: {}", notCompletedInterns);
+            if (!internsCompletionTask.isEmpty()) {
+                internsCompletionTask.forEach(intern -> {
+                    intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
+                    intern.getRoles().remove(TeamRole.INTERN);// Убираем роль стажера
+                    internship.getInterns().remove(intern);// Убираем из списка стажеров
+                    log.info("Завершенные стажеры: {}", internsCompletionTask);
+                });
+            } else {
+                log.info("нет стажеров заблаговременно завершивших все задачи");
+            }
 
-        } else {
-            log.info("Стажировка еще не завершилась");
+            if(LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(2)){
+                log.info("Прошло более двух месяцев с даты начала стажировки.");
+                //список интернов которые по истечению 2 месяцем все задачи со статусом 1todo
+                List<TeamMember> internsNotCompletionTask = internship.getInterns().stream()
+                        .filter(this::checkAllTasksNotCompleted)
+                        .toList();
+                if (!internsNotCompletionTask.isEmpty()) {
+                    internsNotCompletionTask.forEach(intern -> {
+                        internship.getInterns().remove(intern);// Убираем из списка стажеров
+                        log.info("Уволенные стажеры: {}", internsCompletionTask);
+                    });
+                }
+            }
         }
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
@@ -93,11 +116,11 @@ public class InternshipService {
         List<Team> teams = project.getTeams();
 
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId()).orElseThrow(()
-                -> new NotFoundException("Нет члена команды"));
+                -> new NotFoundException("Нет ментора"));
 
         Team team = teamMember.getTeam();
         if (!teams.contains(team)) {
-            throw new NotFoundException("Нет ментора из команды проекта");
+            throw new NotFoundException(" ментор из другого проекта");
         }
         Internship internship = internshipMapper.toInternship(internshipDto);
         internship.setProject(project);
@@ -105,7 +128,7 @@ public class InternshipService {
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map((id) -> teamMemberRepository.findById(id).orElseThrow(()
                         -> new RuntimeException("Стажер с ID " + id + " не найден")))
-                .peek(member -> member.addRole(TeamRole.INTERN))
+                .peek(member -> member.getRoles().add(TeamRole.INTERN))
                 .toList();
         internship.setInterns(teamMembers);
         internship.setCreatedAt(LocalDateTime.now());
@@ -116,9 +139,12 @@ public class InternshipService {
 
     private boolean checkAllTasksCompleted(TeamMember intern) {
         List<Stage> stages = intern.getStages();
+        if (stages.isEmpty()) {
+            throw new RuntimeException("Stages is empty");
+        }
         for (Stage stage : stages) {
             boolean allTaskCompleted = stage.getTasks().stream()
-                    .allMatch(Task::isCompleted);
+                    .allMatch(task -> task.getStatus() == TaskStatus.DONE);
             if (!allTaskCompleted) {
                 return false;
             }
@@ -126,4 +152,42 @@ public class InternshipService {
         // Если все задачи завершены на всех стадиях, возвращаем true
         return true;
     }
+
+    private void completeInternship(Internship internship) {
+        List<TeamMember> completedInterns = internship.getInterns().stream()
+                .filter(this::checkAllTasksCompleted)
+                .toList();
+        completedInterns.forEach(intern -> {
+            intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
+            intern.getRoles().remove(TeamRole.INTERN); // Убираем роль стажера
+        });
+        List<TeamMember> notCompletedInterns = internship.getInterns().stream()
+                .filter(intern -> !checkAllTasksCompleted(intern))
+                .toList();
+        internship.getInterns().removeAll(notCompletedInterns);
+        log.info("Стажировка завершена. Завершенные стажеры: {}", completedInterns);
+        log.info("Удаленные стажеры: {}", notCompletedInterns);
+    }
+
+    private void addNewInterns(Internship internship, List<Long> internsId) {
+        List<TeamMember> newInterns = internshipRepository.findByInternshipIdIn(internsId);
+        if (!newInterns.isEmpty()) {
+            internship.getInterns().addAll(newInterns);
+        }
+    }
+    private boolean checkAllTasksNotCompleted(TeamMember intern) {
+        List<Stage> stages = intern.getStages();
+        if (stages.isEmpty()) {
+            throw new RuntimeException("Stages is empty");
+        }
+        for (Stage stage : stages) {
+            boolean allTaskCompleted = stage.getTasks().stream()
+                    .allMatch(task -> task.getStatus() == TaskStatus.TODO);
+            if (!allTaskCompleted) {
+                return false;
+            }
+        }
+        // Если все задачи завершены на всех стадиях, возвращаем true
+        return true;
+
 }
