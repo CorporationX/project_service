@@ -1,14 +1,15 @@
 package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ProjectDto extends AbstractProjectDto {
     private Long id;
     private Long parentProject;

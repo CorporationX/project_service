@@ -47,9 +47,10 @@ public class ProjectService {
         if (subProjectDto.getStages() != null && !subProjectDto.getStages().isEmpty()) {
             List<Stage> stages = new ArrayList<>();
             for (String stageName : subProjectDto.getStages()) {
-                Stage stage = new Stage();
-                stage.setProject(savedSubProject);
-                stage.setStageName(stageName);
+                Stage stage = Stage.builder()
+                        .project(savedSubProject)
+                        .stageName(stageName)
+                        .build();
                 stages.add(stageRepository.save(stage));
             }
             savedSubProject.setStages(stages);
@@ -136,12 +137,13 @@ public class ProjectService {
     private void createMoment(Project project) {
         List<Project> momentProjects = new ArrayList<>(project.getChildren());
         momentProjects.add(project);
-        Moment moment = new Moment();
-        moment.setName(project.getName());
-        moment.setDescription(MomentType.COMPLETED.getDescription());
-        moment.setProjects(momentProjects);
-        moment.setDate(LocalDateTime.now());
-        moment.setCreatedBy(project.getOwnerId());
+        Moment moment = Moment.builder()
+                .name(project.getName())
+                .description(MomentType.COMPLETED.getDescription())
+                .projects(momentProjects)
+                .date(LocalDateTime.now())
+                .createdBy(project.getOwnerId())
+                .build();
         momentRepository.save(moment);
     }
 

@@ -3,7 +3,6 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
