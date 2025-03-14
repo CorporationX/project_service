@@ -19,8 +19,7 @@ public class VacancyPositionFilter implements VacancyFilter {
         if (!isApplicable(filter)) {
             return vacancies;
         }
-        return vacancies.filter(vacancy -> vacancy.getStatus() != null
-                && vacancy.getStatus().toString().toLowerCase()
-                .contains(filter.positionPattern().toString()));
+        return vacancies.filter(vacancy -> vacancy.getPosition() != null
+                && vacancy.getPosition().equals(filter.positionPattern()));
     }
 }

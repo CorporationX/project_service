@@ -20,7 +20,7 @@ public class VacancyDto {
     private String name;
     private String description;
     private TeamRole position;
-    private Project project;
+    private Long projectId;
     private List<Candidate> candidates;
     private LocalDateTime updatedAt;
     private long updatedBy;

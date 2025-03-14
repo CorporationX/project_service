@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static faang.school.projectservice.model.VacancyStatus.CLOSED;
@@ -37,19 +36,20 @@ public class VacancyService {
     private final UserContext userContext;
     private final VacancyMapper mapper;
     private final VacancyCandidateMapper candidateMapper;
-    private final List<VacancyFilter> vacancyFilters;
+    private final List<VacancyFilter> vacancyFilters = new ArrayList<>();
     private final TeamMemberRepository memberRepository;
     private final ProjectRepository projectRepository;
 
     public VacancyCandidateDto createVacancy(VacancyDto vacancyDto) {
         validateCreatorRole();
         Vacancy vacancy  = mapper.toEntity(vacancyDto);
-        Long projectId = vacancyDto.getProject().getId();
+        Long projectId = vacancyDto.getProjectId();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Проект не найден"));
         mapper.updateVacancyFromDto(vacancyDto, vacancy);
-        vacancy.setProject(project); //todo;валидация?
+        vacancy.setProject(project);
         vacancy.setStatus(VacancyStatus.OPEN);
+        validateVacancyData(vacancy);
         updateMetaData(vacancy);
         Vacancy savedVacancy = repository.save(vacancy);
         log.info("Вакансия {} успешно создана.", savedVacancy.getName());
