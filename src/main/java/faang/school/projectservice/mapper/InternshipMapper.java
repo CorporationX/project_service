@@ -5,7 +5,6 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
 import java.util.Collections;
 import java.util.List;
 

@@ -6,8 +6,8 @@ import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ public class InternshipController {
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
         if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
-            throw new NotFoundException("Список стажеров не может быть пустым.");
+            throw new NotFoundException("The list of interns cannot be empty.");
         }
         return internshipService.createInternship(internshipDto);
     }
@@ -26,9 +26,7 @@ public class InternshipController {
     }
 
     public InternshipDto updateInternship(InternshipDto internshipDto) {
-        if (internshipDto == null) {
-            throw new NotFoundException("internshipDto is null");
-        }
+        Objects.requireNonNull(internshipDto, "internshipDto is null");
         return internshipService.updateInternship(internshipDto);
     }
 
@@ -37,9 +35,7 @@ public class InternshipController {
     }
 
     public List<InternshipDto> findInternshipsByFilter(InternshipFilterDto internshipFilterDto) {
-        if (internshipFilterDto == null) {
-            throw new NotFoundException("internshipFilterDto is null");
-        }
+        Objects.requireNonNull(internshipFilterDto, "internshipFilterDto is null");
         return internshipService.getInternshipsFiltered(internshipFilterDto);
     }
 }

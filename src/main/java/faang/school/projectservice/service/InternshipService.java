@@ -15,6 +15,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
+    private static final int INTERNSHIP_DURATION_TWO_MONTHS = 2;
+    private static final int INTERNSHIP_DURATION_THREE_MONTHS = 3;
 
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
@@ -38,8 +41,7 @@ public class InternshipService {
     public InternshipDto getInternshipById(Long internshipId) {
         return internshipRepository.findById(internshipId)
                 .map(internshipMapper::toInternshipDto)
-                .orElseThrow(() -> new NotFoundException("Internship not found"));
-
+                .orElseThrow(() -> new EntityNotFoundException("Стажировка не найдена"));
     }
 
     public List<InternshipDto> getAllInternships() {
@@ -60,24 +62,20 @@ public class InternshipService {
 
     public InternshipDto updateInternship(InternshipDto internshipDto) {
         Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
-                -> new NotFoundException("Internship not found"));
-        //если стажировка еще не началась
+                -> new EntityNotFoundException("Стажировка не найдена"));
+
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
 
-            //если стажировка закончилась
         } else if (internship.getEndDate().isBefore(LocalDateTime.now())) {
             completeInternship(internship);
 
-            // стажировка идет
         } else {
             log.info("Стажировка еще идет");
             handleOngoingInterns(internship);
 
-
-            if (LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(2))) {
+            if (LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_TWO_MONTHS))) {
                 log.info("Прошло более двух месяцев с даты начала стажировки.");
-                //список интернов которые по истечению 2 месяцем все задачи со статусом 1todo
                 handleInternsNotCompletedTasks(internship);
             }
         }
@@ -86,51 +84,37 @@ public class InternshipService {
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
 
-        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate().plusMonths(3))) {
+        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate()
+                .plusMonths(INTERNSHIP_DURATION_THREE_MONTHS))) {
             throw new IllegalArgumentException("Стажировка не может длиться более 3 месяцев.");
         }
 
         Project project = projectRepository.findById(internshipDto.getProjectId()).orElseThrow(()
-                -> new NotFoundException("Project not found"));
+                -> new EntityNotFoundException("Проект не найден"));
 
         List<Team> teams = project.getTeams();
 
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId()).orElseThrow(()
-                -> new NotFoundException("Нет ментора"));
+                -> new EntityNotFoundException("Нет ментора"));
 
         Team team = teamMember.getTeam();
         if (!teams.contains(team)) {
-            throw new NotFoundException(" ментор из другого проекта");
+            throw new EntityNotFoundException(" Ментор из другого проекта");
         }
         Internship internship = internshipMapper.toInternship(internshipDto);
         internship.setProject(project);
         internship.setMentorId(teamMember);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map((id) -> teamMemberRepository.findById(id).orElseThrow(()
-                        -> new RuntimeException("Стажер с ID " + id + " не найден")))
+                        -> new EntityNotFoundException("Стажер с ID " + id + " не найден")))
                 .peek(member -> member.getRoles().add(TeamRole.INTERN))
                 .toList();
         internship.setInterns(teamMembers);
         internship.setCreatedAt(LocalDateTime.now());
-        internship.setEndDate(internship.getStartDate().plusMonths(3));
+        internship.setEndDate(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_THREE_MONTHS));
 
+        log.info("Стажировка успешно создана");
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
-    }
-
-    private boolean checkAllTasksCompleted(TeamMember intern) {
-        List<Stage> stages = intern.getStages();
-        if (stages.isEmpty()) {
-            throw new RuntimeException("Stages is empty");
-        }
-        for (Stage stage : stages) {
-            boolean allTaskCompleted = stage.getTasks().stream()
-                    .allMatch(task -> task.getStatus() == TaskStatus.DONE);
-            if (!allTaskCompleted) {
-                return false;
-            }
-        }
-        // Если все задачи завершены на всех стадиях, возвращаем true
-        return true;
     }
 
     private void completeInternship(Internship internship) {
@@ -138,8 +122,8 @@ public class InternshipService {
                 .filter(this::checkAllTasksCompleted)
                 .toList();
         completedInterns.forEach(intern -> {
-            intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
-            intern.getRoles().remove(TeamRole.INTERN); // Убираем роль стажера
+            intern.getRoles().add(TeamRole.DEVELOPER);
+            intern.getRoles().remove(TeamRole.INTERN);
         });
         List<TeamMember> notCompletedInterns = internship.getInterns().stream()
                 .filter(intern -> !checkAllTasksCompleted(intern))
@@ -156,33 +140,35 @@ public class InternshipService {
         }
     }
 
-    private boolean checkAllTasksNotCompleted(TeamMember intern) {
+    private boolean checkAllTasksStatus(TeamMember intern, TaskStatus status) {
         List<Stage> stages = intern.getStages();
         if (stages.isEmpty()) {
-            throw new RuntimeException("Stages is empty");
+            log.warn("Список стадий пуст для TeamMember: {}", intern.getId());
+            return false;
         }
-        for (Stage stage : stages) {
-            boolean allTaskCompleted = stage.getTasks().stream()
-                    .allMatch(task -> task.getStatus() == TaskStatus.TODO);
-            if (!allTaskCompleted) {
-                return false;
-            }
-        }
-        // Если все задачи завершены на всех стадиях, возвращаем true
-        return true;
+        return stages.stream()
+                .flatMap(stage -> stage.getTasks().stream())
+                .allMatch(task -> task.getStatus().equals(status));
+    }
+
+    private boolean checkAllTasksCompleted(TeamMember intern) {
+        return checkAllTasksStatus(intern, TaskStatus.DONE);
+    }
+
+    private boolean checkAllTasksNotCompleted(TeamMember intern) {
+        return checkAllTasksStatus(intern, TaskStatus.TODO);
     }
 
     private void handleOngoingInterns(Internship internship) {
         List<TeamMember> internsCompletionTask = internship.getInterns().stream()
                 .filter(this::checkAllTasksCompleted)
                 .toList();
-
         if (!internsCompletionTask.isEmpty()) {
             internsCompletionTask.forEach(intern -> {
-                intern.getRoles().add(TeamRole.DEVELOPER); // Добавляем роль разработчика
-                intern.getRoles().remove(TeamRole.INTERN); // Убираем роль стажера
-                internship.getInterns().remove(intern); // Убираем из списка стажеров
-                log.info("Завершенные стажеры: {}", intern); // Логируем каждого завершенного стажера
+                intern.getRoles().add(TeamRole.DEVELOPER);
+                intern.getRoles().remove(TeamRole.INTERN);
+                internship.getInterns().remove(intern);
+                log.info("Завершенные стажеры: {}", intern);
             });
         } else {
             log.info("Нет стажеров, заблаговременно завершивших все задачи");
@@ -196,7 +182,7 @@ public class InternshipService {
 
         if (!internsNotCompletionTask.isEmpty()) {
             internsNotCompletionTask.forEach(intern -> {
-                internship.getInterns().remove(intern); // Убираем из списка стажеров
+                internship.getInterns().remove(intern);
                 log.info("Уволенные стажеры: {}", intern);
             });
         }
