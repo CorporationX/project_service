@@ -44,26 +44,8 @@ public class ProjectService {
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
 
-        if (subProjectDto.getStages() != null && !subProjectDto.getStages().isEmpty()) {
-            List<Stage> stages = new ArrayList<>();
-            for (String stageName : subProjectDto.getStages()) {
-                Stage stage = Stage.builder()
-                        .project(savedSubProject)
-                        .stageName(stageName)
-                        .build();
-                stages.add(stageRepository.save(stage));
-            }
-            savedSubProject.setStages(stages);
-        }
-
-        if (subProjectDto.getChildren() != null && !subProjectDto.getChildren().isEmpty()) {
-            List<Project> children = new ArrayList<>();
-            for (CreateSubProjectDto child : subProjectDto.getChildren()) {
-                child.setParentProject(savedSubProject.getId());
-                children.add(projectMapper.toEntity(create(child)));
-            }
-            savedSubProject.setChildren(children);
-        }
+        addStages(savedSubProject, subProjectDto.getStages());
+        addChildren(savedSubProject, subProjectDto.getChildren());
 
         return projectMapper.toDto(projectRepository.save(savedSubProject));
     }
@@ -132,6 +114,31 @@ public class ProjectService {
         return projects
                 .map(projectMapper::toDto)
                 .toList();
+    }
+
+    private void addStages(Project project, List<String> stageNames) {
+        if (stageNames != null && !stageNames.isEmpty()) {
+            List<Stage> stages = new ArrayList<>();
+            for (String stageName : stageNames) {
+                Stage stage = Stage.builder()
+                        .project(project)
+                        .stageName(stageName)
+                        .build();
+                stages.add(stageRepository.save(stage));
+            }
+            project.setStages(stages);
+        }
+    }
+
+    private void addChildren(Project project, List<CreateSubProjectDto> childrenDtos) {
+        if (childrenDtos != null && !childrenDtos.isEmpty()) {
+            List<Project> updatedChildren = new ArrayList<>();
+            for (CreateSubProjectDto child : childrenDtos) {
+                child.setParentProject(project.getId());
+                updatedChildren.add(projectMapper.toEntity(create(child)));
+            }
+            project.setChildren(updatedChildren);
+        }
     }
 
     private void createMoment(Project project) {
