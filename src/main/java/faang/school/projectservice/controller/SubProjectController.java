@@ -19,4 +19,9 @@ public class SubProjectController {
     public ProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
         return service.create(subProjectDto);
     }
+
+    @PostMapping("/update")
+    public ProjectDto update(@RequestBody ProjectDto projectDto) {
+        return service.update(projectDto);
+    }
 }

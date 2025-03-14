@@ -4,10 +4,13 @@ import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.MomentType;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,6 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +27,7 @@ import java.util.List;
 @Transactional
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final MomentRepository momentRepository;
     private final StageRepository stageRepository;
     private final CreateSubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;
@@ -57,13 +62,60 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(savedSubProject));
     }
 
+    public ProjectDto update(ProjectDto projectDto) {
+        projectDto.validateCommonFields();
+
+        Project project = projectRepository.findById(projectDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Parent project with id = " + projectDto.getId() + " doesn't exist"));
+        ProjectStatus status = projectDto.getStatus();
+        ProjectVisibility visibility = projectDto.getVisibility();
+
+        if (project.getChildren() != null && !project.getChildren().isEmpty()) {
+            List<Project> subProjects = new ArrayList<>(project.getChildren());
+            boolean areAllCompleted  = subProjects.stream()
+                    .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
+
+            boolean isAnyPublic = subProjects.stream()
+                    .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
+
+            if (status == ProjectStatus.COMPLETED) {
+                if (areAllCompleted ) {
+                    createMoment(project);
+                } else {
+                    throw new IllegalArgumentException("Not all subprojects are completed");
+                }
+            }
+            if (visibility == ProjectVisibility.PRIVATE && isAnyPublic) {
+                subProjects.stream()
+                        .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
+                        .forEach(subProject -> {
+                            subProject.setVisibility(ProjectVisibility.PRIVATE);
+                            projectRepository.save(subProject);
+                        });
+            }
+        }
+
+        project.setVisibility(visibility);
+        project.setStatus(status);
+        project.setUpdatedAt(LocalDateTime.now());
+
+        return projectMapper.toDto(project);
+    }
+
+    private void createMoment(Project project) {
+        List<Project> momentProjects = new ArrayList<>(project.getChildren());
+        momentProjects.add(project);
+        Moment moment = new Moment();
+        moment.setName(project.getName());
+        moment.setDescription(MomentType.COMPLETED.getDescription());
+        moment.setProjects(momentProjects);
+        moment.setDate(LocalDateTime.now());
+        moment.setCreatedBy(project.getOwnerId());
+        momentRepository.save(moment);
+    }
+
     private Project validateAndRetrieveParentProject(CreateSubProjectDto subProjectDto) {
-        if (subProjectDto.getParentProject() == null) {
-            throw new IllegalArgumentException("Parent project is required");
-        }
-        if (subProjectDto.getVisibility() == null) {
-            throw new IllegalArgumentException("Visibility project is required");
-        }
+        subProjectDto.validateCommonFields();
 
         var parentId = subProjectDto.getParentProject();
         Project parentProject = projectRepository.findById(parentId)
