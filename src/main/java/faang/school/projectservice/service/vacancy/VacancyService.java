@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -28,7 +29,6 @@ public class VacancyService {
     private final UserContext userContext;
     private final VacancyRepository vacancyRepository;
     private final TeamMemberService teamMemberService;
-    private final Candidate candidate;
     private final VacancyMapper vacancyMapper;
     private final ProjectService projectService;
     private final List<VacancyFilter> vacancyFilters;
@@ -97,13 +97,15 @@ public class VacancyService {
     }
 
     private void checkCandidateNotMember(VacancyDto vacancyDto) {
-        List<TeamMember> teamMembers = teamMemberService
-                .findByUserId(candidate.getUserId());
 
-        if (teamMembers.stream()
-                .noneMatch(teamMember -> teamMember.getUserId() != candidate.getUserId())) {
-            throw new IllegalArgumentException("Candidate is a team member already");
-        }
+        vacancyDto.getCandidateIds().forEach(candidateId -> {
+            List<TeamMember> teamMembers = new ArrayList<>(teamMemberService.findByUserId(candidateId));
+
+            if (teamMembers.stream()
+                    .anyMatch(teamMember -> teamMember.getUserId() == candidateId)) {
+                throw new IllegalArgumentException("Candidate " + candidateId + " is a team member already");
+            }
+        });
     }
 
     private void checkVacancyPosition(VacancyDto vacancyDto) {

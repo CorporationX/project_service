@@ -1,9 +1,6 @@
 package faang.school.projectservice.service.teammember;
 
-import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
