@@ -113,7 +113,7 @@ public class VacancyService {
                 .map(String::valueOf)
                 .noneMatch(string -> string.equals(vacancyDto.getPosition()))) {
             throw new IllegalArgumentException("Vacancy has no required position value");
-        };
+        }
     }
 
     private void checkVacancyProject(VacancyDto vacancyDto) {
