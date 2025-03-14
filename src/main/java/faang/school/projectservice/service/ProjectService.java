@@ -2,6 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.SubProjectsFilterDto;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class ProjectService {
     private final StageRepository stageRepository;
     private final CreateSubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;
+    private final List<SubProjectFilter> subProjectFilters;
 
     public ProjectDto create(CreateSubProjectDto subProjectDto) {
         Project parentProject = validateAndRetrieveParentProject(subProjectDto);
@@ -39,7 +44,7 @@ public class ProjectService {
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
 
-        if (subProjectDto.getStages()!=null && !subProjectDto.getStages().isEmpty()) {
+        if (subProjectDto.getStages() != null && !subProjectDto.getStages().isEmpty()) {
             List<Stage> stages = new ArrayList<>();
             for (String stageName : subProjectDto.getStages()) {
                 Stage stage = new Stage();
@@ -50,7 +55,7 @@ public class ProjectService {
             savedSubProject.setStages(stages);
         }
 
-        if (subProjectDto.getChildren()!=null && !subProjectDto.getChildren().isEmpty()) {
+        if (subProjectDto.getChildren() != null && !subProjectDto.getChildren().isEmpty()) {
             List<Project> children = new ArrayList<>();
             for (CreateSubProjectDto child : subProjectDto.getChildren()) {
                 child.setParentProject(savedSubProject.getId());
@@ -72,14 +77,14 @@ public class ProjectService {
 
         if (project.getChildren() != null && !project.getChildren().isEmpty()) {
             List<Project> subProjects = new ArrayList<>(project.getChildren());
-            boolean areAllCompleted  = subProjects.stream()
+            boolean areAllCompleted = subProjects.stream()
                     .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
 
             boolean isAnyPublic = subProjects.stream()
                     .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
 
             if (status == ProjectStatus.COMPLETED) {
-                if (areAllCompleted ) {
+                if (areAllCompleted) {
                     createMoment(project);
                 } else {
                     throw new IllegalArgumentException("Not all subprojects are completed");
@@ -100,6 +105,32 @@ public class ProjectService {
         project.setUpdatedAt(LocalDateTime.now());
 
         return projectMapper.toDto(project);
+    }
+
+    public List<ProjectDto> getSubProjects(SubProjectsFilterDto filter) {
+        var projectId = filter.projectId();
+        if (projectId == null) {
+            throw new IllegalArgumentException("Project id is required");
+        }
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project with id = " + projectId + " doesn't exist"));
+
+        if (project.getChildren() == null || project.getChildren().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Stream<Project> projects = project.getChildren().stream();
+
+        for (SubProjectFilter subProjectFilter : subProjectFilters) {
+            if (subProjectFilter.isApplicable(filter)) {
+                projects = subProjectFilter.apply(projects, filter);
+            }
+        }
+
+        return projects
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     private void createMoment(Project project) {
