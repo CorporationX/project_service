@@ -6,14 +6,15 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@NoArgsConstructor
 @Data
+@Builder
+@AllArgsConstructor
 public class VacancyDto {
     private long vacancyId;
     private String name;

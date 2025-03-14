@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,11 +48,16 @@ public class VacancyService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Проект не найден"));
         mapper.updateVacancyFromDto(vacancyDto, vacancy);
-        vacancy.setProject(project);
+        vacancy.setProject(project); //todo;валидация?
         vacancy.setStatus(VacancyStatus.OPEN);
         updateMetaData(vacancy);
         Vacancy savedVacancy = repository.save(vacancy);
+        log.info("Вакансия {} успешно создана.", savedVacancy.getName());
+        if (project.getVacancies() == null) {
+            project.setVacancies(new ArrayList<>());
+        }
         project.getVacancies().add(savedVacancy);
+
         return candidateMapper.toDto(savedVacancy);
     }
 
@@ -81,7 +87,7 @@ public class VacancyService {
         Stream<Vacancy> vacancyStream = vacancyList.stream();
         return filterVacancies(vacancyStream, filter)
                 .map(candidateMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Stream<Vacancy> filterVacancies(Stream<Vacancy> vacancies, VacancyFilterDto filters) {
@@ -105,7 +111,7 @@ public class VacancyService {
         return candidateMapper.toDto(vacancy);
     }
 
-    private boolean validateCreatorRole() {
+    private void validateCreatorRole() {
         TeamMember creator = memberRepository.findById(
                 userContext.getUserId()).orElseThrow(() ->
                 new DataValidationException("Пользователь не найден."));
@@ -115,7 +121,6 @@ public class VacancyService {
         if (!hasValidRoles) {
             throw new DataValidationException("Вы не имеете прав на публикацию вакансий.");
         }
-        return true;
     }
 
     private void validateCandidateAdding(Vacancy vacancy, Candidate candidate) {
