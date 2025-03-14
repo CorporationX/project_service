@@ -43,7 +43,7 @@ public class InternshipService {
     public InternshipDto getInternshipById(Long internshipId) {
         return internshipRepository.findById(internshipId)
                 .map(internshipMapper::toInternshipDto)
-                .orElseThrow(() -> new EntityNotFoundException("Стажировка не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Internship not found for search by id"));
     }
 
     public List<InternshipDto> getAllInternships() {
@@ -66,7 +66,7 @@ public class InternshipService {
     public InternshipDto updateInternship(InternshipDto internshipDto) {
         Objects.requireNonNull(internshipDto, "internshipDto is null");
         Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
-                -> new EntityNotFoundException("Стажировка не найдена"));
+                -> new EntityNotFoundException("Internship not found for update"));
 
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
@@ -75,11 +75,11 @@ public class InternshipService {
             completeInternship(internship);
 
         } else {
-            log.info("Стажировка еще идет");
+            log.info("The internship is still ongoing");
             handleOngoingInterns(internship);
 
             if (LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_TWO_MONTHS))) {
-                log.info("Прошло более двух месяцев с даты начала стажировки.");
+                log.info("More than two months have passed since the start date of the internship.");
                 handleInternsNotCompletedTasks(internship);
             }
         }
@@ -89,39 +89,39 @@ public class InternshipService {
     public InternshipDto createInternship(InternshipDto internshipDto) {
 
         if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
-            throw new InternshipGetInternsIdException("The list of interns cannot be empty.");
+            throw new InternshipGetInternsIdException("The list of interns is empty");
         }
 
         if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate()
                 .plusMonths(INTERNSHIP_DURATION_THREE_MONTHS))) {
-            throw new IllegalArgumentException("Стажировка не может длиться более 3 месяцев.");
+            throw new IllegalArgumentException("The internship cannot last more than 3 months.");
         }
 
         Project project = projectRepository.findById(internshipDto.getProjectId()).orElseThrow(()
-                -> new EntityNotFoundException("Проект не найден"));
+                -> new EntityNotFoundException("Project not found"));
 
         List<Team> teams = project.getTeams();
 
         TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId()).orElseThrow(()
-                -> new EntityNotFoundException("Нет ментора"));
+                -> new EntityNotFoundException("No mentor"));
 
         Team team = teamMember.getTeam();
         if (!teams.contains(team)) {
-            throw new EntityNotFoundException(" Ментор из другого проекта");
+            throw new EntityNotFoundException("Mentor from another project");
         }
         Internship internship = internshipMapper.toInternship(internshipDto);
         internship.setProject(project);
         internship.setMentorId(teamMember);
         List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
                 .map((id) -> teamMemberRepository.findById(id).orElseThrow(()
-                        -> new EntityNotFoundException("Стажер с ID " + id + " не найден")))
+                        -> new EntityNotFoundException("TeamMembers id " + id + " not found")))
                 .peek(member -> member.getRoles().add(TeamRole.INTERN))
                 .toList();
         internship.setInterns(teamMembers);
         internship.setCreatedAt(LocalDateTime.now());
         internship.setEndDate(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_THREE_MONTHS));
 
-        log.info("Стажировка успешно создана");
+        log.info("Internship successfully created");
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
@@ -137,8 +137,8 @@ public class InternshipService {
                 .filter(intern -> !checkAllTasksCompleted(intern))
                 .toList();
         internship.getInterns().removeAll(notCompletedInterns);
-        log.info("Стажировка завершена. Завершенные стажеры: {}", completedInterns);
-        log.info("Удаленные стажеры: {}", notCompletedInterns);
+        log.info("Internship Completed. Completed Interns: {}", completedInterns);
+        log.info("Remote Interns: {}", notCompletedInterns);
     }
 
     private void addNewInterns(Internship internship, List<Long> internsId) {
@@ -151,7 +151,7 @@ public class InternshipService {
     private boolean checkAllTasksStatus(TeamMember intern, TaskStatus status) {
         List<Stage> stages = intern.getStages();
         if (stages.isEmpty()) {
-            log.warn("Список стадий пуст для TeamMember: {}", intern.getId());
+            log.warn("Stage list is empty for TeamMember: {}", intern.getId());
             return false;
         }
         return stages.stream()
@@ -176,10 +176,10 @@ public class InternshipService {
                 intern.getRoles().add(TeamRole.DEVELOPER);
                 intern.getRoles().remove(TeamRole.INTERN);
                 internship.getInterns().remove(intern);
-                log.info("Завершенные стажеры: {}", intern);
+                log.info("Completed Interns: {}", intern);
             });
         } else {
-            log.info("Нет стажеров, заблаговременно завершивших все задачи");
+            log.info("There are no interns who have completed all tasks in advance.");
         }
     }
 
@@ -191,7 +191,7 @@ public class InternshipService {
         if (!internsNotCompletionTask.isEmpty()) {
             internsNotCompletionTask.forEach(intern -> {
                 internship.getInterns().remove(intern);
-                log.info("Уволенные стажеры: {}", intern);
+                log.info("Dismissed interns: {}", intern);
             });
         }
     }
