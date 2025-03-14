@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectStatus;
 

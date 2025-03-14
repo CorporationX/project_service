@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 
@@ -14,6 +14,4 @@ public interface ProjectMapper {
     Project projectDtoToProject(ProjectDto projectDto);
 
     List<ProjectDto> projectListToProjectDtoList(List<Project> projectList);
-    List<Project> projectDtoListToProjectList(List<ProjectDto> projectDtoList);
-
 }
