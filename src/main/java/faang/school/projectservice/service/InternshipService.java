@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
+import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 
@@ -51,6 +53,7 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getInternshipsFiltered(InternshipFilterDto filterDto) {
+        Objects.requireNonNull(filterDto, "internshipFilterDto is null");
         Stream<Internship> internshipsStream = internshipRepository.findAll().stream();
         for (InternshipFilter internshipFilter : internshipFilters) {
             if (internshipFilter.isApplicable(filterDto)) {
@@ -61,6 +64,7 @@ public class InternshipService {
     }
 
     public InternshipDto updateInternship(InternshipDto internshipDto) {
+        Objects.requireNonNull(internshipDto, "internshipDto is null");
         Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
                 -> new EntityNotFoundException("Стажировка не найдена"));
 
@@ -83,6 +87,10 @@ public class InternshipService {
     }
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
+
+        if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
+            throw new InternshipGetInternsIdException("The list of interns cannot be empty.");
+        }
 
         if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate()
                 .plusMonths(INTERNSHIP_DURATION_THREE_MONTHS))) {
