@@ -160,6 +160,7 @@ public class InternshipService {
         oldList.removeAll(newList);
         if (!oldList.isEmpty()) {
             log.info("There are no people who passed the test early or were dismissed early.");
+            return;
         }
         for (TeamMember intern : oldList) {
             if(checkAllTasksCompleted(intern)){
