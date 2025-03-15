@@ -11,13 +11,14 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.slf4j.ILoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
 
     @Mapping(target = "parentTaskId", source = "parentTask.id")
@@ -37,7 +38,7 @@ public interface TaskMapper {
     }
 
     @Mapping(target = "parentTask.id", source = "parentTaskId")
-    void updateEntityFromDto(@MappingTarget Task task, TaskUpdateDto updateDto);
+    void updateEntityFromDto(@MappingTarget Task task, TaskUpdateDto updateDto, @Context TaskRepository repository);
 
     @AfterMapping
     default void mapLinkedTasksIds(Task task, @MappingTarget TaskReadDto taskReadDto) {
@@ -51,9 +52,6 @@ public interface TaskMapper {
 
     @AfterMapping
     default void mapIdsToTasks(@MappingTarget Task task, TaskUpdateDto updateDto, @Context TaskRepository repository) {
-        if (task == null || updateDto == null || repository == null) {
-            throw new IllegalArgumentException("Переданы null параметры в метод mapIdsToTasks");
-        }
 
         if (updateDto.getParentTaskId() != null) {
             Task referenceById = repository.getReferenceById(updateDto.getParentTaskId());

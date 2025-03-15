@@ -43,8 +43,7 @@ public class TaskService {
     public TaskReadDto update(TaskUpdateDto updateDto) {
         Task task = getTaskById(updateDto.getId());
         verifyUserProjectMembership(task.getProject().getId());
-        taskMapper.updateEntityFromDto(task, updateDto);
-        taskMapper.mapIdsToTasks(task, updateDto, taskRepository);
+        taskMapper.updateEntityFromDto(task, updateDto, taskRepository);
         taskRepository.save(task);
         return taskMapper.toDto(task);
     }
@@ -68,7 +67,6 @@ public class TaskService {
 
     public List<TaskReadDto> getAllTasksByProjectId(long projectId) {
         verifyUserProjectMembership(projectId);
-        Specification<Task> spec = Specification.where(null);
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
 
         return tasks.stream()
@@ -107,7 +105,7 @@ public class TaskService {
                 .toList();
 
         if (!membersIdList.contains(currentUserId)) {
-            throw new BusinessException("Невозможно создать/изменить задачу пользователю, который не является участником проекта");
+            throw new BusinessException("Пользователь не является участником проекта и не может выполнять операции с задачами.");
         }
     }
 
