@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.vacancy.VacancyCandidateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +58,7 @@ public class VacancyControllerTest {
     public void positiveGetVacancyInfoById() {
         long vacancyId = 1;
         VacancyCandidateDto vacancyCandidateDto =
-                new VacancyCandidateDto(1, "bob", candidates, MANAGER);
+                new VacancyCandidateDto(1, 4, "bob", candidates, MANAGER);
         when(service.getVacancyInfoById(vacancyId)).thenReturn(vacancyCandidateDto);
         VacancyCandidateDto result = controller.getVacancyInfoBiId(vacancyId);
         assertNotNull(result);

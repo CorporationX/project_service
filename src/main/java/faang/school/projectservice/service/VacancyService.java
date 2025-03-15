@@ -45,7 +45,7 @@ public class VacancyService {
         Vacancy vacancy  = mapper.toEntity(vacancyDto);
         Long projectId = vacancyDto.getProjectId();
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataValidationException("Проект не найден"));
+                .orElseThrow(() -> new DataValidationException("Проект не найден."));
         mapper.updateVacancyFromDto(vacancyDto, vacancy);
         vacancy.setProject(project);
         vacancy.setStatus(VacancyStatus.OPEN);
@@ -67,14 +67,17 @@ public class VacancyService {
         if (vacancyDto == null) {
             throw new DataValidationException("Вакансия не может быть пустой");
         }
+
         Vacancy targetVacancy = repository.findById(vacancyId)
                 .orElseThrow(() -> new DataValidationException("Вакансия не найдена"));
-
         mapper.updateVacancyFromDto(vacancyDto, targetVacancy);
 
+        if (vacancyDto.getCandidates() != null
+                && !vacancyDto.getCandidates().equals(targetVacancy.getCandidates())) {
+            validateAndAddNewCandidates(targetVacancy, vacancyDto.getCandidates());
+        }
         validateVacancyData(targetVacancy);
-        validateVacancyClose(targetVacancy);
-        validateCandidateAdding(targetVacancy, new Candidate());
+        validateVacancyClose(vacancyDto);
 
         updateMetaData(targetVacancy);
         repository.save(targetVacancy);
@@ -123,39 +126,38 @@ public class VacancyService {
         }
     }
 
-    private void validateCandidateAdding(Vacancy vacancy, Candidate candidate) {
-        if (existUserRole(new Candidate().getUserId())) {
-            vacancy.getCandidates().add(candidate);
-        } else {
-            throw new DataValidationException("Кандидат не может быть добавлен");
-        }
+    private void validateAndAddNewCandidates(Vacancy vacancy, List<Candidate> candidates) {
+        candidates.stream()
+                .filter(candidate -> !vacancy.getCandidates().contains(candidate))
+                .forEach(candidate -> addAndValidateCandidate(vacancy, candidate));
     }
 
-    private boolean existUserRole(Long userId) {
-        TeamMember participant = memberRepository.findById(
-                userContext.getUserId()).orElseThrow(() ->
+    private void addAndValidateCandidate(Vacancy vacancy, Candidate candidate) {
+        validateUserHasNoRoles(candidate.getUserId());
+        vacancy.getCandidates().add(candidate);
+    }
+
+    private void validateUserHasNoRoles(Long userId) {
+        TeamMember participant = memberRepository.findById(userId).orElseThrow(() ->
                 new DataValidationException("Пользователь не найден"));
-        List<TeamRole> allRoles = List.of(TeamRole.values());
         List<TeamRole> participantRoles = participant.getRoles();
-        boolean isMember = participantRoles.stream().anyMatch(allRoles::contains);
-        if (isMember) {
+        if (!participantRoles.isEmpty()) {
             throw new DataValidationException("Пользователь состоит в компании");
         }
-        return true;
     }
 
-    private boolean hiredCandidates(Vacancy vacancy) {
-        List<Candidate> candidatesList = vacancy.getCandidates();
+    private boolean hiredCandidates(VacancyDto vacancyDto) {
+        List<Candidate> candidatesList = vacancyDto.getCandidates();
         int actualCount = candidatesList.size();
-        int requiredCount = vacancy.getCount();
+        int requiredCount = vacancyDto.getCount();
         if (actualCount != requiredCount) {
             throw new DataValidationException("Достаточное количество кандидатов не набрано");
         }
         return true;
     }
 
-    private void validateVacancyClose(Vacancy vacancy) {
-        if (vacancy.getStatus() == CLOSED && !hiredCandidates(vacancy)) {
+    private void validateVacancyClose(VacancyDto vacancyDto) {
+        if (vacancyDto.getStatus() == CLOSED && !hiredCandidates(vacancyDto)) {
             throw new DataValidationException(
                     "Нельзя закрыть вакансию пока не набрано достаточное количество кандидатов");
         }

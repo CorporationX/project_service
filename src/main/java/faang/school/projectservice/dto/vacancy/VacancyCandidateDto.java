@@ -7,5 +7,5 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record VacancyCandidateDto(long count, String name, List<Candidate> candidates, TeamRole position) {
+public record VacancyCandidateDto(long id, long count, String name, List<Candidate> candidates, TeamRole position) {
 }
