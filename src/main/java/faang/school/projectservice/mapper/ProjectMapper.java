@@ -12,12 +12,10 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);
+
     ProjectDto toDto(Project project);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "name", ignore = true)
-    @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "visibility", ignore = true)
-     void updateProject(ProjectDto projectDto, @MappingTarget Project project);
+    void update(ProjectDto projectDto, @MappingTarget Project project);
 }

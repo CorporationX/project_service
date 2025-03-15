@@ -40,23 +40,24 @@ logging:
 calculations_messages_processing:
   enabled: true
 
-avatar:
-  max-file-size: 5242880
-  max-image-size: 512
-
-project-cover:
-  max-file-size: 5242880
-  max-vertical-image-resolution: 512
-  max-horizontal-image-resolution: 1080
-  image-output-quality: 0.5
-  image-output-scale: 1
-  folder-name: projects_covers
+minio:
+  team-avatar:
+    max-file-size: 5242880
+    max-image-size: 512
+    folder-name: team_avatar
+  project-cover:
+    max-size: 5242880
+    max-vertical-resolution: 512
+    max-horizontal-resolution: 1080
+    compressed-output-quality: 0.5
+    compressed-output-scale: 1
+    folder-name: projects_covers
 
 services:
   s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
+    endpoint: http://localhost:${MINIO_PORT:9000}
+    accessKey: ${MINIO_ACCESS_KEY:user}
+    secretKey: ${MINIO_SECRET_KEY:password}
     bucketName: projectbucket
     isMocked: false
   payment-service:

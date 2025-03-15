@@ -4,7 +4,8 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exceptionhandler.GlobalExceptionHandler;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectCoverService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,22 +26,26 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import static faang.school.projectservice.ProjectTestConstants.CHAIR_PROJECT_ID;
-import static faang.school.projectservice.ProjectTestConstants.OWNER_ID;
-import static faang.school.projectservice.ProjectTestConstants.PROJECT_COVER_IMAGE_ID;
-import static faang.school.projectservice.ProjectTestConstants.PROJECT_COVER_MOCK_MULTIPART_FILE;
+import static faang.school.projectservice.constant.ImageTestConstants.IMAGE_MOCK_MULTIPART_FILE;
+import static faang.school.projectservice.constant.ProjectTestConstants.PROJECT_COVER_IMAGE_ID;
+import static faang.school.projectservice.constant.ProjectTestConstants.TEST_PROJECT_ID;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectControllerTest {
-    private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Mock
+    private ProjectService projectService;
+
+    @Mock
+    private ProjectCoverService projectCoverService;
 
     @InjectMocks
     private ProjectController projectController;
 
-    @Mock
-    private ProjectService projectService;
+    private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +67,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.createProject(Mockito.any(ProjectDto.class))).thenReturn(projectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -85,7 +90,7 @@ public class ProjectControllerTest {
         projectDto.setDescription("Some description");
         projectDto.setStatus(ProjectStatus.CREATED);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -99,7 +104,7 @@ public class ProjectControllerTest {
         projectDto.setDescription(" ");
         projectDto.setStatus(ProjectStatus.CREATED);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -113,9 +118,9 @@ public class ProjectControllerTest {
         updatedProjectDto.setDescription("Project description");
         updatedProjectDto.setStatus(ProjectStatus.ON_HOLD);
 
-        Mockito.when(projectService.updatedProject(Mockito.any(ProjectDto.class))).thenReturn(updatedProjectDto);
+        Mockito.when(projectService.updateProject(Mockito.any(ProjectDto.class))).thenReturn(updatedProjectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/project")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -123,12 +128,13 @@ public class ProjectControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Project description"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value("ON_HOLD"));
 
-        Mockito.verify(projectService, Mockito.times(1)).updatedProject(updatedProjectDto);
+        Mockito.verify(projectService, Mockito.times(1)).updateProject(updatedProjectDto);
     }
 
     @Test
     void getProjectsWithFilter() throws Exception {
         long userId = 10L;
+
         ProjectFilterDto nameFilter = new ProjectFilterDto();
         nameFilter.setNamePattern("chairs");
 
@@ -138,7 +144,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getAllAvailableProjectsForUserWithFilter(nameFilter, userId)).thenReturn(List.of(dto));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects/filter/10")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project/user/{userId}/filter", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nameFilter)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -158,7 +164,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getAllAvailableProjectsForUser(userId)).thenReturn(List.of(dto));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/user/1")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/user/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Project name"))
@@ -177,7 +183,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getProjectById(projectId)).thenReturn(dto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/20")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/{id}", projectId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(20))
@@ -187,31 +193,29 @@ public class ProjectControllerTest {
     @Test
     void addProjectCover_shouldBeCompletedSuccessfully() throws Exception {
 
-        Mockito.when(projectService.addProjectCover(CHAIR_PROJECT_ID, PROJECT_COVER_MOCK_MULTIPART_FILE, OWNER_ID))
+        Mockito.when(projectCoverService.addProjectCover(TEST_PROJECT_ID, IMAGE_MOCK_MULTIPART_FILE))
                 .thenReturn(PROJECT_COVER_IMAGE_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{projectId}/cover",
-                                CHAIR_PROJECT_ID)
-                        .file(PROJECT_COVER_MOCK_MULTIPART_FILE)
-                        .header("x-user-id", OWNER_ID))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/project/{id}/cover",
+                                TEST_PROJECT_ID)
+                        .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(PROJECT_COVER_IMAGE_ID));
+                .andExpect(content().string(PROJECT_COVER_IMAGE_ID));
 
-        Mockito.verify(projectService, Mockito.times(1))
-                .addProjectCover(CHAIR_PROJECT_ID, PROJECT_COVER_MOCK_MULTIPART_FILE, OWNER_ID);
+        Mockito.verify(projectCoverService, Mockito.times(1))
+                .addProjectCover(TEST_PROJECT_ID, IMAGE_MOCK_MULTIPART_FILE);
     }
 
     @Test
     void deleteProjectCover_shouldBeCompletedSuccessfully() throws Exception {
 
-        Mockito.when(projectService.deleteProjectCover(CHAIR_PROJECT_ID, OWNER_ID)).thenReturn(PROJECT_COVER_IMAGE_ID);
+        Mockito.when(projectCoverService.deleteProjectCover(TEST_PROJECT_ID)).thenReturn(PROJECT_COVER_IMAGE_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectId}/cover", CHAIR_PROJECT_ID)
-                        .header("x-user-id", OWNER_ID))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/project/{id}/cover", TEST_PROJECT_ID))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(PROJECT_COVER_IMAGE_ID));
+                .andExpect(content().string(PROJECT_COVER_IMAGE_ID));
 
-        Mockito.verify(projectService, Mockito.times(1)).deleteProjectCover(CHAIR_PROJECT_ID, OWNER_ID);
+        Mockito.verify(projectCoverService, Mockito.times(1)).deleteProjectCover(TEST_PROJECT_ID);
     }
 
     @Test
@@ -219,13 +223,13 @@ public class ProjectControllerTest {
         byte[] projectCoverData = PROJECT_COVER_IMAGE_ID.getBytes();
         InputStream projectCoverInputStream = new ByteArrayInputStream(projectCoverData);
 
-        Mockito.when(projectService.getProjectCover(CHAIR_PROJECT_ID)).thenReturn(projectCoverInputStream);
+        Mockito.when(projectCoverService.getProjectCover(TEST_PROJECT_ID)).thenReturn(projectCoverInputStream);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectId}/cover", CHAIR_PROJECT_ID))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/{id}/cover", TEST_PROJECT_ID))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-                .andExpect(MockMvcResultMatchers.content().bytes(projectCoverData));
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(content().bytes(projectCoverData));
 
-        Mockito.verify(projectService, Mockito.times(1)).getProjectCover(CHAIR_PROJECT_ID);
+        Mockito.verify(projectCoverService, Mockito.times(1)).getProjectCover(TEST_PROJECT_ID);
     }
 }

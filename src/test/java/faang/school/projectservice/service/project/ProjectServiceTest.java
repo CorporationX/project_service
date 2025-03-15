@@ -1,9 +1,8 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.BadRequestException;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -15,7 +14,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.minio.ProjectCoverMinioService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static faang.school.projectservice.ProjectTestConstants.CHAIR_PROJECT_ID;
-import static faang.school.projectservice.ProjectTestConstants.PROJECT_COVER_INPUT_STREAM;
-import static faang.school.projectservice.ProjectTestConstants.PROJECT_COVER_MULTIPART_FILE;
-import static faang.school.projectservice.ProjectTestConstants.NOT_OWNER_ID;
-import static faang.school.projectservice.ProjectTestConstants.OWNER_ID;
-import static faang.school.projectservice.ProjectTestConstants.PROJECT_COVER_IMAGE_ID;
+import static faang.school.projectservice.constant.ProjectTestConstants.OWNER_ID;
+import static faang.school.projectservice.constant.ProjectTestConstants.TEST_PROJECT;
+import static faang.school.projectservice.constant.ProjectTestConstants.TEST_PROJECT_ID;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -48,31 +43,19 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepositoryAdapter projectRepositoryAdapter;
 
-    @Captor
-    private ArgumentCaptor<Project> captor;
-
     @Spy
     private ProjectMapperImpl projectMapper;
 
-    @Mock
-    private ProjectCoverMinioService projectCoverMinioService;
-
     private ProjectService projectService;
 
+    @Captor
+    private ArgumentCaptor<Project> captor;
+
     private final ProjectDto generalDto = new ProjectDto();
-
     private final TeamMember teamMember = new TeamMember();
-
     private final Team team = new Team();
-
-    private Project chairProject;
-    private Project repairComputer;
-    private Project lifeStyleBlog;
-
     private final List<Project> projects = new ArrayList<>();
-
     private final ProjectFilterDto filter = new ProjectFilterDto();
-
     private final List<ProjectFilter> projectFilters = new ArrayList<>();
 
     @BeforeEach
@@ -80,35 +63,25 @@ public class ProjectServiceTest {
         teamMember.setUserId(OWNER_ID);
         team.setTeamMembers(List.of(teamMember));
 
-        chairProject = Project.builder()
-                .id(CHAIR_PROJECT_ID)
-                .name("Chairs hand made")
-                .description("some description")
-                .ownerId(OWNER_ID)
-                .visibility(ProjectVisibility.PUBLIC)
-                .status(ProjectStatus.CREATED)
-                .build();
-
-        repairComputer = Project.builder()
-                .name("Repair computers")
+        Project repairComputer = Project.builder()
+                .name("Computer repair")
                 .visibility(ProjectVisibility.PUBLIC)
                 .teams(List.of(team))
                 .build();
 
-        lifeStyleBlog = Project.builder()
-                .name("Blog lifestyle")
+        Project lifeStyleBlog = Project.builder()
+                .name("Lifestyle blog")
                 .visibility(ProjectVisibility.PRIVATE)
                 .teams(List.of(team))
                 .build();
 
-        projects.add(chairProject);
+        projects.add(TEST_PROJECT);
         projects.add(repairComputer);
         projects.add(lifeStyleBlog);
 
         projectFilters.add(new ProjectNameFilter());
 
-        projectService = new ProjectService(projectRepository, projectRepositoryAdapter, projectMapper, projectFilters,
-                projectCoverMinioService);
+        projectService = new ProjectService(projectRepository, projectRepositoryAdapter, projectMapper, projectFilters);
     }
 
     @Test
@@ -154,7 +127,8 @@ public class ProjectServiceTest {
         entityProject.setName(projectName);
         entityProject.setDescription(projectDescription);
 
-        Mockito.when(projectRepository.existsByOwnerIdAndName(Mockito.eq(OWNER_ID), Mockito.eq(projectName))).thenReturn(false);
+        Mockito.when(projectRepository.existsByOwnerIdAndName(Mockito.eq(OWNER_ID), Mockito.eq(projectName)))
+                .thenReturn(false);
         Mockito.when(projectMapper.toEntity(Mockito.any(ProjectDto.class))).thenReturn(entityProject);
         Mockito.when(projectRepository.save(Mockito.any(Project.class))).thenReturn(entityProject);
         Mockito.when(projectMapper.toDto(Mockito.any(Project.class))).thenReturn(expectedDto);
@@ -185,7 +159,7 @@ public class ProjectServiceTest {
 
         Mockito.when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.updatedProject(generalDto));
+        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.updateProject(generalDto));
     }
 
     @Test
@@ -196,19 +170,19 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
 
-        Mockito.when(projectRepository.findById(1L)).thenReturn(Optional.of(chairProject));
-        Mockito.doNothing().when(projectMapper).updateProject(expectedDto, chairProject);
-        Mockito.when(projectMapper.toDto(chairProject)).thenReturn(expectedDto);
+        Mockito.when(projectRepository.findById(1L)).thenReturn(Optional.of(TEST_PROJECT));
+        Mockito.doNothing().when(projectMapper).update(expectedDto, TEST_PROJECT);
+        Mockito.when(projectMapper.toDto(TEST_PROJECT)).thenReturn(expectedDto);
 
-        ProjectDto result = projectService.updatedProject(expectedDto);
+        ProjectDto result = projectService.updateProject(expectedDto);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(expectedDto.getDescription(), result.getDescription());
         Assertions.assertEquals(expectedDto.getStatus(), result.getStatus());
 
         Mockito.verify(projectRepository, Mockito.times(1)).findById(1L);
-        Mockito.verify(projectMapper, Mockito.times(1)).updateProject(expectedDto, chairProject);
-        Mockito.verify(projectMapper, Mockito.times(1)).toDto(chairProject);
+        Mockito.verify(projectMapper, Mockito.times(1)).update(expectedDto, TEST_PROJECT);
+        Mockito.verify(projectMapper, Mockito.times(1)).toDto(TEST_PROJECT);
     }
 
     @Test
@@ -222,10 +196,10 @@ public class ProjectServiceTest {
                     .build();
         });
 
-        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 100L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, TEST_PROJECT_ID);
 
         Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals("Chairs hand made", result.get(0).getName());
+        Assertions.assertEquals("Test", result.get(0).getName());
         Assertions.assertEquals(ProjectVisibility.PUBLIC, result.get(0).getVisibility());
 
         Mockito.verify(projectRepository, Mockito.times(1)).findAll();
@@ -246,7 +220,7 @@ public class ProjectServiceTest {
         List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 1L);
 
         Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals("Chairs hand made", result.get(0).getName());
+        Assertions.assertEquals("Test", result.get(0).getName());
         Assertions.assertEquals(ProjectVisibility.PUBLIC, result.get(0).getVisibility());
 
         Mockito.verify(projectRepository, Mockito.times(1)).findAll();
@@ -255,7 +229,7 @@ public class ProjectServiceTest {
 
     @Test
     void testGetProjectsWithNameFilter() {
-        filter.setNamePattern("Repair");
+        filter.setNamePattern("Test");
 
         Mockito.when(projectRepository.findAll()).thenReturn(projects);
         Mockito.when(projectMapper.toDto(Mockito.any())).thenAnswer(invocationOnMock -> {
@@ -266,10 +240,10 @@ public class ProjectServiceTest {
                     .build();
         });
 
-        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, 100L);
+        List<ProjectDto> result = projectService.getAllAvailableProjectsForUserWithFilter(filter, TEST_PROJECT_ID);
 
         Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals("Repair computers", result.get(0).getName());
+        Assertions.assertEquals("Test", result.get(0).getName());
         Assertions.assertEquals(ProjectVisibility.PUBLIC, result.get(0).getVisibility());
 
         Mockito.verify(projectRepository, Mockito.times(1)).findAll();
@@ -290,7 +264,7 @@ public class ProjectServiceTest {
         List<ProjectDto> result = projectService.getAllAvailableProjectsForUser(1L);
 
         Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals("Chairs hand made", result.get(0).getName());
+        Assertions.assertEquals("Test", result.get(0).getName());
         Assertions.assertEquals(ProjectVisibility.PUBLIC, result.get(0).getVisibility());
 
         Mockito.verify(projectRepository, Mockito.times(1)).findAll();
@@ -308,122 +282,22 @@ public class ProjectServiceTest {
 
     @Test
     void testGetProjectById() {
-        generalDto.setId(100L);
-        generalDto.setName("Chairs hand made");
-        generalDto.setDescription("some description");
+        generalDto.setId(TEST_PROJECT_ID);
+        generalDto.setName("Test");
+        generalDto.setDescription("Test project");
         generalDto.setVisibility(ProjectVisibility.PUBLIC);
         generalDto.setStatus(ProjectStatus.CREATED);
 
-        Mockito.when(projectRepositoryAdapter.getById(100L)).thenReturn(chairProject);
-        Mockito.when(projectMapper.toDto(chairProject)).thenReturn(generalDto);
+        Mockito.when(projectRepositoryAdapter.getById(TEST_PROJECT_ID)).thenReturn(TEST_PROJECT);
+        Mockito.when(projectMapper.toDto(TEST_PROJECT)).thenReturn(generalDto);
 
-        ProjectDto result = projectService.getProjectById(100L);
+        ProjectDto result = projectService.getProjectById(TEST_PROJECT_ID);
 
-        Assertions.assertEquals("Chairs hand made", result.getName());
-        Assertions.assertEquals("some description", result.getDescription());
+        Assertions.assertEquals("Test", result.getName());
+        Assertions.assertEquals("Test project", result.getDescription());
         Assertions.assertEquals(ProjectVisibility.PUBLIC, result.getVisibility());
 
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(100L);
-        Mockito.verify(projectMapper, Mockito.times(1)).toDto(chairProject);
-    }
-
-    @Test
-    void addProjectCover_shouldThrowBadRequestException_whenTheUserIsNotTheOwnerOfTheProject() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> projectService.addProjectCover(CHAIR_PROJECT_ID, PROJECT_COVER_MULTIPART_FILE, NOT_OWNER_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-    }
-
-    @Test
-    void addProjectCover_shouldThrowBadRequestException_whenProjectCoverImageIdIsNotNull() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        chairProject.setCoverImageId(PROJECT_COVER_IMAGE_ID);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> projectService.addProjectCover(CHAIR_PROJECT_ID, PROJECT_COVER_MULTIPART_FILE, OWNER_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-    }
-
-    @Test
-    void addProjectCover_shouldBeCompletedSuccessfully() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-        Mockito.when(projectCoverMinioService.uploadProjectCover(PROJECT_COVER_MULTIPART_FILE))
-                .thenReturn(PROJECT_COVER_IMAGE_ID);
-
-        projectService.addProjectCover(CHAIR_PROJECT_ID, PROJECT_COVER_MULTIPART_FILE, OWNER_ID);
-
-        Assertions.assertEquals(PROJECT_COVER_IMAGE_ID, chairProject.getCoverImageId());
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-        Mockito.verify(projectCoverMinioService, Mockito.times(1))
-                .uploadProjectCover(PROJECT_COVER_MULTIPART_FILE);
-    }
-
-    @Test
-    void deleteProjectCover_shouldThrowBadRequestException_whenTheUserIsNotTheOwnerOfTheProject() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> projectService.deleteProjectCover(CHAIR_PROJECT_ID, NOT_OWNER_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-    }
-
-    @Test
-    void deleteProjectCover_shouldThrowBadRequestException_whenProjectCoverImageIdIsNull() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> projectService.deleteProjectCover(CHAIR_PROJECT_ID, OWNER_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-    }
-
-    @Test
-    void deleteProjectCover_shouldBeCompletedSuccessfully() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        chairProject.setCoverImageId(PROJECT_COVER_IMAGE_ID);
-
-        Mockito.when(projectCoverMinioService.removeProjectCover(PROJECT_COVER_IMAGE_ID))
-                .thenReturn(PROJECT_COVER_IMAGE_ID);
-
-        projectService.deleteProjectCover(CHAIR_PROJECT_ID, OWNER_ID);
-
-        Assertions.assertNull(chairProject.getCoverImageId());
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-        Mockito.verify(projectCoverMinioService, Mockito.times(1))
-                .removeProjectCover(PROJECT_COVER_IMAGE_ID);
-    }
-
-    @Test
-    void getProjectCover_shouldThrowBadRequestException_whenProjectCoverImageIdIsNull() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        Assertions.assertThrows(BadRequestException.class, () -> projectService.getProjectCover(CHAIR_PROJECT_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-    }
-
-    @Test
-    void getProjectCover_shouldBeCompletedSuccessfully() {
-        Mockito.when(projectRepositoryAdapter.getById(CHAIR_PROJECT_ID)).thenReturn(chairProject);
-
-        chairProject.setCoverImageId(PROJECT_COVER_IMAGE_ID);
-
-        Mockito.when(projectCoverMinioService.getProjectCover(PROJECT_COVER_IMAGE_ID))
-                .thenReturn(PROJECT_COVER_INPUT_STREAM);
-
-        Assertions.assertEquals(PROJECT_COVER_INPUT_STREAM, projectService.getProjectCover(CHAIR_PROJECT_ID));
-
-        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(CHAIR_PROJECT_ID);
-        Mockito.verify(projectCoverMinioService, Mockito.times(1))
-                .getProjectCover(PROJECT_COVER_IMAGE_ID);
+        Mockito.verify(projectRepositoryAdapter, Mockito.times(1)).getById(TEST_PROJECT_ID);
+        Mockito.verify(projectMapper, Mockito.times(1)).toDto(TEST_PROJECT);
     }
 }

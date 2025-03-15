@@ -1,4 +1,4 @@
-package faang.school.projectservice.adapter;
+package faang.school.projectservice.repository.adapter;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -12,6 +12,7 @@ public class ProjectRepositoryAdapter {
     private final ProjectRepository projectRepository;
 
     public Project getById(Long id) {
-        return projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + id));
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Project with ID " + id + " not found"));
     }
 }
