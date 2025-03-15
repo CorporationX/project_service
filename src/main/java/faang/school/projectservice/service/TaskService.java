@@ -1,11 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.event.TaskCompletedEvent;
 import faang.school.projectservice.config.feign.UserContext;
 import faang.school.projectservice.dto.task.TaskCreateDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.dto.task.TaskReadDto;
 import faang.school.projectservice.dto.task.TaskUpdateDto;
+import faang.school.projectservice.event.TaskCompletedEvent;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.task.TaskFilter;
