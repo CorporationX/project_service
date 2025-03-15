@@ -7,6 +7,7 @@ import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -67,21 +69,15 @@ public class InternshipService {
         Objects.requireNonNull(internshipDto, "internshipDto is null");
         Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
                 -> new EntityNotFoundException("Internship not found for update"));
-
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
-
-        } else if (internship.getEndDate().isBefore(LocalDateTime.now())) {
+        }
+        if (internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
             completeInternship(internship);
-
-        } else {
+        }
+        if(internshipDto.getStatus().equals(InternshipStatus.IN_PROGRESS)){
             log.info("The internship is still ongoing");
-            handleOngoingInterns(internship);
-
-            if (LocalDateTime.now().isAfter(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_TWO_MONTHS))) {
-                log.info("More than two months have passed since the start date of the internship.");
-                handleInternsNotCompletedTasks(internship);
-            }
+            aheadOfSchedule(internship,internshipDto);
         }
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
@@ -136,19 +132,19 @@ public class InternshipService {
         List<TeamMember> notCompletedInterns = internship.getInterns().stream()
                 .filter(intern -> !checkAllTasksCompleted(intern))
                 .toList();
-        internship.getInterns().removeAll(notCompletedInterns);
+        internship.setInterns(new ArrayList<>());
         log.info("Internship Completed. Completed Interns: {}", completedInterns);
         log.info("Remote Interns: {}", notCompletedInterns);
     }
 
     private void addNewInterns(Internship internship, List<Long> internsId) {
-        List<TeamMember> newInterns = internshipRepository.findByInternshipIdIn(internsId);
-        if (!newInterns.isEmpty()) {
-            internship.getInterns().addAll(newInterns);
+        List<TeamMember> interns = internshipRepository.findByInternshipIdIn(internsId);
+        if (!interns.isEmpty()) {
+            internship.setInterns((interns));
         }
     }
 
-    private boolean checkAllTasksStatus(TeamMember intern, TaskStatus status) {
+    private boolean checkAllTasksCompleted(TeamMember intern) {
         List<Stage> stages = intern.getStages();
         if (stages.isEmpty()) {
             log.warn("Stage list is empty for TeamMember: {}", intern.getId());
@@ -156,43 +152,25 @@ public class InternshipService {
         }
         return stages.stream()
                 .flatMap(stage -> stage.getTasks().stream())
-                .allMatch(task -> task.getStatus().equals(status));
+                .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
     }
 
-    private boolean checkAllTasksCompleted(TeamMember intern) {
-        return checkAllTasksStatus(intern, TaskStatus.DONE);
-    }
-
-    private boolean checkAllTasksNotCompleted(TeamMember intern) {
-        return checkAllTasksStatus(intern, TaskStatus.TODO);
-    }
-
-    private void handleOngoingInterns(Internship internship) {
-        List<TeamMember> internsCompletionTask = internship.getInterns().stream()
-                .filter(this::checkAllTasksCompleted)
-                .toList();
-        if (!internsCompletionTask.isEmpty()) {
-            internsCompletionTask.forEach(intern -> {
-                intern.getRoles().add(TeamRole.DEVELOPER);
+    private void aheadOfSchedule(Internship internship, InternshipDto internshipDto) {
+        List<TeamMember> oldList = internship.getInterns();
+        List<TeamMember> newList = internshipRepository.findByInternshipIdIn(internshipDto.getInternsId());
+        oldList.removeAll(newList);
+        if (!oldList.isEmpty()) {
+            log.info("There are no people who passed the test early or were dismissed early.");
+        }
+        for (TeamMember intern : oldList) {
+            if(checkAllTasksCompleted(intern)){
+               intern.getRoles().add(TeamRole.DEVELOPER);
                 intern.getRoles().remove(TeamRole.INTERN);
-                internship.getInterns().remove(intern);
                 log.info("Completed Interns: {}", intern);
-            });
-        } else {
-            log.info("There are no interns who have completed all tasks in advance.");
-        }
-    }
-
-    private void handleInternsNotCompletedTasks(Internship internship) {
-        List<TeamMember> internsNotCompletionTask = internship.getInterns().stream()
-                .filter(this::checkAllTasksNotCompleted)
-                .toList();
-
-        if (!internsNotCompletionTask.isEmpty()) {
-            internsNotCompletionTask.forEach(intern -> {
-                internship.getInterns().remove(intern);
+            }else {
                 log.info("Dismissed interns: {}", intern);
-            });
+            }
         }
+        internship.setInterns(newList);
     }
 }

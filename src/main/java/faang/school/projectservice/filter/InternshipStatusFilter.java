@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 public class InternshipStatusFilter implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto internshipFilterDto) {
-        return internshipFilterDto.getStatus() != null;
+        return internshipFilterDto.status() != null;
     }
 
     @Override
     public Stream<Internship> apply(Stream<Internship> stream, InternshipFilterDto internshipFilterDto) {
         return stream.filter(internship
-                -> internshipFilterDto.getStatus().equals(internship.getStatus()));
+                -> internshipFilterDto.status().equals(internship.getStatus()));
     }
 }

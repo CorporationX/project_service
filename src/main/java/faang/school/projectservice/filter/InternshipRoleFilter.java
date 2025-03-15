@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class InternshipRoleFilter implements InternshipFilter {
     @Override
     public boolean isApplicable(InternshipFilterDto internshipDto) {
-        return internshipDto.getRole() != null;
+        return internshipDto.role() != null;
     }
 
     @Override
     public Stream<Internship> apply(Stream<Internship> stream, InternshipFilterDto internshipDto) {
         return stream
-                .filter(internship -> internshipDto.getRole().equals(internship.getRole()));
+                .filter(internship -> internshipDto.role().equals(internship.getRole()));
     }
 }
