@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
-    private static final int INTERNSHIP_DURATION_TWO_MONTHS = 2;
     private static final int INTERNSHIP_DURATION_THREE_MONTHS = 3;
 
     private final InternshipRepository internshipRepository;
