@@ -43,31 +43,31 @@ public class MeetService {
 
         Meet meetEntity = meetMapper.toEntity(meet);
         Meet updatedMeet = meetRepository.save(meetEntity);
-        log.info("Meeting updated meetId : {}", meet.getId());
+        log.info("Meeting updated id : {}", meet.getId());
         return meetMapper.toDto(updatedMeet);
     }
 
     @Transactional
-    public MeetDto cancelMeetById(Long meetId) {
-        Meet meetEntity = meetValidation.getMeet(meetId);
+    public MeetDto cancelMeetById(Long id) {
+        Meet meetEntity = meetValidation.getMeet(id);
         meetValidation.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
 
         meetEntity.setStatus(MeetStatus.CANCELLED);
         meetEntity.setUpdatedAt(LocalDateTime.now());
 
         Meet savedMeet = meetRepository.save(meetEntity);
-        log.info("Meeting canceled meetId : {}", meetId);
+        log.info("Meeting canceled id : {}", id);
         return meetMapper.toDto(savedMeet);
     }
 
     @Transactional
-    public Long deleteMeetById(Long meetId) {
-        Meet meetEntity = meetValidation.getMeet(meetId);
+    public Long deleteMeetById(Long id) {
+        Meet meetEntity = meetValidation.getMeet(id);
         meetValidation.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
-        meetRepository.deleteById(meetId);
+        meetRepository.deleteById(id);
 
-        log.info("Meeting deleted meetId : {}", meetId);
-        return meetId;
+        log.info("Meeting deleted id : {}", id);
+        return id;
     }
 
     public List<MeetDto> findMeetsByProject(Long projectId, MeetFilterDto filterDto) {
@@ -93,7 +93,7 @@ public class MeetService {
                 toList();
     }
 
-    public MeetDto getMeetById(Long meetId) {
-        return meetMapper.toDto(meetValidation.getMeet(meetId));
+    public MeetDto getMeetById(Long id) {
+        return meetMapper.toDto(meetValidation.getMeet(id));
     }
 }

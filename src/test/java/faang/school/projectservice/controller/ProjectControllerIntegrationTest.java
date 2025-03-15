@@ -153,8 +153,9 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/user/{userId}", OWNER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Test"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value("Test project"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("AI Research"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description")
+                        .value("Project for AI development"));
     }
 
     @Test

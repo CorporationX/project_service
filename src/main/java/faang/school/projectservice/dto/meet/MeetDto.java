@@ -1,12 +1,11 @@
 package faang.school.projectservice.dto.meet;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.MeetStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,11 +36,13 @@ public class MeetDto {
     @NotNull(message = "Description IDs list must not be null")
     private String description;
 
-
     @NotNull(message = "Start date and time must not be null")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startsAt;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 }
