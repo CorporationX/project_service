@@ -1,9 +1,10 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
-import faang.school.projectservice.dto.vacancy.VacancyFilterRequestDto;
+import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
-import faang.school.projectservice.service.VacancyService;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
+import faang.school.projectservice.service.VacancyServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -13,17 +14,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyController {
 
-    private final VacancyService vacancyService;
+    private final VacancyServiceImpl vacancyServiceImpl;
 
     public void openVacancy(OpenVacancyRequestDto requestDto) {
-        vacancyService.openVacancy(requestDto);
+        vacancyServiceImpl.openVacancy(requestDto);
     }
 
-    public List<VacancyResponseDto> getFilteredVacancies(VacancyFilterRequestDto filterDto) {
-        return vacancyService.getFilteredVacancies(filterDto);
+    public VacancyResponseDto updateVacancy(UpdateVacancyRequestDto requestDto) {
+        return vacancyServiceImpl.updateVacancy(requestDto);
+    }
+
+    public List<VacancyResponseDto> getFilteredVacancies(FilterVacancyRequestDto filterDto) {
+        return vacancyServiceImpl.getFilteredVacancies(filterDto);
     }
 
     public VacancyResponseDto getVacancyById(long vacancyId) {
-        return vacancyService.getVacancyById(vacancyId);
+        return vacancyServiceImpl.getVacancyById(vacancyId);
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.vacancy;
 
-import faang.school.projectservice.dto.vacancy.VacancyFilterRequestDto;
+import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.model.Vacancy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ public class NameFilterTest {
 
     @Test
     public void testIsApplicable_NameNull_ReturnsFalse() {
-        var filterDto = new VacancyFilterRequestDto(null, null);
+        var filterDto = new FilterVacancyRequestDto(null, null);
 
         var result = nameFilter.isApplicable(filterDto);
 
@@ -31,7 +31,7 @@ public class NameFilterTest {
 
     @Test
     public void testIsApplicable_NameEmpty_ReturnsFalse() {
-        var filterDto = new VacancyFilterRequestDto(null, "");
+        var filterDto = new FilterVacancyRequestDto(null, "");
 
         var result = nameFilter.isApplicable(filterDto);
 
@@ -40,7 +40,7 @@ public class NameFilterTest {
 
     @Test
     public void testIsApplicable_NameBlank_ReturnsFalse() {
-        var filterDto = new VacancyFilterRequestDto(null, "   ");
+        var filterDto = new FilterVacancyRequestDto(null, "   ");
 
         var result = nameFilter.isApplicable(filterDto);
 
@@ -49,7 +49,7 @@ public class NameFilterTest {
 
     @Test
     public void testIsApplicable_NameNotBlank_ReturnsTrue() {
-        var filterDto = new VacancyFilterRequestDto(null, "Test");
+        var filterDto = new FilterVacancyRequestDto(null, "Test");
 
         var result = nameFilter.isApplicable(filterDto);
 
@@ -58,7 +58,7 @@ public class NameFilterTest {
 
     @Test
     public void testApply_HaveMatchedVacancies_ReturnsNonEmptyStream() {
-        var filterDto = new VacancyFilterRequestDto(null, "[a-z ]+");
+        var filterDto = new FilterVacancyRequestDto(null, "[a-z ]+");
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);
 

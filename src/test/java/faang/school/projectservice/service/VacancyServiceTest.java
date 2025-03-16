@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
-import faang.school.projectservice.dto.vacancy.VacancyFilterRequestDto;
+import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.vacancy.AdjustableVacancyAnswer;
@@ -52,9 +52,9 @@ class VacancyServiceTest {
     @Mock
     private VacancyRepository vacancyRepository;
     @Mock
-    private ProjectService projectService;
+    private ProjectServiceImpl projectServiceImpl;
     @Mock
-    private TeamMemberService teamMemberService;
+    private TeamMemberServiceImpl teamMemberServiceImpl;
     @Mock
     private OpenVacancyRequestValidator openVacancyRequestValidator;
 
@@ -70,17 +70,17 @@ class VacancyServiceTest {
     private VacancyFilter vacancyFilter2;
 
     @InjectMocks
-    private VacancyService vacancyService;
+    private VacancyServiceImpl vacancyServiceImpl;
 
     @Captor
     private ArgumentCaptor<Vacancy> vacancyCaptor;
 
     @BeforeEach
     public void setUp() {
-        vacancyService = new VacancyService(
+        vacancyServiceImpl = new VacancyServiceImpl(
                 vacancyRepository,
-                projectService,
-                teamMemberService,
+                projectServiceImpl,
+                teamMemberServiceImpl,
                 openVacancyRequestValidator,
                 vacancyMapper,
                 candidateMapper,
@@ -96,7 +96,7 @@ class VacancyServiceTest {
 
         assertThrowsExactly(
                 DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
+                () -> vacancyServiceImpl.openVacancy(requestDto),
                 "Invalid project");
     }
 
@@ -109,7 +109,7 @@ class VacancyServiceTest {
 
         assertThrowsExactly(
                 DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
+                () -> vacancyServiceImpl.openVacancy(requestDto),
                 "Invalid author");
     }
 
@@ -133,7 +133,7 @@ class VacancyServiceTest {
         when(openVacancyRequestValidator.validateAuthor(requestDto)).thenReturn(author);
 
         // Act
-        vacancyService.openVacancy(requestDto);
+        vacancyServiceImpl.openVacancy(requestDto);
 
         // Assert
         verify(vacancyRepository, times(1)).save(vacancyCaptor.capture());
@@ -147,7 +147,7 @@ class VacancyServiceTest {
     @Test
     public void testGetFilteredVacancies_AllFiltersAreNotApplicable_ReturnsOriginalRequests() {
         // Arrange
-        var filterDto = new VacancyFilterRequestDto(null, null);
+        var filterDto = new FilterVacancyRequestDto(null, null);
 
         var project = getTestProject(1L);
         var authorId = 3L;
@@ -167,9 +167,9 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         when(candidateMapper.ToCandidateDtos(any())).thenReturn(List.of());
@@ -178,7 +178,7 @@ class VacancyServiceTest {
         when(vacancyFilter2.isApplicable(filterDto)).thenReturn(false);
 
         // Act
-        var result = vacancyService.getFilteredVacancies(filterDto);
+        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
 
         // Assert
         var expectedResult = vacancyMapper.ToVacancyResponseDtos(vacancies);
@@ -193,7 +193,7 @@ class VacancyServiceTest {
     @Test
     public void testGetFilteredVacancies_AllRequestsAreNotMatched_ReturnsEmptyList() {
         // Arrange
-        var filterDto = new VacancyFilterRequestDto(null, "Test");
+        var filterDto = new FilterVacancyRequestDto(null, "Test");
 
         var vacancies = List.of(
                 Vacancy.builder().name("Java Developer").build(),
@@ -204,7 +204,7 @@ class VacancyServiceTest {
         setupVacancyFilter(vacancyFilter2, filterDto, true, new ReturnEmptyStreamVacancyAnswer());
 
         // Act
-        var result = vacancyService.getFilteredVacancies(filterDto);
+        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
 
         // Assert
         assertTrue(result.isEmpty());
@@ -215,7 +215,7 @@ class VacancyServiceTest {
         // Arrange
         var namePatternToSearch = "Java";
         var positionToSearch = TeamRole.DEVELOPER;
-        var filterDto = new VacancyFilterRequestDto(positionToSearch, namePatternToSearch);
+        var filterDto = new FilterVacancyRequestDto(positionToSearch, namePatternToSearch);
 
         var project = getTestProject(1L);
         var authorId = 3L;
@@ -242,9 +242,9 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         setupVacancyFilter(
@@ -263,7 +263,7 @@ class VacancyServiceTest {
         expectedResult.add(vacancyMapper.ToVacancyResponseDto(vacancies.get(1)));
 
         // Act
-        var result = vacancyService.getFilteredVacancies(filterDto);
+        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
 
         // Assert
         assertIterableEquals(
@@ -279,7 +279,7 @@ class VacancyServiceTest {
         var vacancyId = 1L;
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
-        var result = vacancyService.getVacancyById(vacancyId);
+        var result = vacancyServiceImpl.getVacancyById(vacancyId);
 
         assertNull(result);
     }
@@ -309,13 +309,13 @@ class VacancyServiceTest {
         vacancy.getCandidates().addAll(candidates);
 
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         // Act
-        var result = vacancyService.getVacancyById(vacancyId);
+        var result = vacancyServiceImpl.getVacancyById(vacancyId);
 
         // Assert
         assertNotNull(result);
@@ -326,9 +326,9 @@ class VacancyServiceTest {
         assertEquals(candidates.size(), result.getCandidates().size());
         assertEquals(candidates.get(0).getUsername(), result.getCandidates().get(0).username());
         assertEquals(candidates.get(0).getCandidateStatus(), result.getCandidates().get(0).candidateStatus());
-        verify(projectService, times(1))
+        verify(projectServiceImpl, times(1))
                 .getProjectByIdOrEmpty(project.getId());
-        verify(teamMemberService, times(1))
+        verify(teamMemberServiceImpl, times(1))
                 .getTeamMemberById(authorId);
     }
 
@@ -358,7 +358,7 @@ class VacancyServiceTest {
 
     private void setupVacancyFilter(
             VacancyFilter filter,
-            VacancyFilterRequestDto filterDto,
+            FilterVacancyRequestDto filterDto,
             boolean isApplicable,
             Answer<Stream<Vacancy>> filterApplyAnswer) {
         when(filter.isApplicable(filterDto)).thenReturn(isApplicable);

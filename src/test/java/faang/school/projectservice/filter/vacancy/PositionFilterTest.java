@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.vacancy;
 
-import faang.school.projectservice.dto.vacancy.VacancyFilterRequestDto;
+import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class PositionFilterTest {
 
     @Test
     public void testIsApplicable_PositionNull_ReturnsFalse() {
-        var filterDto = new VacancyFilterRequestDto(null, null);
+        var filterDto = new FilterVacancyRequestDto(null, null);
 
         var result = positionFilter.isApplicable(filterDto);
 
@@ -32,7 +32,7 @@ public class PositionFilterTest {
 
     @Test
     public void testIsApplicable_PositionPresents_ReturnsTrue() {
-        var filterDto = new VacancyFilterRequestDto(TeamRole.ANALYST, null);
+        var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
 
         var result = positionFilter.isApplicable(filterDto);
 
@@ -41,7 +41,7 @@ public class PositionFilterTest {
 
     @Test
     public void testApply_HaveMatchedVacancies_ReturnsNonEmptyStream() {
-        var filterDto = new VacancyFilterRequestDto(TeamRole.ANALYST, null);
+        var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);
 
