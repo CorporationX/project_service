@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
