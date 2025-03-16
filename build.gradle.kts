@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm")
+    jacoco
 }
 
 group = "faang.school"
@@ -85,4 +86,61 @@ tasks.bootJar {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.test {
+    outputs.upToDateWhen { false }  // To always rerun tests
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+
+    violationRules {
+        rule {
+            element = "CLASS"
+            includes = listOf(
+                "school.faang.projectservice.filter.*",
+                "school.faang.projectservice.service.*",
+                "school.faang.projectservice.validator.*",
+            )
+
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestReport)
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
