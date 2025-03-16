@@ -18,6 +18,7 @@ import faang.school.projectservice.repository.StageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final MomentRepository momentRepository;
@@ -47,6 +49,9 @@ public class ProjectService {
         addStages(savedSubProject, subProjectDto.getStages());
         addChildren(savedSubProject, subProjectDto.getChildren());
 
+        ProjectDto savedDto = projectMapper.toDto(projectRepository.save(savedSubProject));
+        log.info("Subproject with name = {} and id = {} was created", savedDto.getName(), savedDto.getId());
+
         return projectMapper.toDto(projectRepository.save(savedSubProject));
     }
 
@@ -54,25 +59,27 @@ public class ProjectService {
         projectDto.validateCommonFields();
 
         Project project = projectRepository.findById(projectDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Parent project with id = " + projectDto.getId() + " doesn't exist"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Parent project with id = %d doesn't exist", projectDto.getId())));
         ProjectStatus status = projectDto.getStatus();
         ProjectVisibility visibility = projectDto.getVisibility();
 
         if (project.getChildren() != null && !project.getChildren().isEmpty()) {
             List<Project> subProjects = new ArrayList<>(project.getChildren());
-            boolean areAllCompleted = subProjects.stream()
-                    .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
-
-            boolean isAnyPublic = subProjects.stream()
-                    .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
 
             if (status == ProjectStatus.COMPLETED) {
+                boolean areAllCompleted = subProjects.stream()
+                        .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
+
                 if (areAllCompleted) {
                     createMoment(project);
                 } else {
                     throw new IllegalArgumentException("Not all subprojects are completed");
                 }
             }
+
+            boolean isAnyPublic = subProjects.stream()
+                    .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
+
             if (visibility == ProjectVisibility.PRIVATE && isAnyPublic) {
                 subProjects.stream()
                         .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
@@ -86,8 +93,11 @@ public class ProjectService {
         project.setVisibility(visibility);
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
+        ProjectDto savedDto = projectMapper.toDto(projectRepository.save(project));
 
-        return projectMapper.toDto(project);
+        log.info("Subproject with name = {} and id = {} was updated", savedDto.getName(), savedDto.getId());
+
+        return savedDto;
     }
 
     public List<ProjectDto> getSubProjects(SubProjectsFilterDto filter) {
@@ -97,7 +107,7 @@ public class ProjectService {
         }
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project with id = " + projectId + " doesn't exist"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d doesn't exist", projectId)));
 
         if (project.getChildren() == null || project.getChildren().isEmpty()) {
             return Collections.emptyList();
@@ -159,11 +169,11 @@ public class ProjectService {
 
         var parentId = subProjectDto.getParentProject();
         Project parentProject = projectRepository.findById(parentId)
-                .orElseThrow(() -> new EntityNotFoundException("Parent project with id = " + parentId + " doesn't exist"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Parent project with id = %d doesn't exist", parentId)));
 
         if (parentProject.getVisibility() == ProjectVisibility.PRIVATE
                 && subProjectDto.getVisibility() == ProjectVisibility.PUBLIC) {
-            throw new IllegalArgumentException("Project " + subProjectDto.getName() + " cannot be public");
+            throw new IllegalArgumentException(String.format("Project %s cannot be public", subProjectDto.getName()));
         }
 
         return parentProject;

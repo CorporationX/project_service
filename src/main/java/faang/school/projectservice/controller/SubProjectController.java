@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("subProject")
+@RequestMapping("/subProject")
 @RequiredArgsConstructor
 public class SubProjectController {
     private final ProjectService service;
