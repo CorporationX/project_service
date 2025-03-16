@@ -159,7 +159,7 @@ public class InternshipService {
         List<TeamMember> oldList = internship.getInterns();
         List<TeamMember> newList = internshipRepository.findByInternshipIdIn(internshipDto.getInternsId());
         oldList.removeAll(newList);
-        if (!oldList.isEmpty()) {
+        if (oldList.isEmpty()) {
             log.info("There are no people who passed the test early or were dismissed early.");
             return;
         }
