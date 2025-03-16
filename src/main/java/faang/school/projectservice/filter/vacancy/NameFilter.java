@@ -11,13 +11,13 @@ import java.util.stream.Stream;
 public class NameFilter implements VacancyFilter {
     @Override
     public boolean isApplicable(VacancyFilterRequestDto filterDto) {
-        var namePattern = filterDto.getNamePattern();
+        var namePattern = filterDto.namePattern();
         return namePattern != null && !namePattern.isBlank();
     }
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> source, VacancyFilterRequestDto filterDto) {
-        var patternString = filterDto.getNamePattern();
+        var patternString = filterDto.namePattern();
         if (patternString == null) {
             return source;
         }

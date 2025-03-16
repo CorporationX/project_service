@@ -62,7 +62,6 @@ class VacancyServiceTest {
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
     @Spy
     private CandidateMapper candidateMapper = Mappers.getMapper(CandidateMapper.class);
-    ;
 
     @Mock
     private VacancyFilter vacancyFilter1;
@@ -148,7 +147,7 @@ class VacancyServiceTest {
     @Test
     public void testGetFilteredVacancies_AllFiltersAreNotApplicable_ReturnsOriginalRequests() {
         // Arrange
-        var filterDto = new VacancyFilterRequestDto();
+        var filterDto = new VacancyFilterRequestDto(null, null);
 
         var project = getTestProject(1L);
         var authorId = 3L;
@@ -194,8 +193,7 @@ class VacancyServiceTest {
     @Test
     public void testGetFilteredVacancies_AllRequestsAreNotMatched_ReturnsEmptyList() {
         // Arrange
-        var filterDto = new VacancyFilterRequestDto();
-        filterDto.setNamePattern("Test");
+        var filterDto = new VacancyFilterRequestDto(null, "Test");
 
         var vacancies = List.of(
                 Vacancy.builder().name("Java Developer").build(),
@@ -217,9 +215,7 @@ class VacancyServiceTest {
         // Arrange
         var namePatternToSearch = "Java";
         var positionToSearch = TeamRole.DEVELOPER;
-        var filterDto = new VacancyFilterRequestDto();
-        filterDto.setNamePattern(namePatternToSearch);
-        filterDto.setPosition(positionToSearch);
+        var filterDto = new VacancyFilterRequestDto(positionToSearch, namePatternToSearch);
 
         var project = getTestProject(1L);
         var authorId = 3L;

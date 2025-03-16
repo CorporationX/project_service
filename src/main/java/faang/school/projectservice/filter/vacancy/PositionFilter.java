@@ -11,11 +11,11 @@ public class PositionFilter implements VacancyFilter {
 
     @Override
     public boolean isApplicable(VacancyFilterRequestDto filterDto) {
-        return filterDto.getPosition() != null;
+        return filterDto.position() != null;
     }
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> source, VacancyFilterRequestDto filterDto) {
-        return source.filter(request -> request.getPosition() == filterDto.getPosition());
+        return source.filter(request -> request.getPosition() == filterDto.position());
     }
 }
