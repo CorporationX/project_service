@@ -100,8 +100,8 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-        if (project.getVisibility() == ProjectVisibility.PRIVATE && !project.getOwnerId().equals(userId)) {
-            log.warn("Project with id {} not found", projectId);
+        if (isAccessDenied(userId, project)) {
+            log.warn("Project with id {} not found", project.getId());
             throw new AccessDeniedException("Unauthorized access to project");
         }
         return projectMapper.projectToProjectDto(project);
@@ -109,11 +109,16 @@ public class ProjectService {
 
     private List<Project> hidePrivateProjects(Long userId, Stream<Project> projects) {
         Map<Boolean, List<Project>> dividedCollectionProjects = projects
-                .collect(Collectors.partitioningBy(
-                        project -> project.getVisibility() == ProjectVisibility.PRIVATE
-                                && !project.getOwnerId().equals(userId)));
+                .collect(Collectors
+                        .partitioningBy(project -> isAccessDenied(userId, project)));
 
         log.info("Hiding private projects is successful");
         return dividedCollectionProjects.get(false);
+    }
+
+    private boolean isAccessDenied(Long userId, Project project) {
+        return project.getVisibility() == ProjectVisibility.PRIVATE && project.getTeams().stream()
+                .noneMatch(team -> team.getTeamMembers().stream()
+                        .noneMatch(member -> member.getUserId().equals(userId)));
     }
 }
