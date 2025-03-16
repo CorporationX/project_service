@@ -32,7 +32,7 @@ public class ProjectService {
     public void createProject(ProjectDto projectDto) {
         Project project = projectMapper.projectDtoToProject(projectDto);
         boolean isNameNotEquals = true;
-        List<Project> projects = projectRepository.findAll().stream()
+        List<Project> projects = getProjectsOnRepository()
                 .filter(findedProject -> findedProject.getOwnerId().equals(project.getOwnerId()))
                 .toList();
 
@@ -56,22 +56,21 @@ public class ProjectService {
     }
 
     public void updateProject(ProjectDto projectDto) {
-        Project project = projectRepository.findById(projectDto.id())
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project project = getProjectById(projectDto.id());
 
         if (!projectDto.description().equals(project.getDescription())) {
             project.setDescription(projectDto.description());
-            log.info("Project description with id {} updated on {}", project.getId(), project.getDescription());
+            log.debug("Project description with id {} updated on {}", project.getId(), project.getDescription());
         }
 
         if (!projectDto.status().equals(project.getStatus())) {
             project.setStatus(projectDto.status());
-            log.info("Project status with id {} updated on {}", project.getId(), project.getStatus());
+            log.debug("Project status with id {} updated on {}", project.getId(), project.getStatus());
         }
 
         if (!projectDto.visibility().equals(project.getVisibility())) {
             project.setVisibility(projectDto.visibility());
-            log.info("Project visibility with id {} updated on {}", project.getId(), project.getVisibility());
+            log.debug("Project visibility with id {} updated on {}", project.getId(), project.getVisibility());
         }
         LocalDateTime timeUpdated = LocalDateTime.now();
         project.setUpdatedAt(timeUpdated);
@@ -80,7 +79,7 @@ public class ProjectService {
     }
 
     public List<ProjectDto> findProjectsByFilters(Long userId, ProjectFilterDto projectFilterDto) {
-        Stream<Project> projects = projectRepository.findAll().stream();
+        Stream<Project> projects = getProjectsOnRepository();
 
         for (ProjectFilter filter : projectFilters) {
             if (filter.isApplicable(projectFilterDto)) {
@@ -92,13 +91,12 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(Long userId) {
-        Stream<Project> projects = projectRepository.findAll().stream();
+        Stream<Project> projects = getProjectsOnRepository();
         return projectMapper.projectListToProjectDtoList(hidePrivateProjects(userId, projects));
     }
 
     public ProjectDto getProjectById(Long userId, Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project project = getProjectById(projectId);
 
         if (isAccessDenied(userId, project)) {
             log.warn("Project with id {} not found", project.getId());
@@ -120,5 +118,15 @@ public class ProjectService {
         return project.getVisibility() == ProjectVisibility.PRIVATE && project.getTeams().stream()
                 .noneMatch(team -> team.getTeamMembers().stream()
                         .noneMatch(member -> member.getUserId().equals(userId)));
+    }
+
+    private Stream<Project> getProjectsOnRepository() {
+        return projectRepository.findAll().stream();
+    }
+
+    private Project getProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Project with id: %d not found", projectId)));
     }
 }
