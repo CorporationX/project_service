@@ -64,17 +64,18 @@ public class InternshipService {
         return internshipsStream.map(internshipMapper::toInternshipDto).toList();
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto) {
+    public InternshipDto updateInternship(InternshipDto internshipDto,Long internshipId) {
+        Objects.requireNonNull(internshipId, "internshipId is null");
         Objects.requireNonNull(internshipDto, "internshipDto is null");
-        Internship internship = internshipRepository.findById(internshipDto.getId()).orElseThrow(()
+        Internship internship = internshipRepository.findById(internshipId).orElseThrow(()
                 -> new EntityNotFoundException("Internship not found for update"));
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
         }
-        if (internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
+        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             completeInternship(internship);
         }
-        if(internshipDto.getStatus().equals(InternshipStatus.IN_PROGRESS)){
+        if(internship.getStatus().equals(InternshipStatus.IN_PROGRESS)){
             log.info("The internship is still ongoing");
             aheadOfSchedule(internship,internshipDto);
         }

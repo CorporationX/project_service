@@ -6,32 +6,40 @@ import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Objects;
 
 @RestController
+@RequestMapping("/internship")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
-
-    public InternshipDto createInternship(InternshipDto internshipDto) {
+@PostMapping()
+    public InternshipDto createInternship(@RequestBody InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
     }
-
-    public InternshipDto getInternshipById(Long id) {
+@GetMapping("/{id}")
+    public InternshipDto getInternshipById(@PathVariable Long id) {
         return internshipService.getInternshipById(id);
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto) {
-        return internshipService.updateInternship(internshipDto);
+@PutMapping("/{id}")
+    public InternshipDto updateInternship(@RequestBody InternshipDto internshipDto,@PathVariable Long id) {
+        return internshipService.updateInternship(internshipDto,id);
     }
-
+@GetMapping()
     public List<InternshipDto> findAllInternships() {
         return internshipService.getAllInternships();
     }
-
-    public List<InternshipDto> findInternshipsByFilter(InternshipFilterDto internshipFilterDto) {
+@PostMapping("/filter")
+    public List<InternshipDto> findInternshipsByFilter(@RequestBody InternshipFilterDto internshipFilterDto) {
         return internshipService.getInternshipsFiltered(internshipFilterDto);
     }
 }
