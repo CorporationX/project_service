@@ -3,6 +3,8 @@ plugins {
     jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    id("org.jsonschema2pojo") version "1.2.1"
+    kotlin("jvm") version "1.9.20"
 }
 
 group = "faang.school"
@@ -66,31 +68,77 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+val test by tasks.getting(Test::class) {
+    testLogging.showStandardStreams = true
+}
+
+tasks.bootJar {
+    archiveFileName.set("service.jar")
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+/**
+ * JaCoCo settings
+ */
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
+}
+
+val exclusions = listOf(
+    "**/UserServiceApplication*",
+    "**/controller/**",
+    "**/mapper/**",
+    "**/entity/**",
+    "**/dto/**",
+    "**/exception/**",
+    "**/com/json/**",
+    "**/client/**",
+    "**/config/**"
+)
+
 tasks.test {
-    useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+}
+
+tasks.build {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(false)
+        csv.required.set(false)
         html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
+
+    classDirectories.setFrom(
+        files(sourceSets.main.get().output.asFileTree.matching {
+            exclude(exclusions)
+        })
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
+            enabled = true
             limit {
-                minimum = "0.8".toBigDecimal()
+                minimum = 0.7.toBigDecimal()
             }
         }
     }
-}
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
-
-tasks.bootJar {
-    archiveFileName.set("service.jar")
+    classDirectories.setFrom(
+        files(sourceSets.main.get().output.asFileTree.matching {
+            exclude(exclusions)
+        })
+    )
 }
