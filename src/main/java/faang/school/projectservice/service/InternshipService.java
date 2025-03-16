@@ -44,7 +44,7 @@ public class InternshipService {
     public InternshipDto getInternshipById(Long internshipId) {
         return internshipRepository.findById(internshipId)
                 .map(internshipMapper::toInternshipDto)
-                .orElseThrow(() -> new EntityNotFoundException("Internship not found for search by id"));
+                .orElseThrow(() -> new EntityNotFoundException("Internship not found for search by id: " + internshipId));
     }
 
     public List<InternshipDto> getAllInternships() {
@@ -64,20 +64,20 @@ public class InternshipService {
         return internshipsStream.map(internshipMapper::toInternshipDto).toList();
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto,Long internshipId) {
+    public InternshipDto updateInternship(InternshipDto internshipDto, Long internshipId) {
         Objects.requireNonNull(internshipId, "internshipId is null");
         Objects.requireNonNull(internshipDto, "internshipDto is null");
         Internship internship = internshipRepository.findById(internshipId).orElseThrow(()
-                -> new EntityNotFoundException("Internship not found for update"));
+                -> new EntityNotFoundException("Internship not found for search by id : " + internshipId));
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
         }
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             completeInternship(internship);
         }
-        if(internship.getStatus().equals(InternshipStatus.IN_PROGRESS)){
+        if (internship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             log.info("The internship is still ongoing");
-            aheadOfSchedule(internship,internshipDto);
+            aheadOfSchedule(internship, internshipDto);
         }
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
@@ -94,7 +94,8 @@ public class InternshipService {
         }
 
         Project project = projectRepository.findById(internshipDto.getProjectId()).orElseThrow(()
-                -> new EntityNotFoundException("Project not found"));
+                -> new EntityNotFoundException("Project not found for search by id: "
+                + internshipDto.getProjectId()));
 
         List<Team> teams = project.getTeams();
 
@@ -164,11 +165,11 @@ public class InternshipService {
             return;
         }
         for (TeamMember intern : oldList) {
-            if(checkAllTasksCompleted(intern)){
-               intern.getRoles().add(TeamRole.DEVELOPER);
+            if (checkAllTasksCompleted(intern)) {
+                intern.getRoles().add(TeamRole.DEVELOPER);
                 intern.getRoles().remove(TeamRole.INTERN);
                 log.info("Completed Interns: {}", intern);
-            }else {
+            } else {
                 log.info("Dismissed interns: {}", intern);
             }
         }
