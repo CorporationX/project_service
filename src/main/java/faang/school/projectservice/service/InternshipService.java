@@ -163,6 +163,7 @@ public class InternshipService {
         }
         internship.setInterns(newList);
     }
+
     private void validateInternsId(InternshipDto internshipDto) {
         if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
             throw new InternshipGetInternsIdException("The list of interns is empty");
