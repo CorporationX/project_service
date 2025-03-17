@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,17 +28,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
 
-    public void createProject(ProjectDto projectDto) {
+    public void createProject(Long userId, ProjectDto projectDto) {
         Project project = projectMapper.projectDtoToProject(projectDto);
-        boolean isNameNotEquals = true;
-        List<Project> projects = getProjectsOnRepository()
-                .filter(findedProject -> findedProject.getOwnerId().equals(project.getOwnerId()))
-                .toList();
-
-        if (!projects.isEmpty()) {
-            isNameNotEquals = projects.stream()
-                    .noneMatch(findedProject -> findedProject.getName().equals(project.getName()));
-        }
+        boolean isNameNotEquals = getProjectsOnRepository()
+                .filter(findedProject -> findedProject.getOwnerId().equals(userId))
+                .noneMatch(findedProject -> findedProject.getName().equals(project.getName()));
 
         if (!isNameNotEquals) {
             throw new IllegalStateException("Names projects cannot be equals");
@@ -48,34 +41,34 @@ public class ProjectService {
         if (project.getVisibility() == null) {
             project.setVisibility(ProjectVisibility.PUBLIC);
         }
+        project.setOwnerId(userId);
         project.setStatus(ProjectStatus.CREATED);
-        LocalDateTime timeCreated = LocalDateTime.now();
-        project.setCreatedAt(timeCreated);
         projectRepository.save(project);
-        log.info("Project with id {} successful created\nTime created: {}", project.getId(), timeCreated);
+        log.info("Project with id {} successful created\nTime created: {}", project.getId(), project.getCreatedAt());
     }
 
-    public void updateProject(ProjectDto projectDto) {
-        Project project = getProjectById(projectDto.id());
+    public void updateProject(Long projectId, ProjectDto projectDto) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException(String.format("Project with id: %d not found", projectId));
+        }
+        Project project = getProjectById(projectId);
 
         if (!projectDto.description().equals(project.getDescription())) {
             project.setDescription(projectDto.description());
             log.debug("Project description with id {} updated on {}", project.getId(), project.getDescription());
         }
 
-        if (!projectDto.status().equals(project.getStatus())) {
+        if (projectDto.status() != null && !projectDto.status().equals(project.getStatus())) {
             project.setStatus(projectDto.status());
             log.debug("Project status with id {} updated on {}", project.getId(), project.getStatus());
         }
 
-        if (!projectDto.visibility().equals(project.getVisibility())) {
+        if (projectDto.visibility() != null && !projectDto.visibility().equals(project.getVisibility())) {
             project.setVisibility(projectDto.visibility());
             log.debug("Project visibility with id {} updated on {}", project.getId(), project.getVisibility());
         }
-        LocalDateTime timeUpdated = LocalDateTime.now();
-        project.setUpdatedAt(timeUpdated);
         projectRepository.save(project);
-        log.info("Project updated successful\nId: {}, last time updated: {}", project.getId(), timeUpdated);
+        log.info("Project updated successful\nId: {}, last time updated: {}", project.getId(), project.getUpdatedAt());
     }
 
     public List<ProjectDto> findProjectsByFilters(Long userId, ProjectFilterDto projectFilterDto) {
@@ -115,9 +108,11 @@ public class ProjectService {
     }
 
     private boolean isAccessDenied(Long userId, Project project) {
-        return project.getVisibility() == ProjectVisibility.PRIVATE && project.getTeams().stream()
-                .noneMatch(team -> team.getTeamMembers().stream()
-                        .noneMatch(member -> member.getUserId().equals(userId)));
+        return project.getVisibility() == ProjectVisibility.PRIVATE
+                && project.getTeams().stream()
+                .allMatch(team -> team.getTeamMembers().stream()
+                        .noneMatch(member -> member.getUserId().equals(userId)))
+                && !project.getOwnerId().equals(userId);
     }
 
     private Stream<Project> getProjectsOnRepository() {

@@ -9,7 +9,6 @@ public record ProjectDto(
         Long id,
         String name,
         String description,
-        Long ownerId,
         ProjectStatus status,
         ProjectVisibility visibility
 ) {
