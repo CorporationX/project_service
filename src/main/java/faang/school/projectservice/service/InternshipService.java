@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -91,39 +92,17 @@ public class InternshipService {
     public InternshipDto createInternship(InternshipDto internshipDto) {
         Objects.requireNonNull(internshipDto, "internshipDto is null");
 
-        if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
-            throw new InternshipGetInternsIdException("The list of interns is empty");
-        }
+        validateInternsId(internshipDto);
+        validateInternshipDuration(internshipDto);
+        Project project = validateProject(internshipDto.getProjectId());
+        TeamMember teamMember = validateMentor(internshipDto.getMentorId(), project);
+        List<TeamMember> teamMembers = validateInterns(internshipDto.getInternsId());
 
-        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate()
-                .plusMonths(INTERNSHIP_DURATION_THREE_MONTHS))) {
-            throw new IllegalArgumentException("The internship cannot last more than 3 months.");
-        }
-
-        Project project = projectRepository.findById(internshipDto.getProjectId()).orElseThrow(()
-                -> new EntityNotFoundException("Project not found for search by id: "
-                + internshipDto.getProjectId()));
-
-        List<Team> teams = project.getTeams();
-
-        TeamMember teamMember = teamMemberRepository.findById(internshipDto.getMentorId()).orElseThrow(()
-                -> new EntityNotFoundException("No mentor"));
-
-        Team team = teamMember.getTeam();
-        if (!teams.contains(team)) {
-            throw new EntityNotFoundException("Mentor from another project");
-        }
         Internship internship = internshipMapper.toInternship(internshipDto);
         internship.setProject(project);
         internship.setMentorId(teamMember);
-        List<TeamMember> teamMembers = internshipDto.getInternsId().stream()
-                .map((id) -> teamMemberRepository.findById(id).orElseThrow(()
-                        -> new EntityNotFoundException("TeamMembers id " + id + " not found")))
-                .peek(member -> member.getRoles().add(TeamRole.INTERN))
-                .toList();
         internship.setInterns(teamMembers);
-        internship.setSchedule(scheduleRepository.findById(internshipDto.getScheduleId())
-                .orElseThrow(()->new EntityNotFoundException("Schedule not found")));
+        internship.setSchedule(validateSchedule(internshipDto.getScheduleId()));
 
         log.info("Internship successfully created");
         InternshipDto dto = internshipMapper.toInternshipDto(internship);
@@ -183,5 +162,46 @@ public class InternshipService {
             }
         }
         internship.setInterns(newList);
+    }
+    private void validateInternsId(InternshipDto internshipDto) {
+        if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
+            throw new InternshipGetInternsIdException("The list of interns is empty");
+        }
+    }
+
+    private void validateInternshipDuration(InternshipDto internshipDto) {
+        if (internshipDto.getEndDate().isAfter(internshipDto.getStartDate()
+                .plusMonths(INTERNSHIP_DURATION_THREE_MONTHS))) {
+            throw new IllegalArgumentException("The internship cannot last more than 3 months.");
+        }
+    }
+
+    private Project validateProject(Long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(() ->
+                new EntityNotFoundException("Project not found for search by id: " + projectId));
+    }
+
+    private TeamMember validateMentor(Long mentorId, Project project) {
+        TeamMember teamMember = teamMemberRepository.findById(mentorId).orElseThrow(() ->
+                new EntityNotFoundException("No mentor"));
+
+        Team team = teamMember.getTeam();
+        if (!project.getTeams().contains(team)) {
+            throw new EntityNotFoundException("Mentor from another project");
+        }
+        return teamMember;
+    }
+
+    private List<TeamMember> validateInterns(List<Long> internsId) {
+        return internsId.stream()
+                .map(id -> teamMemberRepository.findById(id).orElseThrow(() ->
+                        new EntityNotFoundException("TeamMembers id " + id + " not found")))
+                .peek(member -> member.getRoles().add(TeamRole.INTERN))
+                .toList();
+    }
+
+    private Schedule validateSchedule(Long scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Schedule not found"));
     }
 }
