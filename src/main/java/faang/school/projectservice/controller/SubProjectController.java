@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.SubProjectsFilterDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping("/subProject")
 @RequiredArgsConstructor
 public class SubProjectController {
-    private final ProjectService service;
+    private final SubProjectService service;
 
     @PostMapping("/create")
     public ProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {

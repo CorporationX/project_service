@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class ProjectService {
+public class SubProjectService {
     private final ProjectRepository projectRepository;
     private final MomentRepository momentRepository;
     private final StageRepository stageRepository;
