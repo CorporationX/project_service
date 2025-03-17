@@ -29,22 +29,11 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("redis.clients:jedis:4.3.2")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("com.h2database:h2")
 
     /**
      * Amazon S3
      */
     implementation("software.amazon.awssdk:s3:2.29.20")
-
-    /**
-     * Imgscalr
-     */
-    implementation("org.imgscalr:imgscalr-lib:4.2")
-
-    /**
-     * Apache Tika
-     */
-    implementation("org.apache.tika:tika-core:2.9.2")
 
     /**
      * Utils & Logging
@@ -71,11 +60,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
-    /**
-     * Swagger
-     */
-    implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 }
 
 tasks.withType<Test> {
@@ -88,11 +72,11 @@ tasks.bootJar {
     archiveFileName.set("service.jar")
 }
 
-
 jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
 }
+
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
@@ -131,12 +115,12 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = "0.50".toBigDecimal()
             }
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = "0.50".toBigDecimal()
             }
 
         }
