@@ -13,6 +13,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 public class ProjectServiceApplication {
     public static void main(String[] args) {
+        //для проверки пайплайна
+        fail();
         new SpringApplicationBuilder(ProjectServiceApplication.class)
                 .bannerMode(Banner.Mode.OFF)
                 .run(args);
