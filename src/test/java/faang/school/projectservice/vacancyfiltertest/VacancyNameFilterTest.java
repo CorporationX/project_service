@@ -26,7 +26,10 @@ public class VacancyNameFilterTest {
     @BeforeEach
     public void setUp() {
         filter = new VacancyNameFilter();
-        filterDto = VacancyFilterDto.builder().namePattern("Java").build();
+        filterDto = VacancyFilterDto
+                .builder()
+                .namePattern("Java")
+                .build();
     }
 
     @Test

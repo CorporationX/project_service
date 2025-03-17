@@ -45,7 +45,7 @@ public class VacancyService {
         Vacancy vacancy  = mapper.toEntity(vacancyDto);
         Long projectId = vacancyDto.getProjectId();
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataValidationException("Проект не найден."));
+                .orElseThrow(() -> new DataValidationException("Проект с id: {} не найден.", projectId));
         mapper.updateVacancyFromDto(vacancyDto, vacancy);
         vacancy.setProject(project);
         vacancy.setStatus(VacancyStatus.OPEN);
@@ -69,7 +69,7 @@ public class VacancyService {
         }
 
         Vacancy targetVacancy = repository.findById(vacancyId)
-                .orElseThrow(() -> new DataValidationException("Вакансия не найдена"));
+                .orElseThrow(() -> new DataValidationException("Вакансия c id: {} не найдена", vacancyId));
         mapper.updateVacancyFromDto(vacancyDto, targetVacancy);
 
         if (vacancyDto.getCandidates() != null
@@ -77,7 +77,7 @@ public class VacancyService {
             validateAndAddNewCandidates(targetVacancy, vacancyDto.getCandidates());
         }
         validateVacancyData(targetVacancy);
-        validateVacancyClose(vacancyDto);
+        validateIsVacancyClosable(vacancyDto);
 
         updateMetaData(targetVacancy);
         repository.save(targetVacancy);
@@ -98,10 +98,6 @@ public class VacancyService {
                 vacancyFilters.stream()
                         .filter(filter -> filter.isApplicable(filters))
                         .toList();
-        if (applicableFilters.isEmpty()) {
-            return vacancies;
-        }
-
         for (VacancyFilter vacancyFilter : applicableFilters) {
             vacancies = vacancyFilter.apply(vacancies, filters);
         }
@@ -118,10 +114,7 @@ public class VacancyService {
         TeamMember creator = memberRepository.findById(
                 userContext.getUserId()).orElseThrow(() ->
                 new DataValidationException("Пользователь не найден."));
-        List<TeamRole> creatorRoles = creator.getRoles();
-        List<TeamRole> validRoles = List.of(TeamRole.OWNER, TeamRole.MANAGER);
-        boolean hasValidRoles = creatorRoles.stream().anyMatch(validRoles::contains);
-        if (!hasValidRoles) {
+        if (creator.getRoles().stream().noneMatch(role -> role == TeamRole.OWNER || role == TeamRole.MANAGER)) {
             throw new DataValidationException("Вы не имеете прав на публикацию вакансий.");
         }
     }
@@ -156,7 +149,7 @@ public class VacancyService {
         return true;
     }
 
-    private void validateVacancyClose(VacancyDto vacancyDto) {
+    private void validateIsVacancyClosable(VacancyDto vacancyDto) {
         if (vacancyDto.getStatus() == CLOSED && !hiredCandidates(vacancyDto)) {
             throw new DataValidationException(
                     "Нельзя закрыть вакансию пока не набрано достаточное количество кандидатов");

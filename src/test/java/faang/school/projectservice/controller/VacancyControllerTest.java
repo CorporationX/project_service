@@ -50,8 +50,8 @@ public class VacancyControllerTest {
                 VacancyCandidateDto.builder().name("Nescafe").count(1).build();
         when(service.updateVacancy(vacancyId, vacancyDto)).thenReturn(vacancyCandidateDto);
         VacancyCandidateDto result = controller.updateVacancy(vacancyId, vacancyDto);
-        assertNotNull(result);
         verify(service, times(1)).updateVacancy(vacancyId, vacancyDto);
+        assertNotNull(result);
     }
 
     @Test
@@ -61,8 +61,8 @@ public class VacancyControllerTest {
                 new VacancyCandidateDto(1, 4, "bob", candidates, MANAGER);
         when(service.getVacancyInfoById(vacancyId)).thenReturn(vacancyCandidateDto);
         VacancyCandidateDto result = controller.getVacancyInfoBiId(vacancyId);
-        assertNotNull(result);
         verify(service, times(1)).getVacancyInfoById(vacancyId);
+        assertNotNull(result);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class VacancyControllerTest {
         List<VacancyCandidateDto> forFind = new ArrayList<>();
         when(service.findVacancy(filter)).thenReturn(forFind);
         List<VacancyCandidateDto> result = controller.findVacancy(filter);
-        assertNotNull(result);
         verify(service, times(1)).findVacancy(filter);
+        assertNotNull(result);
     }
 }

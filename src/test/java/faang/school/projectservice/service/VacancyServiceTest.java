@@ -103,12 +103,12 @@ public class VacancyServiceTest {
 
         VacancyCandidateDto result = service.createVacancy(vacancyDto);
 
+        verify(projectRepository, times(1)).findById(1L);
+        verify(repository, times(1)).save(vacancy);
+
         assertNotNull(result);
         assertEquals(1L, result.id());
         assertEquals("Designer", result.name());
-
-        verify(projectRepository, times(1)).findById(1L);
-        verify(repository, times(1)).save(vacancy);
     }
 
     @Test
@@ -119,9 +119,10 @@ public class VacancyServiceTest {
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> service.createVacancy(vacancyDto));
 
-        assertEquals("Пользователь не найден.", exception.getMessage());
         verify(memberRepository, times(1)).findById(1L);
         verify(context, times(1)).getUserId();
+
+        assertEquals("Пользователь не найден.", exception.getMessage());
     }
 
     @Test
@@ -134,9 +135,10 @@ public class VacancyServiceTest {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 service.createVacancy(vacancyDto));
 
-        assertEquals("Вы не имеете прав на публикацию вакансий.", exception.getMessage());
         verify(memberRepository, times(1)).findById(1L);
         verify(context, times(1)).getUserId();
+
+        assertEquals("Вы не имеете прав на публикацию вакансий.", exception.getMessage());
     }
 
     @Test
@@ -146,13 +148,15 @@ public class VacancyServiceTest {
         when(vacancyDto.getProjectId()).thenReturn(1L);
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
-        DataValidationException exception = assertThrows(DataValidationException.class, () ->
+        DataValidationException exception;
+        exception = assertThrows(DataValidationException.class, () ->
                 service.createVacancy(vacancyDto));
 
-        assertEquals("Проект не найден.", exception.getMessage());
         verify(memberRepository, times(1)).findById(1L);
         verify(context, times(1)).getUserId();
         verify(projectRepository, times(1)).findById(1L);
+
+        assertEquals("Проект с id: {} не найден.", exception.getMessage());
     }
 
     @Test
@@ -165,9 +169,10 @@ public class VacancyServiceTest {
 
         DataValidationException exception = prepareBadValidationDataForCreate();
 
-        assertEquals("Имя не может быть пустым", exception.getMessage());
         verify(projectRepository, times(1)).findById(1L);
         verify(repository, times(0)).save(vacancy);
+
+        assertEquals("Имя не может быть пустым", exception.getMessage());
     }
 
     @Test
@@ -180,9 +185,10 @@ public class VacancyServiceTest {
 
         DataValidationException exception = prepareBadValidationDataForCreate();
 
-        assertEquals("Заработная плата должна быть больше 0", exception.getMessage());
         verify(projectRepository, times(1)).findById(1L);
         verify(repository, times(0)).save(vacancy);
+
+        assertEquals("Заработная плата должна быть больше 0", exception.getMessage());
     }
 
     @Test
@@ -195,9 +201,11 @@ public class VacancyServiceTest {
 
         DataValidationException exception = prepareBadValidationDataForCreate();
 
-        assertEquals("Количество вакантных мест не может быть меньше 1", exception.getMessage());
         verify(projectRepository, times(1)).findById(1L);
         verify(repository, times(0)).save(vacancy);
+
+        assertEquals("Количество вакантных мест не может быть меньше 1", exception.getMessage());
+
     }
 
     @Test
@@ -256,10 +264,10 @@ public class VacancyServiceTest {
             service.updateVacancy(1L, null);
         });
 
-        assertEquals("Вакансия не может быть пустой", exception.getMessage());
-
         verify(context, times(1)).getUserId();
         verify(memberRepository, times(1)).findById(1L);
+
+        assertEquals("Вакансия не может быть пустой", exception.getMessage());
     }
 
     @Test
@@ -268,15 +276,17 @@ public class VacancyServiceTest {
         when(context.getUserId()).thenReturn(1L);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(creator));
 
-        Exception exception = assertThrows(DataValidationException.class, () -> {
+        Exception exception;
+        exception = assertThrows(DataValidationException.class, () -> {
             service.updateVacancy(1L, vacancyDto);
         });
-
-        assertEquals("Вакансия не найдена", exception.getMessage());
 
         verify(repository, times(1)).findById(1L);
         verify(context, times(1)).getUserId();
         verify(memberRepository, times(1)).findById(1L);
+
+        assertEquals("Вакансия c id: {} не найдена", exception.getMessage());
+
     }
 
     @Test
@@ -323,8 +333,8 @@ public class VacancyServiceTest {
         List<Vacancy> vacancyList = new ArrayList<>();
         when(repository.findAll()).thenReturn(vacancyList);
         List<VacancyCandidateDto> result = service.findVacancy(filterDto);
-        assertNotNull(result);
         verify(repository, times(1)).findAll();
+        assertNotNull(result);
     }
 
     @Test
@@ -336,10 +346,12 @@ public class VacancyServiceTest {
         when(repository.findById(vacancyId)).thenReturn(Optional.of(infoVacancy));
         when(candidateMapper.toDto(infoVacancy)).thenReturn(resultDto);
         VacancyCandidateDto result = service.getVacancyInfoById(vacancyId);
+
+        verify(repository, times(1)).findById(vacancyId);
+
         assertNotNull(resultDto);
         assertEquals(1L, result.id());
         assertEquals("vacancy", result.name());
-        verify(repository, times(1)).findById(vacancyId);
     }
 
     @Test
@@ -350,9 +362,11 @@ public class VacancyServiceTest {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 service.getVacancyInfoById(vacancyId));
 
-        assertEquals("Вакансия не найдена", exception.getMessage());
         verify(repository, times(1)).findById(vacancyId);
         verify(candidateMapper, times(0)).toDto(any());
+
+        assertEquals("Вакансия не найдена", exception.getMessage());
+
     }
 
     private DataValidationException prepareBadValidationDataForCreate() {
