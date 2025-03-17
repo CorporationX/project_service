@@ -20,12 +20,12 @@ public class SubProjectController {
 
     @PostMapping("/create")
     public ProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
-        return service.create(subProjectDto);
+        return service.createSubProject(subProjectDto);
     }
 
     @PostMapping("/update")
     public ProjectDto update(@RequestBody ProjectDto projectDto) {
-        return service.update(projectDto);
+        return service.updateSubProject(projectDto);
     }
 
     @PostMapping("/filter")

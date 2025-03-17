@@ -39,7 +39,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<SubProjectFilter> subProjectFilters;
 
-    public ProjectDto create(CreateSubProjectDto subProjectDto) {
+    public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         Project parentProject = validateAndRetrieveParentProject(subProjectDto);
         Project subProject = subProjectMapper.toEntity(subProjectDto);
         subProject.setParentProject(parentProject);
@@ -55,7 +55,7 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(savedSubProject));
     }
 
-    public ProjectDto update(ProjectDto projectDto) {
+    public ProjectDto updateSubProject(ProjectDto projectDto) {
         projectDto.validateCommonFields();
 
         Project project = projectRepository.findById(projectDto.getId())
@@ -145,7 +145,7 @@ public class ProjectService {
             List<Project> updatedChildren = new ArrayList<>();
             for (CreateSubProjectDto child : childrenDtos) {
                 child.setParentProject(project.getId());
-                updatedChildren.add(projectMapper.toEntity(create(child)));
+                updatedChildren.add(projectMapper.toEntity(createSubProject(child)));
             }
             project.setChildren(updatedChildren);
         }
