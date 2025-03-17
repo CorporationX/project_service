@@ -83,7 +83,7 @@ public class ProjectService {
         for (ProjectFilter filter : projectFilters) {
             if (filter.isApplicable(projectFilterDto)) {
                 projects = filter.apply(projects, projectFilterDto);
-                log.info("{} filter has apply successful", filter.getClass().getSimpleName());
+                log.info("Filter has apply successful");
             }
         }
         return projectMapper.projectListToProjectDtoList(hidePrivateProjects(userId, projects));

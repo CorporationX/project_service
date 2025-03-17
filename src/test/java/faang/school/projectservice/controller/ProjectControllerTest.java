@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,4 +26,28 @@ public class ProjectControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(projectController).build();
     }
 
+    @Test
+    public void testPositiveCreateProject() {
+
+    }
+
+    @Test
+    public void testPositiveUpdateProject() {
+
+    }
+
+    @Test
+    public void testPositiveFindProjectsByFilters() {
+
+    }
+
+    @Test
+    public void testPositiveGetAllProjects() {
+
+    }
+
+    @Test
+    public void testPositiveGetProjectById() {
+
+    }
 }
