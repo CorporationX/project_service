@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +30,8 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
 
     public void createProject(Long userId, ProjectDto projectDto) {
+        validateUserId(userId);
+        validateCreatedProject(projectDto);
         Project project = projectMapper.projectDtoToProject(projectDto);
         boolean isNameNotEquals = getProjectsOnRepository()
                 .filter(findedProject -> findedProject.getOwnerId().equals(userId))
@@ -48,6 +51,8 @@ public class ProjectService {
     }
 
     public void updateProject(Long projectId, ProjectDto projectDto) {
+        validateProjectId(projectId);
+        validateUpdatedProject(projectDto);
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(String.format("Project with id: %d not found", projectId));
         }
@@ -72,6 +77,7 @@ public class ProjectService {
     }
 
     public List<ProjectDto> findProjectsByFilters(Long userId, ProjectFilterDto projectFilterDto) {
+        validateUserId(userId);
         Stream<Project> projects = getProjectsOnRepository();
 
         for (ProjectFilter filter : projectFilters) {
@@ -84,11 +90,14 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(Long userId) {
+        validateUserId(userId);
         Stream<Project> projects = getProjectsOnRepository();
         return projectMapper.projectListToProjectDtoList(hidePrivateProjects(userId, projects));
     }
 
     public ProjectDto getProjectById(Long userId, Long projectId) {
+        validateUserId(userId);
+        validateProjectId(projectId);
         Project project = getProjectById(projectId);
 
         if (isAccessDenied(userId, project)) {
@@ -123,5 +132,30 @@ public class ProjectService {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Project with id: %d not found", projectId)));
+    }
+
+    private void validateProjectId(Long projectId) {
+        Objects.requireNonNull(projectId, "Project must contain id");
+    }
+
+    private void validateUserId(Long userId) {
+        Objects.requireNonNull(userId, "User must contain id");
+    }
+
+    private void validateDescription(String description) {
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Description cannot be empty");
+        }
+    }
+
+    private void validateCreatedProject(ProjectDto projectDto) {
+        validateDescription(projectDto.description());
+        if (projectDto.name() == null || projectDto.name().isBlank()) {
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+    }
+
+    private void validateUpdatedProject(ProjectDto projectDto) {
+        validateDescription(projectDto.description());
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/projects")
@@ -23,62 +22,29 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/creating")
+    @PostMapping("/new")
     public void createProject(@RequestParam Long userId, @RequestBody ProjectDto projectDto) {
-        validateUserId(userId);
-        validateCreatedProject(projectDto);
         projectService.createProject(userId, projectDto);
     }
 
-    @PutMapping("/updating/{projectId}")
+    @PutMapping("/{projectId}")
     public void updateProject(@PathVariable Long projectId, @RequestBody ProjectDto projectDto) {
-        validateProjectId(projectId);
-        validateUpdatedProject(projectDto);
         projectService.updateProject(projectId, projectDto);
     }
 
-    @GetMapping("/filtered")
+    @PostMapping("/all-filtered")
     public List<ProjectDto> findProjectsByFilters(@RequestParam Long userId,
                                                   @RequestBody ProjectFilterDto projectFilterDto) {
-        validateUserId(userId);
         return projectService.findProjectsByFilters(userId, projectFilterDto);
     }
 
     @GetMapping("/all")
     public List<ProjectDto> getAllProjects(@RequestParam Long userId) {
-        validateUserId(userId);
         return projectService.getAllProjects(userId);
     }
 
     @GetMapping("/{projectId}")
     public ProjectDto getProjectById(@RequestParam Long userId, @PathVariable Long projectId) {
-        validateUserId(userId);
-        validateProjectId(projectId);
         return projectService.getProjectById(userId, projectId);
-    }
-
-    private void validateProjectId(Long projectId) {
-        Objects.requireNonNull(projectId, "Project must contain id");
-    }
-
-    private void validateUserId(Long userId) {
-        Objects.requireNonNull(userId, "User must contain id");
-    }
-
-    private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Description cannot be empty");
-        }
-    }
-
-    private void validateCreatedProject(ProjectDto projectDto) {
-        validateDescription(projectDto.description());
-        if (projectDto.name() == null || projectDto.name().isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-    }
-
-    private void validateUpdatedProject(ProjectDto projectDto) {
-        validateDescription(projectDto.description());
     }
 }
