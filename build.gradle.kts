@@ -72,6 +72,10 @@ tasks.bootJar {
     archiveFileName.set("service.jar")
 }
 
+/**
+ * jacoco
+ */
+
 jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
