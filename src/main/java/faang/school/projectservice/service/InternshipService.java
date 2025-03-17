@@ -15,6 +15,8 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ScheduleRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -39,17 +41,22 @@ public class InternshipService {
     private final List<InternshipFilter> internshipFilters;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final ScheduleRepository scheduleRepository;
 
     public InternshipDto getInternshipById(Long internshipId) {
+        Objects.requireNonNull(internshipId, "internshipId is null");
         return internshipRepository.findById(internshipId)
                 .map(internshipMapper::toInternshipDto)
                 .orElseThrow(() -> new EntityNotFoundException("Internship not found for search by id: " + internshipId));
     }
 
     public List<InternshipDto> getAllInternships() {
-        return internshipRepository.findAll().stream()
-                .map(internshipMapper::toInternshipDto)
-                .toList();
+        List<Internship> internshipList = internshipRepository.findAll();
+        if (internshipList.isEmpty()) {
+            throw new EntityNotFoundException("The list of internShip is empty");
+        }
+        return internshipList.stream()
+                .map(internshipMapper::toInternshipDto).toList();
     }
 
     public List<InternshipDto> getInternshipsFiltered(InternshipFilterDto filterDto) {
@@ -82,6 +89,7 @@ public class InternshipService {
     }
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
+        Objects.requireNonNull(internshipDto, "internshipDto is null");
 
         if (internshipDto.getInternsId() == null || internshipDto.getInternsId().isEmpty()) {
             throw new InternshipGetInternsIdException("The list of interns is empty");
@@ -114,11 +122,13 @@ public class InternshipService {
                 .peek(member -> member.getRoles().add(TeamRole.INTERN))
                 .toList();
         internship.setInterns(teamMembers);
-        internship.setCreatedAt(LocalDateTime.now());
-        internship.setEndDate(internship.getStartDate().plusMonths(INTERNSHIP_DURATION_THREE_MONTHS));
+        internship.setSchedule(scheduleRepository.findById(internshipDto.getScheduleId())
+                .orElseThrow(()->new EntityNotFoundException("Schedule not found")));
 
         log.info("Internship successfully created");
-        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+        InternshipDto dto = internshipMapper.toInternshipDto(internship);
+        internshipRepository.save(internship);
+        return dto;
     }
 
     private void completeInternship(Internship internship) {

@@ -16,13 +16,12 @@ public interface InternshipMapper {
     @Mapping(target = "interns", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "schedule", ignore = true)
     Internship toInternship(InternshipDto internshipDto);
 
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "mentorId.id", target = "mentorId")
+    @Mapping(source = "schedule.id", target = "scheduleId")
     @Mapping(target = "internsId", expression = "java(mapTeamMemberToIds(internship.getInterns()))")
     InternshipDto toInternshipDto(Internship internship);
 
