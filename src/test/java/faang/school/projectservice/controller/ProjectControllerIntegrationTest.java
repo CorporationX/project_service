@@ -85,7 +85,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testSuccessCreateProject() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -99,7 +99,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void testCreateProjectWithoutName() throws Exception {
         testProjectDto.setName("");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -110,7 +110,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void testCreateProjectWithoutDescription() throws Exception {
         testProjectDto.setDescription("");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -126,7 +126,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         updatedProjectDto.setDescription("Project description");
         updatedProjectDto.setStatus(ProjectStatus.ON_HOLD);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -140,7 +140,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         ProjectFilterDto nameFilter = new ProjectFilterDto();
         nameFilter.setNamePattern("Test");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project/user/{userId}/filter", OWNER_ID)
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects/user/{userId}/filter", OWNER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nameFilter)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -150,7 +150,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testGetAllAvailableProjectsForUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/user/{userId}", OWNER_ID)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/user/{userId}", OWNER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("AI Research"))
@@ -160,7 +160,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testGetProjectById() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/{id}", testProjectId)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{id}", testProjectId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(testProjectId));
@@ -170,7 +170,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void addProjectCover_shouldThrowBadRequestException_whenTheUserIsNotTheAuthorOfTheProject() throws Exception {
         userContext.setUserId(NOT_OWNER_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/project/{id}/cover", testProjectId)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
@@ -189,7 +189,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
                         .status(ProjectStatus.CREATED)
                         .build()).getId();
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/project/{id}/cover", testProjectId)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
@@ -199,7 +199,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void addProjectCover_shouldBeCompletedSuccessfully() throws Exception {
         MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.multipart("/api/v1/project/{projectId}/cover", testProjectId)
+                .perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{projectId}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
@@ -215,7 +215,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void deleteProjectCover_shouldThrowBadRequestException_whenTheUserIsNotTheAuthorOfTheProject() throws Exception {
         userContext.setUserId(NOT_OWNER_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/project/{id}/cover", testProjectId))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
                         .value("Only the owner of the project can delete a cover"));
@@ -223,7 +223,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void deleteProjectCover_shouldThrowBadRequestException_whenTheProjectDoesNotContainCover() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/project/{id}/cover", testProjectId))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
                         .value("The project with ID " + testProjectId + " does not have a cover"));
@@ -234,7 +234,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         addTestProjectCover();
 
         MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.delete("/api/v1/project/{id}/cover", testProjectId))
+                .perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
@@ -250,7 +250,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         addTestProjectCover();
 
         MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/api/v1/project/{id}/cover", testProjectId))
+                .perform(MockMvcRequestBuilders.get("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andReturn();
@@ -263,7 +263,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void addTestProjectCover() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/project/{id}/cover", testProjectId)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

@@ -67,7 +67,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.createProject(Mockito.any(ProjectDto.class))).thenReturn(projectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -90,7 +90,7 @@ public class ProjectControllerTest {
         projectDto.setDescription("Some description");
         projectDto.setStatus(ProjectStatus.CREATED);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -104,7 +104,7 @@ public class ProjectControllerTest {
         projectDto.setDescription(" ");
         projectDto.setStatus(ProjectStatus.CREATED);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -120,7 +120,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.updateProject(Mockito.any(ProjectDto.class))).thenReturn(updatedProjectDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/project")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -144,7 +144,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getAllAvailableProjectsForUserWithFilter(nameFilter, userId)).thenReturn(List.of(dto));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/project/user/{userId}/filter", userId)
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects/user/{userId}/filter", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nameFilter)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -164,7 +164,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getAllAvailableProjectsForUser(userId)).thenReturn(List.of(dto));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/user/1")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/user/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Project name"))
@@ -183,7 +183,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectService.getProjectById(projectId)).thenReturn(dto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/{id}", projectId)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{id}", projectId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(20))
@@ -196,7 +196,7 @@ public class ProjectControllerTest {
         Mockito.when(projectCoverService.addProjectCover(TEST_PROJECT_ID, IMAGE_MOCK_MULTIPART_FILE))
                 .thenReturn(PROJECT_COVER_IMAGE_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/project/{id}/cover",
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover",
                                 TEST_PROJECT_ID)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -211,7 +211,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectCoverService.deleteProjectCover(TEST_PROJECT_ID)).thenReturn(PROJECT_COVER_IMAGE_ID);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/project/{id}/cover", TEST_PROJECT_ID))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", TEST_PROJECT_ID))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().string(PROJECT_COVER_IMAGE_ID));
 
@@ -225,7 +225,7 @@ public class ProjectControllerTest {
 
         Mockito.when(projectCoverService.getProjectCover(TEST_PROJECT_ID)).thenReturn(projectCoverInputStream);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/{id}/cover", TEST_PROJECT_ID))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{id}/cover", TEST_PROJECT_ID))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(content().bytes(projectCoverData));

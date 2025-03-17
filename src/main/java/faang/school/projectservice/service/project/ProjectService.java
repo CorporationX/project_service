@@ -44,6 +44,10 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    public List<ProjectDto> getProjectsByIds(List<Long> ids) {
+        return projectMapper.toDtoList(projectRepository.findAllById(ids));
+    }
+
     @Transactional
     public ProjectDto updateProject(ProjectDto projectDto) {
         Project projectToUpdate = projectRepository.findById(projectDto.getId())
