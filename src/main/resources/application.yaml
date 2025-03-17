@@ -16,7 +16,6 @@ spring:
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
-    contexts: local
 
   data:
     redis:
