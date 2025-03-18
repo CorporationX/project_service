@@ -227,21 +227,27 @@ class VacancyServiceTest {
         // Arrange
         var vacancyId = 1L;
         var updaterId = 2L;
-        var projectId = 1L;
-        var project = getTestProject(projectId);
-        var authorId = 3L;
-        var author = getTestAuthor(authorId);
         var requestDto = createUpdateVacancyRequestDto(vacancyId, updaterId, VacancyStatus.CLOSED, 10);
 
+        var projectId = 1L;
+        var project = getTestProject(projectId);
         when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
+
+        var authorId = 3L;
+        var author = getTestAuthor(authorId);
         when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
+
+        var updater = getTestUpdater(updaterId);
+        when(teamMemberService.getTeamMemberById(updaterId)).thenReturn(
+                Optional.of(updater));
 
         var vacancy = Vacancy.builder()
                 .id(vacancyId)
                 .project(project)
                 .createdBy(authorId)
+                .updatedBy(updaterId)
                 .build();
         when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
 
@@ -264,6 +270,75 @@ class VacancyServiceTest {
         assertEquals(requestDto.status(), savedVacancy.getStatus());
         assertEquals(requestDto.position(), savedVacancy.getPosition());
         assertEquals(CandidateStatus.ACCEPTED, candidate.getCandidateStatus());
+    }
+
+    @Test
+    public void testUpdateVacancy_ValidDataWithoutChanges_ReturnVacancy() {
+        // Arrange
+        var vacancyId = 1L;
+        var updaterId = 2L;
+        var requestDto = new UpdateVacancyRequestDto(
+                vacancyId,
+                updaterId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        var projectId = 1L;
+        var project = getTestProject(projectId);
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
+                Optional.of(project));
+
+        var authorId = 3L;
+        var author = getTestAuthor(authorId);
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
+                Optional.of(author));
+
+        var updater = getTestUpdater(updaterId);
+        when(teamMemberService.getTeamMemberById(updaterId)).thenReturn(
+                Optional.of(updater));
+
+        var vacancyName = "Test vacancy";
+        var vacancyDescription = "Test description";
+        var vacancyPosition = TeamRole.DEVELOPER;
+        var vacancyStatus = VacancyStatus.OPEN;
+        var vacancy = Vacancy.builder()
+                .id(vacancyId)
+                .name(vacancyName)
+                .description(vacancyDescription)
+                .position(vacancyPosition)
+                .status(vacancyStatus)
+                .project(project)
+                .createdBy(authorId)
+                .updatedBy(updaterId)
+                .build();
+        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
+
+        var candidate = new Candidate();
+        candidate.setId(2L);
+        candidate.setUsername("Test user name");
+        candidate.setVacancy(vacancy);
+        candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
+        List<Candidate> attachedToProjectCandidates = List.of(candidate);
+        when(candidateService.getAllCandidatesAttachedToProjectVacancy(vacancyId, projectId))
+                .thenReturn(attachedToProjectCandidates);
+
+        // Act
+        vacancyService.updateVacancy(requestDto);
+
+        // Assert
+        verify(vacancyRepository, times(1)).save(vacancyCaptor.capture());
+        var savedVacancy = vacancyCaptor.getValue();
+        assertEquals(vacancyName, savedVacancy.getName());
+        assertEquals(vacancyDescription, savedVacancy.getDescription());
+        assertEquals(vacancyStatus, savedVacancy.getStatus());
+        assertEquals(vacancyPosition, savedVacancy.getPosition());
+        assertEquals(CandidateStatus.WAITING_RESPONSE, candidate.getCandidateStatus());
     }
 
     @Test
@@ -509,6 +584,13 @@ class VacancyServiceTest {
         return TeamMember.builder()
                 .id(authorId)
                 .nickname("Author nickname")
+                .build();
+    }
+
+    private static TeamMember getTestUpdater(long updaterId) {
+        return TeamMember.builder()
+                .id(updaterId)
+                .nickname("Updater nickname")
                 .build();
     }
 

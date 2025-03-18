@@ -137,7 +137,10 @@ public class VacancyServiceImpl implements VacancyService {
 
         vacancyMapper.update(vacancy, requestDto);
 
-        currentAcceptedCandidates.forEach(candidate -> candidate.setCandidateStatus(CandidateStatus.ACCEPTED));
+        if (vacancy.getStatus().equals(VacancyStatus.CLOSED)) {
+            currentAcceptedCandidates.forEach(
+                    candidate -> candidate.setCandidateStatus(CandidateStatus.ACCEPTED));
+        }
 
         vacancyRepository.save(vacancy);
     }
