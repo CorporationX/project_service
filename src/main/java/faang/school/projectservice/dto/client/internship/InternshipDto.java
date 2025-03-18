@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.client.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Schedule;
 import faang.school.projectservice.model.TeamRole;
 import lombok.Builder;
 import lombok.Data;
@@ -24,5 +23,4 @@ public class InternshipDto {
     private Long createdBy;
     private Long updatedBy;
     private Long scheduleId;
-
 }

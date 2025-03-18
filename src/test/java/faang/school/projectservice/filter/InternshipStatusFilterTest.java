@@ -15,12 +15,13 @@ public class InternshipStatusFilterTest {
 
     @Test
     public void testIsApplicableTrue() {
-        boolean actual = internshipStatusFilter.isApplicable(new InternshipFilterDto(InternshipStatus.IN_PROGRESS,null));
+        boolean actual = internshipStatusFilter.isApplicable(new InternshipFilterDto(InternshipStatus.IN_PROGRESS, null));
         assertTrue(actual);
     }
+
     @Test
     public void testIsApplicableFalse() {
-        boolean actual = internshipStatusFilter.isApplicable(new InternshipFilterDto(null,null));
+        boolean actual = internshipStatusFilter.isApplicable(new InternshipFilterDto(null, null));
         assertFalse(actual);
     }
 
@@ -31,7 +32,7 @@ public class InternshipStatusFilterTest {
                 Internship.builder().status(InternshipStatus.COMPLETED).build());
 
         List<Internship> list = internshipStatusFilter
-                .apply(internships,new InternshipFilterDto(InternshipStatus.IN_PROGRESS,null)).toList();
+                .apply(internships, new InternshipFilterDto(InternshipStatus.IN_PROGRESS, null)).toList();
         assertEquals(1, list.size());
         assertEquals(InternshipStatus.IN_PROGRESS, list.get(0).getStatus());
     }
@@ -43,7 +44,7 @@ public class InternshipStatusFilterTest {
                 Internship.builder().status(InternshipStatus.IN_PROGRESS).build());
 
         List<Internship> list = internshipStatusFilter
-                .apply(internships,new InternshipFilterDto(InternshipStatus.IN_PROGRESS,null)).toList();
+                .apply(internships, new InternshipFilterDto(InternshipStatus.IN_PROGRESS, null)).toList();
         assertEquals(2, list.size());
         assertEquals(InternshipStatus.IN_PROGRESS, list.get(0).getStatus());
         assertEquals(InternshipStatus.IN_PROGRESS, list.get(1).getStatus());
@@ -56,9 +57,8 @@ public class InternshipStatusFilterTest {
                 Internship.builder().status(InternshipStatus.IN_PROGRESS).build());
 
         List<Internship> list = internshipStatusFilter
-                .apply(internships,new InternshipFilterDto(InternshipStatus.COMPLETED,null)).toList();
+                .apply(internships, new InternshipFilterDto(InternshipStatus.COMPLETED, null)).toList();
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
-
     }
 }

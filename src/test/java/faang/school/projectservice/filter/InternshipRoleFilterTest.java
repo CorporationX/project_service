@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamRole;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,11 +20,13 @@ public class InternshipRoleFilterTest {
         boolean result = internshipRoleFilter.isApplicable(new InternshipFilterDto(null, TeamRole.INTERN));
         assertTrue(result);
     }
+
     @Test
     public void testIsApplicableFalse() {
         boolean result = internshipRoleFilter.isApplicable(new InternshipFilterDto(null, null));
         assertFalse(result);
     }
+
     @Test
     public void testApply() {
         Stream<Internship> internshipStream = Stream.of(

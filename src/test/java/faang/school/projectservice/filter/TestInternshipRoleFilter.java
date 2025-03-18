@@ -3,7 +3,6 @@ package faang.school.projectservice.filter;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamRole;
-
 import java.util.stream.Stream;
 
 public class TestInternshipRoleFilter implements InternshipFilter {

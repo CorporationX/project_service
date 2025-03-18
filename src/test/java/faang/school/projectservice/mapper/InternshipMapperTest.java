@@ -27,6 +27,7 @@ public class InternshipMapperTest {
         assertEquals(internship.getId(), internshipDto.getId());
         assertEquals(internship.getName(), internshipDto.getName());
     }
+
     @Test
     public void mapToInternshipDto() {
         Internship internship = Internship.builder()

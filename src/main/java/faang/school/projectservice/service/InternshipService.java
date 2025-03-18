@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Schedule;
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -76,17 +77,27 @@ public class InternshipService {
         Objects.requireNonNull(internshipDto, "internshipDto is null");
         Internship internship = internshipRepository.findById(internshipId).orElseThrow(()
                 -> new EntityNotFoundException("Internship not found for search by id : " + internshipId));
+
         if (internship.getStartDate().isAfter(LocalDateTime.now())) {
             addNewInterns(internship, internshipDto.getInternsId());
+            internshipRepository.save(internship);
+            return internshipMapper.toInternshipDto(internship);
         }
+
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             completeInternship(internship);
+            internshipRepository.save(internship);
+            return internshipMapper.toInternshipDto(internship);
+
         }
         if (internship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             log.info("The internship is still ongoing");
             aheadOfSchedule(internship, internshipDto);
+            internshipRepository.save(internship);
+            return internshipMapper.toInternshipDto(internship);
         }
-        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
+        log.info("стажировка не обновилась");
+        return internshipDto;
     }
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
@@ -114,16 +125,30 @@ public class InternshipService {
         List<TeamMember> completedInterns = internship.getInterns().stream()
                 .filter(this::checkAllTasksCompleted)
                 .toList();
-        completedInterns.forEach(intern -> {
-            intern.getRoles().add(TeamRole.DEVELOPER);
-            intern.getRoles().remove(TeamRole.INTERN);
-        });
-        List<TeamMember> notCompletedInterns = internship.getInterns().stream()
-                .filter(intern -> !checkAllTasksCompleted(intern))
-                .toList();
+        List<TeamMember> notCompletedInterns = new ArrayList<>(internship.getInterns());
+        notCompletedInterns.removeAll(completedInterns);
+        updateRolesForCompletedInterns(completedInterns);
+        removeInternRoleFromNotCompleted(notCompletedInterns);
         internship.setInterns(new ArrayList<>());
         log.info("Internship Completed. Completed Interns: {}", completedInterns);
         log.info("Remote Interns: {}", notCompletedInterns);
+    }
+
+    private void updateRolesForCompletedInterns(List<TeamMember> completedInterns) {
+        completedInterns.forEach(intern -> {
+            if (intern.getRoles().contains(TeamRole.INTERN)) {
+                intern.getRoles().remove(TeamRole.INTERN);
+            }
+            intern.getRoles().add(TeamRole.DEVELOPER);
+        });
+    }
+
+    private void removeInternRoleFromNotCompleted(List<TeamMember> notCompletedInterns) {
+        notCompletedInterns.forEach(intern -> {
+            if (intern.getRoles().contains(TeamRole.INTERN)) {
+                intern.getRoles().remove(TeamRole.INTERN);
+            }
+        });
     }
 
     private void addNewInterns(Internship internship, List<Long> internsId) {
@@ -134,14 +159,22 @@ public class InternshipService {
     }
 
     private boolean checkAllTasksCompleted(TeamMember intern) {
+        if (intern == null) {
+            log.warn("TeamMember is null");
+            return false;
+        }
         List<Stage> stages = intern.getStages();
         if (stages.isEmpty()) {
             log.warn("Stage list is empty for TeamMember: {}", intern.getId());
             return false;
         }
-        return stages.stream()
+        boolean allTasksCompleted = stages.stream()
                 .flatMap(stage -> stage.getTasks().stream())
                 .allMatch(task -> task.getStatus().equals(TaskStatus.DONE));
+        if (!allTasksCompleted) {
+            log.info("Not all tasks are completed for TeamMember: {}", intern.getId());
+        }
+        return allTasksCompleted;
     }
 
     private void aheadOfSchedule(Internship internship, InternshipDto internshipDto) {
@@ -156,7 +189,6 @@ public class InternshipService {
             if (checkAllTasksCompleted(intern)) {
                 intern.getRoles().add(TeamRole.DEVELOPER);
                 intern.getRoles().remove(TeamRole.INTERN);
-                log.info("Completed Interns: {}", intern);
             } else {
                 log.info("Dismissed interns: {}", intern);
             }
