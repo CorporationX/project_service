@@ -60,7 +60,7 @@ class VacancyServiceTest {
     @Mock
     private TeamMemberServiceImpl teamMemberService;
     @Mock
-    private CandidateService candidateService;
+    private CandidateServiceImpl candidateService;
     @Mock
     private OpenVacancyRequestValidator openVacancyRequestValidator;
     @Mock

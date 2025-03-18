@@ -88,35 +88,34 @@ kotlin {
     jvmToolchain(17)
 }
 
-
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.8"
 }
 
 tasks.test {
-    outputs.upToDateWhen { false }  // To always rerun tests
+    outputs.upToDateWhen { false }
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
     reports {
-        xml.required.set(false)
-        csv.required.set(false)
+        xml.required.set(true)
+        csv.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
 }
 
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.test)
+    dependsOn(tasks.jacocoTestReport)
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.projectservice.filter.*",
-                "school.faang.projectservice.service.*",
-                "school.faang.projectservice.validator.*",
+                "faang.school.projectservice.filter.*",
+                "faang.school.projectservice.service.VacancyServiceImpl",
+                "faang.school.projectservice.validator.*",
             )
 
             limit {
@@ -143,4 +142,16 @@ tasks.jacocoTestCoverageVerification {
 tasks.check {
     dependsOn(tasks.jacocoTestReport)
     dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.build {
+    dependsOn(tasks.check)
+}
+
+tasks.classes {
+    finalizedBy(tasks.check)
+}
+
+tasks.compileJava {
+    finalizedBy(tasks.check)
 }
