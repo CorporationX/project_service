@@ -22,7 +22,7 @@ public record OpenVacancyRequestDto(
         TeamRole position,
 
         @Min(value = 1, message = "A vacancy cannot be opened without candidates")
-        long requiredCandidatesCount,
+        int requiredCandidatesCount,
 
         long authorId,
 

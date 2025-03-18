@@ -1,7 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
+import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.vacancy.AdjustableVacancyAnswer;
@@ -18,6 +19,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.OpenVacancyRequestValidator;
+import faang.school.projectservice.validator.UpdateVacancyRequestValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +28,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +56,15 @@ class VacancyServiceTest {
     @Mock
     private VacancyRepository vacancyRepository;
     @Mock
-    private ProjectServiceImpl projectServiceImpl;
+    private ProjectServiceImpl projectService;
     @Mock
-    private TeamMemberServiceImpl teamMemberServiceImpl;
+    private TeamMemberServiceImpl teamMemberService;
+    @Mock
+    private CandidateService candidateService;
     @Mock
     private OpenVacancyRequestValidator openVacancyRequestValidator;
+    @Mock
+    private UpdateVacancyRequestValidator updateVacancyRequestValidator;
 
     @Spy
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
@@ -70,18 +78,20 @@ class VacancyServiceTest {
     private VacancyFilter vacancyFilter2;
 
     @InjectMocks
-    private VacancyServiceImpl vacancyServiceImpl;
+    private VacancyServiceImpl vacancyService;
 
     @Captor
     private ArgumentCaptor<Vacancy> vacancyCaptor;
 
     @BeforeEach
     public void setUp() {
-        vacancyServiceImpl = new VacancyServiceImpl(
+        vacancyService = new VacancyServiceImpl(
                 vacancyRepository,
-                projectServiceImpl,
-                teamMemberServiceImpl,
+                projectService,
+                teamMemberService,
+                candidateService,
                 openVacancyRequestValidator,
+                updateVacancyRequestValidator,
                 vacancyMapper,
                 candidateMapper,
                 List.of(vacancyFilter1, vacancyFilter2)
@@ -91,30 +101,45 @@ class VacancyServiceTest {
     @Test
     public void testOpenVacancy_FailedProjectValidation_Throws() {
         var requestDto = createOpenVacancyRequestDto(0, 1, null);
-        when(openVacancyRequestValidator.validateProject(requestDto))
+        when(openVacancyRequestValidator.validateAndGetProject(requestDto))
                 .thenThrow(new DataValidationException("Invalid project"));
 
         assertThrowsExactly(
                 DataValidationException.class,
-                () -> vacancyServiceImpl.openVacancy(requestDto),
+                () -> vacancyService.openVacancy(requestDto),
                 "Invalid project");
     }
 
     @Test
     public void testOpenVacancy_FailedAuthorValidation_Throws() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
-        when(openVacancyRequestValidator.validateProject(requestDto)).thenReturn(new Project());
-        when(openVacancyRequestValidator.validateAuthor(requestDto))
+        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
+        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto))
                 .thenThrow(new DataValidationException("Invalid author"));
 
         assertThrowsExactly(
                 DataValidationException.class,
-                () -> vacancyServiceImpl.openVacancy(requestDto),
+                () -> vacancyService.openVacancy(requestDto),
                 "Invalid author");
     }
 
     @Test
     public void testOpenVacancy_FailedSalaryValidation_Throws() {
+        var requestDto = createOpenVacancyRequestDto(1, 0, null);
+        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
+        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(new TeamMember());
+        Mockito.doThrow(new DataValidationException("Invalid salary")).
+                when(openVacancyRequestValidator)
+                .validateSalary(requestDto);
+
+        assertThrowsExactly(
+                DataValidationException.class,
+                () -> vacancyService.openVacancy(requestDto),
+                "Invalid salary");
+    }
+
+    @Test
+    public void testOpenVacancy_ValidData_SaveVacancy() {
         // Arrange
         var projectId = 1L;
         var authorId = 2L;
@@ -124,16 +149,16 @@ class VacancyServiceTest {
                 .id(projectId)
                 .name("Test project")
                 .build();
-        when(openVacancyRequestValidator.validateProject(requestDto)).thenReturn(project);
+        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(project);
 
         var author = TeamMember.builder()
                 .id(authorId)
                 .nickname("Test author")
                 .build();
-        when(openVacancyRequestValidator.validateAuthor(requestDto)).thenReturn(author);
+        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(author);
 
         // Act
-        vacancyServiceImpl.openVacancy(requestDto);
+        vacancyService.openVacancy(requestDto);
 
         // Assert
         verify(vacancyRepository, times(1)).save(vacancyCaptor.capture());
@@ -142,6 +167,103 @@ class VacancyServiceTest {
         assertEquals(authorId, savedVacancy.getCreatedBy());
         assertEquals(projectId, savedVacancy.getProject().getId());
         assertEquals(project.getName(), savedVacancy.getProject().getName());
+    }
+
+    @Test
+    public void testUpdateVacancy_FailedVacancyValidation_Throws() {
+        var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
+        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto))
+                .thenThrow(new DataValidationException("Invalid vacancy"));
+
+        assertThrowsExactly(
+                DataValidationException.class,
+                () -> vacancyService.updateVacancy(requestDto),
+                "Invalid vacancy");
+    }
+
+    @Test
+    public void testUpdateVacancy_FailedUpdaterRoleValidation_Throws() {
+        var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
+        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(new Vacancy());
+        Mockito.doThrow(new DataValidationException("Invalid updater role")).
+                when(updateVacancyRequestValidator)
+                .validateUpdaterRole(requestDto);
+
+        assertThrowsExactly(
+                DataValidationException.class,
+                () -> vacancyService.updateVacancy(requestDto),
+                "Invalid updater role");
+    }
+
+    @Test
+    public void testUpdateVacancy_FailedCandidatesCountValidation_Throws() {
+        // Arrange
+        var vacancyId = 1L;
+        var projectId = 1L;
+        var vacancy = Vacancy.builder()
+                .id(vacancyId)
+                .project(getTestProject(projectId))
+                .build();
+        List<Candidate> attachedToProjectCandidates = List.of();
+
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, 1L, null, null);
+
+        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
+        when(candidateService.getAllCandidatesAttachedToProjectVacancy(vacancyId, projectId))
+                .thenReturn(attachedToProjectCandidates);
+        Mockito.doThrow(new DataValidationException("Invalid candidates count")).
+                when(updateVacancyRequestValidator)
+                .validateCandidatesCount(requestDto, vacancy, attachedToProjectCandidates);
+
+        // Act + Assert
+        assertThrowsExactly(
+                DataValidationException.class,
+                () -> vacancyService.updateVacancy(requestDto),
+                "Invalid candidates count");
+    }
+
+    @Test
+    public void testUpdateVacancy_ValidData_ReturnVacancy() {
+        // Arrange
+        var vacancyId = 1L;
+        var updaterId = 2L;
+        var projectId = 1L;
+        var project = getTestProject(projectId);
+        var authorId = 3L;
+        var author = getTestAuthor(authorId);
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, updaterId, VacancyStatus.CLOSED, 10);
+
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
+                Optional.of(project));
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
+                Optional.of(author));
+
+        var vacancy = Vacancy.builder()
+                .id(vacancyId)
+                .project(project)
+                .createdBy(authorId)
+                .build();
+        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
+
+        var candidate = new Candidate();
+        candidate.setId(2L);
+        candidate.setUsername("Test user name");
+        candidate.setVacancy(vacancy);
+        List<Candidate> attachedToProjectCandidates = List.of(candidate);
+        when(candidateService.getAllCandidatesAttachedToProjectVacancy(vacancyId, projectId))
+                .thenReturn(attachedToProjectCandidates);
+
+        // Act
+        vacancyService.updateVacancy(requestDto);
+
+        // Assert
+        verify(vacancyRepository, times(1)).save(vacancyCaptor.capture());
+        var savedVacancy = vacancyCaptor.getValue();
+        assertEquals(requestDto.name(), savedVacancy.getName());
+        assertEquals(requestDto.description(), savedVacancy.getDescription());
+        assertEquals(requestDto.status(), savedVacancy.getStatus());
+        assertEquals(requestDto.position(), savedVacancy.getPosition());
+        assertEquals(CandidateStatus.ACCEPTED, candidate.getCandidateStatus());
     }
 
     @Test
@@ -154,12 +276,14 @@ class VacancyServiceTest {
         var author = getTestAuthor(authorId);
         var vacancies = List.of(
                 Vacancy.builder()
+                        .id(1L)
                         .name("Java Developer")
                         .status(VacancyStatus.OPEN)
                         .project(project)
                         .createdBy(authorId)
                         .build(),
                 Vacancy.builder()
+                        .id(2L)
                         .name("Kotlin Developer")
                         .status(VacancyStatus.CLOSED)
                         .project(project)
@@ -167,9 +291,9 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         when(candidateMapper.ToCandidateDtos(any())).thenReturn(List.of());
@@ -178,10 +302,13 @@ class VacancyServiceTest {
         when(vacancyFilter2.isApplicable(filterDto)).thenReturn(false);
 
         // Act
-        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
+        var result = vacancyService.getFilteredVacancies(filterDto);
 
         // Assert
         var expectedResult = vacancyMapper.ToVacancyResponseDtos(vacancies);
+        assertIterableEquals(
+                expectedResult.stream().map(VacancyResponseDto::getId).toList(),
+                result.stream().map(VacancyResponseDto::getId).toList());
         assertIterableEquals(
                 expectedResult.stream().map(VacancyResponseDto::getName).toList(),
                 result.stream().map(VacancyResponseDto::getName).toList());
@@ -196,15 +323,21 @@ class VacancyServiceTest {
         var filterDto = new FilterVacancyRequestDto(null, "Test");
 
         var vacancies = List.of(
-                Vacancy.builder().name("Java Developer").build(),
-                Vacancy.builder().name("Kotlin Developer").build());
+                Vacancy.builder()
+                        .id(1L)
+                        .name("Java Developer")
+                        .build(),
+                Vacancy.builder()
+                        .id(2L)
+                        .name("Kotlin Developer")
+                        .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
         setupVacancyFilter(vacancyFilter1, filterDto, true, new ReturnEmptyStreamVacancyAnswer());
         setupVacancyFilter(vacancyFilter2, filterDto, true, new ReturnEmptyStreamVacancyAnswer());
 
         // Act
-        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
+        var result = vacancyService.getFilteredVacancies(filterDto);
 
         // Assert
         assertTrue(result.isEmpty());
@@ -223,18 +356,21 @@ class VacancyServiceTest {
 
         var vacancies = List.of(
                 Vacancy.builder()
+                        .id(1L)
                         .name("JavaScript")
                         .position(TeamRole.DEVELOPER)
                         .project(project)
                         .createdBy(authorId)
                         .build(),
                 Vacancy.builder()
+                        .id(2L)
                         .name("Java")
                         .position(TeamRole.DEVELOPER)
                         .project(project)
                         .createdBy(authorId)
                         .build(),
                 Vacancy.builder()
+                        .id(3L)
                         .name("Python")
                         .position(TeamRole.DEVELOPER)
                         .project(project)
@@ -242,9 +378,9 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         setupVacancyFilter(
@@ -263,9 +399,12 @@ class VacancyServiceTest {
         expectedResult.add(vacancyMapper.ToVacancyResponseDto(vacancies.get(1)));
 
         // Act
-        var result = vacancyServiceImpl.getFilteredVacancies(filterDto);
+        var result = vacancyService.getFilteredVacancies(filterDto);
 
         // Assert
+        assertIterableEquals(
+                expectedResult.stream().map(VacancyResponseDto::getId).toList(),
+                result.stream().map(VacancyResponseDto::getId).toList());
         assertIterableEquals(
                 expectedResult.stream().map(VacancyResponseDto::getName).toList(),
                 result.stream().map(VacancyResponseDto::getName).toList());
@@ -279,7 +418,7 @@ class VacancyServiceTest {
         var vacancyId = 1L;
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
-        var result = vacancyServiceImpl.getVacancyById(vacancyId);
+        var result = vacancyService.getVacancyById(vacancyId);
 
         assertNull(result);
     }
@@ -287,19 +426,17 @@ class VacancyServiceTest {
     @Test
     public void testGetVacancyById_RequestFound_ReturnsVacancy() {
         // Arrange
+        var project = getTestProject(1L);
+        var authorId = 3L;
+        var author = getTestAuthor(authorId);
         var vacancyId = 1L;
         var vacancy = Vacancy.builder()
                 .id(vacancyId)
                 .name("Test name")
                 .candidates(new ArrayList<>())
+                .project(project)
+                .createdBy(authorId)
                 .build();
-
-        var project = getTestProject(1L);
-        vacancy.setProject(project);
-
-        var authorId = 3L;
-        var author = getTestAuthor(authorId);
-        vacancy.setCreatedBy(authorId);
 
         var candidate = new Candidate();
         candidate.setId(4L);
@@ -309,16 +446,17 @@ class VacancyServiceTest {
         vacancy.getCandidates().addAll(candidates);
 
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
-        when(projectServiceImpl.getProjectByIdOrEmpty(project.getId())).thenReturn(
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
                 Optional.of(project));
-        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
                 Optional.of(author));
 
         // Act
-        var result = vacancyServiceImpl.getVacancyById(vacancyId);
+        var result = vacancyService.getVacancyById(vacancyId);
 
         // Assert
         assertNotNull(result);
+        assertEquals(vacancy.getId(), result.getId());
         assertEquals(vacancy.getName(), result.getName());
         assertEquals(vacancy.getProject().getName(), result.getProjectName());
         assertEquals(author.getNickname(), result.getCreatedByNickname());
@@ -326,9 +464,9 @@ class VacancyServiceTest {
         assertEquals(candidates.size(), result.getCandidates().size());
         assertEquals(candidates.get(0).getUsername(), result.getCandidates().get(0).username());
         assertEquals(candidates.get(0).getCandidateStatus(), result.getCandidates().get(0).candidateStatus());
-        verify(projectServiceImpl, times(1))
+        verify(projectService, times(1))
                 .getProjectByIdOrEmpty(project.getId());
-        verify(teamMemberServiceImpl, times(1))
+        verify(teamMemberService, times(1))
                 .getTeamMemberById(authorId);
     }
 
@@ -341,6 +479,24 @@ class VacancyServiceTest {
                 1,
                 authorId,
                 salary,
+                null,
+                null);
+    }
+
+    private static UpdateVacancyRequestDto createUpdateVacancyRequestDto(
+            long vacancyId,
+            long updaterId,
+            @Nullable VacancyStatus status,
+            @Nullable Integer requiredCandidatesCount) {
+        return new UpdateVacancyRequestDto(
+                vacancyId,
+                updaterId,
+                "Test name",
+                "Test description",
+                TeamRole.ANALYST,
+                status,
+                requiredCandidatesCount,
+                null,
                 null,
                 null);
     }

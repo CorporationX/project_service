@@ -14,6 +14,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 public class VacancyResponseDto {
+    private final Long id;
     private final String name;
     private final String description;
     private final TeamRole position;

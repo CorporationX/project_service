@@ -1,19 +1,23 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
-import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DatabaseCorruptedException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.CandidateMapper;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.OpenVacancyRequestValidator;
+import faang.school.projectservice.validator.UpdateVacancyRequestValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,16 +26,18 @@ import java.util.List;
 public class VacancyServiceImpl implements VacancyService {
 
     private final VacancyRepository vacancyRepository;
-    private final ProjectServiceImpl projectServiceImpl;
-    private final TeamMemberServiceImpl teamMemberServiceImpl;
+    private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
+    private final CandidateService candidateService;
     private final OpenVacancyRequestValidator openVacancyRequestValidator;
+    private final UpdateVacancyRequestValidator updateVacancyRequestValidator;
     private final VacancyMapper vacancyMapper;
     private final CandidateMapper candidateMapper;
     private final List<VacancyFilter> filters;
 
     public void openVacancy(OpenVacancyRequestDto requestDto) {
-        var project = openVacancyRequestValidator.validateProject(requestDto);
-        var author = openVacancyRequestValidator.validateAuthor(requestDto);
+        var project = openVacancyRequestValidator.validateAndGetProject(requestDto);
+        var author = openVacancyRequestValidator.validateAndGetAuthor(requestDto);
         openVacancyRequestValidator.validateSalary(requestDto);
 
         var vacancy = vacancyMapper.toVacancy(requestDto);
@@ -43,7 +49,17 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     public VacancyResponseDto updateVacancy(UpdateVacancyRequestDto requestDto) {
-        return null;
+        var vacancy = updateVacancyRequestValidator.validateAndGetVacancy(requestDto);
+        updateVacancyRequestValidator.validateUpdaterRole(requestDto);
+
+        var attachedToProjectCandidates = candidateService.getAllCandidatesAttachedToProjectVacancy(
+                vacancy.getId(),
+                vacancy.getProject().getId());
+        updateVacancyRequestValidator.validateCandidatesCount(requestDto, vacancy, attachedToProjectCandidates);
+
+        updateAndSaveVacancy(requestDto, vacancy, attachedToProjectCandidates);
+
+        return convertVacancyToVacancyDto(vacancy);
     }
 
     public List<VacancyResponseDto> getFilteredVacancies(FilterVacancyRequestDto filterDto) {
@@ -82,22 +98,47 @@ public class VacancyServiceImpl implements VacancyService {
             return;
         }
 
-        var lastUpdater = teamMemberServiceImpl.getTeamMemberById(lastUpdaterId);
+        var lastUpdater = teamMemberService.getTeamMemberById(lastUpdaterId);
         lastUpdater.ifPresent(
                 teamMember -> vacancyDto.setUpdatedByNickname(teamMember.getNickname()));
     }
 
     private void setVacancyAuthorNickname(Vacancy vacancy, VacancyResponseDto vacancyDto) {
-        var author = teamMemberServiceImpl.getTeamMemberById(vacancy.getCreatedBy())
+        var author = teamMemberService.getTeamMemberById(vacancy.getCreatedBy())
                 .orElseThrow(() -> new DatabaseCorruptedException(
                         "Team member (id: %d) is not found. Database is corrupted"));
         vacancyDto.setCreatedByNickname(author.getNickname());
     }
 
     private void setVacancyProjectName(Vacancy vacancy, VacancyResponseDto vacancyDto) {
-        var project = projectServiceImpl.getProjectByIdOrEmpty(vacancy.getProject().getId())
+        var project = projectService.getProjectByIdOrEmpty(vacancy.getProject().getId())
                 .orElseThrow(() -> new DatabaseCorruptedException(
                         "Vacancy project (id: %d) is not found. Database is corrupted"));
         vacancyDto.setProjectName(project.getName());
+    }
+
+    @Transactional
+    private void updateAndSaveVacancy(
+            UpdateVacancyRequestDto requestDto,
+            Vacancy vacancy,
+            List<Candidate> currentAcceptedCandidates) {
+        if (requestDto.name() != null) {
+            vacancy.setName(requestDto.name());
+        }
+        if (requestDto.description() != null) {
+            vacancy.setDescription(requestDto.description());
+        }
+        if (requestDto.position() != null) {
+            vacancy.setPosition(requestDto.position());
+        }
+        if (requestDto.status() != null) {
+            vacancy.setStatus(requestDto.status());
+        }
+
+        vacancyMapper.update(vacancy, requestDto);
+
+        currentAcceptedCandidates.forEach(candidate -> candidate.setCandidateStatus(CandidateStatus.ACCEPTED));
+
+        vacancyRepository.save(vacancy);
     }
 }

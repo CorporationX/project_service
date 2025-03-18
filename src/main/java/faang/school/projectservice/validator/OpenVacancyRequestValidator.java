@@ -5,27 +5,26 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.ProjectServiceImpl;
-import faang.school.projectservice.service.TeamMemberServiceImpl;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class OpenVacancyRequestValidator {
 
-    private final ProjectServiceImpl projectServiceImpl;
-    private final TeamMemberServiceImpl teamMemberServiceImpl;
+    private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
 
-    public @NonNull Project validateProject(OpenVacancyRequestDto requestDto) {
-        return projectServiceImpl.getProjectByIdOrEmpty(requestDto.projectId())
+    public Project validateAndGetProject(OpenVacancyRequestDto requestDto) {
+        return projectService.getProjectByIdOrEmpty(requestDto.projectId())
                 .orElseThrow(() -> new DataValidationException(
                         "Project with id %d is not found".formatted(requestDto.projectId())));
     }
 
-    public TeamMember validateAuthor(OpenVacancyRequestDto requestDto) {
-        var author = teamMemberServiceImpl.getTeamMemberById(requestDto.authorId())
+    public TeamMember validateAndGetAuthor(OpenVacancyRequestDto requestDto) {
+        var author = teamMemberService.getTeamMemberById(requestDto.authorId())
                 .orElseThrow(() -> new DataValidationException(
                         "Author with id %d is not found".formatted(requestDto.authorId())));
 

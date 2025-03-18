@@ -28,63 +28,63 @@ import static org.mockito.Mockito.when;
 class OpenVacancyRequestValidatorTest {
 
     @Mock
-    private ProjectServiceImpl projectServiceImpl;
+    private ProjectServiceImpl projectService;
     @Mock
-    private TeamMemberServiceImpl teamMemberServiceImpl;
+    private TeamMemberServiceImpl teamMemberService;
 
     @InjectMocks
     OpenVacancyRequestValidator openVacancyRequestValidator;
 
     @Test
-    public void testValidateProject_ProjectIdIsNotPresent_Throws() {
+    public void testValidateAndGetProject_ProjectIdIsNotPresent_Throws() {
         var projectId = 0;
         var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
-        when(projectServiceImpl.getProjectByIdOrEmpty(projectId)).thenReturn(Optional.empty());
+        when(projectService.getProjectByIdOrEmpty(projectId)).thenReturn(Optional.empty());
 
         assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateProject(requestDto));
+                () -> openVacancyRequestValidator.validateAndGetProject(requestDto));
     }
 
     @Test
-    public void testValidateProject_ProjectIdIsPresent_ReturnsProjectEntity() {
+    public void testValidateAndGetProject_ProjectIdIsPresent_ReturnsProjectEntity() {
         var projectId = 10L;
         var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
         var expectedResult = Project.builder()
                 .id(projectId)
                 .name("Test project")
                 .build();
-        when(projectServiceImpl.getProjectByIdOrEmpty(projectId))
+        when(projectService.getProjectByIdOrEmpty(projectId))
                 .thenReturn(Optional.of(expectedResult));
 
-        var result = openVacancyRequestValidator.validateProject(requestDto);
+        var result = openVacancyRequestValidator.validateAndGetProject(requestDto);
 
         assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testValidateAuthor_AuthorIdIsNotPresent_Throws() {
+    public void testValidateAndGetAuthor_AuthorIdIsNotPresent_Throws() {
         var authorId = 0;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
-        when(teamMemberServiceImpl.getTeamMemberById(authorId)).thenReturn(Optional.empty());
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.empty());
 
         assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateAuthor(requestDto));
+                () -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
     }
 
     @ParameterizedTest
     @MethodSource("getInvalidAuthorRoles")
-    public void testValidateAuthor_InvalidAuthorRoles_Throws(List<TeamRole> authorRoles) {
+    public void testValidateAndGetAuthor_InvalidAuthorRoles_Throws(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder()
                 .id(authorId)
                 .roles(authorRoles)
                 .build();
-        when(teamMemberServiceImpl.getTeamMemberById(authorId))
+        when(teamMemberService.getTeamMemberById(authorId))
                 .thenReturn(Optional.of(author));
 
         assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateAuthor(requestDto));
+                () -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
     }
 
     private static List<Arguments> getInvalidAuthorRoles() {
@@ -96,17 +96,17 @@ class OpenVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getValidAuthorRoles")
-    public void testValidateAuthor_ValidAuthorRoles_Success(List<TeamRole> authorRoles) {
+    public void testValidateAndGetAuthor_ValidAuthorRoles_Success(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder()
                 .id(authorId)
                 .roles(authorRoles)
                 .build();
-        when(teamMemberServiceImpl.getTeamMemberById(authorId))
+        when(teamMemberService.getTeamMemberById(authorId))
                 .thenReturn(Optional.of(author));
 
-        assertDoesNotThrow(() -> openVacancyRequestValidator.validateAuthor(requestDto));
+        assertDoesNotThrow(() -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
     }
 
     private static List<Arguments> getValidAuthorRoles() {
