@@ -1,4 +1,4 @@
-package faang.school.projectservice.adapter;
+package faang.school.projectservice.repository.adapter;
 
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.repository.CandidateRepository;

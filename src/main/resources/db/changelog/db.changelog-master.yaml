@@ -1,26 +1,28 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changeset/project_V000__initial.sql
+      file: db/changelog/changeset/create_user.yaml
   - include:
-      file: db/changelog/changeset/project_V001_create_stage.sql
+      file: db/changelog/changeset/project_V001__initial.sql
   - include:
-      file: db/changelog/changeset/project_V001_create_stage_invitation.sql
+      file: db/changelog/changeset/project_V002_create_stage.sql
   - include:
-      file: db/changelog/changeset/project_V003__create_campaign.sql
+      file: db/changelog/changeset/project_V003_create_stage_invitation.sql
   - include:
-      file: db/changelog/changeset/project_V005__create_moment.sql
+      file: db/changelog/changeset/project_V004__create_campaign.sql
   - include:
-      file: db/changelog/changeset/project_V006__create_vacancy.sql
+      file: db/changelog/changeset/project_V006__create_moment.sql
   - include:
-      file: db/changelog/changeset/project_V007__create_internship.sql
+      file: db/changelog/changeset/project_V007__create_vacancy.sql
   - include:
-      file: db/changelog/changeset/project_V008__alter_candidate_add_vacancy.sql
+      file: db/changelog/changeset/project_V008__create_internship.sql
+  - include:
+      file: db/changelog/changeset/project_V009__alter_candidate_add_vacancy.sql
   - include:
       file: db/changelog/changeset/project_V012_create_moment_users.sql
   - include:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
-        file: db/changelog/changeset/project_V014_resource.sql
+      file: db/changelog/changeset/project_V014_resource.sql
   - include:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:

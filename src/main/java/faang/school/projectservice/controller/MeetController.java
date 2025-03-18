@@ -7,50 +7,56 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/meets")
 @RestController
 @RequiredArgsConstructor
 public class MeetController {
     private final MeetService meetService;
 
-    @PostMapping("/meets")
+    @PostMapping
     public MeetDto createMeet(@RequestBody @NotNull MeetDto meet) {
         return meetService.createMeet(meet);
     }
 
-    @PutMapping("/meets")
+    @PutMapping
     public MeetDto updateMeet(@RequestBody @NotNull MeetDto meet) {
         return meetService.updateMeet(meet);
     }
 
-    @PutMapping("/meets/{meetId}")
-    public MeetDto cancelMeetById(@PathVariable @NotNull Long meetId) {
-        return meetService.cancelMeetById(meetId);
+    @PutMapping("/{id}")
+    public MeetDto cancelMeetById(@PathVariable @NotNull Long id) {
+        return meetService.cancelMeetById(id);
     }
 
-    @DeleteMapping("/meets/{meetId}")
-    public Long deleteMeetById(@PathVariable @Valid Long meetId) {
-        return meetService.deleteMeetById(meetId);
+    @DeleteMapping("/{id}")
+    public Long deleteMeetById(@PathVariable @Valid Long id) {
+        return meetService.deleteMeetById(id);
     }
 
-    @PostMapping("/meets")
-    public List<MeetDto> findMeetsByProject(@RequestParam @Valid Long projectId,
+    @PostMapping("/project/{projectId}")
+    public List<MeetDto> findMeetsByProject(@PathVariable @Valid Long projectId,
                                             @RequestBody(required = false) MeetFilterDto filter) {
         return meetService.findMeetsByProject(projectId, filter);
     }
 
-    @GetMapping("/meets")
+    @GetMapping
     public List<MeetDto> getAllMeets() {
         return meetService.getAllMeets();
     }
 
-    @GetMapping("/meets/{meetId}")
-    public MeetDto getMeetById(@NotNull @Positive @PathVariable Long meetId) {
-        return meetService.getMeetById(meetId);
+    @GetMapping("/{id}")
+    public MeetDto getMeetById(@NotNull @Positive @PathVariable Long id) {
+        return meetService.getMeetById(id);
     }
-
 }
