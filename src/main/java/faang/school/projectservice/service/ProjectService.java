@@ -3,13 +3,13 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.AccessDeniedException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,9 +52,13 @@ public class ProjectService {
 
     public void updateProject(Long projectId, ProjectDto projectDto) {
         validateProjectId(projectId);
-        validateUpdatedProject(projectDto);
+
+        if (projectDto.description() == null || projectDto.description().isBlank()) {
+            throw new IllegalArgumentException("Description cannot be empty");
+        }
+
         if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(String.format("Project with id: %d not found", projectId));
+            throw new EntityNotFoundException("Project", projectId);
         }
         Project project = getProjectById(projectId);
 
@@ -130,8 +134,7 @@ public class ProjectService {
 
     private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Project with id: %d not found", projectId)));
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId));
     }
 
     private void validateProjectId(Long projectId) {
@@ -142,20 +145,12 @@ public class ProjectService {
         Objects.requireNonNull(userId, "User must contain id");
     }
 
-    private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
+    private void validateCreatedProject(ProjectDto projectDto) {
+        if (projectDto.description() == null || projectDto.description().isBlank()) {
             throw new IllegalArgumentException("Description cannot be empty");
         }
-    }
-
-    private void validateCreatedProject(ProjectDto projectDto) {
-        validateDescription(projectDto.description());
         if (projectDto.name() == null || projectDto.name().isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
-    }
-
-    private void validateUpdatedProject(ProjectDto projectDto) {
-        validateDescription(projectDto.description());
     }
 }

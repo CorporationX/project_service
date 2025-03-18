@@ -9,11 +9,13 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -74,24 +76,18 @@ public class ProjectServiceTest {
                 createDto(null, null, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
     }
 
-    @Test
-    public void testNegativeCreateWithEmptyDescription() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    public void testNegativeCreateWithEmptyDescription(String description) {
         assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto(null, null, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
-        assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto(null, "", ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
-        assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto(null, "  ", ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
+                createDto(firstName, description, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
     }
 
-    @Test
-    public void testNegativeCreateWithEmptyName() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    public void testNegativeCreateWithEmptyName(String name) {
         assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto(null, firstDescription, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
-        assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto("", firstDescription, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
-        assertThrows(IllegalArgumentException.class, () -> projectService.createProject(firstId,
-                createDto("   ", firstDescription, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
+                createDto(name, firstDescription, ProjectVisibility.PUBLIC, ProjectStatus.CREATED)));
     }
 
     @Test
