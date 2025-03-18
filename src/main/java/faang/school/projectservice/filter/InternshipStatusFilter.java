@@ -3,6 +3,7 @@ package faang.school.projectservice.filter;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import org.springframework.stereotype.Component;
+
 import java.util.stream.Stream;
 
 @Component

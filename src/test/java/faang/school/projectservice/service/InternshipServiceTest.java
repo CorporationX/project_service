@@ -6,7 +6,6 @@ import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import faang.school.projectservice.filter.InternshipFilter;
 import faang.school.projectservice.filter.TestInternshipRoleFilter;
 import faang.school.projectservice.filter.TestInternshipStatusFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.mapper.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
@@ -22,7 +21,6 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ScheduleRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,15 +32,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static faang.school.projectservice.model.TeamRole.INTERN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +46,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-
 public class InternshipServiceTest {
     private final InternshipFilter internshipRoleFilter = new TestInternshipRoleFilter();
     private final InternshipFilter internshipStatusFilter = new TestInternshipStatusFilter();
@@ -135,7 +129,6 @@ public class InternshipServiceTest {
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
         InternshipDto internshipDto1 = internshipService.getInternshipById(1L);
         assertEquals(internship.getId(), internshipDto1.getId());
-
     }
 
     @Test
@@ -277,10 +270,12 @@ public class InternshipServiceTest {
                         .id(34L)
                         .build());
         InternshipDto internshipDto = InternshipDto.builder().build();
+
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
         when(internshipRepository.findByInternshipIdIn(any())).thenReturn(memberLIst);
 
         InternshipDto dto = internshipService.updateInternship(internshipDto, 1L);
+
         verify(internshipRepository, times(1)).save(any());
         assertEquals(2, dto.getInternsId().size());
         assertEquals(internship.getId(), dto.getId());
@@ -288,7 +283,6 @@ public class InternshipServiceTest {
 
     @Test
     public void testPositiveUpdateInternshipComplete() {
-
         List<TeamRole> teamRoleList = new ArrayList<>();
         teamRoleList.add(INTERN);
         List<TeamRole> teamRoleList1 = new ArrayList<>();
@@ -329,8 +323,8 @@ public class InternshipServiceTest {
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
 
         InternshipDto dto = internshipService.updateInternship(internshipDto, 1L);
-        verify(internshipRepository, times(1)).save(any());
 
+        verify(internshipRepository, times(1)).save(any());
         assertEquals(0, dto.getInternsId().size());
         assertTrue(teamMember2.getRoles().contains(TeamRole.DEVELOPER));
         assertFalse(teamMember1.getRoles().contains(TeamRole.DEVELOPER));
@@ -396,13 +390,13 @@ public class InternshipServiceTest {
                 .build();
 
         InternshipDto internshipDto = InternshipDto.builder().build();
+
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
         when(internshipRepository.findByInternshipIdIn(any())).thenReturn(memberLIst);
 
         InternshipDto dto = internshipService.updateInternship(internshipDto, 1L);
 
         verify(internshipRepository, times(1)).save(any());
-
         assertEquals(2, dto.getInternsId().size());
         assertEquals(internship.getId(), dto.getId());
         assertFalse(teamMember1.getRoles().contains(TeamRole.DEVELOPER));

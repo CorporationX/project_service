@@ -1,9 +1,7 @@
 package faang.school.projectservice.controller;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.client.internship.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/internships")

@@ -5,12 +5,12 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
 import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface InternshipMapper {
-
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "mentorId", ignore = true)
     @Mapping(target = "interns", ignore = true)

@@ -9,7 +9,6 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Schedule;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -18,7 +17,6 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ScheduleRepository;
-import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +29,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
     private static final int INTERNSHIP_DURATION_THREE_MONTHS = 3;
-
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final List<InternshipFilter> internshipFilters;
@@ -83,12 +79,10 @@ public class InternshipService {
             internshipRepository.save(internship);
             return internshipMapper.toInternshipDto(internship);
         }
-
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             completeInternship(internship);
             internshipRepository.save(internship);
             return internshipMapper.toInternshipDto(internship);
-
         }
         if (internship.getStatus().equals(InternshipStatus.IN_PROGRESS)) {
             log.info("The internship is still ongoing");
