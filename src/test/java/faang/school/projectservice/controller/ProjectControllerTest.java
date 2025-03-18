@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
