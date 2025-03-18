@@ -59,7 +59,7 @@ public class SubProjectService {
         projectDto.validateCommonFields();
 
         Project project = projectRepository.findById(projectDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Parent project with id = %d doesn't exist", projectDto.getId())));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d doesn't exist", projectDto.getId())));
         ProjectStatus status = projectDto.getStatus();
         ProjectVisibility visibility = projectDto.getVisibility();
 
@@ -87,6 +87,7 @@ public class SubProjectService {
                             subProject.setVisibility(ProjectVisibility.PRIVATE);
                             projectRepository.save(subProject);
                         });
+                project.setChildren(subProjects);
             }
         }
 

@@ -2,8 +2,10 @@ package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 @Data
+@SuperBuilder
 public abstract class AbstractProjectDto {
     private String name;
     private Long ownerId;

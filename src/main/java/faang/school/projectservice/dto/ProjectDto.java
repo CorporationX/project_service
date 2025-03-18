@@ -3,6 +3,7 @@ package faang.school.projectservice.dto;
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
+@SuperBuilder
 public class ProjectDto extends AbstractProjectDto {
     private Long id;
     private Long parentProject;
