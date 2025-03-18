@@ -63,33 +63,7 @@ public class SubProjectService {
         ProjectStatus status = projectDto.getStatus();
         ProjectVisibility visibility = projectDto.getVisibility();
 
-        if (project.getChildren() != null && !project.getChildren().isEmpty()) {
-            List<Project> subProjects = new ArrayList<>(project.getChildren());
-
-            if (status == ProjectStatus.COMPLETED) {
-                boolean areAllCompleted = subProjects.stream()
-                        .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
-
-                if (areAllCompleted) {
-                    createMoment(project);
-                } else {
-                    throw new IllegalArgumentException("Not all subprojects are completed");
-                }
-            }
-
-            boolean isAnyPublic = subProjects.stream()
-                    .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
-
-            if (visibility == ProjectVisibility.PRIVATE && isAnyPublic) {
-                subProjects.stream()
-                        .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
-                        .forEach(subProject -> {
-                            subProject.setVisibility(ProjectVisibility.PRIVATE);
-                            projectRepository.save(subProject);
-                        });
-                project.setChildren(subProjects);
-            }
-        }
+        processSubProjects(project, status, visibility);
 
         project.setVisibility(visibility);
         project.setStatus(status);
@@ -99,6 +73,43 @@ public class SubProjectService {
         log.info("Subproject with name = {} and id = {} was updated", savedDto.getName(), savedDto.getId());
 
         return savedDto;
+    }
+
+    private void processSubProjects(Project project, ProjectStatus status, ProjectVisibility visibility) {
+        if (project.getChildren() != null && !project.getChildren().isEmpty()) {
+            List<Project> subProjects = new ArrayList<>(project.getChildren());
+
+            validateAllSubProjectsCompleted(project, subProjects, status);
+            updateSubProjectVisibility(project, subProjects, visibility);
+        }
+    }
+
+    private void validateAllSubProjectsCompleted(Project project, List<Project> subProjects, ProjectStatus status) {
+        if (status == ProjectStatus.COMPLETED) {
+            boolean areAllCompleted = subProjects.stream()
+                    .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
+
+            if (areAllCompleted) {
+                createMoment(project);
+            } else {
+                throw new IllegalArgumentException("Not all subprojects are completed");
+            }
+        }
+    }
+
+    private void updateSubProjectVisibility(Project project, List<Project> subProjects, ProjectVisibility visibility) {
+        boolean isAnyPublic = subProjects.stream()
+                .anyMatch(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
+
+        if (visibility == ProjectVisibility.PRIVATE && isAnyPublic) {
+            subProjects.stream()
+                    .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
+                    .forEach(subProject -> {
+                        subProject.setVisibility(ProjectVisibility.PRIVATE);
+                        projectRepository.save(subProject);
+                    });
+            project.setChildren(subProjects);
+        }
     }
 
     public List<ProjectDto> getSubProjects(SubProjectsFilterDto filter) {
