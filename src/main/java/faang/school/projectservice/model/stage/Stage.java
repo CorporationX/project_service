@@ -1,5 +1,6 @@
 package faang.school.projectservice.model.stage;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;

@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,7 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/{projectId}/{creatorId}")
-    public StageDtoCreate create(@RequestBody StageDtoCreate stageDtoCreate
+    public StageDTO create(@RequestBody StageDtoCreate stageDtoCreate
             , @RequestParam @NotNull Long projectId, @RequestParam @NotNull Long creatorId) {
         return stageService.create(stageDtoCreate, projectId, creatorId);
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StageDtoUpdate {
+public class StageDTO {
     private Long id;
     @NotNull
     @Size(min = 3, max = 100)
