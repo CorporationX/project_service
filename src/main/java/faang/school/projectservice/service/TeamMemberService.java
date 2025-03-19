@@ -24,13 +24,9 @@ public class TeamMemberService {
 
     public void areTeamMembersExist(List<Long> userIds) {
         userIds.forEach(id -> {
-            if (getTeamMembersByUserId(id).isEmpty()) {
+            if (teamMemberRepository.findByUserId(id).isEmpty()) {
                 throw new EntityNotFoundException("Участника команды с userId=" + id + " не существует");
             }
         });
-    }
-
-    public List<TeamMember> getTeamMembersByUserId(Long userId) {
-        return teamMemberRepository.findByUserId(userId);
     }
 }
