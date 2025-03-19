@@ -60,7 +60,6 @@ public class StageService {
         if (project.getStages() == null) {
             project.setStages(new ArrayList<>());
         }
-
         stage.setProject(project);
         project.getStages().add(stage);
 

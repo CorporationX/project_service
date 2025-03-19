@@ -19,12 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static faang.school.projectservice.model.TeamRole.OWNER;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,7 +63,18 @@ class StageServiceTest {
         when(stageCreateMapper.toEntity(stageDtoCreate)).thenReturn(stage);
         when(stageRolesMapper.mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage)).thenReturn(stageRoles);
        //when(stageCreateMapper.toDto(stage)).thenReturn(StageDtoCreate.builder().build());
-        when(stageMapper.toDto(stage)).thenReturn(StageDTO.builder().build());
+        when(stageMapper.toDto(stage)).thenReturn(
+                StageDTO.builder()
+                        .id(stage.getStageId())
+                        .stageName(stage.getStageName())
+                        .projectId(stage.getProject().getId())
+                        .tasksIds(new ArrayList<>())
+                        .stageRoleIds(stageRoles.stream().map(StageRoles::getId)
+                                .filter(Objects::nonNull)
+                                .collect(toList()))
+                        .executorsIds(new ArrayList<>())
+                        .build()
+        );
         // When
         StageDTO result = stageService.create(stageDtoCreate, creatorId, projectId);
         // Then
@@ -85,7 +94,7 @@ class StageServiceTest {
         stageDtoCreate =
                 StageDtoCreate.builder()
                         .id(1L)
-                        .stageName("test")
+                        .stageName("Test")
                         .roleAndCount(teamRoles)
                         .build();
         return stageDtoCreate;
@@ -102,7 +111,9 @@ class StageServiceTest {
     private Stage getStage() {
         stage = Stage.builder()
                 .stageId(1L)
-                .stageName("test")
+                .stageName("Test")
+                .tasks(new ArrayList<>())
+                .executors(new ArrayList<>())
                 .project(project)
                 .build();
         return stage;
@@ -114,6 +125,7 @@ class StageServiceTest {
         stageRole.setId(1L);
         stageRole.setTeamRole(OWNER);
         stageRole.setCount(1);
+        stageRole.setStage(stage); // Устанавливаем stage для StageRoles
         stageRoles.add(stageRole);
         return stageRoles;
     }

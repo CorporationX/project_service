@@ -17,8 +17,8 @@ public class StageDTO {
     @Size(min = 3, max = 100)
     private String stageName;
     private Long projectId;
-    private List<Long> tasksId;
-    private List<Long> stageRoleId;
-    private List<Long> executorsId;
+    private List<Long> tasksIds;
+    private List<Long> stageRoleIds;
+    private List<Long> executorsIds;
 
 }

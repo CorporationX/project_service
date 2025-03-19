@@ -18,11 +18,12 @@ import static java.util.stream.Collectors.toList;
 
 @Mapper(componentModel = "spring")
 public interface StageMapper {
-    @Mapping(source = "stageId", target = "id")
-    @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "tasks", target = "tasksId", qualifiedByName = "mapTasks")
-    @Mapping(source = "stageRoles", target = "stageRoleId", qualifiedByName = "mapStageRoles")
-    @Mapping(source = "executors", target = "executorsId", qualifiedByName = "mapExecutors")
+    @Mapping(source = "stageId", target = "id") // stageId -> id
+    @Mapping(source = "stageName", target = "stageName") // stageName -> stageName
+    @Mapping(source = "project.id", target = "projectId") // project.id -> projectId
+    @Mapping(source = "tasks", target = "tasksIds", qualifiedByName = "mapTasks")
+    @Mapping(source = "stageRoles", target = "stageRoleIds", qualifiedByName = "mapStageRoles")
+    @Mapping(source = "executors", target = "executorsIds", qualifiedByName = "mapExecutors")
     StageDTO toDto(Stage stage);
     @Mapping(target = "stageId", ignore = true)
     @Mapping(source = "project", target = "project")
