@@ -53,10 +53,6 @@ public class VacancyService {
         updateMetaData(vacancy);
         Vacancy savedVacancy = repository.save(vacancy);
         log.info("Вакансия {} успешно создана.", savedVacancy.getName());
-        if (project.getVacancies() == null) {
-            project.setVacancies(new ArrayList<>());
-        }
-        project.getVacancies().add(savedVacancy);
 
         return candidateMapper.toDto(savedVacancy);
     }
