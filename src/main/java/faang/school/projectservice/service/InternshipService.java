@@ -103,7 +103,8 @@ public class InternshipService {
         TeamMember teamMember = validateMentor(internshipDto.getMentorId(), project);
         List<TeamMember> teamMembers = validateInterns(internshipDto.getInternsId());
 
-        Internship internship = internshipMapper.toInternship(internshipDto);
+        Internship internship = new Internship();
+        internshipMapper.updateInternship(internshipDto, internship);
         internship.setProject(project);
         internship.setMentorId(teamMember);
         internship.setInterns(teamMembers);

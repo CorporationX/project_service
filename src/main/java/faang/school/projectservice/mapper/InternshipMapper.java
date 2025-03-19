@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,8 @@ public interface InternshipMapper {
     @Mapping(source = "schedule.id", target = "scheduleId")
     @Mapping(target = "internsId", expression = "java(mapTeamMemberToIds(internship.getInterns()))")
     InternshipDto toInternshipDto(Internship internship);
+
+    void updateInternship(InternshipDto internshipDto,@MappingTarget Internship internship);
 
     default List<Long> mapTeamMemberToIds(List<TeamMember> teamMember) {
         return teamMember != null ? teamMember.stream()
