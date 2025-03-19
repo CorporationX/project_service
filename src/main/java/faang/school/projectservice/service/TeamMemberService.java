@@ -2,18 +2,21 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.team.TeamMemberDto;
+import faang.school.projectservice.event.InviteSentEvent;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.publisher.InviteSentEventPublisher;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.validator.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,7 @@ public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final TeamMemberValidator teamMemberValidator;
+    private final InviteSentEventPublisher inviteSentEventPublisher;
 
     public TeamMemberDto addMember(TeamMemberDto dto, Long projectId, Long requesterId) {
         userServiceClient.getUser(dto.getUserId());
@@ -40,7 +44,18 @@ public class TeamMemberService {
 
         TeamMember newMember = teamMemberMapper.teamMemberDtoToTeamMember(dto);
         newMember.setTeam(team);
-        return teamMemberMapper.teamMemberToTeamMemberDto(teamMemberRepository.save(newMember));
+        teamMemberRepository.save(newMember);
+        publishInviteSentEvent(projectId, requesterId, dto.getId());
+        return teamMemberMapper.teamMemberToTeamMemberDto(newMember);
+    }
+
+    private void publishInviteSentEvent(Long projectId, Long inviterId, Long inviteeId) {
+        inviteSentEventPublisher.publish(InviteSentEvent.builder()
+                .projectId(projectId)
+                .inviterId(inviterId)
+                .inviteeId(inviteeId)
+                .createAt(LocalDateTime.now())
+                .build());
     }
 
     public TeamMemberDto updateMember(TeamMemberDto teamMemberDto, Long requesterId, Long projectId) {
