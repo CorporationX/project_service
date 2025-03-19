@@ -51,7 +51,7 @@ public class InternshipService {
     public List<InternshipDto> getAllInternships() {
         List<Internship> internshipList = internshipRepository.findAll();
         if (internshipList.isEmpty()) {
-            throw new EntityNotFoundException("The list of internShip is empty");
+            return new ArrayList<>();
         }
         return internshipList.stream()
                 .map(internshipMapper::toInternshipDto).toList();
@@ -146,7 +146,7 @@ public class InternshipService {
     }
 
     private void addNewInterns(Internship internship, List<Long> internsId) {
-        List<TeamMember> interns = internshipRepository.findByInternshipIdIn(internsId);
+        List<TeamMember> interns = teamMemberRepository.findByIdIn(internsId);
         if (!interns.isEmpty()) {
             internship.setInterns((interns));
         }
@@ -173,7 +173,7 @@ public class InternshipService {
 
     private void aheadOfSchedule(Internship internship, InternshipDto internshipDto) {
         List<TeamMember> oldList = internship.getInterns();
-        List<TeamMember> newList = internshipRepository.findByInternshipIdIn(internshipDto.getInternsId());
+        List<TeamMember> newList = teamMemberRepository.findByIdIn(internshipDto.getInternsId());
         oldList.removeAll(newList);
         if (oldList.isEmpty()) {
             log.info("There are no people who passed the test early or were dismissed early.");

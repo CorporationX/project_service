@@ -147,12 +147,6 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void testGetNegativeAllInternshipsIsEmpty() {
-        when(internshipRepository.findAll()).thenReturn(new ArrayList<>());
-        assertThrows(EntityNotFoundException.class, () -> internshipService.getAllInternships());
-    }
-
-    @Test
     public void testNegativeCreateInternshipIsNull() {
         assertThrows(NullPointerException.class, () -> internshipService.createInternship(null));
     }
@@ -272,7 +266,7 @@ public class InternshipServiceTest {
         InternshipDto internshipDto = InternshipDto.builder().build();
 
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
-        when(internshipRepository.findByInternshipIdIn(any())).thenReturn(memberLIst);
+        when(teamMemberRepository.findByIdIn(any())).thenReturn(memberLIst);
 
         InternshipDto dto = internshipService.updateInternship(internshipDto, 1L);
 
@@ -392,7 +386,7 @@ public class InternshipServiceTest {
         InternshipDto internshipDto = InternshipDto.builder().build();
 
         when(internshipRepository.findById(any())).thenReturn(Optional.of(internship));
-        when(internshipRepository.findByInternshipIdIn(any())).thenReturn(memberLIst);
+        when(teamMemberRepository.findByIdIn(any())).thenReturn(memberLIst);
 
         InternshipDto dto = internshipService.updateInternship(internshipDto, 1L);
 
