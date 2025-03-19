@@ -26,6 +26,12 @@ public interface InternshipMapper {
     @Mapping(target = "internsId", expression = "java(mapTeamMemberToIds(internship.getInterns()))")
     InternshipDto toInternshipDto(Internship internship);
 
+    @Mapping(target = "project", ignore = true)
+    @Mapping(target = "mentorId", ignore = true)
+    @Mapping(target = "interns", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "schedule", ignore = true)
     void updateInternship(InternshipDto internshipDto,@MappingTarget Internship internship);
 
     default List<Long> mapTeamMemberToIds(List<TeamMember> teamMember) {
