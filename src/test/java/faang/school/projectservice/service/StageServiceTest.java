@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.StageCreateMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -47,6 +48,7 @@ class StageServiceTest {
     private StageService stageService;
 
     private StageDtoCreate stageDtoCreate;
+    private StageDTO stageDTO;
     private Project project;
     private Stage stage;
     private List<StageRoles> stageRoles;
@@ -70,6 +72,7 @@ class StageServiceTest {
         verify(projectRepository).findById(projectId);
         verify(stageCreateMapper).toEntity(stageDtoCreate);
         verify(stageRolesMapper).mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
+        verify(stageMapper).toDto(stage);
         verify(stageRepository).save(stage);
         System.out.println(result);
         assertThat(result).isNotNull();
@@ -108,6 +111,7 @@ class StageServiceTest {
     private List<StageRoles> getStageRoles() {
         stageRoles = new ArrayList<>();
         StageRoles stageRole = new StageRoles();
+        stageRole.setId(1L);
         stageRole.setTeamRole(OWNER);
         stageRole.setCount(1);
         stageRoles.add(stageRole);

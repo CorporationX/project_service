@@ -17,9 +17,8 @@ import java.util.HashMap;
 @AllArgsConstructor
 public class StageDtoCreate {
     private Long id;
-    @NotNull
     @Size(min = 3, max = 100)
     private String stageName;
-    private HashMap<@NotNull TeamRole, @Min(1) Integer> roleAndCount;
+    private HashMap<TeamRole, Integer> roleAndCount;
 
 }

@@ -41,6 +41,7 @@ public class StageService {
         this.stageRolesMapper = stageRolesMapper;
         this.stageMapper = stageMapper;
     }
+
     @Transactional
     public StageDTO create(StageDtoCreate stageDtoCreate, Long creatorId, Long projectId) {
         if (stageDtoCreate == null || creatorId == null || projectId == null) {
@@ -59,13 +60,15 @@ public class StageService {
         if (project.getStages() == null) {
             project.setStages(new ArrayList<>());
         }
+
         stage.setProject(project);
         project.getStages().add(stage);
 
         stageRepository.save(stage);
 //TODO что то с ДТО
         log.info("Created stage: {}", stage);
-        log.info("\n Dto to created stage: {}", stageMapper.toDto(stage));
-        return stageMapper.toDto(stage);
+        StageDTO stageDTO = stageMapper.toDto(stage);
+        log.info("Dto to created stage: {}", stageDTO);
+        return stageDTO;
     }
 }

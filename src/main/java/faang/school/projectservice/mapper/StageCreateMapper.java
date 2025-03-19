@@ -14,6 +14,10 @@ public interface StageCreateMapper {
     StageDtoCreate toDto(Stage entity);
 
     @Mapping(target = "stageId", source = "id")
+    @Mapping(target = "project", ignore = true)
+    @Mapping(target = "stageRoles", ignore = true)
+    @Mapping(target = "tasks", ignore = true)
+    @Mapping(target = "executors", ignore = true)
     Stage toEntity(StageDtoCreate dto);
 
     List<StageDtoCreate> toDtoList(List<Stage> entities);

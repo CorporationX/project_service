@@ -14,16 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 public class StageDTO {
     private Long id;
-    @NotNull
     @Size(min = 3, max = 100)
     private String stageName;
-    @NotNull
     private Long projectId;
-    @Size(min = 1)
     private List<Long> tasksId;
-    @Size(min = 1)
     private List<Long> stageRoleId;
-    @Size(min = 1)
     private List<Long> executorsId;
 
 }
