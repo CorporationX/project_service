@@ -3,36 +3,48 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stageinvitation.ChangeStatusDto;
 import faang.school.projectservice.dto.stageinvitation.RejectInvitationDto;
 import faang.school.projectservice.dto.stageinvitation.StageInvitationDto;
-
 import faang.school.projectservice.dto.stageinvitation.StageInvitationUpdateDto;
 import faang.school.projectservice.service.StageInvitationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RequestMapping("/invitations")
+@RestController
 @RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    public StageInvitationDto createStageInvitation(StageInvitationDto dto) {
+    @PostMapping
+    public StageInvitationDto createStageInvitation(@Valid @RequestBody StageInvitationDto dto) {
         return stageInvitationService.createStageInvitation(dto);
     }
 
-    public StageInvitationUpdateDto updateStageInvitation(StageInvitationUpdateDto dto) {
+    @PutMapping("/updated")
+    public StageInvitationUpdateDto updateStageInvitation(@Valid @RequestBody StageInvitationUpdateDto dto) {
         return stageInvitationService.updateStageInvitation(dto);
     }
 
-    public RejectInvitationDto rejectStageInvitation(RejectInvitationDto dto) {
+    @PutMapping("/rejected")
+    public RejectInvitationDto rejectStageInvitation(@Valid @RequestBody RejectInvitationDto dto) {
         return stageInvitationService.rejectStageInvitation(dto);
     }
 
-    public ChangeStatusDto acceptStageInvitation(ChangeStatusDto dto) {
+    @PutMapping("/accepted")
+    public ChangeStatusDto acceptStageInvitation(@Valid @RequestBody ChangeStatusDto dto) {
         return stageInvitationService.acceptStageInvitation(dto);
     }
 
-    public List<StageInvitationDto> getStageInvitationForTeamMember(Long invitedId) {
+    @GetMapping("/member/{invitedId}")
+    public List<StageInvitationDto> getStageInvitationForTeamMember(@PathVariable Long invitedId) {
         return stageInvitationService.getStageInvitationForTeamMember(invitedId);
     }
 }
