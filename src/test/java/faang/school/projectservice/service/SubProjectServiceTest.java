@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.dto.SubProjectsFilterDto;
 import faang.school.projectservice.mapper.CreateSubProjectMapper;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.MomentType;
 import faang.school.projectservice.model.Project;
@@ -53,10 +53,10 @@ public class SubProjectServiceTest {
     StageRepository stageRepository;
 
     @Mock
-    CreateSubProjectMapper subProjectMapper;
+    CreateSubProjectMapper createdSubProjectMapper;
 
     @Mock
-    ProjectMapper projectMapper;
+    SubProjectMapper subProjectMapper;
 
     @InjectMocks
     SubProjectService subProjectService;
@@ -110,9 +110,9 @@ public class SubProjectServiceTest {
         CreateSubProjectDto subProjectDto = createSubProjectDto();
 
         when(projectRepository.findById(subProjectDto.getParentProject())).thenReturn(Optional.of(new Project()));
-        when(subProjectMapper.toEntity(subProjectDto)).thenReturn(subProject);
+        when(createdSubProjectMapper.toEntity(subProjectDto)).thenReturn(subProject);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
-        when(projectMapper.toDto(subProject)).thenReturn(createProjectDto());
+        when(subProjectMapper.toDto(subProject)).thenReturn(createProjectDto());
 
         subProjectService.createSubProject(subProjectDto);
 
@@ -130,10 +130,10 @@ public class SubProjectServiceTest {
         subProjectDto.setChildren(List.of(createSubProjectDto()));
 
         when(projectRepository.findById(subProjectDto.getParentProject())).thenReturn(Optional.of(new Project()));
-        when(subProjectMapper.toEntity(any(CreateSubProjectDto.class))).thenReturn(subProject);
+        when(createdSubProjectMapper.toEntity(any(CreateSubProjectDto.class))).thenReturn(subProject);
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
         when(stageRepository.save(any(Stage.class))).thenReturn(stage);
-        when(projectMapper.toDto(subProject)).thenReturn(createProjectDto());
+        when(subProjectMapper.toDto(subProject)).thenReturn(createProjectDto());
 
         subProjectService.createSubProject(subProjectDto);
 
@@ -156,33 +156,33 @@ public class SubProjectServiceTest {
     @ParameterizedTest
     @MethodSource("providedInvalidProjectInputs")
     void testUpdateNegativeMissingFields(String name, Long ownerId, ProjectVisibility visibility, ProjectStatus status, String expectedMessage) {
-        ProjectDto projectDto = createProjectDto(name, ownerId, visibility, status);
+        SubProjectDto subProjectDto = createProjectDto(name, ownerId, visibility, status);
 
-        assertException(() -> subProjectService.updateSubProject(projectDto), IllegalArgumentException.class, expectedMessage);
+        assertException(() -> subProjectService.updateSubProject(subProjectDto), IllegalArgumentException.class, expectedMessage);
     }
 
     @Test
     @DisplayName("Negative: error when project value is missing")
     void testUpdateNoProject() {
-        ProjectDto projectDto = createProjectDto();
+        SubProjectDto subProjectDto = createProjectDto();
 
-        when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.empty());
+        when(projectRepository.findById(subProjectDto.getId())).thenReturn(Optional.empty());
 
-        assertException(() -> subProjectService.updateSubProject(projectDto), EntityNotFoundException.class,
-                String.format("Project with id = %d doesn't exist", projectDto.getId()));
+        assertException(() -> subProjectService.updateSubProject(subProjectDto), EntityNotFoundException.class,
+                String.format("Project with id = %d doesn't exist", subProjectDto.getId()));
     }
 
     @Test
     @DisplayName("Positive: successful update of project")
     void testUpdateSuccess() {
         Project project = createProject();
-        ProjectDto projectDto = createProjectDto();
+        SubProjectDto subProjectDto = createProjectDto();
 
-        when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.of(project));
+        when(projectRepository.findById(subProjectDto.getId())).thenReturn(Optional.of(project));
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(subProjectMapper.toDto(project)).thenReturn(subProjectDto);
 
-        subProjectService.updateSubProject(projectDto);
+        subProjectService.updateSubProject(subProjectDto);
 
         assertEquals(ProjectStatus.CREATED, project.getStatus());
     }
@@ -194,11 +194,11 @@ public class SubProjectServiceTest {
         Project subProject = createSubProject(ProjectStatus.IN_PROGRESS);
         project.setChildren(List.of(subProject));
 
-        ProjectDto projectDto = createProjectDto(ProjectStatus.COMPLETED);
+        SubProjectDto subProjectDto = createProjectDto(ProjectStatus.COMPLETED);
 
-        when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.of(project));
+        when(projectRepository.findById(subProjectDto.getId())).thenReturn(Optional.of(project));
 
-        assertException(() -> subProjectService.updateSubProject(projectDto), IllegalArgumentException.class,
+        assertException(() -> subProjectService.updateSubProject(subProjectDto), IllegalArgumentException.class,
                 "Not all subprojects are completed");
     }
 
@@ -209,14 +209,14 @@ public class SubProjectServiceTest {
         Project subProject = createSubProject(ProjectStatus.COMPLETED);
         project.setChildren(List.of(subProject));
 
-        ProjectDto projectDto = createProjectDto(ProjectStatus.COMPLETED);
+        SubProjectDto subProjectDto = createProjectDto(ProjectStatus.COMPLETED);
 
-        when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.of(project));
+        when(projectRepository.findById(subProjectDto.getId())).thenReturn(Optional.of(project));
         when(momentRepository.save(any(Moment.class))).thenReturn(new Moment());
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(subProjectMapper.toDto(project)).thenReturn(subProjectDto);
 
-        subProjectService.updateSubProject(projectDto);
+        subProjectService.updateSubProject(subProjectDto);
 
         ArgumentCaptor<Moment> argumentCaptor = ArgumentCaptor.forClass(Moment.class);
         verify(momentRepository, times(1)).save(argumentCaptor.capture());
@@ -233,14 +233,14 @@ public class SubProjectServiceTest {
         Project subProject = createSubProject(ProjectVisibility.PUBLIC);
         project.setChildren(List.of(subProject));
 
-        ProjectDto projectDto = createProjectDto(ProjectVisibility.PRIVATE);
+        SubProjectDto subProjectDto = createProjectDto(ProjectVisibility.PRIVATE);
 
-        when(projectRepository.findById(projectDto.getId())).thenReturn(Optional.of(project));
+        when(projectRepository.findById(subProjectDto.getId())).thenReturn(Optional.of(project));
         when(projectRepository.save(subProject)).thenReturn(subProject);
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(subProjectMapper.toDto(project)).thenReturn(subProjectDto);
 
-        subProjectService.updateSubProject(projectDto);
+        subProjectService.updateSubProject(subProjectDto);
 
         verify(projectRepository, times(2)).save(any(Project.class));
         assertEquals(project.getVisibility(), subProject.getVisibility());
@@ -274,7 +274,7 @@ public class SubProjectServiceTest {
 
         when(projectRepository.findById(filterDto.projectId())).thenReturn(Optional.of(project));
 
-        List<ProjectDto> subProjects = subProjectService.getSubProjects(filterDto);
+        List<SubProjectDto> subProjects = subProjectService.getSubProjects(filterDto);
 
         assertEquals(0, subProjects.size());
     }
@@ -294,8 +294,8 @@ public class SubProjectServiceTest {
                 .build();
     }
 
-    private ProjectDto createProjectDto(String name, Long ownerId, ProjectVisibility visibility, ProjectStatus status) {
-        return ProjectDto.builder()
+    private SubProjectDto createProjectDto(String name, Long ownerId, ProjectVisibility visibility, ProjectStatus status) {
+        return SubProjectDto.builder()
                 .name(name)
                 .ownerId(ownerId)
                 .visibility(visibility)
@@ -303,8 +303,8 @@ public class SubProjectServiceTest {
                 .build();
     }
 
-    private ProjectDto createProjectDto() {
-        return ProjectDto.builder()
+    private SubProjectDto createProjectDto() {
+        return SubProjectDto.builder()
                 .name("test")
                 .ownerId(1L)
                 .visibility(ProjectVisibility.PUBLIC)
@@ -312,16 +312,16 @@ public class SubProjectServiceTest {
                 .build();
     }
 
-    private ProjectDto createProjectDto(ProjectStatus status) {
-        ProjectDto projectDto = createProjectDto();
-        projectDto.setStatus(status);
-        return projectDto;
+    private SubProjectDto createProjectDto(ProjectStatus status) {
+        SubProjectDto subProjectDto = createProjectDto();
+        subProjectDto.setStatus(status);
+        return subProjectDto;
     }
 
-    private ProjectDto createProjectDto(ProjectVisibility visibility) {
-        ProjectDto projectDto = createProjectDto();
-        projectDto.setVisibility(visibility);
-        return projectDto;
+    private SubProjectDto createProjectDto(ProjectVisibility visibility) {
+        SubProjectDto subProjectDto = createProjectDto();
+        subProjectDto.setVisibility(visibility);
+        return subProjectDto;
     }
 
     private CreateSubProjectDto createSubProjectDto() {

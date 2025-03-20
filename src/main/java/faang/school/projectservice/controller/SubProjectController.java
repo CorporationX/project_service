@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.dto.SubProjectsFilterDto;
 import faang.school.projectservice.service.SubProjectService;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +19,17 @@ public class SubProjectController {
     private final SubProjectService service;
 
     @PostMapping("/create")
-    public ProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
+    public SubProjectDto create(@RequestBody CreateSubProjectDto subProjectDto) {
         return service.createSubProject(subProjectDto);
     }
 
     @PostMapping("/update")
-    public ProjectDto update(@RequestBody ProjectDto projectDto) {
-        return service.updateSubProject(projectDto);
+    public SubProjectDto update(@RequestBody SubProjectDto subProjectDto) {
+        return service.updateSubProject(subProjectDto);
     }
 
     @PostMapping("/filter")
-    public List<ProjectDto> getSubProjects(@RequestBody SubProjectsFilterDto filterDto) {
+    public List<SubProjectDto> getSubProjects(@RequestBody SubProjectsFilterDto filterDto) {
         return service.getSubProjects(filterDto);
     }
 }

@@ -1,11 +1,11 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.dto.SubProjectsFilterDto;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.CreateSubProjectMapper;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.MomentType;
 import faang.school.projectservice.model.Project;
@@ -35,13 +35,13 @@ public class SubProjectService {
     private final ProjectRepository projectRepository;
     private final MomentRepository momentRepository;
     private final StageRepository stageRepository;
-    private final CreateSubProjectMapper subProjectMapper;
-    private final ProjectMapper projectMapper;
+    private final CreateSubProjectMapper createdSubProjectMapper;
+    private final SubProjectMapper subProjectMapper;
     private final List<SubProjectFilter> subProjectFilters;
 
-    public ProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
+    public SubProjectDto createSubProject(CreateSubProjectDto subProjectDto) {
         Project parentProject = validateAndRetrieveParentProject(subProjectDto);
-        Project subProject = subProjectMapper.toEntity(subProjectDto);
+        Project subProject = createdSubProjectMapper.toEntity(subProjectDto);
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
         Project savedSubProject = projectRepository.save(subProject);
@@ -49,26 +49,26 @@ public class SubProjectService {
         addStages(savedSubProject, subProjectDto.getStages());
         addChildren(savedSubProject, subProjectDto.getChildren());
 
-        ProjectDto savedDto = projectMapper.toDto(projectRepository.save(savedSubProject));
+        SubProjectDto savedDto = subProjectMapper.toDto(projectRepository.save(savedSubProject));
         log.info("Subproject with name = {} and id = {} was created", savedDto.getName(), savedDto.getId());
 
-        return projectMapper.toDto(projectRepository.save(savedSubProject));
+        return subProjectMapper.toDto(projectRepository.save(savedSubProject));
     }
 
-    public ProjectDto updateSubProject(ProjectDto projectDto) {
-        projectDto.validateCommonFields();
+    public SubProjectDto updateSubProject(SubProjectDto subProjectDto) {
+        subProjectDto.validateCommonFields();
 
-        Project project = projectRepository.findById(projectDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d doesn't exist", projectDto.getId())));
-        ProjectStatus status = projectDto.getStatus();
-        ProjectVisibility visibility = projectDto.getVisibility();
+        Project project = projectRepository.findById(subProjectDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Project with id = %d doesn't exist", subProjectDto.getId())));
+        ProjectStatus status = subProjectDto.getStatus();
+        ProjectVisibility visibility = subProjectDto.getVisibility();
 
         processSubProjects(project, status, visibility);
 
         project.setVisibility(visibility);
         project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
-        ProjectDto savedDto = projectMapper.toDto(projectRepository.save(project));
+        SubProjectDto savedDto = subProjectMapper.toDto(projectRepository.save(project));
 
         log.info("Subproject with name = {} and id = {} was updated", savedDto.getName(), savedDto.getId());
 
@@ -112,7 +112,7 @@ public class SubProjectService {
         }
     }
 
-    public List<ProjectDto> getSubProjects(SubProjectsFilterDto filter) {
+    public List<SubProjectDto> getSubProjects(SubProjectsFilterDto filter) {
         var projectId = filter.projectId();
         if (projectId == null) {
             throw new IllegalArgumentException("Project id is required");
@@ -134,7 +134,7 @@ public class SubProjectService {
         }
 
         return projects
-                .map(projectMapper::toDto)
+                .map(subProjectMapper::toDto)
                 .toList();
     }
 
@@ -157,7 +157,7 @@ public class SubProjectService {
             List<Project> updatedChildren = new ArrayList<>();
             for (CreateSubProjectDto child : childrenDtos) {
                 child.setParentProject(project.getId());
-                updatedChildren.add(projectMapper.toEntity(createSubProject(child)));
+                updatedChildren.add(subProjectMapper.toEntity(createSubProject(child)));
             }
             project.setChildren(updatedChildren);
         }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
@@ -11,19 +11,19 @@ import org.mapstruct.Named;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface ProjectMapper  {
+public interface SubProjectMapper {
 
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "parentProject", ignore = true)
     @Mapping(target = "stages", ignore = true)
     @Mapping(target = "tasks", ignore = true)
-    Project toEntity(ProjectDto projectDto);
+    Project toEntity(SubProjectDto subProjectDto);
 
     @Mapping(target = "children", source = "children", qualifiedByName = "mapProjectsToIds")
     @Mapping(target = "parentProject", source = "parentProject.id")
     @Mapping(target = "stages", source = "stages", qualifiedByName = "mapStagesToIds")
     @Mapping(target = "tasks", source = "tasks", qualifiedByName = "mapTasksToIds")
-    ProjectDto toDto(Project project);
+    SubProjectDto toDto(Project project);
 
     @Named("mapProjectsToIds")
     default List<Long> mapProjectsToIds(List<Project> children) {
