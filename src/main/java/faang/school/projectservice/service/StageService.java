@@ -115,8 +115,8 @@ public class StageService {
     public void delete(@NotNull Long stageId) {
     }
 
-    private List<TeamMember> findAllMembers(HashMap<TeamRole, Integer> roleAndCount, Stage stage, Project project) {
-        List<TeamMember> invitedMembers = new ArrayList<>();
+    private List<TeamMember> findAllExecutors(HashMap<TeamRole, Integer> roleAndCount, Stage stage, Project project) {
+        List<TeamMember> Executors = new ArrayList<>();
         Set<Long> invitedIds = new HashSet<>();
 
         Map<Long, List<TeamRole>> stageExecutors = getExecutorFromStage(stage);
@@ -150,11 +150,11 @@ public class StageService {
                     }
                     return selected;
                 };
-        invitedMembers.addAll(findCandidates.apply(stageExecutors, roleAndCount));
+        Executors.addAll(findCandidates.apply(stageExecutors, roleAndCount));
         if (!roleAndCount.isEmpty()) {
-            invitedMembers.addAll(findCandidates.apply(projectExecutors, roleAndCount));
+            Executors.addAll(findCandidates.apply(projectExecutors, roleAndCount));
         }
-        return invitedMembers;
+        return Executors;
     }
 
     private Map<Long,List<TeamRole>> getExecutorFromProject(Project project) {
