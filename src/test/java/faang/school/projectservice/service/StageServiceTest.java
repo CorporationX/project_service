@@ -75,9 +75,7 @@ class StageServiceTest {
                         .executorsIds(new ArrayList<>())
                         .build()
         );
-        // When
         StageDTO result = stageService.create(stageDtoCreate, creatorId, projectId);
-        // Then
         verify(projectRepository).findById(projectId);
         verify(stageCreateMapper).toEntity(stageDtoCreate);
         verify(stageRolesMapper).mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
