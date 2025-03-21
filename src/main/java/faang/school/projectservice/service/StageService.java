@@ -13,7 +13,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,17 +45,19 @@ public class StageService {
     private final StageCreateMapper stageCreateMapper;
     private final StageRolesMapper stageRolesMapper;
     private final StageMapper stageMapper;
+    private final StageInvitationRepository stageInvitationRepository;
 
     @Autowired
     public StageService(StageRepository stageRepository, TeamMemberRepository teamMemberRepository,
                         ProjectRepository projectRepository, StageCreateMapper stageCreateMapper,
-                        StageRolesMapper stageRolesMapper, StageMapper stageMapper) {
+                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository) {
         this.stageRepository = stageRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.projectRepository = projectRepository;
         this.stageCreateMapper = stageCreateMapper;
         this.stageRolesMapper = stageRolesMapper;
         this.stageMapper = stageMapper;
+        this.stageInvitationRepository = stageInvitationRepository;
     }
 
     public StageDTO create(StageDtoCreate stageDtoCreate, Long creatorId, Long projectId) {
@@ -83,21 +88,23 @@ public class StageService {
         }
         stage.setProject(project);
         project.getStages().add(stage);
-        stage.setExecutors(findAllExecutors(stageDtoCreate.getRoleAndCount(), stage, project));
+        List<TeamMember> fundedExecutors = findAllExecutors(stageDtoCreate.getRoleAndCount(), stage, project);
+        stage.setExecutors(fundedExecutors);
+        sendInvite(stage,fundedExecutors,creator);
         stageRepository.save(stage);
         log.info("Created stage: {}", stage);
-
         return stageMapper.toDto(stage);
     }
 
     public StageDTO update(StageDTO stageDTO) {
-    //TODO доделать апдейт
+
         return null;
     }
 
     public List<StageDTO> getRoleAndStatus(StageFilterDTO stageFilterDTO) {
-        //TODO дописать запрос
-        return null;
+        List<Stage> filteredStages = stageRepository.findStagesByRolesAndTaskStatus
+                (stageFilterDTO.getTeamRoles(),stageFilterDTO.getTasksStatus());
+        return stageMapper.toDtoList(filteredStages);
     }
 
     public List<StageDTO> getAllProjectStages(@NotNull Long projectId) {
@@ -175,5 +182,16 @@ public class StageService {
 
     }
 
-
+    private void sendInvite(Stage stage, List<TeamMember> invitedMembers, TeamMember author) {
+        invitedMembers.forEach(teamMember -> {
+            StageInvitation stageInvitation = StageInvitation.builder()
+                    .status(StageInvitationStatus.PENDING)
+                    .stage(stage)
+                    .author(author)
+                    .invited(teamMember)
+                    .build();
+            log.info("Sending invite on stage to : {}", teamMember);
+            stageInvitationRepository.save(stageInvitation);
+        });
+    }
 }
