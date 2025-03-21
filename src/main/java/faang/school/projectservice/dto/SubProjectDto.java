@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @SuperBuilder
-public class ProjectDto extends AbstractProjectDto {
+public class SubProjectDto extends AbstractProjectDto {
     private Long id;
     private Long parentProject;
     private String description;
