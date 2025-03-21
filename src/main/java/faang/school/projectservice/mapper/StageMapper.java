@@ -32,6 +32,12 @@ public interface StageMapper {
     @Mapping(source = "executors", target = "executors")
     Stage toEntity(StageDTO dto,Long id, Project project, List<Task> tasks, List<StageRoles> stageRoles, List<TeamMember> executors);
 
+    default List<StageDTO> toDtoList(List<Stage> stages) {
+        return stages == null ? Collections.emptyList() :
+                stages.stream()
+                        .map(this::toDto)
+                        .collect(toList());
+    }
     @Named("mapTasks")
     default List<Long> mapTasks(List<Task> tasks) {
         return tasks == null ? Collections.emptyList() :

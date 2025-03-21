@@ -41,7 +41,7 @@ public class StageController {
         return stageService.getAllProjectStages(projectId);
     }
     @GetMapping("/{stageId}")
-    public List<StageDTO> get(@RequestParam @NotNull Long stageId) {
+    public StageDTO get(@RequestParam @NotNull Long stageId) {
         return stageService.getStage(stageId);
     }
     @DeleteMapping

@@ -15,7 +15,6 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
@@ -30,11 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -79,7 +75,6 @@ public class StageService {
         }
 
         Stage stage = stageCreateMapper.toEntity(stageDtoCreate);
-
         List<StageRoles> stageRoles = stageRolesMapper.mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
         stage.setStageRoles(stageRoles);
 
@@ -88,7 +83,7 @@ public class StageService {
         }
         stage.setProject(project);
         project.getStages().add(stage);
-
+        stage.setExecutors(findAllExecutors(stageDtoCreate.getRoleAndCount(), stage, project));
         stageRepository.save(stage);
         log.info("Created stage: {}", stage);
 
@@ -96,32 +91,40 @@ public class StageService {
     }
 
     public StageDTO update(StageDTO stageDTO) {
-
+    //TODO доделать апдейт
         return null;
     }
 
     public List<StageDTO> getRoleAndStatus(StageFilterDTO stageFilterDTO) {
+        //TODO дописать запрос
         return null;
     }
 
     public List<StageDTO> getAllProjectStages(@NotNull Long projectId) {
-    return null;
+       Project project = projectRepository.findById(projectId)
+               .orElseThrow(() -> new EntityNotFoundException("Project not found with ID: " + projectId));
+    return stageMapper.toDtoList(project.getStages());
     }
 
-    public List<StageDTO> getStage(@NotNull Long stageId) {
-    return null;
+    public StageDTO getStage(@NotNull Long stageId) {
+    return stageMapper.toDto(stageRepository.findById(stageId)
+            .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId)));
     }
 
     public void delete(@NotNull Long stageId) {
+        Stage deletedStage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId));
+        log.info("Deleted stage: {}", deletedStage);
+        stageRepository.delete(deletedStage);
     }
 
     private List<TeamMember> findAllExecutors(HashMap<TeamRole, Integer> roleAndCount, Stage stage, Project project) {
         List<TeamMember> Executors = new ArrayList<>();
         Set<Long> invitedIds = new HashSet<>();
 
-        Map<Long, List<TeamRole>> stageExecutors = getExecutorFromStage(stage);
+        Map<Long, List<TeamRole>> stageExecutors = getRoleAndIdFromStage(stage);
 
-        Map<Long, List<TeamRole>> projectExecutors = getExecutorFromProject(project);
+        Map<Long, List<TeamRole>> projectExecutors = getRoleAndIdFromProject(project);
 
         BiFunction<Map<Long, List<TeamRole>>, HashMap<TeamRole, Integer>, List<TeamMember>> findCandidates =
                 (executors, remainingRoles) -> {
@@ -157,7 +160,7 @@ public class StageService {
         return Executors;
     }
 
-    private Map<Long,List<TeamRole>> getExecutorFromProject(Project project) {
+    private Map<Long,List<TeamRole>> getRoleAndIdFromProject(Project project) {
       return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .collect(toMap(
@@ -165,7 +168,7 @@ public class StageService {
                         TeamMember::getRoles));
     }
 
-    private Map<Long,List<TeamRole>> getExecutorFromStage(Stage stage) {
+    private Map<Long,List<TeamRole>> getRoleAndIdFromStage(Stage stage) {
         return stage.getExecutors().stream()
                 .collect(toMap(TeamMember::getId,
                         TeamMember::getRoles));
