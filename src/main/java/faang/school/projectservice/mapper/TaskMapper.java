@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.task.TaskReadDto;
 import faang.school.projectservice.dto.task.TaskUpdateDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.IterableMapping;
@@ -54,8 +55,7 @@ public interface TaskMapper {
 
         if (updateDto.getParentTaskId() != null) {
             Task referenceById = repository.getReferenceById(updateDto.getParentTaskId());
-            task.setParentTask(referenceById);
-            System.out.printf("Получил объект под ID %s = %s%n", updateDto.getParentTaskId(), referenceById.getName());
+            task.setParentTask(referenceById);;
         }
 
         if (updateDto.getLinkedTasksId() != null) {

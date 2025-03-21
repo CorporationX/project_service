@@ -22,6 +22,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,17 +101,17 @@ public class TaskService {
         Project project = projectService.getProjectById(projectId);
         long currentUserId = userContext.getUserId();
 
-        List<Long> membersIdList = project.getTeams().stream()
+        Set<Long> membersIdList = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
-                .toList();
+                .collect(Collectors.toSet());
 
         if (!membersIdList.contains(currentUserId)) {
             throw new BusinessException("Пользователь не является участником проекта и не может выполнять операции с задачами.");
         }
     }
 
-    public Task getTaskById(long taskId) {
+    private Task getTaskById(long taskId) {
         Task task = taskRepository.getReferenceById(taskId);
         verifyUserProjectMembership(task.getProject().getId());
         return task;

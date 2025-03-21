@@ -15,13 +15,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskServiceTest {
@@ -57,19 +59,19 @@ public class TaskServiceTest {
 
         long currentUserId = 3L;
 
-        Mockito.when(projectService.getProjectById(createDto.getProjectId())).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(createDto.getProjectId())).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(3L);
+        when(teamMember.getUserId()).thenReturn(3L);
 
         Task newTask = taskMapper.toEntity(createDto);
 
         taskService.create(createDto);
-        Mockito.verify(taskRepository, Mockito.times(1)).save(newTask);
+        verify(taskRepository, times(1)).save(newTask);
     }
 
     @Test
@@ -83,14 +85,14 @@ public class TaskServiceTest {
 
         long currentUserId = 1L;
 
-        Mockito.when(projectService.getProjectById(createDto.getProjectId())).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(createDto.getProjectId())).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(3L);
+        when(teamMember.getUserId()).thenReturn(3L);
 
         assertThrows(BusinessException.class, () -> taskService.create(createDto));
     }
@@ -112,21 +114,21 @@ public class TaskServiceTest {
                 .reporterUserId(2L)
                 .build();
 
-        Mockito.when(taskRepository.getReferenceById(updateDto.getId())).thenReturn(task);
+        when(taskRepository.getReferenceById(updateDto.getId())).thenReturn(task);
 
-        Mockito.when(projectService.getProjectById(task.getProject().getId())).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(task.getProject().getId())).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(3L);
+        when(teamMember.getUserId()).thenReturn(3L);
 
         taskMapper.updateEntityFromDto(task, updateDto, taskRepository);
 
         taskService.update(updateDto);
-        Mockito.verify(taskRepository, Mockito.times(1)).save(task);
+        verify(taskRepository, times(1)).save(task);
     }
 
     @Test
@@ -146,16 +148,16 @@ public class TaskServiceTest {
                 .reporterUserId(2L)
                 .build();
 
-        Mockito.when(taskRepository.getReferenceById(updateDto.getId())).thenReturn(task);
+        when(taskRepository.getReferenceById(updateDto.getId())).thenReturn(task);
 
-        Mockito.when(projectService.getProjectById(task.getProject().getId())).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(task.getProject().getId())).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(1L);
+        when(teamMember.getUserId()).thenReturn(1L);
 
         taskMapper.updateEntityFromDto(task, updateDto, taskRepository);
 
@@ -167,17 +169,17 @@ public class TaskServiceTest {
         long projectId = 1L;
         long currentUserId = 3L;
 
-        Mockito.when(projectService.getProjectById(projectId)).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(3L);
+        when(teamMember.getUserId()).thenReturn(3L);
 
         taskService.getAllTasksByProjectId(projectId);
-        Mockito.verify(taskRepository, Mockito.times(1)).findAllByProjectId(projectId);
+        verify(taskRepository, times(1)).findAllByProjectId(projectId);
     }
 
     @Test
@@ -185,14 +187,14 @@ public class TaskServiceTest {
         long projectId = 1L;
         long currentUserId = 3L;
 
-        Mockito.when(projectService.getProjectById(projectId)).thenReturn(project);
-        Mockito.when(userContext.getUserId()).thenReturn(currentUserId);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(userContext.getUserId()).thenReturn(currentUserId);
 
         List<Team> teams = List.of(team);
-        Mockito.when(project.getTeams()).thenReturn(teams);
-        Mockito.when(team.getTeamMembers()).thenReturn(List.of(teamMember));
+        when(project.getTeams()).thenReturn(teams);
+        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
-        Mockito.when(teamMember.getUserId()).thenReturn(1L);
+        when(teamMember.getUserId()).thenReturn(1L);
 
         assertThrows(BusinessException.class, () -> taskService.getAllTasksByProjectId(projectId));
     }
