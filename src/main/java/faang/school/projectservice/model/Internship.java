@@ -29,7 +29,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Entity
 @Table(name = "internship")
 public class Internship {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

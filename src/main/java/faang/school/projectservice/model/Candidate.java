@@ -19,12 +19,15 @@ public class Candidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotNull
     private Long userId;
+
     @NotNull
     private String username;
     private String resumeDocKey;
     private String coverLetter;
+
     @Enumerated(EnumType.STRING)
     private CandidateStatus candidateStatus;
 

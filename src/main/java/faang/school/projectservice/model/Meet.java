@@ -28,7 +28,6 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "id")
 public class Meet {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

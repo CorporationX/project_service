@@ -9,6 +9,9 @@ version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
     mavenCentral()
 }
 
@@ -59,6 +62,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * Jira API
+     **/
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.0")
+    implementation("com.atlassian.fugue:fugue:2.7.0")
 }
 
 tasks.withType<Test> {
