@@ -56,6 +56,13 @@ public class CampaignService {
         return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
+    public CampaignUpdateDto findById(long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new CampaignNotFoundException(id));
+
+        return campaignMapper.toDto(campaignRepository.save(campaign));
+    }
+
     private boolean isManager(Long userId) {
         return teamMemberRepository.findByUserId(userId).stream()
                 .flatMap(teamMember -> teamMember.getRoles().stream())
