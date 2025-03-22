@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.CampaignDto;
+import faang.school.projectservice.dto.CampaignCreateDto;
+import faang.school.projectservice.dto.CampaignUpdateDto;
 import faang.school.projectservice.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,12 @@ public class CampaignController {
     private final CampaignService campaignService;
 
     @PostMapping("/create")
-    public CampaignDto create(@Valid @RequestBody CampaignDto campaignDto) {
-        return campaignService.create(campaignDto);
+    public CampaignUpdateDto create(@Valid @RequestBody CampaignCreateDto campaignCreateDto) {
+        return campaignService.create(campaignCreateDto);
+    }
+
+    @PostMapping("/update")
+    public CampaignUpdateDto update(@Valid @RequestBody CampaignUpdateDto campaignUpdateDto) {
+        return campaignService.update(campaignUpdateDto);
     }
 }

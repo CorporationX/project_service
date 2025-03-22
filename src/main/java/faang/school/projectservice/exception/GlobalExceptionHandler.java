@@ -41,4 +41,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(CampaignNotFoundException.class)
+    public ResponseEntity<String> handleCampaignNotFoundException(CampaignNotFoundException ex) {
+        log.error("CampaignNotFoundException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CampaignCreatorModificationException.class)
+    public ResponseEntity<String> handleCampaignCreatorModificationException(CampaignCreatorModificationException ex) {
+        log.error("CampaignCreatorModificationException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

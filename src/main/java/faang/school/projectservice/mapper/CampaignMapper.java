@@ -1,16 +1,26 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.CampaignDto;
+import faang.school.projectservice.dto.CampaignCreateDto;
+import faang.school.projectservice.dto.CampaignUpdateDto;
 import faang.school.projectservice.model.Campaign;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface CampaignMapper {
 
     @Mapping(target = "project", ignore = true)
-    Campaign toEntity(CampaignDto campaignDto);
+    Campaign toEntity(CampaignCreateDto dto);
+
+    @Mapping(target = "project", ignore = true)
+    Campaign toEntity(CampaignUpdateDto dto);
 
     @Mapping(target = "projectId", source = "project.id")
-    CampaignDto toDto(Campaign campaign);
+    CampaignUpdateDto toDto(Campaign entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void update(@MappingTarget Campaign entity, CampaignUpdateDto dto);
 }

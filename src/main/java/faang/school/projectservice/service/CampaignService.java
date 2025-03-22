@@ -1,6 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CampaignDto;
+import faang.school.projectservice.dto.CampaignCreateDto;
+import faang.school.projectservice.dto.CampaignUpdateDto;
+import faang.school.projectservice.exception.CampaignCreatorModificationException;
+import faang.school.projectservice.exception.CampaignNotFoundException;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.CampaignMapper;
@@ -20,16 +23,28 @@ public class CampaignService {
     private final ProjectRepository projectRepository;
     private final CampaignMapper campaignMapper;
 
-    public CampaignDto create(CampaignDto campaignDto) {
-        var userId = campaignDto.getUpdatedBy();
-        campaignDto.setCreatedBy(userId);
-        Campaign campaign = campaignMapper.toEntity(campaignDto);
+    public CampaignUpdateDto create(CampaignCreateDto campaignCreateDto) {
+        var userId = campaignCreateDto.getUpdatedBy();
+        campaignCreateDto.setCreatedBy(userId);
+        Campaign campaign = campaignMapper.toEntity(campaignCreateDto);
 
-        if (isManager(userId) || isProjectOwner(campaign, userId, campaignDto.getProjectId())) {
+        if (isManager(userId) || isProjectOwner(campaign, userId, campaignCreateDto.getProjectId())) {
             return campaignMapper.toDto(campaignRepository.save(campaign));
         }
 
         throw new PermissionDeniedException();
+    }
+
+    public CampaignUpdateDto update(CampaignUpdateDto dto) {
+        Campaign campaign = campaignRepository.findById(dto.getId())
+                .orElseThrow(() -> new CampaignNotFoundException(dto.getId()));
+
+        if (dto.getCreatedBy()!=null && !dto.getCreatedBy().equals(campaign.getCreatedBy())) {
+            throw new CampaignCreatorModificationException();
+        }
+
+        campaignMapper.update(campaign, dto);
+        return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
     private boolean isManager(Long userId) {
