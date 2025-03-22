@@ -1,6 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stageinvitation.*;
+import faang.school.projectservice.dto.stageinvitation.ChangeStatusDto;
+import faang.school.projectservice.dto.stageinvitation.RejectInvitationDto;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationDto;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationUpdateDto;
+import faang.school.projectservice.event.InviteSentEvent;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.filter.stageinvitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.stageinvitation.ChangeStatusMapper;
@@ -9,8 +14,8 @@ import faang.school.projectservice.mapper.stageinvitation.RejectInvitationMapper
 import faang.school.projectservice.mapper.stageinvitation.StageInvitationMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
-
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.InviteSentEventPublisher;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.validator.stageinvitation.StageInvitationValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +40,7 @@ public class StageInvitationService {
     private final RejectInvitationMapper rejectInvitationMapper;
     private final List<StageInvitationFilter> stageInvitationFilters;
     private final InvitationUpdateMapper invitationUpdateMapper;
+    private final InviteSentEventPublisher invitationPublisher;
 
     public StageInvitation findById(@NotNull Long stageInvitationId) {
         return stageInvitationRepository.findById(stageInvitationId)
@@ -44,10 +50,17 @@ public class StageInvitationService {
     public StageInvitationDto createStageInvitation(StageInvitationDto dto) {
         StageInvitation stageInvitation = stageInvitationValidator.validateStageInvitation(dto);
 
-        stageInvitation.setStage(stageService.findById(dto.getStageId()));
-        stageInvitation.setAuthor(teamMemberService.findById(dto.getAuthorId()));
-        stageInvitation.setInvited(teamMemberService.findById(dto.getInvitedId()));
+        var stage = stageService.findById(dto.getStageId());
+        var authorTeamMember = teamMemberService.findById(dto.getAuthorId());
+        var invitedTeamMember = teamMemberService.findById(dto.getInvitedId());
+        stageInvitation.setStage(stage);
+        stageInvitation.setAuthor(authorTeamMember);
+        stageInvitation.setInvited(invitedTeamMember);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
+
+        var event = new InviteSentEvent(invitedTeamMember.getUserId(), authorTeamMember.getUserId(),
+                stage.getProject().getId());
+        invitationPublisher.publish(event);
 
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }
@@ -65,13 +78,9 @@ public class StageInvitationService {
     }
 
     public ChangeStatusDto acceptStageInvitation(ChangeStatusDto dto) {
-
         StageInvitation stageInvitation = findPendingStageInvitation(dto.getId());
 
-        List<Stage> stages = teamMemberService
-                .findById(dto.getInvitedId())
-                .getStages();
-
+        List<Stage> stages = teamMemberService.findById(dto.getInvitedId()).getStages();
         Stage stage = stageInvitation.getStage();
 
         if (stages.contains(stage)) {
@@ -85,7 +94,6 @@ public class StageInvitationService {
     }
 
     public RejectInvitationDto rejectStageInvitation(RejectInvitationDto dto) {
-
         StageInvitation stageInvitation = findPendingStageInvitation(dto.getStatusDto().getId());
         updateStatus(stageInvitation, dto.getStatusDto(), StageInvitationStatus.REJECTED);
 
@@ -93,7 +101,6 @@ public class StageInvitationService {
     }
 
     public List<StageInvitationDto> getStageInvitationForTeamMember(Long invitedId) {
-
         Stream<StageInvitation> stageInvitationStream = stageInvitationRepository
                 .findAll()
                 .stream();
@@ -113,7 +120,6 @@ public class StageInvitationService {
     private void updateStatus(StageInvitation stageInvitation,
                               ChangeStatusDto statusDto,
                               StageInvitationStatus status) {
-
         statusDto.setStatus(status);
         changeStatusMapper.update(stageInvitation, statusDto);
     }

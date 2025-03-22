@@ -1,10 +1,12 @@
 package faang.school.projectservice.exception.handler;
 
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.FileManagementException;
 import faang.school.projectservice.exception.IntegrationException;
 import faang.school.projectservice.exception.PaymentFailedException;
+import faang.school.projectservice.exception.PublishEventException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
@@ -77,6 +79,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileManagementException.class)
     public ErrorResponse handleFileManagementException(FileManagementException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(PublishEventException.class)
+    public ErrorResponse handlePublishEventException(PublishEventException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
