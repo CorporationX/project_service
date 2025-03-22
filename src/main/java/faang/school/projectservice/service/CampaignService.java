@@ -8,6 +8,7 @@ import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
+import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -39,11 +40,19 @@ public class CampaignService {
         Campaign campaign = campaignRepository.findById(dto.getId())
                 .orElseThrow(() -> new CampaignNotFoundException(dto.getId()));
 
-        if (dto.getCreatedBy()!=null && !dto.getCreatedBy().equals(campaign.getCreatedBy())) {
+        if (dto.getCreatedBy() != null && !dto.getCreatedBy().equals(campaign.getCreatedBy())) {
             throw new CampaignCreatorModificationException();
         }
 
         campaignMapper.update(campaign, dto);
+        return campaignMapper.toDto(campaignRepository.save(campaign));
+    }
+
+    public CampaignUpdateDto delete(long id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new CampaignNotFoundException(id));
+
+        campaign.setStatus(CampaignStatus.CANCELED);
         return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
