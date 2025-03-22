@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.moment.MomentReadDto;
 import faang.school.projectservice.dto.vacancy.*;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;

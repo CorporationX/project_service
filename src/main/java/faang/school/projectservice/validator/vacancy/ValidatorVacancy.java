@@ -1,8 +1,6 @@
 package faang.school.projectservice.validator.vacancy;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.*;
@@ -14,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -54,7 +51,8 @@ public class ValidatorVacancy {
                     if (ownerId == null) {
                         throw new ValidationException("Project owner is not set");
                     }
-                    TeamMember owner = teamMemberRepository.findByUserIdAndProjectId(ownerId, projectId);
+                    TeamMember owner = teamMemberRepository.findByUserIdAndProjectId(ownerId, projectId).orElseThrow(() ->
+                            new DataValidationException("Участник проекта не найден"));
                     if (owner == null) {
                         return false;
                     }
@@ -81,7 +79,9 @@ public class ValidatorVacancy {
             if (vacancy.getCount() == dto.getCount()) {
                 return vacancy.getCandidates().stream().allMatch(role -> {
                     TeamMember teamMember = teamMemberRepository
-                            .findByUserIdAndProjectId(role.getUserId(), dto.getProjectId());
+                            .findByUserIdAndProjectId(role.getUserId(), dto.getProjectId()).orElseThrow(() ->
+                                    new DataValidationException("Участник проекта не найден"));
+
                     return dto.getPosition().equals(teamMember.toString());
                 });
             } else {
