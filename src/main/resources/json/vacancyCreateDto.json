@@ -1,0 +1,9 @@
+{
+  "name": "Vrch",
+  "position": "DEVELOPER",
+  "projectId": 2,
+  "count": 3,
+  "description": "Вакансия для Java-разработчика",
+  "status": "OPEN",
+  "requiredSkillIds": []
+}

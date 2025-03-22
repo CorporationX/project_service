@@ -1,0 +1,12 @@
+{
+  "id": 4,
+  "name": "UPDATE DEV",
+  "position": "DEVELOPER",
+  "projectId": 2,
+  "count": 3,
+  "description": "Вакансия для Java-разработчика",
+  "status": "OPEN"
+}
+//не забывайте про HEADER(key = X-User-Id)! Надо указать id в графе владелец проекта(progect), создать team и в teamMember
+
+
