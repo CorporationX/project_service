@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.CampaignCreateDto;
-import faang.school.projectservice.dto.CampaignUpdateDto;
+import faang.school.projectservice.dto.campaign.CampaignCreateDto;
+import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.model.Campaign;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

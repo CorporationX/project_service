@@ -53,4 +53,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(DateParseException.class)
+    public ResponseEntity<String> handleDateParseException(DateParseException ex) {
+        log.error("DateParseException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

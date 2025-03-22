@@ -1,9 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CampaignCreateDto;
-import faang.school.projectservice.dto.CampaignUpdateDto;
+import faang.school.projectservice.dto.campaign.CampaignCreateDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
+import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.exception.CampaignCreatorModificationException;
 import faang.school.projectservice.exception.CampaignNotFoundException;
+import faang.school.projectservice.exception.DateParseException;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.CampaignMapper;
@@ -16,9 +18,16 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CampaignService {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final CampaignRepository campaignRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
@@ -63,6 +72,19 @@ public class CampaignService {
         return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
+    public List<CampaignUpdateDto> getFilteredCampaigns(CampaignFilterDto filterDto) {
+        LocalDateTime startDate = null;
+        if (filterDto.startDate()!=null && !filterDto.startDate().isBlank()) {
+            startDate = getDate(filterDto.startDate());
+        }
+
+        List<Campaign> campaigns = campaignRepository.findCampaignsByFilters(filterDto.status(), filterDto.createdId(), startDate);
+
+        return campaigns.stream()
+                .map(campaignMapper::toDto)
+                .toList();
+    }
+
     private boolean isManager(Long userId) {
         return teamMemberRepository.findByUserId(userId).stream()
                 .flatMap(teamMember -> teamMember.getRoles().stream())
@@ -75,6 +97,15 @@ public class CampaignService {
         campaign.setProject(project);
 
         return project.getOwnerId().equals(userId);
+    }
+
+    private LocalDateTime getDate(String date) {
+        try {
+            LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
+            return localDate.atStartOfDay();
+        } catch (DateTimeParseException e) {
+            throw new DateParseException(date);
+        }
     }
 
 }

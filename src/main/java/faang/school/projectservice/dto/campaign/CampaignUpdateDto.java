@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.campaign;
 
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.CampaignStatus;
