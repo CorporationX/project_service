@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -48,6 +48,8 @@ server:
 logging:
   level:
     root: info
+    org.hibernate.SQL: info
+    org.hibernate.type.descriptor.sql.BasicBinder: info
 
 calculations_messages_processing:
   enabled: true
@@ -75,7 +77,6 @@ services:
     url: ${services.user-service.host}:${services.user-service.port}${services.user-service.path}
 
 ---
-
 spring:
   config:
     activate:
@@ -84,9 +85,9 @@ spring:
 logging:
   level:
     root: debug
+    org.hibernate.SQL: debug
 
 ---
-
 spring:
   config:
     activate:
