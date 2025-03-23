@@ -8,14 +8,14 @@ import jakarta.validation.constraints.NotNull;
 public record PaymentRequest (
         Long paymentNumber,
 
-        @Min(1)
-        @NotNull
+        @Min(value = 1, message = "Amount must be greater than 0")
+        @NotNull (message = "Amount must not be null")
         BigDecimal amount,
 
-        @NotNull
+        @NotNull (message = "Payment currency must not be null")
         Currency paymentCurrency,
 
-        @NotNull
+        @NotNull (message = "Target currency must not be null")
         Currency targetCurrency
 ) {
 }
