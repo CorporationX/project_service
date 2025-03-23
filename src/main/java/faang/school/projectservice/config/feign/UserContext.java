@@ -12,7 +12,11 @@ public class UserContext {
     }
 
     public long getUserId() {
-        return userIdHolder.get();
+        Long userId = userIdHolder.get();
+        if (userId == null) {
+            throw new IllegalArgumentException("Отсутствует ID пользователя. Пожалуйста, убедитесь, что заголовок 'x-user-id' включен в запрос.");
+        }
+        return userId;
     }
 
     public void clear() {
