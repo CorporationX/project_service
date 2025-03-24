@@ -1,3 +1,24 @@
+spring:
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    listener:
+      ack-mode: record
+    consumer:
+      security:
+        protocol: PLAINTEXT
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      properties:
+        spring.json.use.type.headers: false
+      project-create:
+        topic: "project-create"
+        group-id: "project-create-achievement-group"
+
+  liquibase:
+    change-log: db/changelog-test/db.changelog-test.yaml
+
 calculations_messages_processing:
   enabled: false
 

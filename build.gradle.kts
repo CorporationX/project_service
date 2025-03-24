@@ -25,6 +25,7 @@ dependencies {
     implementation("org.springframework.retry:spring-retry:2.0.11")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     /**
      * Database
@@ -75,6 +76,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     implementation("org.springframework.kafka:spring-kafka-test")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
 
     /**
      * Google API

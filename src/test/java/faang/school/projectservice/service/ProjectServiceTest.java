@@ -52,7 +52,6 @@ class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project createProject;
     private Project updateProject;
     private ProjectCreateRequestDto createRequestDto;
     private ProjectUpdateRequestDto updateRequestDto;
@@ -61,11 +60,6 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        createProject = new Project();
-        createProject.setOwnerId(100L);
-        createProject.setName("Test Project");
-        createProject.setStatus(ProjectStatus.CREATED);
-
         updateProject = new Project();
         updateProject.setId(1L);
         updateProject.setVisibility(ProjectVisibility.PUBLIC);
@@ -86,8 +80,16 @@ class ProjectServiceTest {
     @Test
     void createProject_ShouldSaveProjectWhenValidRequest() {
         when(projectRepository.existsByOwnerIdAndName(100L, "Test Project")).thenReturn(false);
+        Project.ProjectBuilder projectBuilder = Project.builder()
+                .name("Test Project")
+                .status(ProjectStatus.CREATED)
+                .ownerId(100L);
+        Project createProject = projectBuilder.build();
+        Project createProjectAfterSave = projectBuilder
+                .id(1L)
+                .build();
 
-        when(projectRepository.save(createProject)).thenReturn(createProject);
+        when(projectRepository.save(createProject)).thenReturn(createProjectAfterSave);
 
         ProjectCreateResponseDto result = projectService.createProject(createRequestDto);
 
@@ -129,7 +131,10 @@ class ProjectServiceTest {
         Project privateProject = new Project();
         privateProject.setVisibility(ProjectVisibility.PRIVATE);
         privateProject.setOwnerId(userId);
-        List<Project> projects = List.of(createProject, privateProject);
+        Project publicProject = new Project();
+        publicProject.setVisibility(ProjectVisibility.PUBLIC);
+        publicProject.setOwnerId(userId);
+        List<Project> projects = List.of(publicProject, privateProject);
         ProjectFilterDto filterDto = new ProjectFilterDto();
 
         when(projectRepository.findAll()).thenReturn(projects);

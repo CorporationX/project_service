@@ -1,0 +1,7 @@
+{
+  "name": "Test Project",
+  "description": "This is a test project",
+  "ownerId": 123,
+  "createdAt": "2023-10-01T12:00:00",
+  "visibility": "PUBLIC"
+}
