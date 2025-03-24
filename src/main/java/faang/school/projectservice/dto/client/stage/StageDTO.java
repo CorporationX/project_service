@@ -20,6 +20,5 @@ public class StageDTO {
     private String stageName;
     private Long projectId;
     private List<Long> tasksIds;
-    private List<Long> stageRoleIds;
     private List<Long> executorsIds;
 }

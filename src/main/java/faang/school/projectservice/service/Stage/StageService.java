@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.Stage;
 
 import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
@@ -9,6 +9,7 @@ import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
@@ -45,11 +46,12 @@ public class StageService {
     private final StageMapper stageMapper;
     private final StageInvitationRepository stageInvitationRepository;
     private final StageRolesRepository stageRolesRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
     public StageService(StageRepository stageRepository, TeamMemberRepository teamMemberRepository,
                         ProjectRepository projectRepository, StageCreateMapper stageCreateMapper,
-                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository, StageRolesRepository stageRolesRepository) {
+                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository, StageRolesRepository stageRolesRepository, TaskRepository taskRepository) {
         this.stageRepository = stageRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.projectRepository = projectRepository;
@@ -58,6 +60,7 @@ public class StageService {
         this.stageMapper = stageMapper;
         this.stageInvitationRepository = stageInvitationRepository;
         this.stageRolesRepository = stageRolesRepository;
+        this.taskRepository = taskRepository;
     }
 
     public StageDTO create(StageDtoCreate stageDtoCreate, Long creatorId, Long projectId) {
@@ -100,13 +103,21 @@ public class StageService {
     public StageDTO update(StageDTO stageDTO, Map<String, String> roleAndCount) {
         Stage stage = stageRepository.findById(stageDTO.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
-        stage = stageMapper.toEntity(stageDTO);
+        List<Task> tasks = taskRepository.findByIdIn(stageDTO.getTasksIds());
+        stage = Stage.builder()
+                .stageId(stageDTO.getId())
+                .stageName(stageDTO.getStageName())
+                .tasks(tasks)
+                .project(projectRepository.findById(stageDTO.getProjectId()).orElseThrow(
+                        ()-> new EntityNotFoundException("Project not found")))
+                .stageRoles(stage.getStageRoles())
+                .executors(stage.getExecutors())
+                .build();
         if (roleAndCount != null) {
             updateRoleAndCount(stage, roleAndCount);
         }
-        //TODO доделать апдейт, посмотреть маппер в Stage
-
-        return null;
+        stageRepository.save(stage);
+        return stageMapper.toDto(stage);
     }
 
     public List<StageDTO> getRoleAndStatus(StageFilterDTO stageFilterDTO) {
@@ -125,12 +136,22 @@ public class StageService {
         return stageMapper.toDto(stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId)));
     }
-
-    public void delete(@NotNull Long stageId) {
+    private void delete(Long stageId) {
         Stage deletedStage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId));
         log.info("Deleted stage: {}", deletedStage);
-        stageRepository.delete(deletedStage);
+    }
+
+    public void deleteWithStrategy(Long stageId, StageDeletionStrategy strategy, Long targetStageId) {
+        Stage stage = stageRepository.findById(stageId).orElseThrow(
+                () -> new EntityNotFoundException("Stage not found with ID: " + stageId));
+        Stage targetStage = stageRepository.findById(targetStageId)
+                .orElseThrow(()-> new EntityNotFoundException("Target stage not found with ID: " + targetStageId));
+        if (strategy.requiresTargetStage()) {
+            throw new IllegalArgumentException("Target stage must be specified for this deletion strategy.");
+        }
+
+        strategy.deleteStage(stage,targetStage );
     }
 
     private List<TeamMember> findAllExecutors(HashMap<TeamRole, Integer> roleAndCount, Stage stage, Project project) {

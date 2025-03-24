@@ -6,13 +6,13 @@ import faang.school.projectservice.mapper.StageCreateMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
+import faang.school.projectservice.service.Stage.StageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
+    //TODO ExecuteCapture https://faang-school.com/courses/4jnzmndg/32dnjg9d 53min
     @Mock
     private StageRepository stageRepository;
     @Mock

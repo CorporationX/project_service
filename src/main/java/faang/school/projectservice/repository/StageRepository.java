@@ -1,5 +1,6 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
@@ -23,4 +24,5 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
             @Param("roles") List<TeamRole> roles,
             @Param("status") List<TaskStatus> status
     );
+
 }

@@ -3,8 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.dto.client.stage.StageFilterDTO;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.Stage.StageService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +46,7 @@ public class StageController {
 
     @DeleteMapping("/{stageId}")
     public void delete(@PathVariable @NotNull Long stageId) {
-        stageService.delete(stageId);
+        stageService.deleteCascade(stageId);
     }
 }
 
