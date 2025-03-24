@@ -48,3 +48,10 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+app:
+  minio:
+    presentations:
+      endpoint: http://localhost:9000
+      access-key: HZykibzYtPG1ABN2J073
+      secret-key: qjGfUbiitoZyWPNYS24G4EQKDsxCba9rK28DoqEj
