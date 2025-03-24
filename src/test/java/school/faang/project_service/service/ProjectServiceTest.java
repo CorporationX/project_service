@@ -12,9 +12,9 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.filters.FilterProjects;
-import faang.school.projectservice.validator.ProjectValidator;
-import faang.school.projectservice.validator.SubProjectValidator;
 
+import faang.school.projectservice.validations.validator.ProjectValidator;
+import faang.school.projectservice.validations.validator.SubProjectValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,8 +92,8 @@ public class ProjectServiceTest {
 
         when(projectRepository.findById(parentId))
                 .thenReturn(Optional.of(parentProject));
-        doNothing().when(projectValidator).doesProjectExist(Optional.of(parentProject));
-        doNothing().when(subProjectValidator).canBeParentProject(parentProject);
+        //doNothing().when(projectValidator).doesProjectExist(Optional.of(parentProject));
+        //doNothing().when(subProjectValidator).canBeParentProject(parentProject);
 
         Project newSubProject = subProjectMapper.toSubEntity(createDto);
         when(projectRepository.save(newSubProject))
@@ -120,8 +120,8 @@ public class ProjectServiceTest {
         Long projectId = 2L;
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(subProjectAlpha));
-        doNothing().when(projectValidator).doesProjectExist(Optional.of(subProjectAlpha));
-        doNothing().when(subProjectValidator).childCompleted(subProjectAlpha.getChildren());
+        //doNothing().when(projectValidator).doesProjectExist(Optional.of(subProjectAlpha));
+        //doNothing().when(subProjectValidator).childCompleted(subProjectAlpha.getChildren());
         when(projectRepository.save(subProjectAlpha)).thenReturn(subProjectAlpha);
 
         Project result = projectService.updateSubProject(projectId, ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
@@ -146,8 +146,8 @@ public class ProjectServiceTest {
         );
 
         when(projectRepository.findById(parentId)).thenReturn(Optional.of(parentProject));
-        doNothing().when(projectValidator).doesProjectExist(Optional.of(parentProject));
-        doNothing().when(subProjectValidator).shouldBePublic(parentProject);
+        //doNothing().when(projectValidator).doesProjectExist(Optional.of(parentProject));
+        //doNothing().when(subProjectValidator).shouldBePublic(parentProject);
 
         List<Project> result = projectService.getSubProjects(parentId, filterDto, 10);
 

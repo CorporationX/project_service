@@ -39,7 +39,7 @@ public class VacancyService {
         repository.deleteById(vacancyId);
     }
 
-    private Vacancy getVacancyById(Long vacancyId) {
+    public Vacancy getVacancyById(Long vacancyId) {
         return repository.findById(vacancyId)
                 .orElseThrow(() -> new IllegalArgumentException("Vacancy not found"));
     }

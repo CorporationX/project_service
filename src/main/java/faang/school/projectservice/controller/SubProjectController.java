@@ -8,7 +8,8 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validations.annotations.StatusVisibility;
+import faang.school.projectservice.validations.validator.ProjectExistValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,26 +31,22 @@ import java.util.List;
 public class SubProjectController {
 
     private final ProjectService projectService;
-    private final ProjectValidator projectValidator;
+    private final ProjectExistValidator projectValidator;
     private final SubProjectMapper subProjectMapper;
     private final ProjectMapper projectMapper;
 
     @PostMapping("/create")
     public ProjectDto createSubProject(@RequestBody CreateSubProjectDto createSubProjectDto) {
         Long parentId = createSubProjectDto.parentProjectId();
-        projectValidator.validateProjectIdNotNull(parentId);
-
         Project newProject = projectService.createSubProject(parentId,
                 subProjectMapper.toSubEntity(createSubProjectDto));
         return projectMapper.toProjectDto(newProject);
     }
 
     @PutMapping("/update")
+    @StatusVisibility
     public ProjectDto updateSubProject(@RequestBody UpdateSubProjectDto updateSubProjectDto) {
         Long id = updateSubProjectDto.id();
-        projectValidator.validateProjectIdNotNull(id);
-        projectValidator.validateAllParametersNotNull(updateSubProjectDto.status(), updateSubProjectDto.visibility());
-
         return projectMapper.toProjectDto(
                 projectService.updateSubProject(id, updateSubProjectDto.status(), updateSubProjectDto.visibility()));
     }
@@ -58,8 +55,6 @@ public class SubProjectController {
     public List<ProjectDto> getSubProjects(@PathVariable Long id,
                                            @RequestParam(defaultValue = "20") Integer limit,
                                            @RequestBody FilterSubProjectDto filtersDto) {
-        projectValidator.validateProjectIdNotNull(id);
-
         return projectMapper.toProjectsList(projectService.getSubProjects(id, filtersDto, limit));
     }
 }
