@@ -8,6 +8,7 @@ import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,20 @@ public interface StageRolesMapper {
     }
 
     @Named("mapEntitiesToRoles")
-    default Map<Long, Integer> mapEntitiesToRoles(List<StageRoles> stageRoles) {
+    default Map<TeamRole, Integer> mapEntitiesToRoles(List<StageRoles> stageRoles) {
         if (stageRoles == null) return Collections.emptyMap();
         return stageRoles.stream()
-                .collect(toMap(StageRoles::getId, StageRoles::getCount));
+                .collect(toMap(StageRoles::getTeamRole, StageRoles::getCount));
     }
+
+    default HashMap<TeamRole, Integer> mapStringToRoles(Map<String, String> roleAndCount) {
+        HashMap<TeamRole, Integer> roleAndCountMap = new HashMap<>();
+        for (Map.Entry<String, String> entry : roleAndCount.entrySet()) {
+            TeamRole role = TeamRole.valueOf(entry.getKey());
+            Integer count = Integer.parseInt(entry.getValue());
+            roleAndCountMap.put(role, count);
+        }
+        return roleAndCountMap;
+    }
+
 }

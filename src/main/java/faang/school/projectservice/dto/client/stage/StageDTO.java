@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.client.stage;
 
+import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
 @Data
 @Builder
@@ -20,5 +22,4 @@ public class StageDTO {
     private List<Long> tasksIds;
     private List<Long> stageRoleIds;
     private List<Long> executorsIds;
-
 }

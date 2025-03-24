@@ -18,9 +18,9 @@ import static java.util.stream.Collectors.toList;
 
 @Mapper(componentModel = "spring")
 public interface StageMapper {
-    @Mapping(source = "stageId", target = "id") // stageId -> id
-    @Mapping(source = "stageName", target = "stageName") // stageName -> stageName
-    @Mapping(source = "project.id", target = "projectId") // project.id -> projectId
+    @Mapping(source = "stageId", target = "id")
+    @Mapping(source = "stageName", target = "stageName")
+    @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "tasks", target = "tasksIds", qualifiedByName = "mapTasks")
     @Mapping(source = "stageRoles", target = "stageRoleIds", qualifiedByName = "mapStageRoles")
     @Mapping(source = "executors", target = "executorsIds", qualifiedByName = "mapExecutors")
@@ -30,7 +30,7 @@ public interface StageMapper {
     @Mapping(source = "tasks", target = "tasks")
     @Mapping(source = "stageRoles", target = "stageRoles")
     @Mapping(source = "executors", target = "executors")
-    Stage toEntity(StageDTO dto,Long id, Project project, List<Task> tasks, List<StageRoles> stageRoles, List<TeamMember> executors);
+    Stage toEntity(StageDTO dto);
 
     default List<StageDTO> toDtoList(List<Stage> stages) {
         return stages == null ? Collections.emptyList() :
@@ -49,7 +49,7 @@ public interface StageMapper {
         return roles == null ? Collections.emptyList() :
                 roles.stream()
                         .map(StageRoles::getId)
-                        .filter(Objects::nonNull) // Исключаем null
+                        .filter(Objects::nonNull)
                         .collect(toList());
     }
 
