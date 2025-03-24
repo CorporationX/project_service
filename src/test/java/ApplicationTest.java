@@ -7,6 +7,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ApplicationTest {
     @Test
     void main_TestLoadingContext() {
-        Assertions.assertEquals(7, 3 + 4);
+        Assertions.assertEquals(8, 3 + 4);
     }
 }
