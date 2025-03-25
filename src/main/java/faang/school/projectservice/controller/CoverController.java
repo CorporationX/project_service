@@ -1,4 +1,4 @@
-package faang.school.projectservice.ontroller;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.service.cover.CoverServiceImpl;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ public class CoverController {
     private final CoverServiceImpl coverService;
 
     @PostMapping("/upload")
-    public String uploadFileToVacancy(@RequestParam("file") @NotNull MultipartFile multipartFile,
+    public String uploadCoverToVacancy(@RequestParam("file") @NotNull MultipartFile multipartFile,
                                       @RequestParam("id") @NotNull Long vacancyId) {
         log.info("Received request to upload cover");
         String coverImageKey = coverService.uploadCover(multipartFile, vacancyId);

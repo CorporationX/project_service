@@ -8,7 +8,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
@@ -54,7 +54,7 @@ services:
     port: 8080
   minio:
     endpoint: http://localhost:9000
-    access-key: aGHJRPr0PIxNBDvJ1nDR
-    secret-key: MjQ1fd0uxXn9JdqUULc8PVBKLWwLolz6UkQQSwoY
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket:
       cover: cover-bucket

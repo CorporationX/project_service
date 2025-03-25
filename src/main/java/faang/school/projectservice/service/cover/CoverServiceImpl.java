@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.cover;
 
 import faang.school.projectservice.exception.EmptyFileException;
+import faang.school.projectservice.exception.FileProcessingException;
+import faang.school.projectservice.exception.StorageException;
 import faang.school.projectservice.exception.VacancyNotFoundException;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -8,6 +10,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -21,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,15 +36,18 @@ public class CoverServiceImpl implements CoverService {
     public static final String FILE_CANT_BE_EMPTY = "File can't be empty";
     public static final String VACANCY_NOT_FOUND = "Vacancy with ID %d not found";
     public static final String COVER_PREFIX = "covers/";
-    public static final String FILENAME_CANT_BE_NULL = "Filename can't be null";
-    public static final int MAX_IMAGE_DIMENSION = 5120;
+    public static final String FILENAME_CANT_BE_NULL = "Filename can't be null or blank";
+    public static final int MAX_IMAGE_DIMENSION = 512;
     public static final String UPLOADED_FILE_IS_NOT_A_VALID_IMAGE = "Uploaded file is not a valid image";
+    public static final String FILE_UPLOAD_FAILED = "Failed to upload file to storage";
+    public static final String IMAGE_PROCESSING_FAILED = "Failed to process image";
+    public static final String UNEXPECTED_ERROR_DURING_COVER_UPLOAD = "Unexpected error during cover upload";
 
     private final MinioClient minioClient;
     private final VacancyRepository vacancyRepository;
 
     @Value("${services.minio.bucket.cover}")
-    private String bucketName;
+    private static String bucketName;
 
     @Override
     public String uploadCover(MultipartFile file, Long vacancyId) {
@@ -65,18 +73,25 @@ public class CoverServiceImpl implements CoverService {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
 
-            PutObjectArgs putObjectArgs = PutObjectArgs.builder()
+            minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(generatedKey)
                     .stream(inputStream, imageBytes.length, -1)
                     .contentType(file.getContentType())
-                    .build();
-            minioClient.putObject(putObjectArgs);
+                    .build());
+        } catch (VacancyNotFoundException | EmptyFileException | IllegalArgumentException e) {
+            log.error("Validation error: {}", e.getMessage());
+            throw e;
+        } catch (IOException e) {
+            log.error("{}: {}", IMAGE_PROCESSING_FAILED, e.getMessage());
+            throw new FileProcessingException(IMAGE_PROCESSING_FAILED, e);
+        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("{}: {}", FILE_UPLOAD_FAILED, e.getMessage());
+            throw new StorageException(FILE_UPLOAD_FAILED, e);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("MiniIO client exception. {}", e.getMessage());
+            log.error("{}: {}", UNEXPECTED_ERROR_DURING_COVER_UPLOAD, e.getMessage());
+            throw new FileProcessingException(UNEXPECTED_ERROR_DURING_COVER_UPLOAD, e);
         }
-
         Vacancy vacancy = vacancyOptional.get();
         vacancy.setCoverImageKey(generatedKey);
         return generatedKey;
@@ -91,10 +106,7 @@ public class CoverServiceImpl implements CoverService {
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         int maxDimension = Math.max(originalHeight, originalWidth);
-        if (maxDimension <= MAX_IMAGE_DIMENSION) {
-            return originalImage;
-        }
-        return Thumbnails.of(originalImage)
+        return maxDimension <= MAX_IMAGE_DIMENSION ? originalImage : Thumbnails.of(originalImage)
                 .size(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION)
                 .asBufferedImage();
     }
@@ -105,7 +117,7 @@ public class CoverServiceImpl implements CoverService {
             throw new EmptyFileException(FILE_CANT_BE_EMPTY);
         }
         String filename = file.getOriginalFilename();
-        if (filename == null) {
+        if (filename == null || filename.isBlank()) {
             log.error(FILENAME_CANT_BE_NULL);
             throw new IllegalArgumentException(FILENAME_CANT_BE_NULL);
         }
