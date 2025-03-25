@@ -2,6 +2,7 @@ package faang.school.projectservice.client;
 
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
+import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueLinkDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
@@ -25,17 +26,17 @@ public class JiraClient {
                 .block();
     }
 
-    public IssueRequestDto getIssueByKey(String issueKey) {
+    public IssueResponseDto getIssueByKey(String issueKey) {
         return jiraWebClient.get()
                 .uri("/issue/{key}", issueKey)
                 .retrieve()
-                .bodyToMono(IssueRequestDto.class)
+                .bodyToMono(IssueResponseDto.class)
                 .block();
     }
 
     public void createIssueLinks(List<IssueLinkDto> issueLinkDtos) {
         issueLinkDtos.forEach(issueLink -> jiraWebClient.post()
-                .uri("/rest/api/3/issueLink")
+                .uri("/issueLink")
                 .bodyValue(issueLink)
                 .retrieve()
                 .toBodilessEntity()

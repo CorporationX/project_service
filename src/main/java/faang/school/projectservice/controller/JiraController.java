@@ -3,6 +3,8 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
+import faang.school.projectservice.dto.jira.response.IssueResponseDto;
+import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 import faang.school.projectservice.service.jira.JiraService;
@@ -42,19 +44,19 @@ public class JiraController {
         jiraService.updateIssue(key, issueUpdateDto);
     }
 
-    @GetMapping("/issue/filter/project/{projectKey}")
-    public List<IssueRequestDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
-                                                        @RequestBody @NotNull IssueFilterDto issueFilterDto) {
+    @GetMapping("/issue/filter/project/{projectId}")
+    public List<IssueResponseDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
+                                                          @RequestBody @NotNull IssueFilterDto issueFilterDto) {
         return jiraService.getAllIssuesWithFilter(projectId, issueFilterDto);
-    }
+    }//
 
     @GetMapping("/issues/project/{projectId}")
-    public List<IssueRequestDto> getAllIssuesByProjectId(@PathVariable @NotNull @NonNegative Long projectId) {
+    public List<IssueResponseDto> getAllIssuesByProjectId(@PathVariable @NotNull @NonNegative Long projectId) {
         return jiraService.getAllIssuesByProject(projectId);
-    }
+    }//
 
     @GetMapping("/issues/{key}")
-    public IssueRequestDto getIssueByKey(@PathVariable @NotNull @NotBlank String key) {
+    public IssueResponseDto getIssueByKey(@PathVariable @NotNull @NotBlank String key) {
         return jiraService.getIssueByKey(key);
     }//
 

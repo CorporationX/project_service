@@ -27,9 +27,9 @@ public class JiraWebClientConfig {
     @Bean
     public WebClient jiraWebClient() {
         return WebClient.builder()
-                .baseUrl(jiraBaseUrl + "/rest/api/2/")
+                .baseUrl(jiraBaseUrl + "/rest/api/2")
                 .filter(addAuthorizationHeader())
-                .filter(errorHandlingFilter())
+                //.filter(errorHandlingFilter())
                 .codecs(ClientCodecConfigurer::defaultCodecs)
                 .build();
     }

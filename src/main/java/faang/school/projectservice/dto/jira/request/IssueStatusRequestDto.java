@@ -4,7 +4,5 @@ import lombok.Data;
 
 @Data
 public class IssueStatusRequestDto {
-    private String id;
-    private String description;
     private String name;
 }

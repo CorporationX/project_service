@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AssigneeDto {
-    private String accountId;
     private String name;
 }

@@ -4,6 +4,7 @@ import faang.school.projectservice.client.JiraClient;
 import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
+import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
@@ -48,20 +49,19 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public List<IssueRequestDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto) {
+    public List<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto) {
         String projectKey = getProjectKey(projectId);
         String jql = issueFilters.stream()
                 .filter(issueFilter -> issueFilter.isApplicable(issueFilterDto))
                 .map(issueFilter -> issueFilter.createJql(issueFilterDto))
                 .collect(Collectors.joining(" AND "));
         jql += " AND project = " + projectKey;
-        return Optional.ofNullable(jiraClient.getInfoByJql(jql))
-                .map(IssuesResponseDto::getIssues)
-                .orElse(Collections.emptyList());
+        System.out.println(jql);
+        return jiraClient.getInfoByJql(jql).getIssues();
     }
 
     @Override
-    public List<IssueRequestDto> getAllIssuesByProject(Long projectId) {
+    public List<IssueResponseDto> getAllIssuesByProject(Long projectId) {
         String projectKey = getProjectKey(projectId);
         String jql = "project = " + projectKey;
         return Optional.ofNullable(jiraClient.getInfoByJql(jql))
@@ -70,7 +70,7 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public IssueRequestDto getIssueByKey(String key) {
+    public IssueResponseDto getIssueByKey(String key) {
         log.info("Getting issue by key using JiraClient");
         return jiraClient.getIssueByKey(key);
     }

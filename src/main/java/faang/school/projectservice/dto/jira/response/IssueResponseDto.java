@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IssueGetResponseDto {
-
+public class IssueResponseDto {
     private Fields fields;
 }

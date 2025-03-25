@@ -3,6 +3,8 @@ package faang.school.projectservice.service.jira;
 import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
+import faang.school.projectservice.dto.jira.response.IssueResponseDto;
+import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 
@@ -13,11 +15,11 @@ public interface JiraService {
 
     void updateIssue(String key, IssueUpdateDto issueUpdateDto);
 
-    List<IssueRequestDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto);
+    List<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto);
 
-    List<IssueRequestDto> getAllIssuesByProject(Long projectId);
+    List<IssueResponseDto> getAllIssuesByProject(Long projectId);
 
-    IssueRequestDto getIssueByKey(String key);
+    IssueResponseDto getIssueByKey(String key);
 
     ProjectResponseDto registerProject(Long id, String key);
 }

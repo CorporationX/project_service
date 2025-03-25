@@ -8,6 +8,8 @@ import faang.school.projectservice.dto.jira.request.ProjectRequestDto;
 import faang.school.projectservice.dto.parent.ParentDto;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Fields {
@@ -18,4 +20,6 @@ public class Fields {
     private AssigneeDto assignee;
     private ProjectRequestDto project;
     private IssueStatusRequestDto status;
+    private String duedate;
+    private List<String> labels;
 }

@@ -11,5 +11,5 @@ public class IssuesResponseDto {
     private Integer startAt;
     private Integer maxResults;
     private Integer total;
-    private List<IssueRequestDto> issues;
+    private List<IssueResponseDto> issues;
 }
