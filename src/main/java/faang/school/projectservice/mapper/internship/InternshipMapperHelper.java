@@ -15,7 +15,7 @@ interface InternshipMapperHelper {
     @Named("mapProjectIdToProject")
     default Project mapProjectIdToProject(Long projectId) {
         if (projectId == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("ProjectId cannot be null");
         }
         return Project.builder().id(projectId).build();
     }
@@ -23,7 +23,7 @@ interface InternshipMapperHelper {
     @Named("mapMentorIdToMentor")
     default TeamMember mapMentorIdToMentor(Long mentorId) {
         if (mentorId == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("MentorId cannot be null");
         }
         return TeamMember.builder().id(mentorId).build();
     }
@@ -31,7 +31,7 @@ interface InternshipMapperHelper {
     @Named("mapInternIdsToTeamMembers")
     default List<TeamMember> mapInternIdsToTeamMembers(List<Long> internIds) {
         if (internIds == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("Interns cannot be null");
         }
         return internIds.stream().map(id -> TeamMember.builder().id(id).build()).collect(Collectors.toList());
     }
@@ -39,7 +39,7 @@ interface InternshipMapperHelper {
     @Named("mapScheduleIdToSchedule")
     default Schedule mapScheduleIdToSchedule(Long scheduleId) {
         if (scheduleId == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("ScheduleId cannot be null");
         }
         return Schedule.builder().id(scheduleId).build();
     }
@@ -47,7 +47,7 @@ interface InternshipMapperHelper {
     @Named("mapTeamMembersToInternIds")
     default List<Long> mapTeamMembersToInternIds(List<TeamMember> teamMembers) {
         if (teamMembers == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("TeamMembers cannot be null");
         }
         return teamMembers.stream().map(TeamMember::getId).collect(Collectors.toList());
     }

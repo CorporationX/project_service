@@ -6,11 +6,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         uses = InternshipMapperHelper.class)
 public interface InternshipMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "project", source = "projectId", qualifiedByName = "mapProjectIdToProject")
     @Mapping(target = "mentor", source = "mentorId", qualifiedByName = "mapMentorIdToMentor")
     @Mapping(target = "interns", source = "internIds", qualifiedByName = "mapInternIdsToTeamMembers")
@@ -20,6 +23,10 @@ public interface InternshipMapper {
     @Mapping(target = "status")
     @Mapping(target = "description")
     @Mapping(target = "name")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     Internship toEntity(InternshipDto internshipDto);
 
     @Mapping(target = "projectId", source = "project.id")
@@ -32,4 +39,6 @@ public interface InternshipMapper {
     @Mapping(target = "startDate")
     @Mapping(target = "endDate")
     InternshipDto toDto(Internship internship);
+
+    List<InternshipDto> toDtoList(List<Internship> internships);
 }
