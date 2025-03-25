@@ -10,10 +10,17 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,7 +32,8 @@ public class CoverServiceImpl implements CoverService {
     public static final String VACANCY_NOT_FOUND = "Vacancy with ID %d not found";
     public static final String COVER_PREFIX = "covers/";
     public static final String FILENAME_CANT_BE_NULL = "Filename can't be null";
-    public static final int MAX_IMAGE_DIMENSION = 512;
+    public static final int MAX_IMAGE_DIMENSION = 5120;
+    public static final String UPLOADED_FILE_IS_NOT_A_VALID_IMAGE = "Uploaded file is not a valid image";
 
     private final MinioClient minioClient;
     private final VacancyRepository vacancyRepository;
@@ -41,22 +49,26 @@ public class CoverServiceImpl implements CoverService {
             log.error(message);
             throw new VacancyNotFoundException(message);
         }
+        validateFile(file);
         String filename = file.getOriginalFilename();
+        String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
+        String generatedKey = COVER_PREFIX + UUID.randomUUID() + fileExtension;
 
         try {
-            BucketExistsArgs bucketExistsArgs = BucketExistsArgs.builder()
-                    .bucket(bucketName)
-                    .build();
-            if (!minioClient.bucketExists(bucketExistsArgs)) {
-                MakeBucketArgs makeBucketArgs = MakeBucketArgs.builder()
-                        .bucket(bucketName)
-                        .build();
-                minioClient.makeBucket(makeBucketArgs);
+            BufferedImage croppedImage = cropImage(file);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(croppedImage, fileExtension, outputStream);
+            byte[] imageBytes = outputStream.toByteArray();
+            InputStream inputStream = new ByteArrayInputStream(imageBytes);
+
+            if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
+
             PutObjectArgs putObjectArgs = PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(filename)
-                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .object(generatedKey)
+                    .stream(inputStream, imageBytes.length, -1)
                     .contentType(file.getContentType())
                     .build();
             minioClient.putObject(putObjectArgs);
@@ -65,11 +77,26 @@ public class CoverServiceImpl implements CoverService {
             log.error("MiniIO client exception. {}", e.getMessage());
         }
 
-        String fileExtension = filename.substring(filename.lastIndexOf("."));
-        String generatedKey = COVER_PREFIX + UUID.randomUUID() + file.getContentType() + fileExtension;
         Vacancy vacancy = vacancyOptional.get();
         vacancy.setCoverImageKey(generatedKey);
         return generatedKey;
+    }
+
+    private BufferedImage cropImage(MultipartFile file) throws IOException {
+        BufferedImage originalImage = ImageIO.read(file.getInputStream());
+        if (originalImage == null) {
+            log.error(UPLOADED_FILE_IS_NOT_A_VALID_IMAGE);
+            throw new IllegalArgumentException(UPLOADED_FILE_IS_NOT_A_VALID_IMAGE);
+        }
+        int originalWidth = originalImage.getWidth();
+        int originalHeight = originalImage.getHeight();
+        int maxDimension = Math.max(originalHeight, originalWidth);
+        if (maxDimension <= MAX_IMAGE_DIMENSION) {
+            return originalImage;
+        }
+        return Thumbnails.of(originalImage)
+                .size(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION)
+                .asBufferedImage();
     }
 
     private void validateFile(MultipartFile file) {
