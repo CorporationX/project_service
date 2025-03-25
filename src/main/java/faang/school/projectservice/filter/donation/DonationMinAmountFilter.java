@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 public class DonationMinAmountFilter implements DonationFilter {
 
     @Override
+    public boolean isApplicable(DonationFilterDto filter) {
+        return filter.minAmount() != null;
+    }
+
+    @Override
     public Specification<Donation> apply(DonationFilterDto filter) {
-        return (root, query, builder) -> {
-            if (filter.minAmount() != null) {
-                return builder.greaterThanOrEqualTo(root.get("amount"), filter.minAmount());
-            }
-            return null;
-        };
+        return (root, query, builder) ->
+                builder.greaterThanOrEqualTo(root.get("amount"), filter.minAmount());
     }
 }

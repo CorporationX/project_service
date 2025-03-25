@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 public class DonationToDateFilter implements DonationFilter {
 
     @Override
+    public boolean isApplicable(DonationFilterDto filter) {
+        return filter.toDonationTime() != null;
+    }
+
+    @Override
     public Specification<Donation> apply(DonationFilterDto filter) {
-        return (root, query, builder) -> {
-            if (filter.toDonationTime() != null) {
-                return builder.lessThanOrEqualTo(root.get("donationTime"), filter.toDonationTime());
-            }
-            return null;
-        };
+        return (root, query, builder) ->
+                builder.lessThanOrEqualTo(root.get("donationTime"), filter.toDonationTime());
     }
 }

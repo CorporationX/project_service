@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 public class DonationMaxAmountFilter implements DonationFilter {
 
     @Override
+    public boolean isApplicable(DonationFilterDto filter) {
+        return filter.maxAmount() != null;
+    }
+
+    @Override
     public Specification<Donation> apply(DonationFilterDto filter) {
-        return (root, query, builder) -> {
-            if (filter.maxAmount() != null) {
-                return builder.lessThanOrEqualTo(root.get("amount"), filter.maxAmount());
-            }
-            return null;
-        };
+        return (root, query, builder) ->
+                builder.lessThanOrEqualTo(root.get("amount"), filter.maxAmount());
     }
 }

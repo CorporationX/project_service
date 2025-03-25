@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 public class DonationCurrencyFilter implements DonationFilter {
 
     @Override
+    public boolean isApplicable(DonationFilterDto filter) {
+        return filter.currency() != null;
+    }
+
+    @Override
     public Specification<Donation> apply(DonationFilterDto filter) {
-        return (root, query, builder) -> {
-            if (filter.currency() != null) {
-                return builder.equal(root.get("currency"), filter.currency());
-            }
-            return null;
-        };
+        return (root, query, builder) ->
+                builder.equal(root.get("currency"), filter.currency());
     }
 }

@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.CampaignNotActiveException;
+import faang.school.projectservice.exception.DifferentCurrencyException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapper;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,11 +50,11 @@ public class DonationService {
         Long campaignId = donationDto.campaignId();
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new EntityNotFoundException(CAMPAIGN_ENTITY_NAME, campaignId));
-        Long paymentNumber = UUID.randomUUID().getMostSignificantBits();
+        Long paymentNumber = createRandomPaymentNumber();
 
         Objects.requireNonNull(campaign.getStatus(), "Campaign hasn't status");
         if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
-            throw new CampaignNotActiveException("Campaign with id {} not active", campaignId);
+            throw new CampaignNotActiveException("Campaign with id %d not active", campaignId);
         }
         donation.setCampaign(campaign);
         donation.setUserId(userContext.getUserId());
@@ -66,10 +66,14 @@ public class DonationService {
         PaymentRequest request = paymentMapper.donationToPaymentRequest(donationDto);
 
         Objects.requireNonNull(campaign.getCurrency(), "Campaign hasn't currency");
-        request.setTargetCurrency(campaign.getCurrency());
 
+        if (!campaign.getCurrency().equals(request.getCurrency())) {
+            throw new DifferentCurrencyException("Request currency (%s) does not match campaign currency (%s)",
+                    request.getCurrency(), campaign.getCurrency());
+        }
         PaymentResponse response = paymentClient.sendPayment(request);
-        log.info("Success donation sent: {}", response);
+        log.info("\n{}\nStatus: {}\nYour verification code: {}",
+                response.message(), response.status(), response.verificationCode());
         return response;
     }
 
@@ -81,18 +85,26 @@ public class DonationService {
     }
 
     public List<DonationDto> findDonationsByFilters(DonationFilterDto filter) {
-        Specification<Donation> combinedSpec = filters.stream()
+        Specification<Donation> specifications = filters.stream()
+                .filter(donationFilter -> donationFilter.isApplicable(filter))
                 .map(donationFilter -> donationFilter.apply(filter))
-                .filter(Objects::nonNull)
                 .reduce(Specification::and)
                 .orElse(null);
 
-        return donationMapper.entityListToDtoList(Optional.ofNullable(combinedSpec)
-                .map(donationRepository::findAll)
-                .orElseGet(donationRepository::findAll)
-                .stream()
-                .sorted(Comparator.comparing(Donation::getDonationTime).reversed())
+        List<Donation> donations = specifications != null ? donationRepository.findAll(specifications)
+                : donationRepository.findAll();
+
+        return donationMapper.entityListToDtoList(donations.stream()
                 .filter(donation -> donation.getUserId().equals(userContext.getUserId()))
+                .sorted(Comparator.comparing(Donation::getDonationTime).reversed())
                 .toList());
+    }
+
+    private Long createRandomPaymentNumber() {
+        long paymentNumber = UUID.randomUUID().getMostSignificantBits();
+        if (paymentNumber == Long.MIN_VALUE) {
+            return Math.abs(paymentNumber + 1);
+        }
+        return Math.abs(paymentNumber);
     }
 }

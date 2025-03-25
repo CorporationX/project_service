@@ -19,8 +19,5 @@ public class PaymentRequest {
         private final BigDecimal amount;
 
         @NotNull
-        private final Currency paymentCurrency;
-
-        @NotNull
-        private Currency targetCurrency;
+        private final Currency currency;
 }

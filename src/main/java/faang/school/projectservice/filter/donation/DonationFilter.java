@@ -6,5 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 public interface DonationFilter {
 
+    boolean isApplicable(DonationFilterDto filter);
+
     Specification<Donation> apply(DonationFilterDto filter);
 }

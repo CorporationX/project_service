@@ -99,7 +99,7 @@ public class DonationControllerTest {
         return PaymentResponse.builder()
                 .paymentNumber(number)
                 .amount(amount)
-                .paymentCurrency(currency)
+                .currency(currency)
                 .build();
     }
 

@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.CampaignNotActiveException;
+import faang.school.projectservice.exception.DifferentCurrencyException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapperImpl;
@@ -129,19 +130,27 @@ public class DonationServiceTest {
     }
 
     @Test
-    public void testPositiveSendDonation() {
+    public void testNegativeSendDonationWhenCurrencyDifferent() {
         DonationDto donation = donationDtoList.get(0);
         Campaign campaign = createCampaign(CampaignStatus.ACTIVE, Currency.EUR);
-        PaymentRequest request = createDonationRequest(firstAmount, firstCurrency, campaign.getCurrency());
-        PaymentResponse response = createDonationResponse(firstAmount, firstCurrency, campaign.getCurrency());
+        when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
+
+        assertThrows(DifferentCurrencyException.class, () -> donationService.sendDonation(donation));
+    }
+
+    @Test
+    public void testPositiveSendDonation() {
+        DonationDto donation = donationDtoList.get(0);
+        Campaign campaign = createCampaign(CampaignStatus.ACTIVE, Currency.USD);
+        PaymentRequest request = createDonationRequest(firstAmount, firstCurrency);
+        PaymentResponse response = createDonationResponse(firstAmount, firstCurrency);
         when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
         when(paymentClient.sendPayment(request)).thenReturn(response);
 
         PaymentResponse result = donationService.sendDonation(donation);
 
         assertEquals(result.amount(), donation.amount());
-        assertEquals(result.paymentCurrency(), donation.currency());
-        assertEquals(result.targetCurrency(), campaign.getCurrency());
+        assertEquals(result.currency(), donation.currency());
     }
 
     @Test
@@ -190,20 +199,18 @@ public class DonationServiceTest {
     }
 
     private PaymentResponse createDonationResponse(BigDecimal amount,
-                                                   Currency currency, Currency campaignCurrency) {
+                                                   Currency currency) {
         return PaymentResponse.builder()
                 .amount(amount)
-                .paymentCurrency(currency)
-                .targetCurrency(campaignCurrency)
+                .currency(currency)
                 .build();
     }
 
     private PaymentRequest createDonationRequest(BigDecimal amount,
-                                                 Currency currency, Currency campaignCurrency) {
+                                                 Currency currency) {
         return PaymentRequest.builder()
                 .amount(amount)
-                .paymentCurrency(currency)
-                .targetCurrency(campaignCurrency)
+                .currency(currency)
                 .build();
     }
 
