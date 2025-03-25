@@ -7,7 +7,8 @@ import faang.school.projectservice.dto.meet.UpdateMeetDto;
 import faang.school.projectservice.service.MeetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,49 +24,78 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/meets")
+@RequestMapping("/api/v1/meets")
+@Tag(name = "Meet Management", description = "API для управления встречами")
 public class MeetController {
 
     private final MeetService meetService;
 
-    @Operation(parameters = {
-            @Parameter(name = "x-user-id", in = ParameterIn.HEADER, required = true)
-    })
+    @Operation(
+            summary = "Создать новую встречу",
+            description = "Создает новую встречу с указанными параметрами",
+            security = @SecurityRequirement(name = "user-id")
+    )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MeetResponseDto createMeet(@RequestBody @Valid CreateMeetDto createMeetDto) {
         return meetService.createMeet(createMeetDto);
     }
 
+    @Operation(summary = "Получить все встречи")
     @GetMapping
     public List<MeetResponseDto> findAll() {
         return meetService.findAll();
     }
 
+    @Operation(summary = "Получить встречи проекта с фильтрацией")
     @GetMapping("/project/{projectId}")
-    public List<MeetResponseDto> findProjectMeetsByFilter(@PathVariable long projectId, MeetFilterDto filter) {
+    public List<MeetResponseDto> findProjectMeetsByFilter(
+            @Parameter(description = "ID проекта") @PathVariable long projectId,
+            @Parameter(description = "Параметры фильтрации") MeetFilterDto filter) {
         return meetService.findProjectMeetsByFilter(projectId, filter);
     }
 
+    @Operation(summary = "Получить встречу по ID")
     @GetMapping("/{id}")
-    public MeetResponseDto findById(@PathVariable long id) {
+    public MeetResponseDto findById(
+            @Parameter(description = "ID встречи") @PathVariable long id) {
         return meetService.findById(id);
     }
 
+    @Operation(
+            summary = "Обновить встречу",
+            security = @SecurityRequirement(name = "user-id")
+    )
     @PutMapping
+    @ResponseStatus(OK)
     public MeetResponseDto updateMeet(@RequestBody @Valid UpdateMeetDto updateMeetDto) {
         return meetService.updateMeet(updateMeetDto);
     }
 
-    @PutMapping("/{id}")
-    public MeetResponseDto cancelMeet(@PathVariable long id) {
+    @Operation(
+            summary = "Отменить встречу",
+            security = @SecurityRequirement(name = "user-id")
+    )
+    @PutMapping("/{id}/cancel")
+    @ResponseStatus(OK)
+    public MeetResponseDto cancelMeet(
+            @Parameter(description = "ID встречи") @PathVariable long id) {
         return meetService.cancelMeet(id);
     }
 
+    @Operation(
+            summary = "Удалить встречу",
+            security = @SecurityRequirement(name = "user-id")
+    )
     @DeleteMapping("/{id}")
-    public void deleteMeet(@PathVariable long id) {
+    @ResponseStatus(NO_CONTENT)
+    public void deleteMeet(
+            @Parameter(description = "ID встречи") @PathVariable long id) {
         meetService.deleteMeet(id);
     }
 }
