@@ -5,8 +5,10 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class CascadeDeleteStrategy implements StageDeletionStrategy{
     private final TaskRepository taskRepository;

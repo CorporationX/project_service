@@ -7,15 +7,15 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
-
+@Component
 @Mapper(componentModel = "spring")
 public interface StageMapper {
     //TODO что то с дто

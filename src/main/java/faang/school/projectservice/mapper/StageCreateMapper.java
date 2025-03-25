@@ -4,9 +4,9 @@ import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-
+@Component
 @Mapper(componentModel = "spring")
 public interface StageCreateMapper {
     @Mapping(target = "roleAndCount", ignore = true)
@@ -19,9 +19,5 @@ public interface StageCreateMapper {
     @Mapping(target = "tasks", ignore = true)
     @Mapping(target = "executors", ignore = true)
     Stage toEntity(StageDtoCreate dto);
-
-    List<StageDtoCreate> toDtoList(List<Stage> entities);
-
-    List<Stage> toEntityList(List<StageDtoCreate> dtos);
 
 }

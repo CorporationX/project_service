@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import org.mapstruct.Mapper;
 import org.mapstruct.Named;
 
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Component
+@Mapper(componentModel = "spring")
 public interface StageRolesMapper {
 
     @Named("mapRolesToEntities")

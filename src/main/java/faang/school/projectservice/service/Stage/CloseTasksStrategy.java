@@ -7,10 +7,12 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class CloseTasksStrategy implements StageDeletionStrategy{
     private final TaskRepository taskRepository;
