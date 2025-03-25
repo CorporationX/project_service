@@ -50,6 +50,7 @@ services:
     port: 8080
   minio:
     endpoint: http://localhost:9000
-    access-key: minioadmin
-    secret-key: minioadmin
-    bucket: mybucket
+    access-key: aGHJRPr0PIxNBDvJ1nDR
+    secret-key: MjQ1fd0uxXn9JdqUULc8PVBKLWwLolz6UkQQSwoY
+    bucket:
+      cover: cover-bucket

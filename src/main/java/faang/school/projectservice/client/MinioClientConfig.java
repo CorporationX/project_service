@@ -1,12 +1,11 @@
 package faang.school.projectservice.client;
 
-import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MinioConfig {
+public class MinioClientConfig {
     @Value("${services.minio.endpoint}")
     private String endpoint;
 
@@ -17,8 +16,8 @@ public class MinioConfig {
     private String secretKey;
 
     @Bean
-    public MinioClient minioClient() {
-        return MinioClient.builder()
+    public io.minio.MinioClient minioClient() {
+        return io.minio.MinioClient.builder()
                 .endpoint(endpoint)
                 .credentials(accessKey, secretKey)
                 .build();
