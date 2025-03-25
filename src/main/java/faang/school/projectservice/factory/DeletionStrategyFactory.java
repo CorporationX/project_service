@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.factory;
 
 import faang.school.projectservice.service.Stage.CascadeDeleteStrategy;
 import faang.school.projectservice.service.Stage.CloseTasksStrategy;

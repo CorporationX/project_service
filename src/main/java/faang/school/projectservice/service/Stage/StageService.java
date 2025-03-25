@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.dto.client.stage.StageFilterDTO;
 import faang.school.projectservice.exception.stage.DataValidException;
-import faang.school.projectservice.mapper.DeletionStrategyFactory;
+import faang.school.projectservice.factory.DeletionStrategyFactory;
 import faang.school.projectservice.mapper.StageCreateMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -79,7 +79,7 @@ public class StageService {
             log.error("Project status is " + project.getStatus());
             throw new DataValidException("Project status is " + project.getStatus());
         }
-        if (stageDtoCreate == null || creatorId == null || projectId == null) {
+        if (stageDtoCreate == null) {
             log.error("Creator ID: {}, Project ID: {}, Stage DTO: {}", creatorId, projectId, stageDtoCreate);
             throw new DataValidException("Data not valid");
         }
