@@ -34,35 +34,54 @@ public class JiraController {
 
     @PostMapping("/issue")
     public IssueCreateResponseDto createIssue(@RequestBody @NotNull IssueRequestDto issueRequestDto) {
-        log.info("start {}", issueRequestDto.getFields().getIssuetype());
-        return jiraService.createIssue(issueRequestDto);
-    }//
+        log.info("Creating issue started");
+        IssueCreateResponseDto response = jiraService.createIssue(issueRequestDto);
+        log.info("Creating issue completed");
+        return response;
+    }
 
     @PutMapping("/issue/update/{key}")
     public void updateIssue(@PathVariable @NotNull @NotBlank String key,
                             @RequestBody @NotNull IssueUpdateDto issueUpdateDto) {
+
+        log.info("Updating issue with key {} started", key);
         jiraService.updateIssue(key, issueUpdateDto);
+        log.info("Updating issue with key {} completed", key);
     }
 
-    @GetMapping("/issue/filter/project/{projectId}")
+    @GetMapping("/issue/project/{projectId}")
     public List<IssueResponseDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
                                                           @RequestBody @NotNull IssueFilterDto issueFilterDto) {
-        return jiraService.getAllIssuesWithFilter(projectId, issueFilterDto);
-    }//
+
+        log.info("Getting all issues with filter for project {} started", projectId);
+        List<IssueResponseDto> response = jiraService.getAllIssuesWithFilter(projectId, issueFilterDto);
+        log.info("Getting all issues with filter for project {} completed, found {} issues", projectId, response.size());
+        return response;
+    }
 
     @GetMapping("/issues/project/{projectId}")
     public List<IssueResponseDto> getAllIssuesByProjectId(@PathVariable @NotNull @NonNegative Long projectId) {
-        return jiraService.getAllIssuesByProject(projectId);
-    }//
+        log.info("Getting all issues for project {} started", projectId);
+        List<IssueResponseDto> response = jiraService.getAllIssuesByProject(projectId);
+        log.info("Getting all issues for project {} completed, found {} issues", projectId, response.size());
+        return response;
+    }
 
     @GetMapping("/issues/{key}")
     public IssueResponseDto getIssueByKey(@PathVariable @NotNull @NotBlank String key) {
-        return jiraService.getIssueByKey(key);
-    }//
+        log.info("Getting issue by key {} started", key);
+        IssueResponseDto response = jiraService.getIssueByKey(key);
+        log.info("Getting issue by key {} completed", key);
+        return response;
+    }
 
     @PostMapping("/project/{id}/key/{key}")
     public ProjectResponseDto registerProject(@PathVariable @NotNull @NonNegative Long id,
                                               @PathVariable @NotNull @NotBlank String key) {
-        return jiraService.registerProject(id, key);
-    }//
+
+        log.info("Registering project with id {} and key {} started", id, key);
+        ProjectResponseDto response = jiraService.registerProject(id, key);
+        log.info("Registering project with id {} and key {} completed", id, key);
+        return response;
+    }
 }

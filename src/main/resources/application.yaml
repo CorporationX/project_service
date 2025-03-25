@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -50,4 +50,4 @@ services:
     host: http://localhost
     port: 8080
   jira:
-    endpoint: http://localhost:8095
+    endpoint: http://localhost:8095/rest/api/2

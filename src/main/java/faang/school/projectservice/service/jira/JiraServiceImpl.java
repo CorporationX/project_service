@@ -42,9 +42,12 @@ public class JiraServiceImpl implements JiraService {
     public void updateIssue(String key, IssueUpdateDto issueUpdateDto) {
         log.info("Creating issue link using JiraClient");
         jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
-        log.info("Setting transition using JiraClient");
-        jiraClient.setTransitionByKey(key, issueUpdateDto.getFields().getDescription());
 
+        log.info("Setting transition using JiraClient");
+        jiraClient.setTransitionByKey(key, issueUpdateDto.getTransition());
+
+        log.info("Updating issue using JiraClient");
+        issueUpdateDto.getFields().setIssueLinks(null);
         jiraClient.updateIssueByKey(key, issueUpdateDto);
     }
 
@@ -56,7 +59,8 @@ public class JiraServiceImpl implements JiraService {
                 .map(issueFilter -> issueFilter.createJql(issueFilterDto))
                 .collect(Collectors.joining(" AND "));
         jql += " AND project = " + projectKey;
-        System.out.println(jql);
+
+        log.info("Getting issues with filter using JiraClient");
         return jiraClient.getInfoByJql(jql).getIssues();
     }
 
@@ -64,6 +68,8 @@ public class JiraServiceImpl implements JiraService {
     public List<IssueResponseDto> getAllIssuesByProject(Long projectId) {
         String projectKey = getProjectKey(projectId);
         String jql = "project = " + projectKey;
+
+        log.info("Getting issues by project using JiraClient");
         return Optional.ofNullable(jiraClient.getInfoByJql(jql))
                 .map(IssuesResponseDto::getIssues)
                 .orElse(Collections.emptyList());
@@ -79,8 +85,7 @@ public class JiraServiceImpl implements JiraService {
     @Transactional
     public ProjectResponseDto registerProject(Long id, String key) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Project with id %d not found".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException("Project with id %d not found".formatted(id)));
         project.setJiraKey(key);
         return projectMapper.toProjectResponseDto(project);
     }

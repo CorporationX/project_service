@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,9 +28,9 @@ public class JiraWebClientConfig {
     @Bean
     public WebClient jiraWebClient() {
         return WebClient.builder()
-                .baseUrl(jiraBaseUrl + "/rest/api/2")
+                .baseUrl(jiraBaseUrl)
                 .filter(addAuthorizationHeader())
-                //.filter(errorHandlingFilter())
+                .filter(errorHandlingFilter())
                 .codecs(ClientCodecConfigurer::defaultCodecs)
                 .build();
     }
@@ -47,7 +48,7 @@ public class JiraWebClientConfig {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             if (clientResponse.statusCode().isError()) {
                 return clientResponse
-                        .bodyToMono(org.springframework.web.ErrorResponse.class)
+                        .bodyToMono(ErrorResponse.class)
                         .flatMap(error -> Mono.error(
                                 new JiraClientException(error, clientResponse.statusCode().value())
                         ));

@@ -17,6 +17,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueUpdateDto {
     private Fields fields;
+    private TransitionDto transition;
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)

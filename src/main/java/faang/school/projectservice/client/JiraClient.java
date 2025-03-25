@@ -6,11 +6,13 @@ import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueLinkDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
+import faang.school.projectservice.dto.jira.update.TransitionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -44,9 +46,10 @@ public class JiraClient {
         );
     }
 
-    public void setTransitionByKey(String issueKey, String transitionKey) {
+    public void setTransitionByKey(String issueKey, TransitionDto transition) {
         jiraWebClient.post()
                 .uri("/issue/{issueKey}/transitions", issueKey)
+                .bodyValue(Map.of("transition", transition))
                 .retrieve()
                 .toBodilessEntity()
                 .block();
