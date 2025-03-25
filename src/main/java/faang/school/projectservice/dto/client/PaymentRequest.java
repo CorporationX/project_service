@@ -5,19 +5,18 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Data;
 
-@Data
 @Builder
-public class PaymentRequest {
+public record PaymentRequest(
 
         @NotNull
-        private final Long paymentNumber;
+        Long paymentNumber,
 
         @Min(1)
         @NotNull
-        private final BigDecimal amount;
+        BigDecimal amount,
 
         @NotNull
-        private final Currency currency;
+        Currency currency
+) {
 }

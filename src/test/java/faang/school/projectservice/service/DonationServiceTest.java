@@ -1,10 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.CampaignNotActiveException;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,9 +33,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,16 +94,27 @@ public class DonationServiceTest {
     @Mock
     private UserContext userContext;
 
+    @Mock
+    private UserServiceClient userClient;
+
     @BeforeEach
     public void setUp() {
         donationService = new DonationService(donationRepository, campaignRepository, donationMapper, paymentMapper,
                 paymentClient, List.of(createdFromDateFilter, createdToDateFilter, currencyFilter, maxAmountFilter,
-                minAmountFilter), userContext);
+                minAmountFilter), userContext, userClient);
+    }
+
+    @Test
+    public void testNegativeSendDonationWhenUserNotFound() {
+        DonationDto donation = donationDtoList.get(0);
+
+        assertThrows(NullPointerException.class, () -> donationService.sendDonation(donation));
     }
 
     @Test
     public void testNegativeSendDonationWhenCampaignNotFound() {
         DonationDto donation = donationDtoList.get(0);
+        includeCheckUserId();
 
         assertThrows(EntityNotFoundException.class, () -> donationService.sendDonation(donation));
     }
@@ -105,6 +122,7 @@ public class DonationServiceTest {
     @Test
     public void testNegativeSendDonationWhenCampaignStatusNull() {
         DonationDto donation = donationDtoList.get(0);
+        includeCheckUserId();
         Campaign campaign = createCampaign(null, null);
         when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
 
@@ -114,6 +132,7 @@ public class DonationServiceTest {
     @Test
     public void testNegativeSendDonationWhenCampaignStatusNotActive() {
         DonationDto donation = donationDtoList.get(0);
+        includeCheckUserId();
         Campaign campaign = createCampaign(CampaignStatus.COMPLETED, null);
         when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
 
@@ -123,6 +142,7 @@ public class DonationServiceTest {
     @Test
     public void testNegativeSendDonationWhenCampaignCurrencyNull() {
         DonationDto donation = donationDtoList.get(0);
+        includeCheckUserId();
         Campaign campaign = createCampaign(CampaignStatus.ACTIVE, null);
         when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
 
@@ -132,6 +152,7 @@ public class DonationServiceTest {
     @Test
     public void testNegativeSendDonationWhenCurrencyDifferent() {
         DonationDto donation = donationDtoList.get(0);
+        includeCheckUserId();
         Campaign campaign = createCampaign(CampaignStatus.ACTIVE, Currency.EUR);
         when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
 
@@ -140,17 +161,24 @@ public class DonationServiceTest {
 
     @Test
     public void testPositiveSendDonation() {
-        DonationDto donation = donationDtoList.get(0);
-        Campaign campaign = createCampaign(CampaignStatus.ACTIVE, Currency.USD);
-        PaymentRequest request = createDonationRequest(firstAmount, firstCurrency);
-        PaymentResponse response = createDonationResponse(firstAmount, firstCurrency);
-        when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
-        when(paymentClient.sendPayment(request)).thenReturn(response);
+        try (MockedStatic<UUID> mockedUuid = mockStatic(UUID.class)) {
+            UUID uuidMock = mock(UUID.class);
+            when(uuidMock.getMostSignificantBits()).thenReturn(firstId);
+            mockedUuid.when(UUID::randomUUID).thenReturn(uuidMock);
 
-        PaymentResponse result = donationService.sendDonation(donation);
+            DonationDto donation = donationDtoList.get(0);
+            includeCheckUserId();
+            Campaign campaign = createCampaign(CampaignStatus.ACTIVE, Currency.USD);
+            PaymentRequest request = createDonationRequest(firstAmount, firstCurrency);
+            PaymentResponse response = createDonationResponse(firstAmount, firstCurrency);
+            when(campaignRepository.findById(donation.campaignId())).thenReturn(Optional.of(campaign));
+            when(paymentClient.sendPayment(request)).thenReturn(response);
 
-        assertEquals(result.amount(), donation.amount());
-        assertEquals(result.currency(), donation.currency());
+            PaymentResponse result = donationService.sendDonation(donation);
+
+            assertEquals(result.amount(), donation.amount());
+            assertEquals(result.currency(), donation.currency());
+        }
     }
 
     @Test
@@ -188,6 +216,7 @@ public class DonationServiceTest {
                 .amount(amount)
                 .currency(currency)
                 .campaignId(campaignId)
+                .paymentNumber(firstId)
                 .build();
     }
 
@@ -203,6 +232,7 @@ public class DonationServiceTest {
         return PaymentResponse.builder()
                 .amount(amount)
                 .currency(currency)
+                .paymentNumber(firstId)
                 .build();
     }
 
@@ -211,6 +241,7 @@ public class DonationServiceTest {
         return PaymentRequest.builder()
                 .amount(amount)
                 .currency(currency)
+                .paymentNumber(firstId)
                 .build();
     }
 
@@ -230,7 +261,19 @@ public class DonationServiceTest {
                 .userId(firstId)
                 .currency(currency)
                 .amount(amount)
+                .paymentNumber(firstId)
                 .donationTime(LocalDateTime.now())
                 .build();
+    }
+
+    private UserDto createUser(Long id) {
+        return UserDto.builder()
+                .id(id)
+                .build();
+    }
+
+    private void includeCheckUserId() {
+        when(userContext.getUserId()).thenReturn(firstId);
+        when(userClient.getUser(firstId)).thenReturn(createUser(firstId));
     }
 }

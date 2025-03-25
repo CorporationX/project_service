@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
@@ -43,9 +44,11 @@ public class DonationService {
     private final PaymentServiceClient paymentClient;
     private final List<DonationFilter> filters;
     private final UserContext userContext;
+    private final UserServiceClient userClient;
 
     @Transactional
     public PaymentResponse sendDonation(DonationDto donationDto) {
+        Long userId = userClient.getUser(userContext.getUserId()).id();
         Donation donation = donationMapper.dtoToEntity(donationDto);
         Long campaignId = donationDto.campaignId();
         Campaign campaign = campaignRepository.findById(campaignId)
@@ -57,19 +60,19 @@ public class DonationService {
             throw new CampaignNotActiveException("Campaign with id %d not active", campaignId);
         }
         donation.setCampaign(campaign);
-        donation.setUserId(userContext.getUserId());
+        donation.setUserId(userId);
         donation.setPaymentNumber(paymentNumber);
 
         donationRepository.save(donation);
         log.debug("New donation (id: {}) save on DB", donation.getId());
 
-        PaymentRequest request = paymentMapper.donationToPaymentRequest(donationDto);
+        PaymentRequest request = paymentMapper.donationToPaymentRequest(donation);
 
         Objects.requireNonNull(campaign.getCurrency(), "Campaign hasn't currency");
 
-        if (!campaign.getCurrency().equals(request.getCurrency())) {
+        if (!campaign.getCurrency().equals(request.currency())) {
             throw new DifferentCurrencyException("Request currency (%s) does not match campaign currency (%s)",
-                    request.getCurrency(), campaign.getCurrency());
+                    request.currency(), campaign.getCurrency());
         }
         PaymentResponse response = paymentClient.sendPayment(request);
         log.info("\n{}\nStatus: {}\nYour verification code: {}",
