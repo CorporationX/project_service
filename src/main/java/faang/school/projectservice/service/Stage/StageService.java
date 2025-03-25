@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.dto.client.stage.StageFilterDTO;
 import faang.school.projectservice.exception.stage.DataValidException;
+import faang.school.projectservice.mapper.DeletionStrategyFactory;
 import faang.school.projectservice.mapper.StageCreateMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
@@ -30,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -47,11 +47,12 @@ public class StageService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageRolesRepository stageRolesRepository;
     private final TaskRepository taskRepository;
+    private final DeletionStrategyFactory strategyFactory;
 
     @Autowired
     public StageService(StageRepository stageRepository, TeamMemberRepository teamMemberRepository,
                         ProjectRepository projectRepository, StageCreateMapper stageCreateMapper,
-                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository, StageRolesRepository stageRolesRepository, TaskRepository taskRepository) {
+                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository, StageRolesRepository stageRolesRepository, TaskRepository taskRepository, DeletionStrategyFactory strategyFactory) {
         this.stageRepository = stageRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.projectRepository = projectRepository;
@@ -61,6 +62,7 @@ public class StageService {
         this.stageInvitationRepository = stageInvitationRepository;
         this.stageRolesRepository = stageRolesRepository;
         this.taskRepository = taskRepository;
+        this.strategyFactory = strategyFactory;
     }
 
     public StageDTO create(StageDtoCreate stageDtoCreate, Long creatorId, Long projectId) {
@@ -136,64 +138,58 @@ public class StageService {
         return stageMapper.toDto(stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId)));
     }
-    private void delete(Long stageId) {
-        Stage deletedStage = stageRepository.findById(stageId)
+
+    public void deleteWithStrategy(Long stageId, String strategy, Long targetStageId) {
+        StageDeletionStrategy choseStrategy = strategyFactory.getStrategy(strategy);
+        Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId));
-        log.info("Deleted stage: {}", deletedStage);
-    }
-
-    public void deleteWithStrategy(Long stageId, StageDeletionStrategy strategy, Long targetStageId) {
-        Stage stage = stageRepository.findById(stageId).orElseThrow(
-                () -> new EntityNotFoundException("Stage not found with ID: " + stageId));
-        Stage targetStage = stageRepository.findById(targetStageId)
-                .orElseThrow(()-> new EntityNotFoundException("Target stage not found with ID: " + targetStageId));
-        if (strategy.requiresTargetStage()) {
-            throw new IllegalArgumentException("Target stage must be specified for this deletion strategy.");
+        Stage targetStage = null;
+        if (choseStrategy.requiresTargetStage()) {
+            if (targetStageId == null) {
+                throw new IllegalArgumentException("Target stage must be specified for this deletion strategy.");
+            }
+            targetStage = stageRepository.findById(targetStageId)
+                    .orElseThrow(() -> new EntityNotFoundException("Target stage not found with ID: " + targetStageId));
         }
-
-        strategy.deleteStage(stage,targetStage );
+        choseStrategy.deleteStage(stage, targetStage);
     }
 
-    private List<TeamMember> findAllExecutors(HashMap<TeamRole, Integer> roleAndCount, Stage stage, Project project) {
-        List<TeamMember> Executors = new ArrayList<>();
+    private List<TeamMember> findAllExecutors(Map<TeamRole, Integer> roleAndCount, Stage stage, Project project) {
         Set<Long> invitedIds = new HashSet<>();
 
         Map<Long, List<TeamRole>> stageExecutors = getRoleAndIdFromStage(stage);
-
         Map<Long, List<TeamRole>> projectExecutors = getRoleAndIdFromProject(project);
 
-        BiFunction<Map<Long, List<TeamRole>>, HashMap<TeamRole, Integer>, List<TeamMember>> findCandidates =
-                (executors, remainingRoles) -> {
-                    List<TeamMember> selected = new ArrayList<>();
-                    Iterator<Map.Entry<TeamRole, Integer>> iterator = remainingRoles.entrySet().iterator();
-
-                    while (iterator.hasNext()) {
-                        Map.Entry<TeamRole, Integer> entry = iterator.next();
-                        TeamRole role = entry.getKey();
-                        int count = entry.getValue();
-
-                        List<Long> candidates = executors.entrySet().stream()
-                                .filter(e -> e.getValue().contains(role)
-                                        && !invitedIds.contains(e.getKey()))
-                                .map(Map.Entry::getKey)
-                                .limit(count)
-                                .toList();
-
-                        for (Long candidateId : candidates) {
-                            invitedIds.add(candidateId);
-                            selected.add(teamMemberRepository.findById(candidateId).orElseThrow(
-                                    () -> new EntityNotFoundException("candidate not found" + candidateId)));
-                            remainingRoles.put(role, remainingRoles.get(role) - 1);
-                        }
-                        remainingRoles.entrySet().removeIf(e -> e.getValue() <= 0);
-                    }
-                    return selected;
-                };
-        Executors.addAll(findCandidates.apply(stageExecutors, roleAndCount));
+        List<TeamMember> executors = new ArrayList<>(findCandidates(stageExecutors, roleAndCount, invitedIds));
         if (!roleAndCount.isEmpty()) {
-            Executors.addAll(findCandidates.apply(projectExecutors, roleAndCount));
+            executors.addAll(findCandidates(projectExecutors, roleAndCount, invitedIds));
         }
-        return Executors;
+        return executors;
+    }
+    private List<TeamMember> findCandidates(Map<Long, List<TeamRole>> executors, Map<TeamRole, Integer> remainingRoles, Set<Long> invitedIds) {
+        List<TeamMember> selected = new ArrayList<>();
+
+        for (Iterator<Map.Entry<TeamRole, Integer>> it = remainingRoles.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<TeamRole, Integer> entry = it.next();
+            TeamRole role = entry.getKey();
+            int count = entry.getValue();
+
+            List<Long> candidates = executors.entrySet().stream()
+                    .filter(e -> e.getValue().contains(role) && !invitedIds.contains(e.getKey()))
+                    .map(Map.Entry::getKey)
+                    .limit(count)
+                    .toList();
+
+            for (Long candidateId : candidates) {
+                invitedIds.add(candidateId);
+                selected.add(teamMemberRepository.findById(candidateId).orElseThrow(
+                        () -> new EntityNotFoundException("Candidate not found: " + candidateId)
+                ));
+                remainingRoles.put(role, remainingRoles.get(role) - 1);
+            }
+            it.remove();
+        }
+        return selected;
     }
 
     private Map<Long, List<TeamRole>> getRoleAndIdFromProject(Project project) {

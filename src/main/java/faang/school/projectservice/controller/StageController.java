@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.dto.client.stage.StageFilterDTO;
+import faang.school.projectservice.service.Stage.StageDeletionStrategy;
 import faang.school.projectservice.service.Stage.StageService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +46,10 @@ public class StageController {
     }
 
     @DeleteMapping("/{stageId}")
-    public void delete(@PathVariable @NotNull Long stageId) {
-        stageService.deleteCascade(stageId);
+    public void delete(@PathVariable @NotNull Long stageId,
+                       @RequestParam String strategy,
+                       @RequestParam(required = false) Long targetStageId) {
+        stageService.deleteWithStrategy(stageId, strategy, targetStageId);
     }
 }
 

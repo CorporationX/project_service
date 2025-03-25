@@ -16,7 +16,10 @@ public class MoveTasksStrategy implements StageDeletionStrategy {
     private final StageRepository stageRepository;
 
     @Override
-    public void deleteStage(Stage stage) {
+    public void deleteStage(Stage stage, Stage targetStage) {
+        if (targetStage == null) {
+            throw new IllegalArgumentException("Target stage must be specified for MoveTasksStrategy.");
+        }
         List<Task> tasks = taskRepository.findByStage(stage);
         tasks.forEach(task -> task.setStage(targetStage));
         taskRepository.saveAll(tasks);

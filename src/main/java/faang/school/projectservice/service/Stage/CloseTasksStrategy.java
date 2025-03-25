@@ -16,7 +16,7 @@ public class CloseTasksStrategy implements StageDeletionStrategy{
     private final TaskRepository taskRepository;
     private final StageRepository stageRepository;
     @Override
-    public void deleteStage(Stage stage) {
+    public void deleteStage(Stage stage, Stage targetStage) { // targetStage игнорируется
         List<Task> tasks = taskRepository.findByStage(stage);
         tasks.forEach(task -> task.setStatus(TaskStatus.CANCELLED));
         taskRepository.saveAll(tasks);

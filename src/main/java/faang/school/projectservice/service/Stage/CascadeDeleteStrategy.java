@@ -11,11 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 public class CascadeDeleteStrategy implements StageDeletionStrategy{
     private final TaskRepository taskRepository;
     private final StageRepository stageRepository;
+
     @Override
-    public void deleteStage(Stage stage) {
-        log.info("Deleting stage {}", stage);
+    public void deleteStage(Stage stage, Stage targetStage) { // targetStage игнорируется
         log.info("Deleting tasks {}", stage.getTasks());
         taskRepository.deleteByStage(stage);
+        log.info("Deleting stage {}", stage);
         stageRepository.delete(stage);
     }
 

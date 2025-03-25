@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 
 @Mapper(componentModel = "spring")
 public interface StageMapper {
+    //TODO что то с дто
     @Mapping(source = "stageId", target = "id")
     @Mapping(source = "stageName", target = "stageName")
     @Mapping(source = "project.id", target = "projectId")
