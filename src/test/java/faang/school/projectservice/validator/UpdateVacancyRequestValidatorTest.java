@@ -91,10 +91,9 @@ public class UpdateVacancyRequestValidatorTest {
         var vacancy = Vacancy.builder()
                 .id(1L)
                 .status(VacancyStatus.OPEN)
-                .project(Project.builder()
-                        .name("Test project")
-                        .build())
-                .count(3).build();
+                .project(Project.builder().name("Test project").build())
+                .count(3)
+                .build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, 5);
 
         assertThrows(
@@ -213,16 +212,14 @@ public class UpdateVacancyRequestValidatorTest {
             long updaterId,
             @Nullable VacancyStatus status,
             @Nullable Integer requiredCandidatesCount) {
-        return new UpdateVacancyRequestDto(
-                vacancyId,
-                updaterId,
-                "Test name",
-                "Test description",
-                TeamRole.ANALYST,
-                status,
-                requiredCandidatesCount,
-                null,
-                null,
-                null);
+        return UpdateVacancyRequestDto.builder()
+                .vacancyId(vacancyId)
+                .teamMemberUpdaterId(updaterId)
+                .name("Test name")
+                .description("Test description")
+                .position(TeamRole.ANALYST)
+                .status(status)
+                .requiredCandidatesCount(requiredCandidatesCount)
+                .build();
     }
 }

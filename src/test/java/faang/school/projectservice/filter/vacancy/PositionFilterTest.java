@@ -52,27 +52,15 @@ public class PositionFilterTest {
 
     private static List<Vacancy> generateExpectedItems() {
         return List.of(
-                Vacancy.builder()
-                        .id(1L)
-                        .position(TeamRole.ANALYST)
-                        .build(),
-                Vacancy.builder()
-                        .id(2L)
-                        .position(TeamRole.ANALYST)
-                        .build());
+                Vacancy.builder().id(1L).position(TeamRole.ANALYST).build(),
+                Vacancy.builder().id(2L).position(TeamRole.ANALYST).build());
     }
 
     private static Stream<Vacancy> generateSource(List<Vacancy> expectedItems) {
         return Stream.concat(
                 expectedItems.stream(),
                 Stream.of(
-                        Vacancy.builder()
-                                .id(10L)
-                                .position(TeamRole.INTERN)
-                                .build(),
-                        Vacancy.builder()
-                                .id(11L)
-                                .position(TeamRole.DEVELOPER)
-                                .build()));
+                        Vacancy.builder().id(10L).position(TeamRole.INTERN).build(),
+                        Vacancy.builder().id(11L).position(TeamRole.DEVELOPER).build()));
     }
 }

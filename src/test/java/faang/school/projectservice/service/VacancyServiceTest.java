@@ -145,16 +145,10 @@ class VacancyServiceTest {
         var authorId = 2L;
         var requestDto = createOpenVacancyRequestDto(projectId, authorId, 10.5);
 
-        var project = Project.builder()
-                .id(projectId)
-                .name("Test project")
-                .build();
+        var project = Project.builder().id(projectId).name("Test project").build();
         when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(project);
 
-        var author = TeamMember.builder()
-                .id(authorId)
-                .nickname("Test author")
-                .build();
+        var author = TeamMember.builder().id(authorId).nickname("Test author").build();
         when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(author);
 
         // Act
@@ -200,10 +194,7 @@ class VacancyServiceTest {
         // Arrange
         var vacancyId = 1L;
         var projectId = 1L;
-        var vacancy = Vacancy.builder()
-                .id(vacancyId)
-                .project(getTestProject(projectId))
-                .build();
+        var vacancy = Vacancy.builder().id(vacancyId).project(getTestProject(projectId)).build();
         List<Candidate> attachedToProjectCandidates = List.of();
 
         var requestDto = createUpdateVacancyRequestDto(vacancyId, 1L, null, null);
@@ -277,17 +268,10 @@ class VacancyServiceTest {
         // Arrange
         var vacancyId = 1L;
         var updaterId = 2L;
-        var requestDto = new UpdateVacancyRequestDto(
-                vacancyId,
-                updaterId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        var requestDto = UpdateVacancyRequestDto.builder()
+                .vacancyId(vacancyId)
+                .teamMemberUpdaterId(updaterId)
+                .build();
 
         var projectId = 1L;
         var project = getTestProject(projectId);
@@ -398,14 +382,8 @@ class VacancyServiceTest {
         var filterDto = new FilterVacancyRequestDto(null, "Test");
 
         var vacancies = List.of(
-                Vacancy.builder()
-                        .id(1L)
-                        .name("Java Developer")
-                        .build(),
-                Vacancy.builder()
-                        .id(2L)
-                        .name("Kotlin Developer")
-                        .build());
+                Vacancy.builder().id(1L).name("Java Developer").build(),
+                Vacancy.builder().id(2L).name("Kotlin Developer").build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
         setupVacancyFilter(vacancyFilter1, filterDto, true, new ReturnEmptyStreamVacancyAnswer());
@@ -492,7 +470,6 @@ class VacancyServiceTest {
     public void testGetVacancyById_RequestNotFound_Throws() {
         var vacancyId = 1L;
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
-
         var result = vacancyService.getVacancyById(vacancyId);
 
         assertTrue(result.isEmpty());
@@ -546,16 +523,15 @@ class VacancyServiceTest {
     }
 
     private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {
-        return new OpenVacancyRequestDto(
-                "Test name",
-                "Test description",
-                projectId,
-                TeamRole.ANALYST,
-                1,
-                authorId,
-                salary,
-                null,
-                null);
+        return OpenVacancyRequestDto.builder()
+                .name("Test name")
+                .description("Test description")
+                .projectId(projectId)
+                .position(TeamRole.ANALYST)
+                .requiredCandidatesCount(1)
+                .authorId(authorId)
+                .salary(salary)
+                .build();
     }
 
     private static UpdateVacancyRequestDto createUpdateVacancyRequestDto(
@@ -563,17 +539,15 @@ class VacancyServiceTest {
             long updaterId,
             @Nullable VacancyStatus status,
             @Nullable Integer requiredCandidatesCount) {
-        return new UpdateVacancyRequestDto(
-                vacancyId,
-                updaterId,
-                "Test name",
-                "Test description",
-                TeamRole.ANALYST,
-                status,
-                requiredCandidatesCount,
-                null,
-                null,
-                null);
+        return UpdateVacancyRequestDto.builder()
+                .vacancyId(vacancyId)
+                .teamMemberUpdaterId(updaterId)
+                .name("Test name")
+                .description("Test description")
+                .position(TeamRole.ANALYST)
+                .status(status)
+                .requiredCandidatesCount(requiredCandidatesCount)
+                .build();
     }
 
     private static Project getTestProject(long projectId) {
@@ -581,17 +555,11 @@ class VacancyServiceTest {
     }
 
     private static TeamMember getTestAuthor(long authorId) {
-        return TeamMember.builder()
-                .id(authorId)
-                .nickname("Author nickname")
-                .build();
+        return TeamMember.builder().id(authorId).nickname("Author nickname").build();
     }
 
     private static TeamMember getTestUpdater(long updaterId) {
-        return TeamMember.builder()
-                .id(updaterId)
-                .nickname("Updater nickname")
-                .build();
+        return TeamMember.builder().id(updaterId).nickname("Updater nickname").build();
     }
 
     private void setupVacancyFilter(

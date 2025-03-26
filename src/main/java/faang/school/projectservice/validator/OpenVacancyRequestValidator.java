@@ -34,9 +34,7 @@ public class OpenVacancyRequestValidator {
         if (!isRightRole) {
             throw new DataValidationException(
                     "Current author roles are %s. Only OWNER and MANAGER is possible".formatted(
-                            String.join(
-                                    ",",
-                                    author.getRoles().stream().map(Enum::toString).toList())));
+                            String.join(",", author.getRoles().stream().map(Enum::toString).toList())));
         }
 
         return author;

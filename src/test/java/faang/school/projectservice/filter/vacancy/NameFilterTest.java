@@ -23,7 +23,6 @@ public class NameFilterTest {
     @Test
     public void testIsApplicable_NameNull_ReturnsFalse() {
         var filterDto = new FilterVacancyRequestDto(null, null);
-
         var result = nameFilter.isApplicable(filterDto);
 
         assertFalse(result);
@@ -32,7 +31,6 @@ public class NameFilterTest {
     @Test
     public void testIsApplicable_NameEmpty_ReturnsFalse() {
         var filterDto = new FilterVacancyRequestDto(null, "");
-
         var result = nameFilter.isApplicable(filterDto);
 
         assertFalse(result);
@@ -41,7 +39,6 @@ public class NameFilterTest {
     @Test
     public void testIsApplicable_NameBlank_ReturnsFalse() {
         var filterDto = new FilterVacancyRequestDto(null, "   ");
-
         var result = nameFilter.isApplicable(filterDto);
 
         assertFalse(result);
@@ -50,7 +47,6 @@ public class NameFilterTest {
     @Test
     public void testIsApplicable_NameNotBlank_ReturnsTrue() {
         var filterDto = new FilterVacancyRequestDto(null, "Test");
-
         var result = nameFilter.isApplicable(filterDto);
 
         assertTrue(result);
@@ -69,27 +65,15 @@ public class NameFilterTest {
 
     private static List<Vacancy> generateExpectedItems() {
         return List.of(
-                Vacancy.builder()
-                        .id(1L)
-                        .name("first vacancy")
-                        .build(),
-                Vacancy.builder()
-                        .id(2L)
-                        .name("vacancy")
-                        .build());
+                Vacancy.builder().id(1L).name("first vacancy").build(),
+                Vacancy.builder().id(2L).name("vacancy").build());
     }
 
     private static Stream<Vacancy> generateSource(List<Vacancy> expectedItems) {
         return Stream.concat(
                 expectedItems.stream(),
                 Stream.of(
-                        Vacancy.builder()
-                                .id(10L)
-                                .name("2nd vacancy")
-                                .build(),
-                        Vacancy.builder()
-                                .id(11L)
-                                .name("Third vacancy")
-                                .build()));
+                        Vacancy.builder().id(10L).name("2nd vacancy").build(),
+                        Vacancy.builder().id(11L).name("Third vacancy").build()));
     }
 }

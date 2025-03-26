@@ -49,10 +49,7 @@ class OpenVacancyRequestValidatorTest {
     public void testValidateAndGetProject_ProjectIdIsPresent_ReturnsProjectEntity() {
         var projectId = 10L;
         var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
-        var expectedResult = Project.builder()
-                .id(projectId)
-                .name("Test project")
-                .build();
+        var expectedResult = Project.builder().id(projectId).name("Test project").build();
         when(projectService.getProjectByIdOrEmpty(projectId))
                 .thenReturn(Optional.of(expectedResult));
 
@@ -76,10 +73,7 @@ class OpenVacancyRequestValidatorTest {
     public void testValidateAndGetAuthor_InvalidAuthorRoles_Throws(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
-        var author = TeamMember.builder()
-                .id(authorId)
-                .roles(authorRoles)
-                .build();
+        var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
         when(teamMemberService.getTeamMemberById(authorId))
                 .thenReturn(Optional.of(author));
 
@@ -99,10 +93,7 @@ class OpenVacancyRequestValidatorTest {
     public void testValidateAndGetAuthor_ValidAuthorRoles_Success(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
-        var author = TeamMember.builder()
-                .id(authorId)
-                .roles(authorRoles)
-                .build();
+        var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
         when(teamMemberService.getTeamMemberById(authorId))
                 .thenReturn(Optional.of(author));
 
@@ -142,15 +133,14 @@ class OpenVacancyRequestValidatorTest {
     }
 
     private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {
-        return new OpenVacancyRequestDto(
-                "Test name",
-                "Test description",
-                projectId,
-                TeamRole.ANALYST,
-                1,
-                authorId,
-                salary,
-                null,
-                null);
+        return OpenVacancyRequestDto.builder()
+                .name("Test name")
+                .description("Test description")
+                .projectId(projectId)
+                .position(TeamRole.ANALYST)
+                .requiredCandidatesCount(1)
+                .authorId(authorId)
+                .salary(salary)
+                .build();
     }
 }

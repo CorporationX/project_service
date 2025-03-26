@@ -5,8 +5,10 @@ import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import org.springframework.lang.Nullable;
 
+@Builder
 public record OpenVacancyRequestDto(
         @NotNull(message = "Vacancy name is required")
         @NotBlank(message = "Vacancy name cannot be blank")
