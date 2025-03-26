@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/meets")
 @Tag(name = "Meet Management", description = "API для управления встречами")
@@ -56,7 +58,7 @@ public class MeetController {
     @GetMapping("/project/{projectId}")
     public List<MeetResponseDto> findProjectMeetsByFilter(
             @Parameter(description = "ID проекта") @PathVariable long projectId,
-            @Parameter(description = "Параметры фильтрации") MeetFilterDto filter) {
+            @Parameter(description = "Параметры фильтрации") @Valid MeetFilterDto filter) {
         return meetService.findProjectMeetsByFilter(projectId, filter);
     }
 
