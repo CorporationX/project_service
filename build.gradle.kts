@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
+
     /**
      * Database
      */
@@ -59,6 +60,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2") // или последняя версия
+    implementation("org.apache.httpcomponents.core5:httpcore5:5.2")
+
+    implementation ("net.coobird:thumbnailator:0.4.14")
+
 }
 
 tasks.withType<Test> {

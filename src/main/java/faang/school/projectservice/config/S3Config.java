@@ -7,6 +7,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class S3Config {
@@ -29,5 +31,11 @@ public class S3Config {
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "<AWS Region>"))
                 .withPathStyleAccessEnabled(true)
                 .build();
+    }
+    @Bean
+    RestTemplate restTemplate() {
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        return new RestTemplate(requestFactory);
     }
 }
