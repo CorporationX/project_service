@@ -22,7 +22,7 @@ public class PositionFilterTest {
     private PositionFilter positionFilter;
 
     @Test
-    public void testIsApplicable_PositionNull_ReturnsFalse() {
+    public void shouldIsApplicable_returnsFalse_whenPositionIsNull() {
         var filterDto = new FilterVacancyRequestDto(null, null);
 
         var result = positionFilter.isApplicable(filterDto);
@@ -31,7 +31,7 @@ public class PositionFilterTest {
     }
 
     @Test
-    public void testIsApplicable_PositionPresents_ReturnsTrue() {
+    public void shouldIsApplicable_returnsTrue_whenPositionIsPresented() {
         var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
 
         var result = positionFilter.isApplicable(filterDto);
@@ -40,7 +40,7 @@ public class PositionFilterTest {
     }
 
     @Test
-    public void testApply_HaveMatchedVacancies_ReturnsNonEmptyStream() {
+    public void shouldApply_returnsNonEmptyStream_whenThereAreMatchedVacancies() {
         var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);

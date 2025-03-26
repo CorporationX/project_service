@@ -36,7 +36,7 @@ class OpenVacancyRequestValidatorTest {
     OpenVacancyRequestValidator openVacancyRequestValidator;
 
     @Test
-    public void testValidateAndGetProject_ProjectIdIsNotPresent_Throws() {
+    public void shouldValidateAndGetProject_throw_whenProjectIdIsNotPresented() {
         var projectId = 0;
         var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
         when(projectService.getProjectByIdOrEmpty(projectId)).thenReturn(Optional.empty());
@@ -46,7 +46,7 @@ class OpenVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateAndGetProject_ProjectIdIsPresent_ReturnsProjectEntity() {
+    public void shouldValidateAndGetProject_returnsProjectEntity_whenProjectIdIsPresented() {
         var projectId = 10L;
         var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
         var expectedResult = Project.builder().id(projectId).name("Test project").build();
@@ -59,7 +59,7 @@ class OpenVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateAndGetAuthor_AuthorIdIsNotPresent_Throws() {
+    public void shouldValidateAndGetAuthor_throw_whenAuthorIdIsNotPresented() {
         var authorId = 0;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.empty());
@@ -70,7 +70,7 @@ class OpenVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getInvalidAuthorRoles")
-    public void testValidateAndGetAuthor_InvalidAuthorRoles_Throws(List<TeamRole> authorRoles) {
+    public void shouldValidateAndGetAuthor_throw_whenSomeAuthorRolesAreInvalid(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
@@ -90,7 +90,7 @@ class OpenVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getValidAuthorRoles")
-    public void testValidateAndGetAuthor_ValidAuthorRoles_Success(List<TeamRole> authorRoles) {
+    public void shouldValidateAndGetAuthor_success_whenAllAuthorRolesAreValid(List<TeamRole> authorRoles) {
         var authorId = 1L;
         var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
@@ -108,7 +108,7 @@ class OpenVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateSalary_NegativeSalary_Throws() {
+    public void shouldValidateSalary_throw_whenSalaryIsNegative() {
         var salary = -2.0;
         var requestDto = createOpenVacancyRequestDto(1, 1, salary);
 
@@ -117,7 +117,7 @@ class OpenVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateSalary_NullSalary_Success() {
+    public void shouldValidateSalary_success_whenSalaryIsNull() {
         Double salary = null;
         var requestDto = createOpenVacancyRequestDto(1, 1, salary);
 
@@ -125,7 +125,7 @@ class OpenVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateSalary_PositiveSalary_Success() {
+    public void shouldValidateSalary_success_whenSalaryIsPositive() {
         Double salary = 10.0;
         var requestDto = createOpenVacancyRequestDto(1, 1, salary);
 

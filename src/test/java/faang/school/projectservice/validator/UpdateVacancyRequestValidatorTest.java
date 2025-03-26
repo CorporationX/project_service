@@ -41,7 +41,7 @@ public class UpdateVacancyRequestValidatorTest {
     private UpdateVacancyRequestValidator updateVacancyRequestValidator;
 
     @Test
-    public void testValidateAndGetVacancy_VacancyIdIsNotPresent_Throws() {
+    public void shouldValidateAndGetVacancy_throw_whenVacancyIdIsNotPresented() {
         var vacancyId = 0L;
         var requestDto = createUpdateVacancyRequestDto(vacancyId, 0L, null, null);
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
@@ -52,7 +52,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateAndGetVacancy_VacancyIdIsPresent_ReturnsVacancyEntity() {
+    public void shouldValidateAndGetVacancy_returnsVacancyEntity_whenVacancyIdIsPresented() {
         var vacancyId = 10L;
         var requestDto = createUpdateVacancyRequestDto(vacancyId, 0L, null, null);
         var expectedResult = Vacancy.builder().id(vacancyId).name("Test vacancy").build();
@@ -64,7 +64,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToOpenStatus_Throws() {
+    public void shouldValidateCandidatesCount_throw_whenUpdateToOpenStatus() {
         var status = VacancyStatus.OPEN;
         var vacancy = Vacancy.builder().status(VacancyStatus.CLOSED).build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, null);
@@ -75,7 +75,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToClosedStatusWithoutVacancyCount_Throws() {
+    public void shouldValidateCandidatesCount_throw_whenUpdateToClosedStatusWithoutVacancyCount() {
         var status = VacancyStatus.CLOSED;
         var vacancy = Vacancy.builder().status(VacancyStatus.OPEN).build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, null);
@@ -86,7 +86,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToClosedStatusIfInvalidCandidatesCount_Throws() {
+    public void shouldValidateCandidatesCount_throw_whenUpdateToClosedStatusIfCandidatesCountIsInvalid() {
         var status = VacancyStatus.CLOSED;
         var vacancy = Vacancy.builder()
                 .id(1L)
@@ -102,7 +102,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToPostponedStatusOnClosedVacancy_Throws() {
+    public void shouldValidateCandidatesCount_throw_whenUpdateToPostponedStatusAndVacancyIsClosed() {
         var status = VacancyStatus.POSTPONED;
         var vacancy = Vacancy.builder().status(VacancyStatus.CLOSED).build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, null);
@@ -113,7 +113,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_NullStatus_Success() {
+    public void shouldValidateCandidatesCount_success_whenStatusIsNull() {
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, null, null);
 
         assertDoesNotThrow(() -> updateVacancyRequestValidator.validateCandidatesCount(
@@ -123,7 +123,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_StatusIsNotChanged_Success() {
+    public void shouldValidateCandidatesCount_success_whenStatusIsNotChanged() {
         var status = VacancyStatus.OPEN;
         var vacancy = Vacancy.builder().status(status).build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, null);
@@ -135,7 +135,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToClosedStatusIfValidCandidatesCount_Success() {
+    public void shouldValidateCandidatesCount_success_whenUpdateToClosedStatusIfCandidatesCountIsValid() {
         var status = VacancyStatus.CLOSED;
         var vacancy = Vacancy.builder().status(VacancyStatus.OPEN).build();
         var acceptedCandidates = List.of(new Candidate(), new Candidate());
@@ -148,7 +148,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateCandidatesCount_UpdateToPostponedStatusOnOpenedVacancy_Success() {
+    public void shouldValidateCandidatesCount_success_whenUpdateToPostponedStatusAndVacancyIsOpened() {
         var status = VacancyStatus.POSTPONED;
         var vacancy = Vacancy.builder().status(VacancyStatus.OPEN).build();
         var requestDto = createUpdateVacancyRequestDto(10L, 1L, status, null);
@@ -160,7 +160,7 @@ public class UpdateVacancyRequestValidatorTest {
     }
 
     @Test
-    public void testValidateUpdaterRole_TeamMemberUpdaterIdIsNotPresent_Throws() {
+    public void shouldValidateUpdaterRole_throw_whenTeamMemberUpdaterIdIsNotPresented() {
         var teamMemberUpdaterId = 0L;
         var requestDto = createUpdateVacancyRequestDto(10L, teamMemberUpdaterId, null, null);
         when(teamMemberService.getTeamMemberById(teamMemberUpdaterId))
@@ -173,7 +173,7 @@ public class UpdateVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getInvalidUpdaterRoles")
-    public void testValidateUpdaterRole_InvalidUpdaterRoles_Throws(List<TeamRole> updaterRoles) {
+    public void shouldValidateUpdaterRole_throw_whenSomeUpdaterRolesAreInvalid(List<TeamRole> updaterRoles) {
         var teamMemberUpdaterId = 1L;
         var requestDto = createUpdateVacancyRequestDto(10L, teamMemberUpdaterId, null, null);
         var updaterTeamMember = TeamMember.builder().id(teamMemberUpdaterId).roles(updaterRoles).build();
@@ -193,7 +193,7 @@ public class UpdateVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getValidUpdaterRoles")
-    public void testValidateAndGetAuthor_ValidAuthorRoles_Success(List<TeamRole> updaterRoles) {
+    public void shouldValidateAndGetAuthor_success_whenAllAuthorRolesAreValid(List<TeamRole> updaterRoles) {
         var teamMemberUpdaterId = 1L;
         var requestDto = createUpdateVacancyRequestDto(10L, teamMemberUpdaterId, null, null);
         var updaterTeamMember = TeamMember.builder().id(teamMemberUpdaterId).roles(updaterRoles).build();

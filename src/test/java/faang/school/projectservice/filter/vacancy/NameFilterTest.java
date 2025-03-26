@@ -21,7 +21,7 @@ public class NameFilterTest {
     private NameFilter nameFilter;
 
     @Test
-    public void testIsApplicable_NameNull_ReturnsFalse() {
+    public void shouldIsApplicable_returnFalse_whenNameIsNull() {
         var filterDto = new FilterVacancyRequestDto(null, null);
         var result = nameFilter.isApplicable(filterDto);
 
@@ -29,7 +29,7 @@ public class NameFilterTest {
     }
 
     @Test
-    public void testIsApplicable_NameEmpty_ReturnsFalse() {
+    public void shouldIsApplicable_ReturnFalse_whenNameIsEmpty() {
         var filterDto = new FilterVacancyRequestDto(null, "");
         var result = nameFilter.isApplicable(filterDto);
 
@@ -37,7 +37,7 @@ public class NameFilterTest {
     }
 
     @Test
-    public void testIsApplicable_NameBlank_ReturnsFalse() {
+    public void shouldIsApplicable_returnFalse_whenNameIsBlank() {
         var filterDto = new FilterVacancyRequestDto(null, "   ");
         var result = nameFilter.isApplicable(filterDto);
 
@@ -45,7 +45,7 @@ public class NameFilterTest {
     }
 
     @Test
-    public void testIsApplicable_NameNotBlank_ReturnsTrue() {
+    public void shouldIsApplicable_returnTrue_whenNameIsNotBlank() {
         var filterDto = new FilterVacancyRequestDto(null, "Test");
         var result = nameFilter.isApplicable(filterDto);
 
@@ -53,7 +53,7 @@ public class NameFilterTest {
     }
 
     @Test
-    public void testApply_HaveMatchedVacancies_ReturnsNonEmptyStream() {
+    public void shouldApply_returnNonEmptyStream_whenThereAreMatchedVacancies() {
         var filterDto = new FilterVacancyRequestDto(null, "[a-z ]+");
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);

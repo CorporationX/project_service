@@ -99,7 +99,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testOpenVacancy_FailedProjectValidation_Throws() {
+    public void shouldOpenVacancy_throw_whenProjectValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(0, 1, null);
         when(openVacancyRequestValidator.validateAndGetProject(requestDto))
                 .thenThrow(new DataValidationException("Invalid project"));
@@ -111,7 +111,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testOpenVacancy_FailedAuthorValidation_Throws() {
+    public void shouldOpenVacancy_throw_whenAuthorValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
         when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
         when(openVacancyRequestValidator.validateAndGetAuthor(requestDto))
@@ -124,7 +124,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testOpenVacancy_FailedSalaryValidation_Throws() {
+    public void shouldOpenVacancy_throw_whenSalaryValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
         when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
         when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(new TeamMember());
@@ -139,7 +139,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testOpenVacancy_ValidData_SaveVacancy() {
+    public void shouldOpenVacancy_saveVacancy_whenDataIsValid() {
         // Arrange
         var projectId = 1L;
         var authorId = 2L;
@@ -164,7 +164,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testUpdateVacancy_FailedVacancyValidation_Throws() {
+    public void shouldUpdateVacancy_throw_whenVacancyValidationIsFailed() {
         var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
         when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto))
                 .thenThrow(new DataValidationException("Invalid vacancy"));
@@ -176,7 +176,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testUpdateVacancy_FailedUpdaterRoleValidation_Throws() {
+    public void shouldUpdateVacancy_throw_whenUpdaterRoleValidationIsFailed() {
         var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
         when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(new Vacancy());
         Mockito.doThrow(new DataValidationException("Invalid updater role")).
@@ -190,7 +190,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testUpdateVacancy_FailedCandidatesCountValidation_Throws() {
+    public void shouldUpdateVacancy_throw_whenCandidatesCountValidationIsFailed() {
         // Arrange
         var vacancyId = 1L;
         var projectId = 1L;
@@ -214,7 +214,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testUpdateVacancy_ValidData_ReturnVacancy() {
+    public void shouldUpdateVacancy_returnVacancy_whenDataIsValid() {
         // Arrange
         var vacancyId = 1L;
         var updaterId = 2L;
@@ -264,7 +264,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testUpdateVacancy_ValidDataWithoutChanges_ReturnVacancy() {
+    public void shouldUpdateVacancy_returnVacancy_whenNoChangesAreNeeded() {
         // Arrange
         var vacancyId = 1L;
         var updaterId = 2L;
@@ -326,7 +326,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testGetFilteredVacancies_AllFiltersAreNotApplicable_ReturnsOriginalRequests() {
+    public void shouldGetFilteredVacancies_returnsOriginalRequests_whenAllFiltersAreNotApplicable() {
         // Arrange
         var filterDto = new FilterVacancyRequestDto(null, null);
 
@@ -377,7 +377,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testGetFilteredVacancies_AllRequestsAreNotMatched_ReturnsEmptyList() {
+    public void shouldGetFilteredVacancies_returnsEmptyList_whenAllRequestsAreNotMatched() {
         // Arrange
         var filterDto = new FilterVacancyRequestDto(null, "Test");
 
@@ -397,7 +397,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testGetFilteredVacancies_SomeRequestsAreMatched_ReturnsNotEmptyList() {
+    public void shouldGetFilteredVacancies_returnsNotEmptyList_whenSomeRequestsAreMatched() {
         // Arrange
         var namePatternToSearch = "Java";
         var positionToSearch = TeamRole.DEVELOPER;
@@ -467,7 +467,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testGetVacancyById_RequestNotFound_Throws() {
+    public void shouldGetVacancyById_throw_whenRequestIsNotFound() {
         var vacancyId = 1L;
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
         var result = vacancyService.getVacancyById(vacancyId);
@@ -476,7 +476,7 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void testGetVacancyById_RequestFound_ReturnsVacancy() {
+    public void shouldGetVacancyById_returnsVacancy_whenRequestIsFound() {
         // Arrange
         var project = getTestProject(1L);
         var authorId = 3L;
