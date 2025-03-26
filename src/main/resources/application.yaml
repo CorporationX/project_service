@@ -8,7 +8,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
@@ -56,5 +56,7 @@ services:
     endpoint: http://localhost:9000
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
-    bucket:
-      cover: cover-bucket
+    cover:
+      bucket:
+        cover-bucket
+      max-image-dimension: 512

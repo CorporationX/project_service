@@ -19,7 +19,7 @@ public class CoverController {
 
     @PostMapping("/upload")
     public String uploadCoverToVacancy(@RequestParam("file") @NotNull MultipartFile multipartFile,
-                                      @RequestParam("id") @NotNull Long vacancyId) {
+                                       @RequestParam("id") @NotNull Long vacancyId) {
         log.info("Received request to upload cover");
         String coverImageKey = coverService.uploadCover(multipartFile, vacancyId);
         log.info("File successfully uploaded");
