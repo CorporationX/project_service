@@ -26,9 +26,11 @@ public record OpenVacancyRequestDto(
 
         long authorId,
 
-        @Nullable Double salary,
+        @Nullable
+        Double salary,
 
-        @Nullable WorkSchedule workSchedule,
-
-        @Nullable String coverImageKey) {
+        @Nullable
+        WorkSchedule workSchedule,
+        @Nullable
+        String coverImageKey) {
 }
