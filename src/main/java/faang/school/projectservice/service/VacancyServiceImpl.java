@@ -49,6 +49,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancyRepository.save(vacancy);
     }
 
+    @Transactional
     public VacancyResponseDto updateVacancy(UpdateVacancyRequestDto requestDto) {
         var vacancy = updateVacancyRequestValidator.validateAndGetVacancy(requestDto);
         updateVacancyRequestValidator.validateUpdaterRole(requestDto);
@@ -118,23 +119,14 @@ public class VacancyServiceImpl implements VacancyService {
         vacancyDto.setProjectName(project.getName());
     }
 
-    @Transactional
     private void updateAndSaveVacancy(
             UpdateVacancyRequestDto requestDto,
             Vacancy vacancy,
             List<Candidate> currentAcceptedCandidates) {
-        if (requestDto.name() != null) {
-            vacancy.setName(requestDto.name());
-        }
-        if (requestDto.description() != null) {
-            vacancy.setDescription(requestDto.description());
-        }
-        if (requestDto.position() != null) {
-            vacancy.setPosition(requestDto.position());
-        }
-        if (requestDto.status() != null) {
-            vacancy.setStatus(requestDto.status());
-        }
+        Optional.ofNullable(requestDto.name()).ifPresent(vacancy::setName);
+        Optional.ofNullable(requestDto.description()).ifPresent(vacancy::setDescription);
+        Optional.ofNullable(requestDto.position()).ifPresent(vacancy::setPosition);
+        Optional.ofNullable(requestDto.status()).ifPresent(vacancy::setStatus);
 
         vacancyMapper.update(vacancy, requestDto);
 
