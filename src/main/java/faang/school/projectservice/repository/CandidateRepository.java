@@ -8,13 +8,14 @@ import java.util.List;
 
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
     @Query(nativeQuery = true, value = """
-            SELECT c FROM Candidate c, Vacancy v, TeamMember tm, Team t, User u, team_member_roles tmr,
-            WHERE c.vacancy_id = v.id
-                AND c.userId = u.id
-                AND tm.user_id = u.id
-                AND tm.team_id = t.id
-                AND tm.id = tmr.team_member_id
-                AND v.id = :vacancyId
+            SELECT c
+            FROM Candidate c
+                JOIN Vacancy v ON c.vacancy_id = v.id
+                JOIN User u ON c.userId = u.id
+                JOIN TeamMember tm ON tm.user_id = u.id
+                JOIN Team t ON tm.team_id = t.id
+                JOIN team_member_roles tmr ON tm.id = tmr.team_member_id
+            WHERE v.id = :vacancyId
                 AND t.project_id = :projectId
             """)
     List<Candidate> findAllCandidatesAttachedToProjectVacancy(long vacancyId, long projectId);
