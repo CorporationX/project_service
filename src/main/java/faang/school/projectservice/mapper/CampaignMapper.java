@@ -15,6 +15,7 @@ import static faang.school.projectservice.service.CampaignService.ID_NULL_EXCEPT
 public interface CampaignMapper {
 
     @Mapping(target = "project", source = "projectId")
+    @Mapping(target = "isDeleted", ignore = true)
     Campaign toCampaign(CampaignDto campaignDto);
 
     @Mapping(target = "projectId", source = "project")

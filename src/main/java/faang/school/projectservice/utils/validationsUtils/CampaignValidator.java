@@ -12,12 +12,11 @@ public class CampaignValidator {
 
     private static final int TITLE_MAX_LENGTH = 128;
     private static final int DESCRIPTION_MAX_LENGTH = 4096;
-    private static final BigDecimal GOAL_MIN_DECIMAL = new BigDecimal("0.01");
+    private static final BigDecimal GOAL_MIN_DECIMAL = BigDecimal.valueOf(0.01);
     public static final String CAMPAIGN_NULL_EXCEPTION = "Campaign dto can't be null";
     public static final String TITLE_NULL_EXCEPTION = "The title can't be null";
     public static final String TITLE_EMPTY_EXCEPTION = "The title can't be empty";
     public static final String PROJECT_ID_NULL_EXCEPTION = "Project id can't be null";
-    public static final String GOAL_NULL_EXCEPTION = "Goal can't be null";
     public static final String GOAL_MIN_DECIMAL_EXCEPTION = "Goal must be at least " + GOAL_MIN_DECIMAL;
     public static final String TITLE_MAX_LENGTH_EXCEPTION = "The length of title can't be more than "
             + TITLE_MAX_LENGTH;
@@ -61,6 +60,7 @@ public class CampaignValidator {
             throw new DataValidationException(TITLE_EMPTY_EXCEPTION);
         } else if (title.length() > TITLE_MAX_LENGTH) {
             log.info(TITLE_MAX_LENGTH_EXCEPTION);
+            log.info("Length of title: {}", title.length());
             throw new DataValidationException(TITLE_MAX_LENGTH_EXCEPTION);
         }
     }
@@ -73,10 +73,7 @@ public class CampaignValidator {
     }
 
     private static void validateGoal(BigDecimal goal) {
-        if (goal == null) {
-            log.info(GOAL_NULL_EXCEPTION);
-            throw new DataValidationException(GOAL_NULL_EXCEPTION);
-        } else if (goal.compareTo(GOAL_MIN_DECIMAL) < 0) {
+        if (goal.compareTo(GOAL_MIN_DECIMAL) < 0) {
             log.info(GOAL_MIN_DECIMAL_EXCEPTION);
             throw new DataValidationException(GOAL_MIN_DECIMAL_EXCEPTION);
         }

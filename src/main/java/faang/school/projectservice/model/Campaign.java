@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @Entity
 @Table(name = "campaign")
 public class Campaign {
@@ -63,6 +65,7 @@ public class Campaign {
 
     private Long updatedBy;
 
+    @Builder.Default
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
 }

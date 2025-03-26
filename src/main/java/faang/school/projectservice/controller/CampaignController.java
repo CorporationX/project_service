@@ -25,15 +25,13 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/campaign")
+@RequestMapping("/campaigns")
 public class CampaignController {
 
     private final CampaignService campaignService;
 
     @PostMapping
     public CampaignDto createCampaign(@RequestBody CampaignDto campaignDto) {
-        CampaignValidator.validationCampaignDto(campaignDto);
-        log.info("All validation have been verifeied.\nStarting the campaign creation process");
         CampaignDto returnedCampaignDto = campaignService.create(campaignDto);
         log.info("The campaign has been created");
         return returnedCampaignDto;
@@ -41,8 +39,6 @@ public class CampaignController {
 
     @PutMapping
     public CampaignDto updateCampaign(@RequestBody CampaignUpdateDto campaignUpdateDto) {
-        CampaignValidator.validateCampaignUpdateDto(campaignUpdateDto);
-        log.info("All validation have been verifeied.\nStarting the campaign updating process");
         CampaignDto returnedCampaignDto = campaignService.update(campaignUpdateDto);
         log.info("The campaign has been updated");
         return returnedCampaignDto;
@@ -59,7 +55,7 @@ public class CampaignController {
         return campaignService.getCampaign(campaignId);
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping
     public List<CampaignDto> getCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
         return campaignService.getCampaignsByProject(campaignFilterDto);
     }

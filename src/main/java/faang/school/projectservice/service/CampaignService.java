@@ -11,14 +11,20 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.utils.validationsUtils.CampaignValidator;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.PROJECT_ID_NULL_EXCEPTION;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,8 +40,11 @@ public class CampaignService {
     private final List<CampaignFilter> campaignFilters;
 
     public CampaignDto create(CampaignDto campaignDto) {
+        CampaignValidator.validationCampaignDto(campaignDto);
+        log.info("All validation have been verifeied.\nStarting the campaign creation process");
+
         if (!isManagerOrOwner(campaignDto.getCreatedBy(), campaignDto.getProjectId())) {
-            log.info(CREATING_EXCEPTION);
+            log.error(CREATING_EXCEPTION);
             throw new DataValidationException(CREATING_EXCEPTION);
         }
 
@@ -46,11 +55,13 @@ public class CampaignService {
     }
 
     public CampaignDto update(CampaignUpdateDto campaignUpdateDto) {
-        Campaign campaign = campaignRepository.findById(campaignUpdateDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Campaign not found"));
+        CampaignValidator.validateCampaignUpdateDto(campaignUpdateDto);
+        log.info("All validation have been verifeied.\nStarting the campaign updating process");
+
+        Campaign campaign = campaignRepository.findById(campaignUpdateDto.getId()).get();
 
         if (!isManagerOrOwner(campaign.getCreatedBy(), campaign.getProject().getId())) {
-            log.info(UPDATING_EXCEPTION);
+            log.error(UPDATING_EXCEPTION);
             throw new DataValidationException(UPDATING_EXCEPTION);
         }
 
@@ -64,17 +75,18 @@ public class CampaignService {
 
     public void delete(Long id) {
         if (id == null) {
-            log.info(ID_NULL_EXCEPTION);
+            log.error(ID_NULL_EXCEPTION);
             throw new DataValidationException(ID_NULL_EXCEPTION);
         }
 
         Campaign campaign = campaignRepository.findById(id).get();
         campaign.setDeleted(true);
+        campaignRepository.save(campaign);
     }
 
     public CampaignDto getCampaign(Long id) {
         if (id == null) {
-            log.info(ID_NULL_EXCEPTION);
+            log.error(ID_NULL_EXCEPTION);
             throw new DataValidationException(ID_NULL_EXCEPTION);
         }
 
@@ -83,6 +95,13 @@ public class CampaignService {
     }
 
     public List<CampaignDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
+//        if (campaignFilterDto.getProjectId() == null) {
+//            log.error(PROJECT_ID_NULL_EXCEPTION);
+//            throw new DataValidationException(PROJECT_ID_NULL_EXCEPTION);
+//        }
+
+        campaignFilters.forEach(campaignFilter -> System.out.println(campaignFilter.toString()));
+
         Stream<Campaign> allCampaigns = campaignRepository.findAll().stream();
 
         for (CampaignFilter campaignFilter : campaignFilters) {
@@ -92,7 +111,7 @@ public class CampaignService {
         }
 
         return allCampaigns
-                .sorted(Comparator.comparing(Campaign::getCreatedBy).reversed())
+                .sorted(Comparator.comparing(Campaign::getCreatedAt).reversed())
                 .map(campaignMapper::toCampaignDto)
                 .toList();
     }
