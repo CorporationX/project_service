@@ -3,12 +3,9 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
-import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.service.CampaignService;
-import faang.school.projectservice.utils.validationsUtils.CampaignValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,10 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -27,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/campaigns")
 public class CampaignController {
-
     private final CampaignService campaignService;
 
     @PostMapping

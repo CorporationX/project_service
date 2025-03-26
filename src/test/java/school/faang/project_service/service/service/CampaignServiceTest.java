@@ -9,6 +9,7 @@ import faang.school.projectservice.filter.campaign.CampaignFilter;
 import faang.school.projectservice.filter.campaign.CampaignOwnerFilter;
 import faang.school.projectservice.filter.campaign.CampaignProjectFilter;
 import faang.school.projectservice.filter.campaign.CampaignStatusFilter;
+import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.mapper.CampaignMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -71,9 +72,6 @@ public class CampaignServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
-
-//    @Spy
-//    private List<CampaignFilter> campaignFilters;
 
     private CampaignFilter campaignProjectFilter = new CampaignProjectFilter();
 
@@ -281,13 +279,13 @@ public class CampaignServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
         CampaignFilterDto campaignFilterDto =
-                new CampaignFilterDto(null, null, null, null);
+                new CampaignFilterDto(1L, null, null, null);
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
         List<CampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
         System.out.println(result);
-        assertEquals(0, result.size());
+        assertEquals(1, result.size());
     }
 
     @Test
@@ -328,7 +326,8 @@ public class CampaignServiceTest {
                 .status(null)
                 .createdAt(null)
                 .build();
-        CampaignFilterDto campaignFilterDto = new CampaignFilterDto(null, null, null, null);
+        CampaignFilterDto campaignFilterDto =
+                new CampaignFilterDto(2L, 3L, null, null);
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
@@ -343,7 +342,7 @@ public class CampaignServiceTest {
                 .project(Project.builder().id(1L).build())
                 .createdBy(null)
                 .status(null)
-                .createdAt(LocalDateTime.of(2002, 3, 20, 1, 1))
+                .createdAt(LocalDateTime.of(2025, 3, 20, 1, 1))
                 .build();
         Campaign campaign2 = Campaign.builder()
                 .project(Project.builder().id(2L).build())
@@ -351,30 +350,9 @@ public class CampaignServiceTest {
                 .status(null)
                 .createdAt(LocalDateTime.of(2025, 2, 1, 1, 1))
                 .build();
-        CampaignFilterDto campaignFilterDto = new CampaignFilterDto(PROJECT_ID, null, null, null);
-
-        when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
-
-        List<CampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
-        System.out.println(result);
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    public void testGetCampaignsByProjectNotEmpty() {
-        Campaign campaign1 = Campaign.builder()
-                .project(Project.builder().id(1L).build())
-                .createdBy(1L)
-                .status(CampaignStatus.ACTIVE)
-                .createdAt(LocalDateTime.of(2025, 3, 20, 1, 1))
-                .build();
-        Campaign campaign2 = Campaign.builder()
-                .project(Project.builder().id(2L).build())
-                .createdBy(2L)
-                .status(CampaignStatus.CANCELED)
-                .createdAt(LocalDateTime.of(2025, 2, 20, 1, 1))
-                .build();
-        CampaignFilterDto campaignFilterDto = new CampaignFilterDto(null, null, null, null);
+        LocalDateTime after = LocalDateTime.of(2022, 3, 1, 1, 1);
+        CampaignFilterDto campaignFilterDto =
+                new CampaignFilterDto(1L, null, null, after);
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 

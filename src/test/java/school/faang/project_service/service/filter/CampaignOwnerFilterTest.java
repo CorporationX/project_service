@@ -3,7 +3,6 @@ package school.faang.project_service.service.filter;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.filter.campaign.CampaignOwnerFilter;
 import faang.school.projectservice.model.Campaign;
-import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

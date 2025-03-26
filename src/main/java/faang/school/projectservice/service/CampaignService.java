@@ -8,15 +8,18 @@ import faang.school.projectservice.filter.campaign.CampaignFilter;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.utils.validationsUtils.CampaignValidator;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,8 @@ public class CampaignService {
     private final CampaignRepository campaignRepository;
     private final ProjectRepository projectRepository;
     private final List<CampaignFilter> campaignFilters;
+    private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
 
     public CampaignDto create(CampaignDto campaignDto) {
         CampaignValidator.validationCampaignDto(campaignDto);
@@ -95,12 +100,10 @@ public class CampaignService {
     }
 
     public List<CampaignDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
-//        if (campaignFilterDto.getProjectId() == null) {
-//            log.error(PROJECT_ID_NULL_EXCEPTION);
-//            throw new DataValidationException(PROJECT_ID_NULL_EXCEPTION);
-//        }
-
-        campaignFilters.forEach(campaignFilter -> System.out.println(campaignFilter.toString()));
+        if (campaignFilterDto.getProjectId() == null) {
+            log.error(PROJECT_ID_NULL_EXCEPTION);
+            throw new DataValidationException(PROJECT_ID_NULL_EXCEPTION);
+        }
 
         Stream<Campaign> allCampaigns = campaignRepository.findAll().stream();
 
