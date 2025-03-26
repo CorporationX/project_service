@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.exception.CampaignCreatorModificationException;
 import faang.school.projectservice.exception.CampaignNotFoundException;
 import faang.school.projectservice.exception.DateParseException;
+import faang.school.projectservice.exception.EmptyFilterException;
+import faang.school.projectservice.exception.ExceptionMessage;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.CampaignMapper;
@@ -42,15 +44,15 @@ public class CampaignService {
             return campaignMapper.toDto(campaignRepository.save(campaign));
         }
 
-        throw new PermissionDeniedException();
+        throw new PermissionDeniedException(ExceptionMessage.PERMISSION_DENIED);
     }
 
-    public CampaignUpdateDto update(CampaignUpdateDto dto) {
-        Campaign campaign = campaignRepository.findById(dto.getId())
-                .orElseThrow(() -> new CampaignNotFoundException(dto.getId()));
+    public CampaignUpdateDto update(Long id, CampaignUpdateDto dto) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new CampaignNotFoundException(ExceptionMessage.CAMPAIGN_NOT_FOUND, id));
 
         if (dto.getCreatedBy() != null && !dto.getCreatedBy().equals(campaign.getCreatedBy())) {
-            throw new CampaignCreatorModificationException();
+            throw new CampaignCreatorModificationException(ExceptionMessage.CAMPAIGN_CREATOR_MODIFICATION);
         }
 
         campaignMapper.update(campaign, dto);
@@ -59,7 +61,7 @@ public class CampaignService {
 
     public CampaignUpdateDto delete(long id) {
         Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new CampaignNotFoundException(id));
+                .orElseThrow(() -> new CampaignNotFoundException(ExceptionMessage.CAMPAIGN_NOT_FOUND, id));
 
         campaign.setStatus(CampaignStatus.CANCELED);
         return campaignMapper.toDto(campaignRepository.save(campaign));
@@ -67,12 +69,16 @@ public class CampaignService {
 
     public CampaignUpdateDto findById(long id) {
         Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new CampaignNotFoundException(id));
+                .orElseThrow(() -> new CampaignNotFoundException(ExceptionMessage.CAMPAIGN_NOT_FOUND, id));
 
         return campaignMapper.toDto(campaignRepository.save(campaign));
     }
 
     public List<CampaignUpdateDto> getFilteredCampaigns(CampaignFilterDto filterDto) {
+        if (filterDto.startDate()==null && filterDto.status()==null && filterDto.createdId()==null) {
+            throw new EmptyFilterException(ExceptionMessage.EMPTY_FILTER);
+        }
+
         LocalDateTime startDate = null;
         if (filterDto.startDate()!=null && !filterDto.startDate().isBlank()) {
             startDate = getDate(filterDto.startDate());
@@ -93,7 +99,7 @@ public class CampaignService {
 
     private boolean isProjectOwner(Campaign campaign, Long userId, Long projectId) {
         var project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+                .orElseThrow(() -> new ProjectNotFoundException(ExceptionMessage.PROJECT_NOT_FOUND, projectId));
         campaign.setProject(project);
 
         return project.getOwnerId().equals(userId);
@@ -104,7 +110,7 @@ public class CampaignService {
             LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
             return localDate.atStartOfDay();
         } catch (DateTimeParseException e) {
-            throw new DateParseException(date);
+            throw new DateParseException(ExceptionMessage.DATE_PARSE, date);
         }
     }
 

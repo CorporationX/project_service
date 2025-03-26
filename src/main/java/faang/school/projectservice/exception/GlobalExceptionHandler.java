@@ -59,4 +59,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(EmptyFilterException.class)
+    public ResponseEntity<String> handleEmptyFilterException(EmptyFilterException ex) {
+        log.error("EmptyFilterException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

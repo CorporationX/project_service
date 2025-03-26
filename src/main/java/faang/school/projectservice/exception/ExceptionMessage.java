@@ -10,7 +10,9 @@ public enum ExceptionMessage {
     PERMISSION_DENIED("Only a team member with the MANAGER role or the project owner can create fundraising activities for a project"),
     CAMPAIGN_NOT_FOUND("Campaign with id=%d not found"),
     CAMPAIGN_CREATOR_MODIFICATION("Unable to change campaign creator"),
-    DATE_PARSE("Invalid date format: %s. Expected format: yyyy-MM-dd");
+    DATE_PARSE("Invalid date format: %s. Expected format: yyyy-MM-dd"),
+    EMPTY_FILTER("At least one filter parameter must be provided");
+
 
     private final String message;
     

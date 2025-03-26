@@ -2,7 +2,7 @@ package faang.school.projectservice.exception;
 
 public class CampaignNotFoundException extends CustomException {
 
-    public CampaignNotFoundException(Long id) {
-        super(ExceptionMessage.CAMPAIGN_NOT_FOUND, id);
+    public CampaignNotFoundException(ExceptionMessage message, Long id) {
+        super(message, id);
     }
 }
