@@ -18,11 +18,13 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.OpenVacancyRequestValidator;
 import faang.school.projectservice.validator.UpdateVacancyRequestValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,8 +64,6 @@ class VacancyServiceTest {
     private TeamMemberServiceImpl teamMemberService;
     @Mock
     private CandidateServiceImpl candidateService;
-    @Mock
-    private OpenVacancyRequestValidator openVacancyRequestValidator;
     @Mock
     private UpdateVacancyRequestValidator updateVacancyRequestValidator;
 
@@ -90,7 +91,6 @@ class VacancyServiceTest {
                 projectService,
                 teamMemberService,
                 candidateService,
-                openVacancyRequestValidator,
                 updateVacancyRequestValidator,
                 vacancyMapper,
                 candidateMapper,
@@ -101,7 +101,7 @@ class VacancyServiceTest {
     @Test
     public void shouldOpenVacancy_throw_whenProjectValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(0, 1, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto))
+        when(projectService.validateAndGetProject(requestDto))
                 .thenThrow(new DataValidationException("Invalid project"));
 
         assertThrowsExactly(
@@ -113,8 +113,8 @@ class VacancyServiceTest {
     @Test
     public void shouldOpenVacancy_throw_whenAuthorValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto))
+        when(projectService.validateAndGetProject(requestDto)).thenReturn(new Project());
+        when(teamMemberService.validateAndGetAuthor(requestDto))
                 .thenThrow(new DataValidationException("Invalid author"));
 
         assertThrowsExactly(
@@ -124,32 +124,27 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void shouldOpenVacancy_throw_whenSalaryValidationIsFailed() {
-        var requestDto = createOpenVacancyRequestDto(1, 0, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(new TeamMember());
-        Mockito.doThrow(new DataValidationException("Invalid salary")).
-                when(openVacancyRequestValidator)
-                .validateSalary(requestDto);
+    public void shouldOpenVacancy_throw_whenSalaryIsNegative() {
+        var salary = -2.0;
+        var requestDto = createOpenVacancyRequestDto(1, 1, salary);
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
-                "Invalid salary");
+        assertThrows(DataValidationException.class, () -> vacancyService.openVacancy(requestDto));
     }
 
-    @Test
-    public void shouldOpenVacancy_saveVacancy_whenDataIsValid() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(doubles = {10.5})
+    public void shouldOpenVacancy_saveVacancy_whenDataIsValid(Double salary) {
         // Arrange
         var projectId = 1L;
         var authorId = 2L;
-        var requestDto = createOpenVacancyRequestDto(projectId, authorId, 10.5);
+        var requestDto = createOpenVacancyRequestDto(projectId, authorId, salary);
 
         var project = Project.builder().id(projectId).name("Test project").build();
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(project);
+        when(projectService.validateAndGetProject(requestDto)).thenReturn(project);
 
         var author = TeamMember.builder().id(authorId).nickname("Test author").build();
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(author);
+        when(teamMemberService.validateAndGetAuthor(requestDto)).thenReturn(author);
 
         // Act
         vacancyService.openVacancy(requestDto);
@@ -516,10 +511,8 @@ class VacancyServiceTest {
         assertEquals(candidates.size(), result.get().getCandidates().size());
         assertEquals(candidates.get(0).getUsername(), result.get().getCandidates().get(0).username());
         assertEquals(candidates.get(0).getCandidateStatus(), result.get().getCandidates().get(0).candidateStatus());
-        verify(projectService, times(1))
-                .getProjectByIdOrEmpty(project.getId());
-        verify(teamMemberService, times(1))
-                .getTeamMemberById(authorId);
+        verify(projectService, times(1)).getProjectByIdOrEmpty(project.getId());
+        verify(teamMemberService, times(1)).getTeamMemberById(authorId);
     }
 
     private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {

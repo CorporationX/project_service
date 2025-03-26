@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DatabaseCorruptedException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.CandidateMapper;
@@ -13,7 +14,6 @@ import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.OpenVacancyRequestValidator;
 import faang.school.projectservice.validator.UpdateVacancyRequestValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,16 +30,15 @@ public class VacancyServiceImpl implements VacancyService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
     private final CandidateService candidateService;
-    private final OpenVacancyRequestValidator openVacancyRequestValidator;
     private final UpdateVacancyRequestValidator updateVacancyRequestValidator;
     private final VacancyMapper vacancyMapper;
     private final CandidateMapper candidateMapper;
     private final List<VacancyFilter> filters;
 
     public void openVacancy(OpenVacancyRequestDto requestDto) {
-        var project = openVacancyRequestValidator.validateAndGetProject(requestDto);
-        var author = openVacancyRequestValidator.validateAndGetAuthor(requestDto);
-        openVacancyRequestValidator.validateSalary(requestDto);
+        var project = projectService.validateAndGetProject(requestDto);
+        var author = teamMemberService.validateAndGetAuthor(requestDto);
+        validateSalary(requestDto);
 
         var vacancy = vacancyMapper.toVacancy(requestDto);
         vacancy.setCreatedBy(author.getId());
@@ -136,5 +135,11 @@ public class VacancyServiceImpl implements VacancyService {
         }
 
         vacancyRepository.save(vacancy);
+    }
+
+    private void validateSalary(OpenVacancyRequestDto requestDto) {
+        if (requestDto.salary() != null && requestDto.salary() <= 0) {
+            throw new DataValidationException("Negative or null salary is crazy");
+        }
     }
 }
