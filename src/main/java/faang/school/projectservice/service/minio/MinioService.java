@@ -8,7 +8,7 @@ import java.io.InputStream;
 public interface MinioService {
     Resource uploadFile(MultipartFile file, String folder);
 
-    void deleteFile(String key);
+    //void deleteFile(String key);
 
-    InputStream downloadFile(String key);
+    //InputStream downloadFile(String key);
 }

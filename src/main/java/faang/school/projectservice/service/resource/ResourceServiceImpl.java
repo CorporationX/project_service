@@ -22,7 +22,11 @@ public class ResourceServiceImpl implements ResourceService {
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final ResourceMapper resourceMapper;
-    private final MinioService s3Service;
+    private final MinioService minioService;
+
+    //  private String coverImageId;
+    //  galleryFileKeys;
+    //  private List<Resource> resources;
 
     @Override
     @Transactional
@@ -35,7 +39,7 @@ public class ResourceServiceImpl implements ResourceService {
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
         String folder = 1 + "_" + "My project"; //project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = minioService.uploadFile(file, folder);
         resource.setProject(project);
         resource = resourceRepository.save(resource);
 
@@ -47,24 +51,25 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public InputStream downloadResource(Long resourceId) {
-        Resource resource = resourceRepository.findById(resourceId).orElseThrow(
-                () -> new NotFoundException("There is no resource with ID " + resourceId)
-        );
-        return s3Service.downloadFile(resource.getKey());
-    }
-
-    @Override
-    public ResourceDto updateResource(Long resourceId, Long userId, MultipartFile file) {
+    public ResourceDto updateResource(Long resourceId, MultipartFile file) {
 
         return null;
     }
 
     @Override
-    public void deleteResource(Long resourceId, Long userId) {
+    public void deleteResource(Long resourceId) {
 
     }
 
+    @Override
+    public InputStream downloadResource(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId).orElseThrow(
+                () -> new NotFoundException("There is no resource with ID " + resourceId)
+        );
+        return minioService.downloadFile(resource.getKey());
+    }
+
+    /******************************************************************************************************************/
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
 
     }

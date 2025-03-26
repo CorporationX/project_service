@@ -9,9 +9,9 @@ public interface ResourceService {
 
     ResourceDto addResource(Long projectId, MultipartFile file);
 
+    ResourceDto updateResource(Long resourceId, MultipartFile file);
+
+    void deleteResource(Long resourceId);
+
     InputStream downloadResource(Long resourceId);
-
-    ResourceDto updateResource(Long resourceId, Long userId, MultipartFile file);
-
-    void deleteResource(Long resourceId, Long userId);
 }
