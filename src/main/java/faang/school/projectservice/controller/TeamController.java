@@ -21,11 +21,11 @@ public class TeamController {
 
 
     @PostMapping("/upload/{id}")
-    public void upload(@NotNull @RequestBody MultipartFile file,@NotNull @PathVariable Long id) {
+    public void upload(@NotNull @RequestBody MultipartFile file, @NotNull @PathVariable Long id) {
         service.upload(file, id);
     }
 
-    @DeleteMapping("delete/avatar/{id}/{teamMemberId}")
+    @DeleteMapping("delete/avatar/{id}")
     public void delete(@NotNull @PathVariable Long id) {
         service.deleteAvatar(id, userContext.getUserId());
     }
