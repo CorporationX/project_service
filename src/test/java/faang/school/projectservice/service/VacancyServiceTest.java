@@ -40,9 +40,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -495,7 +495,7 @@ class VacancyServiceTest {
 
         var result = vacancyService.getVacancyById(vacancyId);
 
-        assertNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -530,15 +530,15 @@ class VacancyServiceTest {
         var result = vacancyService.getVacancyById(vacancyId);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(vacancy.getId(), result.getId());
-        assertEquals(vacancy.getName(), result.getName());
-        assertEquals(vacancy.getProject().getName(), result.getProjectName());
-        assertEquals(author.getNickname(), result.getCreatedByNickname());
-        assertNotNull(result.getCandidates());
-        assertEquals(candidates.size(), result.getCandidates().size());
-        assertEquals(candidates.get(0).getUsername(), result.getCandidates().get(0).username());
-        assertEquals(candidates.get(0).getCandidateStatus(), result.getCandidates().get(0).candidateStatus());
+        assertFalse(result.isEmpty());
+        assertEquals(vacancy.getId(), result.get().getId());
+        assertEquals(vacancy.getName(), result.get().getName());
+        assertEquals(vacancy.getProject().getName(), result.get().getProjectName());
+        assertEquals(author.getNickname(), result.get().getCreatedByNickname());
+        assertNotNull(result.get().getCandidates());
+        assertEquals(candidates.size(), result.get().getCandidates().size());
+        assertEquals(candidates.get(0).getUsername(), result.get().getCandidates().get(0).username());
+        assertEquals(candidates.get(0).getCandidateStatus(), result.get().getCandidates().get(0).candidateStatus());
         verify(projectService, times(1))
                 .getProjectByIdOrEmpty(project.getId());
         verify(teamMemberService, times(1))

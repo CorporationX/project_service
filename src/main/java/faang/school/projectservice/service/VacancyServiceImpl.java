@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -74,10 +75,10 @@ public class VacancyServiceImpl implements VacancyService {
         return vacancies.map(this::convertVacancyToVacancyDto).toList();
     }
 
-    public VacancyResponseDto getVacancyById(long vacancyId) {
+    public Optional<VacancyResponseDto> getVacancyById(long vacancyId) {
         var vacancy = vacancyRepository.findById(vacancyId);
 
-        return vacancy.map(this::convertVacancyToVacancyDto).orElse(null);
+        return vacancy.map(this::convertVacancyToVacancyDto);
     }
 
     private VacancyResponseDto convertVacancyToVacancyDto(Vacancy vacancy) {

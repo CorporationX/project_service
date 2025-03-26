@@ -6,10 +6,11 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VacancyService {
     void openVacancy(OpenVacancyRequestDto requestDto);
     VacancyResponseDto updateVacancy(UpdateVacancyRequestDto requestDto);
     List<VacancyResponseDto> getFilteredVacancies(FilterVacancyRequestDto filterDto);
-    VacancyResponseDto getVacancyById(long vacancyId);
+    Optional<VacancyResponseDto> getVacancyById(long vacancyId);
 }

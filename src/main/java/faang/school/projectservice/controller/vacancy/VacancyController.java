@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class VacancyController {
         return vacancyService.getFilteredVacancies(filterDto);
     }
 
-    public VacancyResponseDto getVacancyById(long vacancyId) {
+    public Optional<VacancyResponseDto> getVacancyById(long vacancyId) {
         return vacancyService.getVacancyById(vacancyId);
     }
 }
