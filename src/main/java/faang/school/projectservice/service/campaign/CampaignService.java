@@ -1,7 +1,10 @@
 package faang.school.projectservice.service.campaign;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.Campaign.CampaignDto;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.DuplicateTitleException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.campaign.DateStart;
@@ -30,7 +33,8 @@ public class CampaignService {
     private final CampaignMapper campaignMapper;
     private final ProjectRepository projectRepository;
     private final CampaignRepository campaignRepository;
-
+    private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
     @Transactional
     public CampaignDto create(CampaignDto campaignDto, long projectId, long creatorId) {
         checkDuplicateTitle(campaignDto.getTitle(), projectId);
@@ -63,6 +67,8 @@ public class CampaignService {
 
     @Transactional
     public CampaignDto getCampaign(long projectId, long campaignId) {
+        long userId = userContext.getUserIdOrElse(3L);
+        UserDto userDto = userServiceClient.getUser(userId);
         Campaign campaign = validateCampaignNotDeleted(campaignId);
         getProjectByIdAndValidate(projectId);
 

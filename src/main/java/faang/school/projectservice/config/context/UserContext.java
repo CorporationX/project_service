@@ -2,6 +2,8 @@ package faang.school.projectservice.config.context;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class UserContext {
 
@@ -11,8 +13,12 @@ public class UserContext {
         userIdHolder.set(userId);
     }
 
-    public long getUserId() {
-        return userIdHolder.get();
+    public Optional<Long> getUserIdOptional() {
+        return Optional.ofNullable(userIdHolder.get());
+    }
+
+    public long getUserIdOrElse(long fallback) {
+        return userIdHolder.get() != null ? userIdHolder.get() : fallback;
     }
 
     public void clear() {

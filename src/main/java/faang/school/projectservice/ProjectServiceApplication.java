@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableFeignClients
+@EnableFeignClients("faang.school.projectservice.client")
 @EnableJpaAuditing
 public class ProjectServiceApplication {
     public static void main(String[] args) {
