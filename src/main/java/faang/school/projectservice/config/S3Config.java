@@ -27,7 +27,7 @@ public class S3Config {
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
         return AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "<AWS Region>"))
-                .withPathStyleAccessEnabled(true) // Включите, если используете MinIO или аналогичный
+                .withPathStyleAccessEnabled(true)
                 .build();
     }
 }

@@ -29,16 +29,18 @@ public class TeamService {
 
     public void upload(MultipartFile file, Long id) {
         log.info("Начало загрузки аватара для команды с ID: {}", id);
+
         Team team = teamRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Команда не найдена"));
+
         String folder = "teamAvatar" + team.getId();
         Resource resource = s3Service.uploadFile(file, folder);
         resourceRepository.save(resource);
         team.setAvatarKey(resource.getKey());
         teamRepository.save(team);
+
         log.info("Аватар успешно загружен для команды с ID: {}", id);
     }
-
 
     public void deleteAvatar(Long id, Long userId) {
         log.info("Попытка удалить аватар для команды с ID: {} пользователем с ID: {}", id, userId);
