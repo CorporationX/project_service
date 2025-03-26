@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 public interface MinioService {
-    Resource uploadFile(MultipartFile file, String folder);
+    Resource uploadFile(MultipartFile file);
 
     //void deleteFile(String key);
 

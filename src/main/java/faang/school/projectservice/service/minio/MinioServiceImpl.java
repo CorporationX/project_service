@@ -38,32 +38,28 @@ public class MinioServiceImpl implements MinioService {
     private static final int MAX_HORIZONTAL_HEIGHT = 566;
     private static final int MAX_SQUARE_SIZE = 1080;
 
-    @PostConstruct
+    /*@PostConstruct
     public void init() {
         if (!s3Client.doesBucketExistV2(bucketName)) {
             s3Client.createBucket(bucketName);
             log.info("Bucket {} created", bucketName);
         }
-    }
+    }*/
 
     @Override
-    public Resource uploadFile(MultipartFile file, String folder) {
-        // Проверка размера файла
+    public Resource uploadFile(MultipartFile file) {
         long fileSize = file.getSize();
         if (fileSize > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("File size exceeds 5 MB limit");
         }
 
-        // Проверка и сжатие изображения
         File compressedFile = compressImageIfNeeded(file);
 
-        // Метаданные для MinIO
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(compressedFile.length());
         metadata.setContentType(file.getContentType());
-        String key = String.format("%s/%d_%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
+        String key = String.format("%s/%d_%s", bucketName, System.currentTimeMillis(), file.getOriginalFilename());
 
-        // Загрузка в MinIO
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName, key, new FileInputStream(compressedFile), metadata);
@@ -74,12 +70,11 @@ public class MinioServiceImpl implements MinioService {
             throw new RuntimeException("Upload failed", ex);
         }
 
-        // Создание ресурса
         Resource resource = new Resource();
         resource.setKey(key);
         resource.setSize(BigInteger.valueOf(fileSize));
-        resource.setCreatedAt(LocalDateTime.now());
-        resource.setUpdatedAt(LocalDateTime.now());
+        //resource.setCreatedAt(LocalDateTime.now());
+        //resource.setUpdatedAt(LocalDateTime.now());
         resource.setStatus(ResourceStatus.ACTIVE);
         resource.setType(ResourceType.getResourceType(file.getContentType()));
         resource.setName(file.getOriginalFilename());

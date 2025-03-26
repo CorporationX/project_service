@@ -28,7 +28,7 @@ public class ResourceServiceImpl implements ResourceService {
     //  galleryFileKeys;
     //  private List<Resource> resources;
 
-    @Override
+    /*@Override
     @Transactional
     public ResourceDto addResource(Long projectId, MultipartFile file) {
         Project project = projectRepository.findById(projectId).orElseThrow(
@@ -68,9 +68,7 @@ public class ResourceServiceImpl implements ResourceService {
         );
         return minioService.downloadFile(resource.getKey());
     }
-
-    /******************************************************************************************************************/
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
 
-    }
+    }*/
 }
