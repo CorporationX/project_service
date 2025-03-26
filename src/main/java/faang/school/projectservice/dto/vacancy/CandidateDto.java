@@ -7,8 +7,12 @@ import org.springframework.lang.Nullable;
 public record CandidateDto(
         long id,
         long userId,
-        @NotNull String username,
-        @Nullable String resumeDocKey,
-        @Nullable String coverLetter,
-        @NotNull CandidateStatus candidateStatus) {
+        @NotNull
+        String username,
+        @Nullable
+        String resumeDocKey,
+        @Nullable
+        String coverLetter,
+        @NotNull
+        CandidateStatus candidateStatus) {
 }
