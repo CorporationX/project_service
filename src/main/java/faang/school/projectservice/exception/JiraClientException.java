@@ -1,16 +1,14 @@
 package faang.school.projectservice.exception;
 
 import lombok.Getter;
-import org.springframework.web.ErrorResponse;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class JiraClientException extends RuntimeException {
-    private final ErrorResponse errorResponse;
-    private final Integer httpCode;
+    private final HttpStatusCode statusCode;
 
-    public JiraClientException(ErrorResponse errorResponse, Integer httpCode) {
-        super("Error in Jira API");
-        this.errorResponse = errorResponse;
-        this.httpCode = httpCode;
+    public JiraClientException(String message, HttpStatusCode statusCode) {
+        super(message);
+        this.statusCode = statusCode;
     }
 }

@@ -48,9 +48,13 @@ public class JiraWebClientConfig {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             if (clientResponse.statusCode().isError()) {
                 return clientResponse
-                        .bodyToMono(ErrorResponse.class)
-                        .flatMap(error -> Mono.error(
-                                new JiraClientException(error, clientResponse.statusCode().value())
+                        .bodyToMono(String.class)
+                        .defaultIfEmpty("No error details")
+                        .flatMap(errorBody -> Mono.error(
+                                new JiraClientException(
+                                        "Jira API error: " + errorBody,
+                                        clientResponse.statusCode()
+                                )
                         ));
             }
             return Mono.just(clientResponse);

@@ -8,11 +8,12 @@ import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.jira.IssueFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.util.validation.JiraValidation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,17 +35,23 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public IssueCreateResponseDto createIssue(IssueRequestDto issueRequestDto) {
+        JiraValidation.validateCreateIssue(issueRequestDto);
         log.info("Creating issue using JiraClient");
         return jiraClient.createIssue(issueRequestDto);
     }
 
     @Override
     public void updateIssue(String key, IssueUpdateDto issueUpdateDto) {
-        log.info("Creating issue link using JiraClient");
-        jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
+        JiraValidation.validateIssueKey(key);
+        if (issueUpdateDto.getFields().getIssueLinks() != null) {
+            log.info("Creating issue link using JiraClient");
+            jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
+        }
 
-        log.info("Setting transition using JiraClient");
-        jiraClient.setTransitionByKey(key, issueUpdateDto.getTransition());
+        if (issueUpdateDto.getTransition() != null) {
+            log.info("Setting transition using JiraClient");
+            jiraClient.setTransitionByKey(key, issueUpdateDto.getTransition());
+        }
 
         log.info("Updating issue using JiraClient");
         issueUpdateDto.getFields().setIssueLinks(null);
@@ -59,7 +66,9 @@ public class JiraServiceImpl implements JiraService {
                 .map(issueFilter -> issueFilter.createJql(issueFilterDto))
                 .collect(Collectors.joining(" AND "));
         jql += " AND project = " + projectKey;
-
+        if (jql.charAt(0) == ' ') {
+            throw new IllegalArgumentException("No applicable filters set");
+        }
         log.info("Getting issues with filter using JiraClient");
         return jiraClient.getInfoByJql(jql).getIssues();
     }
@@ -77,6 +86,7 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public IssueResponseDto getIssueByKey(String key) {
+        JiraValidation.validateIssueKey(key);
         log.info("Getting issue by key using JiraClient");
         return jiraClient.getIssueByKey(key);
     }
@@ -85,7 +95,8 @@ public class JiraServiceImpl implements JiraService {
     @Transactional
     public ProjectResponseDto registerProject(Long id, String key) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Project with id %d not found".formatted(id)));
+                .orElseThrow(() -> new ProjectNotFoundException("Project with id %d not found".formatted(id)));
+        JiraValidation.validateProjectKey(key);
         project.setJiraKey(key);
         return projectMapper.toProjectResponseDto(project);
     }
@@ -93,7 +104,7 @@ public class JiraServiceImpl implements JiraService {
     private String getProjectKey(Long projectId) {
         return projectRepository.findById(projectId)
                 .map(Project::getJiraKey)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new ProjectNotFoundException(
                         "Project with id %d not connected to jira".formatted(projectId)));
     }
 }

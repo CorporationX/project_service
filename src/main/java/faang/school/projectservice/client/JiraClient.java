@@ -8,8 +8,10 @@ import faang.school.projectservice.dto.jira.update.IssueLinkDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 import faang.school.projectservice.dto.jira.update.TransitionDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,9 @@ public class JiraClient {
         return jiraWebClient.get()
                 .uri("/issue/{key}", issueKey)
                 .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND,
+                        response -> Mono.error(new IllegalArgumentException(
+                                "Issue with key " + issueKey + " not found")))
                 .bodyToMono(IssueResponseDto.class)
                 .block();
     }
