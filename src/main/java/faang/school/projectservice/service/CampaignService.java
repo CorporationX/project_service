@@ -71,7 +71,7 @@ public class CampaignService {
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> new CampaignNotFoundException(ExceptionMessage.CAMPAIGN_NOT_FOUND, id));
 
-        return campaignMapper.toDto(campaignRepository.save(campaign));
+        return campaignMapper.toDto(campaign);
     }
 
     public List<CampaignUpdateDto> getFilteredCampaigns(CampaignFilterDto filterDto) {

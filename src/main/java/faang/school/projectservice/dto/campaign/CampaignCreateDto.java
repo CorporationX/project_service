@@ -4,11 +4,13 @@ import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.CampaignStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder
 public class CampaignCreateDto {
     @NotNull(message = "Title is required")
     @Size(max = 128, message = "Title should not be greater than 128 characters")

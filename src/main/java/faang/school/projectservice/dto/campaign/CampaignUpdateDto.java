@@ -3,11 +3,13 @@ package faang.school.projectservice.dto.campaign;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.CampaignStatus;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder
 public class CampaignUpdateDto {
     @NotNull(message = "ID is required")
     private Long id;
