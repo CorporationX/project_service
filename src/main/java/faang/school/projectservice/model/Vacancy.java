@@ -7,6 +7,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +29,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "vacancy")
@@ -35,6 +37,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Vacancy {
 
     @Id
@@ -46,6 +49,10 @@ public class Vacancy {
 
     @NotBlank
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private TeamRole position;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
@@ -84,8 +91,4 @@ public class Vacancy {
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
-
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TeamRole position;
 }

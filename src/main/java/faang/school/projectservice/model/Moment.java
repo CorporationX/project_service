@@ -1,5 +1,9 @@
 package faang.school.projectservice.model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,9 +16,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -50,6 +51,8 @@ public class Moment {
     private List<Project> projects;
 
     @ElementCollection
+    @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
+    @Column(name = "team_member_id")
     private List<Long> userIds;
 
     @Column(name = "image_id")

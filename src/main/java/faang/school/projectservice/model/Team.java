@@ -35,4 +35,7 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @Column(name = "avatar_key")
+    private String avatarKey;
 }

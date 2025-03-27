@@ -1,5 +1,7 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.initiative;
 
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,33 +28,49 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "task")
+@Table(name = "initiative")
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class Task {
+public class Initiative {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false, length = 4096)
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "curator_id",  nullable = false)
+    private TeamMember curator;
+
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskStatus status;
+    private InitiativeStatus status;
 
-    @Column(name = "performer_user_id", nullable = false)
-    private Long performerUserId;
+    @ManyToMany
+    @JoinTable(
+            name = "initiative_project_stages",
+            joinColumns = @JoinColumn(name = "initiative_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_stage_id")
+    )
+    private List<Stage> stages;
 
-    @Column(name = "reporter_user_id", nullable = false)
-    private Long reporterUserId;
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
-    @Column(name = "minutes_tracked")
-    private Integer minutesTracked;
+    @ManyToMany
+    @JoinTable(
+            name = "initiative_project",
+            joinColumns = @JoinColumn(name = "initiative_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id")
+    )
+    private List<Project> sharingProjects;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -63,25 +81,4 @@ public class Task {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "parent_task_id")
-    private Task parentTask;
-
-    @ManyToMany
-    @JoinTable(
-            name = "task_linked_tasks",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "linked_task_id")
-    )
-    private List<Task> linkedTasks;
-
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
-
-    @ManyToOne
-    @JoinColumn(name = "stage_id")
-    private Stage stage;
 }
-

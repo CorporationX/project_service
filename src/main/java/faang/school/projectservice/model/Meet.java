@@ -14,65 +14,58 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "project_resource")
-@Data
+@Table(name = "meet")
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Resource {
+@EqualsAndHashCode(exclude = "id")
+public class Meet {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "title", length = 128, nullable = false)
+    private String title;
 
-    private String key;
+    @Column(name = "description", length = 512, nullable = false)
+    private String description;
 
-    private BigInteger size;
-
-    @ElementCollection(targetClass = TeamRole.class)
-    @CollectionTable(name = "resource_allowed_roles",
-            joinColumns = @JoinColumn(name = "resource_id"))
-    @Column(name = "role_id")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private List<TeamRole> allowedRoles;
+    private MeetStatus status;
 
-    @Enumerated(EnumType.STRING)
-    private ResourceType type;
+    @Column(name = "creator_id", nullable = false)
+    private long creatorId;
 
-    @Enumerated(EnumType.STRING)
-    private ResourceStatus status;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @ElementCollection
+    @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))
+    @Column(name = "user_id")
+    private List<Long> userIds;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "starts_at", nullable = false)
+    private LocalDateTime startsAt;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private TeamMember createdBy;
-
-    @ManyToOne
-    @JoinColumn(name = "updated_by")
-    private TeamMember updatedBy;
-
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
 }

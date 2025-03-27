@@ -1,18 +1,18 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-@Repository
-@RequiredArgsConstructor
-public class TeamMemberRepository {
-    private final TeamMemberJpaRepository jpaRepository;
+import java.util.List;
 
-    public TeamMember findById(Long id) {
-        return jpaRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
-    }
+public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
+    @Query(
+        "SELECT tm FROM TeamMember tm JOIN tm.team t " +
+        "WHERE tm.userId = :userId " +
+        "AND t.project.id = :projectId"
+    )
+    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+
+    List<TeamMember> findByUserId(long userId);
 }

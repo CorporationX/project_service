@@ -28,13 +28,19 @@ public class Donation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Long paymentNumber;
+
     private BigDecimal amount;
+
     private LocalDateTime donationTime;
+
     @ManyToOne
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
+
     @Enumerated(EnumType.STRING)
     private Currency currency;
+
     private Long userId;
 }

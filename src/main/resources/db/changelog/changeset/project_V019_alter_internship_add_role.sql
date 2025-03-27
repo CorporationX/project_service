@@ -1,0 +1,2 @@
+ALTER TABLE internship
+ADD COLUMN role VARCHAR(20) NOT NULL;

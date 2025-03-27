@@ -17,4 +17,5 @@ public record PaymentRequest (
 
         @NotNull
         Currency targetCurrency
-) {}
+) {
+}
