@@ -51,7 +51,7 @@ public class JiraValidation {
     }
 
     public static void validateProjectKey(String key) {
-        if (key == null || key.length() < 3 || key.charAt(0) == '0') {
+        if (key == null || key.length() < 3 || key.charAt(0) == ' ') {
             log.error(INVALID_PROJECT_KEY);
             throw new IllegalArgumentException(INVALID_PROJECT_KEY);
         }

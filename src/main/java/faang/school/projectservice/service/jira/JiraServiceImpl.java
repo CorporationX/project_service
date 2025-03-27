@@ -94,9 +94,9 @@ public class JiraServiceImpl implements JiraService {
     @Override
     @Transactional
     public ProjectResponseDto registerProject(Long id, String key) {
+        JiraValidation.validateProjectKey(key);
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException("Project with id %d not found".formatted(id)));
-        JiraValidation.validateProjectKey(key);
         project.setJiraKey(key);
         return projectMapper.toProjectResponseDto(project);
     }
