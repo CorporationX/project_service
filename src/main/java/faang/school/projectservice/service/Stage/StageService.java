@@ -17,7 +17,12 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.repository.*;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.StageRolesRepository;
+import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +81,6 @@ public class StageService {
         }
         if (project.getStatus().equals(ProjectStatus.COMPLETED)
                 || project.getStatus().equals(ProjectStatus.CANCELLED)) {
-            log.error("Project status is " + project.getStatus());
             throw new DataValidException("Project status is " + project.getStatus());
         }
         if (stageDtoCreate == null) {
@@ -111,7 +115,7 @@ public class StageService {
                 .stageName(stageDTO.getStageName())
                 .tasks(tasks)
                 .project(projectRepository.findById(stageDTO.getProjectId()).orElseThrow(
-                        ()-> new EntityNotFoundException("Project not found")))
+                        () -> new EntityNotFoundException("Project not found")))
                 .stageRoles(stage.getStageRoles())
                 .executors(stage.getExecutors())
                 .build();
@@ -166,6 +170,7 @@ public class StageService {
         }
         return executors;
     }
+
     private List<TeamMember> findCandidates(Map<Long, List<TeamRole>> executors, Map<TeamRole, Integer> remainingRoles, Set<Long> invitedIds) {
         List<TeamMember> selected = new ArrayList<>();
 

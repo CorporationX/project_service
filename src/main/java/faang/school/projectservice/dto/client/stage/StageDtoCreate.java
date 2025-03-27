@@ -1,8 +1,6 @@
 package faang.school.projectservice.dto.client.stage;
 
 import faang.school.projectservice.model.TeamRole;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
