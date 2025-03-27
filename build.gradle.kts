@@ -66,6 +66,9 @@ dependencies {
     implementation("org.apache.httpcomponents.core5:httpcore5:5.2")
 
     implementation ("net.coobird:thumbnailator:0.4.14")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
+    implementation("org.apache.james:apache-mime4j-core:0.8.12")
+
 
 }
 

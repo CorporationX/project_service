@@ -4,9 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.service.TeamService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +19,7 @@ public class TeamController {
     private final TeamService service;
     private final UserContext userContext;
 
-
-    @PostMapping("/upload/{id}")
+    @PostMapping("/upload/avatar/{id}")
     public void upload(@NotNull @RequestBody MultipartFile file, @NotNull @PathVariable Long id) {
         service.upload(file, id);
     }

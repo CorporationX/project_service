@@ -13,14 +13,10 @@ import faang.school.projectservice.service.s3.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +27,7 @@ public class TeamService {
     private final S3Service s3Service;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final ResizeImagesService resizeImagesService;
 
     public void upload(MultipartFile file, Long id) {
         log.info("Начало загрузки аватара для команды с ID: {}", id);
@@ -42,24 +39,12 @@ public class TeamService {
         Team team = teamRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Команда не найдена"));
 
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            Thumbnails.of(file.getInputStream())
-                    .size(512, 512) // Устанавливаем максимальный размер 512x512
-                    .keepAspectRatio(true) // Сохраняем пропорции
-                    .outputFormat("jpg") // Устанавливаем формат (можно изменить на нужный)
-                    .toOutputStream(outputStream); // Записываем в ByteArrayOutputStream
-
-            InputStream resizedImageStream = new ByteArrayInputStream(outputStream.toByteArray()); // Создаем InputStream из массива байтов
-
-        } catch (IOException e) {
-            log.error("Ошибка при изменении размера изображения: {}", e.getMessage());
-            throw new RuntimeException("Ошибка при обработке изображения");
-        }
-
+        BufferedImage image = resizeImagesService.getImageFromMultiPartFile(file);
+        BufferedImage resizedImage = resizeImagesService.resizeImage(image, image.getWidth(), image.getHeight());
+        MultipartFile customFile = resizeImagesService.convertImageToMultipartFile(file, resizedImage);
 
         String folder = "teamAvatar" + team.getId();
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = s3Service.uploadFile(customFile, folder);
         resourceRepository.save(resource);
         team.setAvatarKey(resource.getKey());
         teamRepository.save(team);
