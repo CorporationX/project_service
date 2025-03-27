@@ -1,9 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.campaign.CampaignCreateDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.exception.CampaignCreatorModificationException;
 import faang.school.projectservice.exception.CampaignNotFoundException;
+import faang.school.projectservice.exception.DateParseException;
+import faang.school.projectservice.exception.EmptyFilterException;
 import faang.school.projectservice.exception.ExceptionMessage;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
@@ -31,7 +34,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -196,6 +201,47 @@ public class CampaignServiceTest {
         assertEquals(foundDto, campaignUpdateDto);
     }
 
+    @Test
+    @DisplayName("Negative: error when filter is empty")
+    void testGetFilteredCampaignsNegativeEmptyFilter() {
+        CampaignFilterDto campaignFilterDto = new CampaignFilterDto(null, null, null);
+
+        assertException(() -> campaignService.getFilteredCampaigns(campaignFilterDto), EmptyFilterException.class,
+                ExceptionMessage.EMPTY_FILTER.getMessage());
+    }
+
+    @Test
+    @DisplayName("Negative: error with invalid date format")
+    void testGetFilteredCampaignsNegativeInvalidDate() {
+        CampaignFilterDto campaignFilterDto = new CampaignFilterDto("20-02-2000", null, null);
+
+        assertException(() -> campaignService.getFilteredCampaigns(campaignFilterDto), DateParseException.class,
+                ExceptionMessage.DATE_PARSE.formatMessage(campaignFilterDto.startDate()));
+    }
+
+    @Test
+    @DisplayName("Positive: successful receipt of campaigns")
+    void testGetFilteredCampaignsSuccess() {
+        CampaignFilterDto campaignFilterDto = new CampaignFilterDto("2000-02-20", CampaignStatus.ACTIVE, 1L);
+        List<Campaign> campaigns = List.of(
+                createCampaign(1L),
+                createCampaign(2L),
+                createCampaign(3L)
+        );
+        List<CampaignUpdateDto> campaignUpdateDtos = createCampaignUpdateDtos(campaigns);
+
+        when(campaignRepository.findCampaignsByFilters(any(CampaignStatus.class), any(Long.class), any(LocalDateTime.class)))
+                .thenReturn(campaigns);
+        when(campaignMapper.toDto(any(Campaign.class))).thenAnswer(invocation -> {
+            Campaign campaign = invocation.getArgument(0);
+            return createCampaignUpdateDto(campaign.getId());
+        });
+
+        List<CampaignUpdateDto> result = campaignService.getFilteredCampaigns(campaignFilterDto);
+
+        assertEquals(campaignUpdateDtos, result);
+    }
+
     private void assertException(Executable executable, Class<? extends Exception> expectedException, String expectedMessage) {
         var exception = assertThrows(expectedException, executable);
 
@@ -211,9 +257,23 @@ public class CampaignServiceTest {
                 .build();
     }
 
+    private List<CampaignUpdateDto> createCampaignUpdateDtos(List<Campaign> campaigns) {
+        return campaigns.stream()
+                .map(campaign -> createCampaignUpdateDto(campaign.getId()))
+                .toList();
+    }
+
     private CampaignUpdateDto createCampaignUpdateDto() {
+        return buildBaseCampaignUpdateDto(1L);
+    }
+
+    private CampaignUpdateDto createCampaignUpdateDto(Long id) {
+        return buildBaseCampaignUpdateDto(id);
+    }
+
+    private CampaignUpdateDto buildBaseCampaignUpdateDto(Long id) {
         return CampaignUpdateDto.builder()
-                .id(1L)
+                .id(id)
                 .title("Test title")
                 .description("Test description update")
                 .projectId(1L)
@@ -229,6 +289,12 @@ public class CampaignServiceTest {
                 .createdBy(1L)
                 .updatedBy(1L)
                 .build();
+    }
+
+    private Campaign createCampaign(Long id) {
+        Campaign campaign = new Campaign();
+        campaign.setId(id);
+        return campaign;
     }
 
     private Project createProject(Long id) {
