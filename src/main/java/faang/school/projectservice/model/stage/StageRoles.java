@@ -39,4 +39,6 @@ public class StageRoles {
     @ManyToOne
     @JoinColumn(name = "project_stage_id", nullable = false)
     private Stage stage;
+
+
 }
