@@ -74,7 +74,7 @@ public class TaskController {
         Long userId = userContext.getUserId();
         log.info("Получен запрос на получение отфильтрованных задач проекта {} от пользователя с ID: {}", projectId, userId);
         try {
-            List<TaskDto> tasks = taskService.getFilteredTasks(projectId, status, performerId, keyword, userId);
+            List<TaskDto> tasks = taskService.getFilteredTasks(projectId, status, keyword);
             return ResponseEntity.ok(tasks);
         } catch (SecurityException e) {
             log.warn("Пользователь с ID {} не имеет доступа к задачам проекта {}", userId, projectId);

@@ -47,8 +47,16 @@ public class TaskService {
     }
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
-    public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId, String keyword, Long userId) {
-        return null;
+    // (буду использовать по ключевому слову).
+    public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, String keyword) {
+        List<Task> tasks = taskRepository.findAll();
+        List<Task> filteredTasks = tasks.stream()
+                .filter(task -> task.getProject().equals(projectId))
+                /// Я пока не могу понять как тут прикрутить фильтры по ключевому слову
+                .toList();
+        return filteredTasks.stream()
+                .map(taskMapper::taskToTaskDto)
+                .toList();
     }
 
     //TODO: "4. Получить все задачи проекта."!!! пока не могу понять как сделать с валидацией
@@ -71,5 +79,4 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
         return taskMapper.taskToTaskDto(task);
     }
-
 }
