@@ -114,7 +114,7 @@ tasks.jacocoTestCoverageVerification {
             element = "CLASS"
             includes = listOf(
                 "faang.school.projectservice.filter.*",
-                "faang.school.projectservice.service.VacancyServiceImpl",
+                "faang.school.projectservice.service.",
                 "faang.school.projectservice.validator.*",
             )
 
