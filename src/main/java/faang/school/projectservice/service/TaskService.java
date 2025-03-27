@@ -18,6 +18,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,8 +43,7 @@ public class TaskService {
 
     public TaskResponse createTask(TaskCreateRequest taskDto) {
         Long userId = checkUserId();
-        Project project = projectRepository.findById(taskDto.projectId()).orElseThrow(() ->
-                new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, PROJECT_ENTITY_NAME, taskDto.projectId()));
+        Project project = findProjectById(taskDto.projectId());
         checkUserOnMembership(userId, project);
         checkPerformerExisting(taskDto.performerUserId());
 
@@ -61,8 +61,7 @@ public class TaskService {
 
     public TaskResponse updateTask(TaskUpdateRequest taskDto) {
         Long userId = checkUserId();
-        Task task = taskRepository.findById(taskDto.id()).orElseThrow(() ->
-                new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, TASK_ENTITY_NAME, taskDto.id()));
+        Task task = findTaskById(taskDto.id());
         Project project = task.getProject();
 
         if (taskDto.performerUserId() != null) {
@@ -81,19 +80,49 @@ public class TaskService {
     }
 
     public List<TaskResponse> getAllTasksByFilters(Long projectId, TaskFilterDto filter) {
-        return null;
+        validateUserAccess(projectId);
+
+        Specification<Task> specifications = filters.stream()
+                .filter(taskFilter -> taskFilter.isApplicable(filter))
+                .map(taskFilter -> taskFilter.apply(filter))
+                .reduce(Specification::and)
+                .orElse(null);
+
+        List<Task> tasks = specifications != null
+                ? taskRepository.findAllByProjectId(projectId, specifications)
+                : taskRepository.findAllByProjectId(projectId);
+
+        return taskResponseMapper.listEntityToListDto(tasks);
     }
 
     public List<TaskResponse> getAllTasks(Long projectId) {
-        return null;
+        validateUserAccess(projectId);
+        return taskResponseMapper.listEntityToListDto(taskRepository.findAllByProjectId(projectId));
     }
 
     public TaskResponse getTaskById(Long taskId) {
-        return null;
+        return taskResponseMapper.entityToDto(findTaskById(taskId));
+    }
+
+    private void checkPerformerExisting(Long userId) {
+        if (userServiceClient.getUser(userId) == null) {
+            throw new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, USER_ENTITY_NAME, userId);
+        }
+    }
+
+    private void validateUserAccess(Long projectId) {
+        Long userId = checkUserId();
+        Project project = findProjectById(projectId);
+        checkUserOnMembership(userId, project);
     }
 
     private Long checkUserId() {
         return userServiceClient.getUser(userContext.getUserId()).id();
+    }
+
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(() ->
+                new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, PROJECT_ENTITY_NAME, projectId));
     }
 
     private void checkUserOnMembership(Long userId, Project project) {
@@ -106,16 +135,9 @@ public class TaskService {
         }
     }
 
-    private void checkPerformerExisting(Long userId) {
-        if (userServiceClient.getUser(userId) == null) {
-            throw new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, USER_ENTITY_NAME, userId);
-        }
-    }
-
     private void setParentTask(Task task, Long parentTaskId) {
         if (parentTaskId != null) {
-            Task parentTask = taskRepository.findById(parentTaskId).orElseThrow(() ->
-                    new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, TASK_ENTITY_NAME, parentTaskId));
+            Task parentTask = findTaskById(parentTaskId);
             task.setParentTask(parentTask);
         }
     }
@@ -125,5 +147,10 @@ public class TaskService {
             List<Task> linkedTasks = taskRepository.findAllById(linkedTasksIds);
             task.setLinkedTasks(linkedTasks);
         }
+    }
+
+    private Task findTaskById(Long taskId) {
+        return taskRepository.findById(taskId).orElseThrow(() ->
+                new EntityNotFoundException(MESSAGE_ENTITY_NOT_FOUND, TASK_ENTITY_NAME, taskId));
     }
 }

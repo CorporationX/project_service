@@ -10,11 +10,12 @@ public class TaskStatusFilter implements TaskFilter {
 
     @Override
     public boolean isApplicable(TaskFilterDto filter) {
-        return true;
+        return filter.status() != null;
     }
 
     @Override
     public Specification<Task> apply(TaskFilterDto filter) {
-        return null;
+        return ((root, query, builder) ->
+                builder.equal(root.get("status"), filter.status()));
     }
 }

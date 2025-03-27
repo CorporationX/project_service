@@ -10,11 +10,12 @@ public class TaskPerformerIdFilter implements TaskFilter {
 
     @Override
     public boolean isApplicable(TaskFilterDto filter) {
-        return true;
+        return filter.performerId() != null;
     }
 
     @Override
     public Specification<Task> apply(TaskFilterDto filter) {
-        return null;
+        return (root, query, builder) ->
+                builder.equal(root.get("performerUserId"), filter.performerId());
     }
 }

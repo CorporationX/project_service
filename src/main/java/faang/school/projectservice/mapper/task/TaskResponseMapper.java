@@ -18,6 +18,8 @@ public interface TaskResponseMapper {
     @Mapping(target = "linkedTasksIds", source = "linkedTasks", qualifiedByName = "mapLinkedTasksToIds")
     TaskResponse entityToDto(Task task);
 
+    List<TaskResponse> listEntityToListDto(List<Task> tasks);
+
     @Named("mapParentTaskToId")
     default Long mapParentTaskToId(Task parentTask) {
         return parentTask != null
