@@ -8,5 +8,4 @@ import org.mapstruct.Mapper;
 public interface TaskMapper {
     TaskDto taskToTaskDto(Task task);
     Task taskDtoToTask(TaskDto taskDto);
-
 }
