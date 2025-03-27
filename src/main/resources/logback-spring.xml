@@ -6,7 +6,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n
+                %d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -14,7 +14,7 @@
     <appender name="COLOR_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %d{HH:mm:ss.SSS} %blue([%thread]) %green(%-5level) %cyan(%logger{20}) - %msg%n
+                %d{HH:mm:ss.SSS} %blue([%thread]) %green(%-5level) %cyan(%logger) - %msg%n
             </pattern>
         </encoder>
     </appender>

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.task;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.TaskStatus;
 import lombok.Builder;
 
@@ -13,8 +14,13 @@ public record TaskResponse(
         TaskStatus status,
         Long performerUserId,
         Long reporterUserId,
+
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime createdAt,
+
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime deadline,
+
         Long parentTaskId,
         List<Long> linkedTasksIds
 ) {
