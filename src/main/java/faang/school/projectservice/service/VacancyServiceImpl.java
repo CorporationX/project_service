@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DatabaseCorruptedException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.CandidateMapper;
@@ -37,8 +38,13 @@ public class VacancyServiceImpl implements VacancyService {
     private final List<VacancyFilter> filters;
 
     public void openVacancy(OpenVacancyRequestDto requestDto) {
-        var project = openVacancyRequestValidator.validateAndGetProject(requestDto);
-        var author = openVacancyRequestValidator.validateAndGetAuthor(requestDto);
+        var project = projectService.getProjectByIdOrEmpty(requestDto.projectId())
+                .orElseThrow(() -> new DataValidationException(
+                        "Project with id %d is not found".formatted(requestDto.projectId())));
+        var author = teamMemberService.getTeamMemberById(requestDto.authorId())
+                .orElseThrow(() -> new DataValidationException(
+                        "Author with id %d is not found".formatted(requestDto.authorId())));
+        openVacancyRequestValidator.validateAuthor(author);
         openVacancyRequestValidator.validateSalary(requestDto);
 
         var vacancy = vacancyMapper.toVacancy(requestDto);
@@ -51,8 +57,13 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Transactional
     public VacancyResponseDto updateVacancy(UpdateVacancyRequestDto requestDto) {
-        var vacancy = updateVacancyRequestValidator.validateAndGetVacancy(requestDto);
-        updateVacancyRequestValidator.validateUpdaterRole(requestDto);
+        var vacancy = vacancyRepository.findById(requestDto.vacancyId())
+                .orElseThrow(() -> new DataValidationException(
+                        "Vacancy with id '%d' is not found".formatted(requestDto.vacancyId())));
+        var updater = teamMemberService.getTeamMemberById(requestDto.teamMemberUpdaterId())
+                .orElseThrow(() -> new DataValidationException(
+                        "Team member with id %d is not found".formatted(requestDto.teamMemberUpdaterId())));
+        updateVacancyRequestValidator.validateUpdaterRole(updater);
 
         var attachedToProjectCandidates = candidateService.getAllCandidatesAttachedToProjectVacancy(
                 vacancy.getId(),
@@ -101,8 +112,7 @@ public class VacancyServiceImpl implements VacancyService {
         }
 
         var lastUpdater = teamMemberService.getTeamMemberById(lastUpdaterId);
-        lastUpdater.ifPresent(
-                teamMember -> vacancyDto.setUpdatedByNickname(teamMember.getNickname()));
+        lastUpdater.ifPresent(teamMember -> vacancyDto.setUpdatedByNickname(teamMember.getNickname()));
     }
 
     private void setVacancyAuthorNickname(Vacancy vacancy, VacancyResponseDto vacancyDto) {
@@ -131,8 +141,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancyMapper.update(vacancy, requestDto);
 
         if (vacancy.getStatus().equals(VacancyStatus.CLOSED)) {
-            currentAcceptedCandidates.forEach(
-                    candidate -> candidate.setCandidateStatus(CandidateStatus.ACCEPTED));
+            currentAcceptedCandidates.forEach(candidate -> candidate.setCandidateStatus(CandidateStatus.ACCEPTED));
         }
 
         vacancyRepository.save(vacancy);

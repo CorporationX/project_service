@@ -57,7 +57,6 @@ public class NameFilterTest {
         var filterDto = new FilterVacancyRequestDto(null, "[a-z ]+");
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);
-
         var result = nameFilter.apply(source, filterDto);
 
         assertIterableEquals(expectedItems, result.toList());

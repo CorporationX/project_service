@@ -24,7 +24,6 @@ public class PositionFilterTest {
     @Test
     public void shouldIsApplicable_returnsFalse_whenPositionIsNull() {
         var filterDto = new FilterVacancyRequestDto(null, null);
-
         var result = positionFilter.isApplicable(filterDto);
 
         assertFalse(result);
@@ -33,7 +32,6 @@ public class PositionFilterTest {
     @Test
     public void shouldIsApplicable_returnsTrue_whenPositionIsPresented() {
         var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
-
         var result = positionFilter.isApplicable(filterDto);
 
         assertTrue(result);
@@ -44,7 +42,6 @@ public class PositionFilterTest {
         var filterDto = new FilterVacancyRequestDto(TeamRole.ANALYST, null);
         var expectedItems = generateExpectedItems();
         var source = generateSource(expectedItems);
-
         var result = positionFilter.apply(source, filterDto);
 
         assertIterableEquals(expectedItems, result.toList());

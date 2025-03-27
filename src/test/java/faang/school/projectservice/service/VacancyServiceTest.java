@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,56 +86,51 @@ class VacancyServiceTest {
 
     @BeforeEach
     public void setUp() {
-        vacancyService = new VacancyServiceImpl(
-                vacancyRepository,
-                projectService,
-                teamMemberService,
-                candidateService,
-                openVacancyRequestValidator,
-                updateVacancyRequestValidator,
-                vacancyMapper,
-                candidateMapper,
-                List.of(vacancyFilter1, vacancyFilter2)
-        );
+        vacancyService = new VacancyServiceImpl(vacancyRepository, projectService, teamMemberService, candidateService,
+                openVacancyRequestValidator, updateVacancyRequestValidator, vacancyMapper, candidateMapper,
+                List.of(vacancyFilter1, vacancyFilter2));
     }
 
     @Test
-    public void shouldOpenVacancy_throw_whenProjectValidationIsFailed() {
-        var requestDto = createOpenVacancyRequestDto(0, 1, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto))
-                .thenThrow(new DataValidationException("Invalid project"));
+    public void shouldOpenVacancy_throw_whenProjectIdIsNotPresented() {
+        var projectId = 0;
+        var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
+        when(projectService.getProjectByIdOrEmpty(projectId)).thenReturn(Optional.empty());
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
-                "Invalid project");
+        assertThrows(DataValidationException.class, () -> vacancyService.openVacancy(requestDto));
+    }
+
+    @Test
+    public void shouldVOpenVacancy_throw_whenAuthorIdIsNotPresented() {
+        var authorId = 0;
+        var requestDto = createOpenVacancyRequestDto(1, authorId, null);
+        when(projectService.getProjectByIdOrEmpty(requestDto.projectId())).thenReturn(Optional.of(new Project()));
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class, () -> vacancyService.openVacancy(requestDto));
     }
 
     @Test
     public void shouldOpenVacancy_throw_whenAuthorValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto))
+        when(projectService.getProjectByIdOrEmpty(requestDto.projectId())).thenReturn(Optional.of(new Project()));
+        when(teamMemberService.getTeamMemberById(requestDto.authorId()))
                 .thenThrow(new DataValidationException("Invalid author"));
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
+        assertThrowsExactly(DataValidationException.class, () -> vacancyService.openVacancy(requestDto),
                 "Invalid author");
     }
 
     @Test
     public void shouldOpenVacancy_throw_whenSalaryValidationIsFailed() {
         var requestDto = createOpenVacancyRequestDto(1, 0, null);
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(new Project());
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(new TeamMember());
-        Mockito.doThrow(new DataValidationException("Invalid salary")).
-                when(openVacancyRequestValidator)
+        when(projectService.getProjectByIdOrEmpty(requestDto.projectId())).thenReturn(Optional.of(new Project()));
+        when(teamMemberService.getTeamMemberById(requestDto.authorId())).thenReturn(Optional.of(new TeamMember()));
+        Mockito.doThrow(new DataValidationException("Invalid salary"))
+                .when(openVacancyRequestValidator)
                 .validateSalary(requestDto);
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.openVacancy(requestDto),
+        assertThrowsExactly(DataValidationException.class, () -> vacancyService.openVacancy(requestDto),
                 "Invalid salary");
     }
 
@@ -146,10 +142,10 @@ class VacancyServiceTest {
         var requestDto = createOpenVacancyRequestDto(projectId, authorId, 10.5);
 
         var project = Project.builder().id(projectId).name("Test project").build();
-        when(openVacancyRequestValidator.validateAndGetProject(requestDto)).thenReturn(project);
+        when(projectService.getProjectByIdOrEmpty(requestDto.projectId())).thenReturn(Optional.of(project));
 
         var author = TeamMember.builder().id(authorId).nickname("Test author").build();
-        when(openVacancyRequestValidator.validateAndGetAuthor(requestDto)).thenReturn(author);
+        when(teamMemberService.getTeamMemberById(requestDto.authorId())).thenReturn(Optional.of(author));
 
         // Act
         vacancyService.openVacancy(requestDto);
@@ -164,52 +160,77 @@ class VacancyServiceTest {
     }
 
     @Test
-    public void shouldUpdateVacancy_throw_whenVacancyValidationIsFailed() {
-        var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
-        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto))
-                .thenThrow(new DataValidationException("Invalid vacancy"));
+    public void shouldUpdateVacancy_throw_whenVacancyIdIsNotPresented() {
+        var vacancyId = 0L;
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, 0L, null, null);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.updateVacancy(requestDto),
-                "Invalid vacancy");
+        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(requestDto));
+    }
+
+    @Test
+    public void shouldValidateUpdaterRole_throw_whenUpdaterTeamMemberIdIsNotPresented() {
+        // Arrange
+        var vacancyId = 1L;
+        var teamMemberUpdaterId = 0L;
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, teamMemberUpdaterId, VacancyStatus.POSTPONED, 10);
+
+        var projectId = 1L;
+        var vacancy = Vacancy.builder().id(vacancyId).project(getTestProject(projectId)).build();
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+
+        when(teamMemberService.getTeamMemberById(teamMemberUpdaterId)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(requestDto));
     }
 
     @Test
     public void shouldUpdateVacancy_throw_whenUpdaterRoleValidationIsFailed() {
-        var requestDto = createUpdateVacancyRequestDto(0L, 1L, null, null);
-        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(new Vacancy());
-        Mockito.doThrow(new DataValidationException("Invalid updater role")).
-                when(updateVacancyRequestValidator)
-                .validateUpdaterRole(requestDto);
+        // Arrange
+        var vacancyId = 1L;
+        var teamMemberUpdaterId = 3L;
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, teamMemberUpdaterId, VacancyStatus.POSTPONED, 10);
 
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.updateVacancy(requestDto),
+        var projectId = 1L;
+        var vacancy = Vacancy.builder().id(vacancyId).project(getTestProject(projectId)).build();
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+
+        var updater = getTestUpdater(teamMemberUpdaterId);
+        when(teamMemberService.getTeamMemberById(teamMemberUpdaterId)).thenReturn(Optional.of(updater));
+
+        Mockito.doThrow(new DataValidationException("Invalid updater role")).when(updateVacancyRequestValidator)
+                .validateUpdaterRole(updater);
+
+        // Act + Assert
+        assertThrowsExactly(DataValidationException.class, () -> vacancyService.updateVacancy(requestDto),
                 "Invalid updater role");
     }
+
 
     @Test
     public void shouldUpdateVacancy_throw_whenCandidatesCountValidationIsFailed() {
         // Arrange
         var vacancyId = 1L;
+        var teamMemberUpdaterId = 3L;
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, teamMemberUpdaterId, VacancyStatus.POSTPONED, 10);
+
         var projectId = 1L;
         var vacancy = Vacancy.builder().id(vacancyId).project(getTestProject(projectId)).build();
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+
+        var updater = getTestUpdater(teamMemberUpdaterId);
+        when(teamMemberService.getTeamMemberById(teamMemberUpdaterId)).thenReturn(Optional.of(updater));
+
         List<Candidate> attachedToProjectCandidates = List.of();
-
-        var requestDto = createUpdateVacancyRequestDto(vacancyId, 1L, null, null);
-
-        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
         when(candidateService.getAllCandidatesAttachedToProjectVacancy(vacancyId, projectId))
                 .thenReturn(attachedToProjectCandidates);
-        Mockito.doThrow(new DataValidationException("Invalid candidates count")).
-                when(updateVacancyRequestValidator)
+
+        Mockito.doThrow(new DataValidationException("Invalid candidates count")).when(updateVacancyRequestValidator)
                 .validateCandidatesCount(requestDto, vacancy, attachedToProjectCandidates);
 
         // Act + Assert
-        assertThrowsExactly(
-                DataValidationException.class,
-                () -> vacancyService.updateVacancy(requestDto),
+        assertThrowsExactly(DataValidationException.class, () -> vacancyService.updateVacancy(requestDto),
                 "Invalid candidates count");
     }
 
@@ -217,30 +238,23 @@ class VacancyServiceTest {
     public void shouldUpdateVacancy_returnVacancy_whenDataIsValid() {
         // Arrange
         var vacancyId = 1L;
-        var updaterId = 2L;
-        var requestDto = createUpdateVacancyRequestDto(vacancyId, updaterId, VacancyStatus.CLOSED, 10);
+        var teamMemberUpdaterId = 2L;
+        var requestDto = createUpdateVacancyRequestDto(vacancyId, teamMemberUpdaterId, VacancyStatus.CLOSED, 10);
 
         var projectId = 1L;
         var project = getTestProject(projectId);
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
-                Optional.of(project));
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(Optional.of(project));
 
-        var authorId = 3L;
-        var author = getTestAuthor(authorId);
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
-                Optional.of(author));
-
-        var updater = getTestUpdater(updaterId);
-        when(teamMemberService.getTeamMemberById(updaterId)).thenReturn(
-                Optional.of(updater));
+        var updater = getTestUpdater(teamMemberUpdaterId);
+        when(teamMemberService.getTeamMemberById(teamMemberUpdaterId)).thenReturn(Optional.of(updater));
 
         var vacancy = Vacancy.builder()
                 .id(vacancyId)
                 .project(project)
-                .createdBy(authorId)
-                .updatedBy(updaterId)
+                .createdBy(2L)
+                .updatedBy(teamMemberUpdaterId)
                 .build();
-        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
 
         var candidate = new Candidate();
         candidate.setId(2L);
@@ -267,25 +281,18 @@ class VacancyServiceTest {
     public void shouldUpdateVacancy_returnVacancy_whenNoChangesAreNeeded() {
         // Arrange
         var vacancyId = 1L;
-        var updaterId = 2L;
+        var teamMemberUpdaterId = 2L;
         var requestDto = UpdateVacancyRequestDto.builder()
                 .vacancyId(vacancyId)
-                .teamMemberUpdaterId(updaterId)
+                .teamMemberUpdaterId(teamMemberUpdaterId)
                 .build();
 
         var projectId = 1L;
         var project = getTestProject(projectId);
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
-                Optional.of(project));
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(Optional.of(project));
 
-        var authorId = 3L;
-        var author = getTestAuthor(authorId);
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
-                Optional.of(author));
-
-        var updater = getTestUpdater(updaterId);
-        when(teamMemberService.getTeamMemberById(updaterId)).thenReturn(
-                Optional.of(updater));
+        var updater = getTestUpdater(teamMemberUpdaterId);
+        when(teamMemberService.getTeamMemberById(teamMemberUpdaterId)).thenReturn(Optional.of(updater));
 
         var vacancyName = "Test vacancy";
         var vacancyDescription = "Test description";
@@ -298,10 +305,10 @@ class VacancyServiceTest {
                 .position(vacancyPosition)
                 .status(vacancyStatus)
                 .project(project)
-                .createdBy(authorId)
-                .updatedBy(updaterId)
+                .createdBy(2L)
+                .updatedBy(teamMemberUpdaterId)
                 .build();
-        when(updateVacancyRequestValidator.validateAndGetVacancy(requestDto)).thenReturn(vacancy);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
 
         var candidate = new Candidate();
         candidate.setId(2L);
@@ -350,10 +357,8 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
-                Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
-                Optional.of(author));
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.of(author));
 
         when(candidateMapper.ToCandidateDtos(any())).thenReturn(List.of());
 
@@ -431,20 +436,12 @@ class VacancyServiceTest {
                         .build());
         when(vacancyRepository.findAll()).thenReturn(vacancies);
 
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
-                Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
-                Optional.of(author));
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.of(author));
 
-        setupVacancyFilter(
-                vacancyFilter1,
-                filterDto,
-                true,
+        setupVacancyFilter(vacancyFilter1, filterDto, true,
                 new AdjustableVacancyAnswer(vacancy -> vacancy.getName().contains(namePatternToSearch)));
-        setupVacancyFilter(
-                vacancyFilter2,
-                filterDto,
-                true,
+        setupVacancyFilter(vacancyFilter2, filterDto, true,
                 new AdjustableVacancyAnswer(vacancy -> vacancy.getPosition() == positionToSearch));
 
         List<VacancyResponseDto> expectedResult = new ArrayList<>();
@@ -498,10 +495,8 @@ class VacancyServiceTest {
         vacancy.getCandidates().addAll(candidates);
 
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
-        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(
-                Optional.of(project));
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(
-                Optional.of(author));
+        when(projectService.getProjectByIdOrEmpty(project.getId())).thenReturn(Optional.of(project));
+        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.of(author));
 
         // Act
         var result = vacancyService.getVacancyById(vacancyId);
@@ -516,10 +511,8 @@ class VacancyServiceTest {
         assertEquals(candidates.size(), result.get().getCandidates().size());
         assertEquals(candidates.get(0).getUsername(), result.get().getCandidates().get(0).username());
         assertEquals(candidates.get(0).getCandidateStatus(), result.get().getCandidates().get(0).candidateStatus());
-        verify(projectService, times(1))
-                .getProjectByIdOrEmpty(project.getId());
-        verify(teamMemberService, times(1))
-                .getTeamMemberById(authorId);
+        verify(projectService, times(1)).getProjectByIdOrEmpty(project.getId());
+        verify(teamMemberService, times(1)).getTeamMemberById(authorId);
     }
 
     private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {
@@ -534,11 +527,8 @@ class VacancyServiceTest {
                 .build();
     }
 
-    private static UpdateVacancyRequestDto createUpdateVacancyRequestDto(
-            long vacancyId,
-            long updaterId,
-            @Nullable VacancyStatus status,
-            @Nullable Integer requiredCandidatesCount) {
+    private static UpdateVacancyRequestDto createUpdateVacancyRequestDto(long vacancyId, long updaterId,
+            @Nullable VacancyStatus status, @Nullable Integer requiredCandidatesCount) {
         return UpdateVacancyRequestDto.builder()
                 .vacancyId(vacancyId)
                 .teamMemberUpdaterId(updaterId)
@@ -562,10 +552,7 @@ class VacancyServiceTest {
         return TeamMember.builder().id(updaterId).nickname("Updater nickname").build();
     }
 
-    private void setupVacancyFilter(
-            VacancyFilter filter,
-            FilterVacancyRequestDto filterDto,
-            boolean isApplicable,
+    private void setupVacancyFilter(VacancyFilter filter, FilterVacancyRequestDto filterDto, boolean isApplicable,
             Answer<Stream<Vacancy>> filterApplyAnswer) {
         when(filter.isApplicable(filterDto)).thenReturn(isApplicable);
         when(filter.apply(any(), any())).thenAnswer(filterApplyAnswer);

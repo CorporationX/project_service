@@ -3,27 +3,16 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.TeamMemberService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class UpdateVacancyRequestValidator {
-    private final VacancyRepository vacancyRepository;
-    private final TeamMemberService teamMemberService;
-
-    public Vacancy validateAndGetVacancy(UpdateVacancyRequestDto requestDto) {
-        return vacancyRepository.findById(requestDto.vacancyId())
-                .orElseThrow(() -> new DataValidationException(
-                        "Vacancy with id '%d' is not found".formatted(requestDto.vacancyId())));
-    }
 
     public void validateCandidatesCount(
             UpdateVacancyRequestDto requestDto,
@@ -61,20 +50,14 @@ public class UpdateVacancyRequestValidator {
         }
     }
 
-    public void validateUpdaterRole(UpdateVacancyRequestDto requestDto) {
-        var updater = teamMemberService.getTeamMemberById(requestDto.teamMemberUpdaterId())
-                .orElseThrow(() -> new DataValidationException(
-                        "Team member with id %d is not found".formatted(requestDto.teamMemberUpdaterId())));
-
+    public void validateUpdaterRole(TeamMember updater) {
         var isRightRole = updater.getRoles()
                 .stream()
                 .anyMatch(role -> role == TeamRole.OWNER || role == TeamRole.MANAGER);
         if (!isRightRole) {
             throw new DataValidationException(
                     "Current updater roles are %s. Only OWNER and MANAGER is possible".formatted(
-                            String.join(
-                                    ",",
-                                    updater.getRoles().stream().map(Enum::toString).toList())));
+                            String.join(",", updater.getRoles().stream().map(Enum::toString).toList())));
         }
     }
 }

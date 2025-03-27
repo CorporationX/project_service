@@ -2,83 +2,34 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.ProjectServiceImpl;
-import faang.school.projectservice.service.TeamMemberServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OpenVacancyRequestValidatorTest {
 
-    @Mock
-    private ProjectServiceImpl projectService;
-    @Mock
-    private TeamMemberServiceImpl teamMemberService;
-
     @InjectMocks
     OpenVacancyRequestValidator openVacancyRequestValidator;
 
-    @Test
-    public void shouldValidateAndGetProject_throw_whenProjectIdIsNotPresented() {
-        var projectId = 0;
-        var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
-        when(projectService.getProjectByIdOrEmpty(projectId)).thenReturn(Optional.empty());
-
-        assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateAndGetProject(requestDto));
-    }
-
-    @Test
-    public void shouldValidateAndGetProject_returnsProjectEntity_whenProjectIdIsPresented() {
-        var projectId = 10L;
-        var requestDto = createOpenVacancyRequestDto(projectId, 1, null);
-        var expectedResult = Project.builder().id(projectId).name("Test project").build();
-        when(projectService.getProjectByIdOrEmpty(projectId))
-                .thenReturn(Optional.of(expectedResult));
-
-        var result = openVacancyRequestValidator.validateAndGetProject(requestDto);
-
-        assertEquals(expectedResult, result);
-    }
-
-    @Test
-    public void shouldValidateAndGetAuthor_throw_whenAuthorIdIsNotPresented() {
-        var authorId = 0;
-        var requestDto = createOpenVacancyRequestDto(1, authorId, null);
-        when(teamMemberService.getTeamMemberById(authorId)).thenReturn(Optional.empty());
-
-        assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
-    }
-
     @ParameterizedTest
     @MethodSource("getInvalidAuthorRoles")
-    public void shouldValidateAndGetAuthor_throw_whenSomeAuthorRolesAreInvalid(List<TeamRole> authorRoles) {
+    public void shouldValidateAuthor_throw_whenSomeAuthorRolesAreInvalid(List<TeamRole> authorRoles) {
         var authorId = 1L;
-        var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
-        when(teamMemberService.getTeamMemberById(authorId))
-                .thenReturn(Optional.of(author));
 
-        assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
+        assertThrows(DataValidationException.class, () -> openVacancyRequestValidator.validateAuthor(author));
     }
 
     private static List<Arguments> getInvalidAuthorRoles() {
@@ -90,14 +41,11 @@ class OpenVacancyRequestValidatorTest {
 
     @ParameterizedTest
     @MethodSource("getValidAuthorRoles")
-    public void shouldValidateAndGetAuthor_success_whenAllAuthorRolesAreValid(List<TeamRole> authorRoles) {
+    public void shouldValidateAuthor_success_whenAllAuthorRolesAreValid(List<TeamRole> authorRoles) {
         var authorId = 1L;
-        var requestDto = createOpenVacancyRequestDto(1, authorId, null);
         var author = TeamMember.builder().id(authorId).roles(authorRoles).build();
-        when(teamMemberService.getTeamMemberById(authorId))
-                .thenReturn(Optional.of(author));
 
-        assertDoesNotThrow(() -> openVacancyRequestValidator.validateAndGetAuthor(requestDto));
+        assertDoesNotThrow(() -> openVacancyRequestValidator.validateAuthor(author));
     }
 
     private static List<Arguments> getValidAuthorRoles() {
@@ -110,16 +58,15 @@ class OpenVacancyRequestValidatorTest {
     @Test
     public void shouldValidateSalary_throw_whenSalaryIsNegative() {
         var salary = -2.0;
-        var requestDto = createOpenVacancyRequestDto(1, 1, salary);
+        var requestDto = createOpenVacancyRequestDto(salary);
 
-        assertThrows(DataValidationException.class,
-                () -> openVacancyRequestValidator.validateSalary(requestDto));
+        assertThrows(DataValidationException.class, () -> openVacancyRequestValidator.validateSalary(requestDto));
     }
 
     @Test
     public void shouldValidateSalary_success_whenSalaryIsNull() {
         Double salary = null;
-        var requestDto = createOpenVacancyRequestDto(1, 1, salary);
+        var requestDto = createOpenVacancyRequestDto(salary);
 
         assertDoesNotThrow(() -> openVacancyRequestValidator.validateSalary(requestDto));
     }
@@ -127,19 +74,19 @@ class OpenVacancyRequestValidatorTest {
     @Test
     public void shouldValidateSalary_success_whenSalaryIsPositive() {
         Double salary = 10.0;
-        var requestDto = createOpenVacancyRequestDto(1, 1, salary);
+        var requestDto = createOpenVacancyRequestDto(salary);
 
         assertDoesNotThrow(() -> openVacancyRequestValidator.validateSalary(requestDto));
     }
 
-    private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {
+    private static OpenVacancyRequestDto createOpenVacancyRequestDto(Double salary) {
         return OpenVacancyRequestDto.builder()
                 .name("Test name")
                 .description("Test description")
-                .projectId(projectId)
+                .projectId(1)
                 .position(TeamRole.ANALYST)
                 .requiredCandidatesCount(1)
-                .authorId(authorId)
+                .authorId(1)
                 .salary(salary)
                 .build();
     }
