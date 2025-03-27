@@ -44,15 +44,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
-
----
-spring:
-  config:
-    activate:
-      on-profile: prod
