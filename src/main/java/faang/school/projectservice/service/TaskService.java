@@ -82,17 +82,21 @@ public class TaskService {
     public List<TaskResponse> getAllTasksByFilters(Long projectId, TaskFilterDto filter) {
         validateUserAccess(projectId);
 
+        List<Long> taskIds = taskRepository.findTaskIdsByProjectId(projectId);
+        Specification<Task> idSpecification = (root, query, cb) ->
+                root.get("id").in(taskIds);
+
         Specification<Task> specifications = filters.stream()
                 .filter(taskFilter -> taskFilter.isApplicable(filter))
                 .map(taskFilter -> taskFilter.apply(filter))
                 .reduce(Specification::and)
                 .orElse(null);
 
-        List<Task> tasks = specifications != null
-                ? taskRepository.findAllByProjectId(projectId, specifications)
-                : taskRepository.findAllByProjectId(projectId);
+        Specification<Task> finalSpecifications = specifications != null
+                ? Specification.where(idSpecification).and(specifications)
+                : idSpecification;
 
-        return taskResponseMapper.listEntityToListDto(tasks);
+        return taskResponseMapper.listEntityToListDto(taskRepository.findAll(finalSpecifications));
     }
 
     public List<TaskResponse> getAllTasks(Long projectId) {

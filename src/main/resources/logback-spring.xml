@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="COLOR_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} %blue([%thread]) %green(%-5level) %cyan(%logger{20}) - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="COLOR_CONSOLE"/>
+        </root>
+
+        <logger name="org.springframework.boot" level="OFF"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <logger name="org.jboss" level="WARN"/>
+    </springProfile>
+
+    <springProfile name="!local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+        <logger name="org.springframework.boot" level="OFF"/>
+        <logger name="org.springframework" level="OFF"/>
+        <logger name="org.hibernate" level="OFF"/>
+        <logger name="com.zaxxer.hikari" level="OFF"/>
+        <logger name="org.jboss" level="OFF"/>
+        <logger name="org.apache" level="OFF"/>
+        <logger name="liquibase" level="OFF"/>
+        <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="ERROR"/>
+        <logger name="org.springframework.scheduling" level="WARN"/>
+    </springProfile>
+
+</configuration>
