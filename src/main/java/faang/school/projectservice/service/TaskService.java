@@ -32,6 +32,8 @@ public class TaskService {
     private static final String TASK_ENTITY_NAME = "Task";
     private static final String USER_ENTITY_NAME = "User";
     private static final String MESSAGE_ENTITY_NOT_FOUND = "%s with id %d not found";
+    private static final String MESSAGE_ACCESS_DENIED = "You cannot change tasks of the project with id %d, " +
+            "because you aren't a member.";
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
@@ -54,7 +56,7 @@ public class TaskService {
         setLinkedTasks(task, taskDto.linkedTasksIds());
 
         task = taskRepository.save(task);
-        log.info("Successful created task with id {}\nDate created: {}. User id who created: {}",
+        log.info("\nSuccessful created task with id {}\nDate created: {}. User id who created: {}",
                 task.getId(), task.getCreatedAt(), userId);
         return taskResponseMapper.entityToDto(task);
     }
@@ -74,7 +76,7 @@ public class TaskService {
         setLinkedTasks(task, taskDto.linkedTasksIds());
 
         task = taskRepository.save(task);
-        log.info("Successful updated task with id {}\nDate updated: {}. User id who updated: {}",
+        log.info("\nSuccessful updated task with id {}\nDate updated: {}. User id who updated: {}",
                 task.getId(), task.getUpdatedAt(), userId);
         return taskResponseMapper.entityToDto(task);
     }
@@ -105,7 +107,9 @@ public class TaskService {
     }
 
     public TaskResponse getTaskById(Long taskId) {
-        return taskResponseMapper.entityToDto(findTaskById(taskId));
+        Task task = findTaskById(taskId);
+        validateUserAccess(task.getProject().getId());
+        return taskResponseMapper.entityToDto(task);
     }
 
     private void checkPerformerExisting(Long userId) {
@@ -130,12 +134,14 @@ public class TaskService {
     }
 
     private void checkUserOnMembership(Long userId, Project project) {
+        if (project.getTeams() == null || project.getTeams().isEmpty()) {
+            throw new AccessDeniedException(MESSAGE_ACCESS_DENIED, project.getId());
+        }
         boolean isProjectMember = project.getTeams().stream()
                 .anyMatch(team -> team.getTeamMembers().stream()
                         .anyMatch(member -> member.getUserId().equals(userId)));
         if (!isProjectMember) {
-            throw new AccessDeniedException(
-                    "You cannot change tasks of the project with id %d, because you aren't a member.", project.getId());
+            throw new AccessDeniedException(MESSAGE_ACCESS_DENIED, project.getId());
         }
     }
 

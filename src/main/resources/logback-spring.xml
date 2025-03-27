@@ -29,6 +29,7 @@
         <logger name="org.hibernate" level="WARN"/>
         <logger name="com.zaxxer.hikari" level="WARN"/>
         <logger name="org.jboss" level="WARN"/>
+        <logger name="_org.springframework.web.servlet.HandlerMapping.Mappings" level="OFF"/>
     </springProfile>
 
     <springProfile name="!local">
