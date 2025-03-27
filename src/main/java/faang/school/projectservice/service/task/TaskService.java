@@ -72,9 +72,7 @@ public class TaskService {
     //TODO: "5. Получить задачу по id"
     @Transactional
     public TaskDto getTaskById(long taskId) {
-        //todo
-        // тут будет логика обращения к репозиторию за данными и возвращать TaskDto, используя MapStruct
-        // надо подумать над другим Exception наверное
+        /// Надо подумать над другим Exception наверное
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
         return taskMapper.taskToTaskDto(task);
