@@ -47,7 +47,6 @@ public class TaskService {
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
     // (буду использовать по исполнителю).
-    @Transactional
     public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
         List<Task> tasks = taskRepository.findAll();
         List<Task> filteredTasks = tasks.stream()
@@ -61,7 +60,6 @@ public class TaskService {
     }
 
     //TODO: "4. Получить все задачи проекта."
-    @Transactional
     public List<TaskDto> getAllTasksByProjectId(long projectId) {
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
         return tasks.stream()
@@ -70,7 +68,6 @@ public class TaskService {
     }
 
     //TODO: "5. Получить задачу по id"
-    @Transactional
     public TaskDto getTaskById(long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
