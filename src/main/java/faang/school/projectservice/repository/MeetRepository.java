@@ -10,10 +10,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface MeetRepository extends JpaRepository<Meet, Long> {
-    @Query("SELECT m FROM Meet m WHERE " +
-            "(m.project.id = :projectId) AND " +
-            "(:title IS NULL OR m.title LIKE %:title%) AND " +
-            "(:date IS NULL OR TO_CHAR(m.startsAt, 'YYYY-MM-DD') = :date)")
+    @Query("""
+        SELECT m FROM Meet m
+        WHERE (m.project.id = :projectId) AND
+        (:title IS NULL OR m.title LIKE %:title%) AND
+        (:date IS NULL OR TO_CHAR(m.startsAt, 'YYYY-MM-DD') = :date)
+        """)
     Stream<Meet> findByFilter(@Param("projectId") long projectId,
                               @Param("title") String title,
                               @Param("date") String date);

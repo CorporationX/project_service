@@ -9,6 +9,6 @@ import java.time.LocalDate;
 public class MeetFilterDto {
 
     @Size(max = 128)
-    String titlePattern;
-    LocalDate datePattern;
+    private String titlePattern;
+    private LocalDate datePattern;
 }
