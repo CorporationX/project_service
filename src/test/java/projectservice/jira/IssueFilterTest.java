@@ -34,8 +34,8 @@ public class IssueFilterTest {
 
     @Test
     public void testAssigneeFilter_createJql() {
-       assertEquals("transition = " + issueFilterDto.getAssignee().getName(),
-               assigneeFilter.createJql(issueFilterDto));
+        assertEquals("transition = " + issueFilterDto.getAssignee().getName(),
+                assigneeFilter.createJql(issueFilterDto));
     }
 
     @Test

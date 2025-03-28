@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
-import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 

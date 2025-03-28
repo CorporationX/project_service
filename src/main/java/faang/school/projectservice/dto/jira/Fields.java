@@ -7,11 +7,13 @@ import faang.school.projectservice.dto.jira.request.IssueTypeRequestDto;
 import faang.school.projectservice.dto.jira.request.ProjectRequestDto;
 import faang.school.projectservice.dto.parent.ParentDto;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
 public class Fields {
     private String summary;
     private String description;

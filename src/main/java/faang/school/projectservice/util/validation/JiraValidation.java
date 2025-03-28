@@ -1,6 +1,7 @@
 package faang.school.projectservice.util.validation;
 
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
+import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,10 +19,15 @@ public class JiraValidation {
     public static final String PROJECT_KEY_CANT_BE_NULL = "Project key can't be null";
     public static final String ISSUE_KEY_CANT_BE_NULL_OR_BLANK = "Issue key can't be null or blank";
     public static final String INVALID_PROJECT_KEY = "Invalid project key";
+    public static final String FIELD_CANT_BE_NULL = "Field can't be null";
+    public static final String FIELDS_CANT_BE_NULL = "Fields can't be null";
 
     public static void validateCreateIssue(IssueRequestDto issueRequestDto) {
         List<String> errors = new ArrayList<>();
-
+        if (issueRequestDto.getFields() == null) {
+            log.error(FIELD_CANT_BE_NULL);
+            throw new IllegalArgumentException(FIELD_CANT_BE_NULL);
+        }
         if (issueRequestDto.getFields().getSummary() == null) {
             errors.add(SUMMARY_CANT_BE_NULL);
         }
@@ -54,6 +60,13 @@ public class JiraValidation {
         if (key == null || key.length() < 3 || key.charAt(0) == ' ') {
             log.error(INVALID_PROJECT_KEY);
             throw new IllegalArgumentException(INVALID_PROJECT_KEY);
+        }
+    }
+
+    public static void validateIssueUpdateDto(IssueUpdateDto issueUpdateDto) {
+        if (issueUpdateDto.getFields() == null) {
+            log.error(FIELDS_CANT_BE_NULL);
+            throw new IllegalArgumentException(FIELDS_CANT_BE_NULL);
         }
     }
 }

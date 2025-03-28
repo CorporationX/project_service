@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.jira.response;
 
-import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import lombok.Data;
 
 import java.util.List;

@@ -2,7 +2,6 @@ package faang.school.projectservice.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 
 public class JiraTokenGenerator {
     public static String generate(String email, String token) {

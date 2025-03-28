@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
-import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 import faang.school.projectservice.service.jira.JiraService;
@@ -51,7 +50,7 @@ public class JiraController {
 
     @GetMapping("/issue/project/{projectId}")
     public List<IssueResponseDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
-                                                          @RequestBody @NotNull IssueFilterDto issueFilterDto) {
+                                                         @RequestBody @NotNull IssueFilterDto issueFilterDto) {
 
         log.info("Getting all issues with filter for project {} started", projectId);
         List<IssueResponseDto> response = jiraService.getAllIssuesWithFilter(projectId, issueFilterDto);

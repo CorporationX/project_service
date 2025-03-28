@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class JiraServiceImpl implements JiraService {
+    public static final String NO_APPLICABLE_FILTERS_SET = "No applicable filters set";
+    public static final String PROJECT_DOES_NOT_CONNECTED_TO_JIRA = "Project with id %d does not connected to jira";
+
     private final JiraClient jiraClient;
     private final ProjectRepository projectRepository;
     private final List<IssueFilter> issueFilters;
@@ -43,6 +46,7 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public void updateIssue(String key, IssueUpdateDto issueUpdateDto) {
         JiraValidation.validateIssueKey(key);
+        JiraValidation.validateIssueUpdateDto(issueUpdateDto);
         if (issueUpdateDto.getFields().getIssueLinks() != null) {
             log.info("Creating issue link using JiraClient");
             jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
@@ -67,7 +71,8 @@ public class JiraServiceImpl implements JiraService {
                 .collect(Collectors.joining(" AND "));
         jql += " AND project = " + projectKey;
         if (jql.charAt(0) == ' ') {
-            throw new IllegalArgumentException("No applicable filters set");
+            log.error(NO_APPLICABLE_FILTERS_SET);
+            throw new IllegalArgumentException(NO_APPLICABLE_FILTERS_SET);
         }
         log.info("Getting issues with filter using JiraClient");
         return jiraClient.getInfoByJql(jql).getIssues();
@@ -105,6 +110,6 @@ public class JiraServiceImpl implements JiraService {
         return projectRepository.findById(projectId)
                 .map(Project::getJiraKey)
                 .orElseThrow(() -> new ProjectNotFoundException(
-                        "Project with id %d not connected to jira".formatted(projectId)));
+                        PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(projectId)));
     }
 }

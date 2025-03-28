@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;

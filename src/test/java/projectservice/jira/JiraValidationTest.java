@@ -41,11 +41,13 @@ public class JiraValidationTest {
     }
 
     @Test
-    public void testCreateIssue_(){
+    public void testCreateIssue_nullProjectKey() {
         requestDto.setFields(new Fields());
         requestDto.getFields().setProject(new ProjectRequestDto());
 
-        Exception exception = assertThrows(Exception.class, () -> jiraService.createIssue(requestDto));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> jiraService.createIssue(requestDto)
+        );
 
         assertTrue(exception.getMessage().contains(PROJECT_KEY_CANT_BE_NULL));
     }
@@ -61,6 +63,15 @@ public class JiraValidationTest {
 
     @Test
     public void testUpdateIssue_invalidIssueKey() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> jiraService.updateIssue("   ", issueUpdateDto)
+        );
+
+        assertEquals(ISSUE_KEY_CANT_BE_NULL_OR_BLANK, exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateIssue_nullFields() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> jiraService.updateIssue("   ", issueUpdateDto)
         );

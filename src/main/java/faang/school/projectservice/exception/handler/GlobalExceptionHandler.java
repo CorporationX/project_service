@@ -11,7 +11,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(JiraClientException.class)
     public ResponseEntity<ErrorResponse> handleJiraClientException(JiraClientException exception) {
         ErrorResponse errorResponse = ErrorResponse.builder(exception,
