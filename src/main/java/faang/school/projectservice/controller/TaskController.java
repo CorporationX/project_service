@@ -65,6 +65,7 @@ public class TaskController {
     }
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
+    // (буду использовать по исполнителю).
     @GetMapping("/project/{projectId}/filtered")
     public ResponseEntity<List<TaskDto>> getFilteredTasks(
             @PathVariable Long projectId,

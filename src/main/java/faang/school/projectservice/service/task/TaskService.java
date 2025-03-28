@@ -30,8 +30,7 @@ public class TaskService {
 
 
     //TODO: "2. Изменение задачи (описание, статус, deadline, исполнитель, изменение родительской задачи,
-    // изменение связанных задач). Изменение могут делать все участники,
-    // важно логировать для аудита дату изменения и пользователя, который изменил данные.
+    // изменение связанных задач).
     @Transactional
     public TaskDto updateTask(Long taskId, TaskDto taskDto, Long userId) {
         Task task = taskRepository.findById(taskId)
@@ -60,8 +59,7 @@ public class TaskService {
                 .toList();
     }
 
-    //TODO: "4. Получить все задачи проекта."!!! пока не могу понять как сделать с валидацией
-    // пользователя. Не вижу взаимосвязи в таблицах.
+    //TODO: "4. Получить все задачи проекта."
     @Transactional
     public List<TaskDto> getAllTasksByProjectId(long projectId) {
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
@@ -73,7 +71,6 @@ public class TaskService {
     //TODO: "5. Получить задачу по id"
     @Transactional
     public TaskDto getTaskById(long taskId) {
-        /// Надо подумать над другим Exception наверное
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
         return taskMapper.taskToTaskDto(task);
