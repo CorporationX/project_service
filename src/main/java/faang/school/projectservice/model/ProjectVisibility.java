@@ -1,6 +1,6 @@
 package faang.school.projectservice.model;
 
-public enum ProjectVisibility {
+public enum     ProjectVisibility {
     PUBLIC,
     PRIVATE,
 }

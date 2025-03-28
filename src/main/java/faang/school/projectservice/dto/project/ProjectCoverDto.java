@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.project;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProjectDto {
+public class ProjectCoverDto {
     @Positive
     @NotNull
     private Long id;
