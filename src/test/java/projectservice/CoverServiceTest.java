@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -115,16 +114,6 @@ public class CoverServiceTest {
         );
 
         assertEquals(FILENAME_CANT_BE_NULL, exception.getMessage());
-    }
-
-    @Test
-    public void testUploadCover_bucketDoesNotExist() throws Exception {
-        when(vacancyRepository.findById(anyLong())).thenReturn(Optional.of(vacancy));
-        when(minioClient.bucketExists(any())).thenReturn(false);
-
-        coverService.uploadCover(validImageFile, vacancyId);
-
-        verify(minioClient, times(1)).makeBucket(any());
     }
 
     @Test

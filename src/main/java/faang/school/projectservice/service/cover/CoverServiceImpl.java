@@ -2,15 +2,11 @@ package faang.school.projectservice.service.cover;
 
 import faang.school.projectservice.exception.EmptyFileException;
 import faang.school.projectservice.exception.FileProcessingException;
-import faang.school.projectservice.exception.StorageException;
 import faang.school.projectservice.exception.VacancyNotFoundException;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -24,8 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -39,10 +33,10 @@ public class CoverServiceImpl implements CoverService {
     public static final String COVER_PREFIX = "covers/";
     public static final String FILENAME_CANT_BE_NULL = "Filename can't be null or blank";
     public static final String UPLOADED_FILE_IS_NOT_A_VALID_IMAGE = "Uploaded file is not a valid image";
-    public static final String FILE_UPLOAD_FAILED = "Failed to upload file to storage";
     public static final String IMAGE_PROCESSING_FAILED = "Failed to process image";
     public static final String UNEXPECTED_ERROR_DURING_COVER_UPLOAD = "Unexpected error during cover upload";
     public static final String UNSUPPORTED_IMAGE_FORMAT = "Unsupported image format. Allowed: JPG, JPEG, PNG";
+    public static final Set<String> AVAILABLE_FILE_EXTENSIONS = Set.of("jpg", "jpeg", "png");
 
     private final MinioClient minioClient;
     private final VacancyRepository vacancyRepository;
@@ -56,26 +50,17 @@ public class CoverServiceImpl implements CoverService {
     @Override
     public String uploadCover(MultipartFile file, Long vacancyId) {
         validateFile(file);
-        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(vacancyId);
-        if (vacancyOptional.isEmpty()) {
-            String message = String.format(VACANCY_NOT_FOUND, vacancyId);
-            log.error(message);
-            throw new VacancyNotFoundException(message);
-        }
+        Vacancy vacancy = findVacancyById(vacancyId);
+
         String filename = file.getOriginalFilename();
         String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
         String generatedKey = COVER_PREFIX + UUID.randomUUID() + fileExtension;
-
         try {
             BufferedImage croppedImage = cropImage(file);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(croppedImage, fileExtension, outputStream);
             byte[] imageBytes = outputStream.toByteArray();
             InputStream inputStream = new ByteArrayInputStream(imageBytes);
-
-            if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-            }
 
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
@@ -86,14 +71,10 @@ public class CoverServiceImpl implements CoverService {
         } catch (IOException e) {
             log.error("{}: {}", IMAGE_PROCESSING_FAILED, e.getMessage());
             throw new FileProcessingException(IMAGE_PROCESSING_FAILED, e);
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
-            log.error("{}: {}", FILE_UPLOAD_FAILED, e.getMessage());
-            throw new StorageException(FILE_UPLOAD_FAILED, e);
         } catch (Exception e) {
             log.error("{}: {}", UNEXPECTED_ERROR_DURING_COVER_UPLOAD, e.getMessage());
             throw new FileProcessingException(UNEXPECTED_ERROR_DURING_COVER_UPLOAD, e);
         }
-        Vacancy vacancy = vacancyOptional.get();
         vacancy.setCoverImageKey(generatedKey);
         return generatedKey;
     }
@@ -107,6 +88,7 @@ public class CoverServiceImpl implements CoverService {
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         int maxDimension = Math.max(originalHeight, originalWidth);
+
         return maxDimension <= maxImageDimension ? originalImage : Thumbnails.of(originalImage)
                 .size(maxImageDimension, maxImageDimension)
                 .asBufferedImage();
@@ -123,9 +105,19 @@ public class CoverServiceImpl implements CoverService {
             throw new IllegalArgumentException(FILENAME_CANT_BE_NULL);
         }
         String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
-        if (!Set.of("jpg", "jpeg", "png").contains(fileExtension)) {
+        if (!AVAILABLE_FILE_EXTENSIONS.contains(fileExtension)) {
             log.error("Unsupported file format: {}", fileExtension);
             throw new IllegalArgumentException(UNSUPPORTED_IMAGE_FORMAT);
         }
+    }
+
+    private Vacancy findVacancyById(Long vacancyId) {
+        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(vacancyId);
+        if (vacancyOptional.isEmpty()) {
+            String message = String.format(VACANCY_NOT_FOUND, vacancyId);
+            log.error(message);
+            throw new VacancyNotFoundException(message);
+        }
+        return vacancyOptional.get();
     }
 }
