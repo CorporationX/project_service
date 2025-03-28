@@ -14,14 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CampaignValidator {
-    private final ProjectRepositoryAdapter projectAdapter;
-    private final CampaignRepositoryAdapter campaignAdapter;
     private final TeamMemberRepositoryAdapter teamMemberAdapter;
     private final UserContext userContext;
 
     public void userStatusValidation(Long projectId) {
         TeamMember teamMember = teamMemberAdapter.getByUserIdAndProjectId(userContext.getUserId(), projectId);
-        if (!teamMember.getRoles().contains(TeamRole.MANAGER) || !teamMember.getRoles().contains(TeamRole.OWNER)) {
+        System.out.println(teamMember.getRoles());
+        if (!(teamMember.getRoles().contains(TeamRole.MANAGER) || teamMember.getRoles().contains(TeamRole.OWNER))) {
             throw new DataValidateException("You are not the creator or manager of the project");
         }
     }
