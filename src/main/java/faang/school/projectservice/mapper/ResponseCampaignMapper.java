@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.campaign.CampaignCreateDto;
+import faang.school.projectservice.dto.campaign.ResponseCampaignDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
@@ -12,18 +12,18 @@ import java.util.List;
 import static faang.school.projectservice.service.CampaignService.ID_NULL_EXCEPTION;
 
 @Mapper(componentModel = "spring")
-public interface CampaignMapper {
+public interface ResponseCampaignMapper {
 
     @Mapping(target = "project", source = "projectId")
     @Mapping(target = "isDeleted", ignore = true)
-    Campaign toCampaign(CampaignCreateDto campaignCreateDto);
+    Campaign toCampaign(ResponseCampaignDto responseCampaignDto);
 
     @Mapping(target = "projectId", source = "project.id")
-    CampaignCreateDto toCampaignDto(Campaign campaign);
+    ResponseCampaignDto toResponseCampaignDto(Campaign campaign);
 
-    List<Campaign> toCampaignList(List<CampaignCreateDto> campaignCreateDtoList);
+    List<Campaign> toCampaignList(List<ResponseCampaignDto> responseCampaignDtoList);
 
-    List<CampaignCreateDto> toCampaignDtoList(List<Campaign> campaignList);
+    List<ResponseCampaignDto> toResponseCampaignDtoList(List<Campaign> campaignList);
 
     default Project mapIdToProject(Long id) {
         if (id == null) {

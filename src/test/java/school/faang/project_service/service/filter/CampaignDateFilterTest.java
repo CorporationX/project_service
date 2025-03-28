@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CampaignDateFilterTest {
     private static final Long PROJECT_ID = 1L;
+    private final LocalDateTime date1 = LocalDateTime.of(2025, 1, 1, 1, 1);
+    private final LocalDateTime date2 = LocalDateTime.of(2025, 3, 10, 1, 1);
     CampaignDateFilter campaignDateFilter = new CampaignDateFilter();
 
     @Test
@@ -35,8 +37,6 @@ public class CampaignDateFilterTest {
 
     @Test
     public void testApply() {
-        LocalDateTime date1 = LocalDateTime.of(2025, 1, 1, 1, 1);
-        LocalDateTime date2 = LocalDateTime.of(2025, 3, 10, 1, 1);
         LocalDateTime dateAfter = LocalDateTime.of(2025, 3, 1, 1, 1);
         Stream<Campaign> campaigns = Stream.of(
                 Campaign.builder().createdAt(date1).build(),
@@ -51,8 +51,6 @@ public class CampaignDateFilterTest {
     }
     @Test
     public void testApplyWithNoSuitableCampaigns() {
-        LocalDateTime date1 = LocalDateTime.of(2025, 1, 1, 1, 1);
-        LocalDateTime date2 = LocalDateTime.of(2025, 3, 10, 1, 1);
         LocalDateTime dateAfter = LocalDateTime.of(2025, 3, 23, 1, 1);
         Stream<Campaign> campaigns = Stream.of(
                 Campaign.builder().createdAt(date1).build(),

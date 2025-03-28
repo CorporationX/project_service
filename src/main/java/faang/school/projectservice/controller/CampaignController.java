@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
+import faang.school.projectservice.dto.campaign.ResponseCampaignDto;
 import faang.school.projectservice.service.CampaignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,22 +21,22 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/campaigns")
+@RequestMapping("/api/v1/campaigns")
 public class CampaignController {
     private final CampaignService campaignService;
 
     @PostMapping
-    public CampaignDto createCampaign(@RequestBody CampaignDto campaignDto) {
-        CampaignDto returnedCampaignDto = campaignService.create(campaignDto);
+    public ResponseCampaignDto createCampaign(@RequestBody CampaignCreateDto campaignCreateDto) {
+        ResponseCampaignDto returnedCampaignCreateDto = campaignService.create(campaignCreateDto);
         log.info("The campaign has been created");
-        return returnedCampaignDto;
+        return returnedCampaignCreateDto;
     }
 
     @PutMapping
-    public CampaignDto updateCampaign(@RequestBody CampaignUpdateDto campaignUpdateDto) {
-        CampaignDto returnedCampaignDto = campaignService.update(campaignUpdateDto);
+    public CampaignCreateDto updateCampaign(@RequestBody CampaignUpdateDto campaignUpdateDto) {
+        CampaignCreateDto returnedCampaignCreateDto = campaignService.update(campaignUpdateDto);
         log.info("The campaign has been updated");
-        return returnedCampaignDto;
+        return returnedCampaignCreateDto;
     }
 
     @DeleteMapping("/{campaignId}")
@@ -45,12 +46,12 @@ public class CampaignController {
     }
 
     @GetMapping("/{campaignId}")
-    public CampaignDto getCampaign(@PathVariable Long campaignId) {
+    public CampaignCreateDto getCampaign(@PathVariable Long campaignId) {
         return campaignService.getCampaign(campaignId);
     }
 
     @GetMapping
-    public List<CampaignDto> getCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
+    public List<CampaignCreateDto> getCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
         return campaignService.getCampaignsByProject(campaignFilterDto);
     }
 }

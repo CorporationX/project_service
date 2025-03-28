@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Data
-public class CampaignDto {
+public class ResponseCampaignDto {
     private Long id;
     private String title;
     private String description;

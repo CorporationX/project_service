@@ -1,6 +1,6 @@
 package faang.school.projectservice.utils.validationsUtils;
 
-import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +23,7 @@ public class CampaignValidator {
     public static final String DESCRIPTION_MAX_LENGTH_EXCEPTION = "The length of description can't be more than "
             + DESCRIPTION_MAX_LENGTH;
 
-    public static void validationCampaignDto(CampaignDto dto) {
-        validateCampaignNull(dto);
+    public static void validationCampaignDto(CampaignCreateDto dto) {
         validateCampaignTittle(dto.getTitle());
         validateCampaignDescription(dto.getDescription());
         validateGoal(dto.getGoal());
@@ -35,13 +34,6 @@ public class CampaignValidator {
         validateCampaignUpdateNull(dto);
         validateCampaignTittle(dto.getTitle());
         validateCampaignDescription(dto.getDescription());
-    }
-    
-    private static void validateCampaignNull(CampaignDto dto) {
-        if (dto == null) {
-            log.info(CAMPAIGN_NULL_EXCEPTION);
-            throw new DataValidationException(CAMPAIGN_NULL_EXCEPTION);
-        }
     }
 
     private static void validateCampaignUpdateNull(CampaignUpdateDto dto) {
@@ -55,10 +47,14 @@ public class CampaignValidator {
         if (title == null) {
             log.info(TITLE_NULL_EXCEPTION);
             throw new DataValidationException(TITLE_NULL_EXCEPTION);
-        } else if (title.isBlank()) {
+        }
+
+        if (title.isBlank()) {
             log.info(TITLE_EMPTY_EXCEPTION);
             throw new DataValidationException(TITLE_EMPTY_EXCEPTION);
-        } else if (title.length() > TITLE_MAX_LENGTH) {
+        }
+
+        if (title.length() > TITLE_MAX_LENGTH) {
             log.info(TITLE_MAX_LENGTH_EXCEPTION);
             log.info("Length of title: {}", title.length());
             throw new DataValidationException(TITLE_MAX_LENGTH_EXCEPTION);

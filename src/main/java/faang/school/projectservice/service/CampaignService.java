@@ -1,24 +1,22 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
+import faang.school.projectservice.dto.campaign.ResponseCampaignDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
 import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.mapper.ResponseCampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.utils.validationsUtils.CampaignValidator;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,32 +32,33 @@ import static faang.school.projectservice.utils.validationsUtils.CampaignValidat
 @Service
 public class CampaignService {
 
-    public static final String ID_NULL_EXCEPTION = "ID can't be null";
+    public static final String ID_NULL_EXCEPTION = "Campaign ID can't be null";
     public static final String UPDATING_EXCEPTION = "Only project owners and managers can update fundraising campaigns";
     public static final String CREATING_EXCEPTION = "Only project owners and managers can create fundraising campaigns";
     private final CampaignMapper campaignMapper;
+    private final ResponseCampaignMapper responseCampaignMapper;
     private final CampaignRepository campaignRepository;
     private final ProjectRepository projectRepository;
     private final List<CampaignFilter> campaignFilters;
-    private final TeamMemberRepository teamMemberRepository;
-    private final TeamRepository teamRepository;
 
-    public CampaignDto create(CampaignDto campaignDto) {
-        CampaignValidator.validationCampaignDto(campaignDto);
+
+    public ResponseCampaignDto create(@NotNull(message = "Campaign cannot be null")
+                                      CampaignCreateDto campaignCreateDto) {
+        CampaignValidator.validationCampaignDto(campaignCreateDto);
         log.info("All validation have been verifeied.\nStarting the campaign creation process");
 
-        if (!isManagerOrOwner(campaignDto.getCreatedBy(), campaignDto.getProjectId())) {
+        if (!isManagerOrOwner(campaignCreateDto.getCreatedBy(), campaignCreateDto.getProjectId())) {
             log.error(CREATING_EXCEPTION);
             throw new DataValidationException(CREATING_EXCEPTION);
         }
 
-        Campaign campaign = campaignMapper.toCampaign(campaignDto);
+        Campaign campaign = campaignMapper.toCampaign(campaignCreateDto);
 
         campaignRepository.save(campaign);
-        return campaignMapper.toCampaignDto(campaign);
+        return responseCampaignMapper.toResponseCampaignDto(campaign);
     }
 
-    public CampaignDto update(CampaignUpdateDto campaignUpdateDto) {
+    public CampaignCreateDto update(CampaignUpdateDto campaignUpdateDto) {
         CampaignValidator.validateCampaignUpdateDto(campaignUpdateDto);
         log.info("All validation have been verifeied.\nStarting the campaign updating process");
 
@@ -89,7 +88,7 @@ public class CampaignService {
         campaignRepository.save(campaign);
     }
 
-    public CampaignDto getCampaign(Long id) {
+    public CampaignCreateDto getCampaign(Long id) {
         if (id == null) {
             log.error(ID_NULL_EXCEPTION);
             throw new DataValidationException(ID_NULL_EXCEPTION);
@@ -99,7 +98,7 @@ public class CampaignService {
         return campaignMapper.toCampaignDto(campaign);
     }
 
-    public List<CampaignDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
+    public List<CampaignCreateDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
         if (campaignFilterDto.getProjectId() == null) {
             log.error(PROJECT_ID_NULL_EXCEPTION);
             throw new DataValidationException(PROJECT_ID_NULL_EXCEPTION);
@@ -121,7 +120,7 @@ public class CampaignService {
 
     private boolean isManagerOrOwner(Long userId, Long projectId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
 
         return project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
