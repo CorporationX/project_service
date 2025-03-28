@@ -47,12 +47,13 @@ public class TaskService {
     }
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
-    // (буду использовать по ключевому слову).
+    // (буду использовать по исполнителю).
     public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
         List<Task> tasks = taskRepository.findAll();
         List<Task> filteredTasks = tasks.stream()
                 .filter(task -> task.getProject().equals(projectId))
-                /// Я пока не могу понять как тут прикрутить фильтры по ключевому слову
+                .filter(task -> task.getStatus().equals(status))
+                .filter(task -> task.getPerformerUserId().equals(performerId))
                 .toList();
         return filteredTasks.stream()
                 .map(taskMapper::taskToTaskDto)
