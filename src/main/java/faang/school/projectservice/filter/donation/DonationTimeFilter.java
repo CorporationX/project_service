@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
+/**
+ * Фильтр для доната по времени
+ */
 @Component
 public class DonationTimeFilter implements DonationFilter {
 

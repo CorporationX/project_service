@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+/**
+ * Фильтр по валюте доната.
+ */
 @Component
 public class DonationCurrencyFilter implements DonationFilter {
 

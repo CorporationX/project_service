@@ -3,7 +3,7 @@ package faang.school.projectservice.dto.client;
 import java.math.BigDecimal;
 
 public record PaymentResponse(
-        String status,
+        PaymentStatus status,
         int verificationCode,
         long paymentNumber,
         BigDecimal amount,

@@ -6,6 +6,9 @@ import faang.school.projectservice.model.Donation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * Маппер для {@link Donation} entity.
+ */
 @Mapper(componentModel = "spring")
 public interface DonationMapper {
 

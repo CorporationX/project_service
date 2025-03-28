@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+/**
+ * Фильтр для максимального или минимального доната.
+ */
 @Component
 public class DonationValueFilter implements DonationFilter {
 

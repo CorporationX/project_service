@@ -6,6 +6,23 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO-класс для создания доната.
+ * <p>
+ * Используется для передачи данных о новом донате.
+ * </p>
+ * <p>
+ * Содержит следующие поля:
+ * <ul>
+ *     <li>{@link #paymentNumber Номер платежа}</li>
+ *     <li>{@link #amount Сумма платежа}</li>
+ *     <li>{@link #campaignId Идентификатор компании}</li>
+ *     <li>{@link #currency Валюта}</li>
+ * </ul>
+ * </p>
+ *
+ * @author juzu400
+ */
 @Data
 public class DonationCreateDto {
     @NotNull(message = "paymentNumber cannot be null")
