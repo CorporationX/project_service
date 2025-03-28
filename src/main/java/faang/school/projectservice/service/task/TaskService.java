@@ -47,6 +47,7 @@ public class TaskService {
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
     // (буду использовать по исполнителю).
+    @Transactional
     public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
         List<Task> tasks = taskRepository.findAll();
         List<Task> filteredTasks = tasks.stream()
