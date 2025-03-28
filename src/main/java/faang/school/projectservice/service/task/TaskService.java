@@ -48,7 +48,7 @@ public class TaskService {
 
     //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
     // (буду использовать по ключевому слову).
-    public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, String keyword) {
+    public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
         List<Task> tasks = taskRepository.findAll();
         List<Task> filteredTasks = tasks.stream()
                 .filter(task -> task.getProject().equals(projectId))

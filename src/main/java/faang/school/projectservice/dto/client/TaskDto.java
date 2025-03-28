@@ -10,5 +10,6 @@ public class TaskDto {
     private Long id;                // для идентификации обновляемой задачи
     private String description;     // описание
     private TaskStatus status;      // статус
+    private Long performerUserId;   // исполнитель
     private LocalDateTime deadline; // deadline
 }

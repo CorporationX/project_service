@@ -69,12 +69,11 @@ public class TaskController {
     public ResponseEntity<List<TaskDto>> getFilteredTasks(
             @PathVariable Long projectId,
             @RequestParam(required = false) TaskStatus status,
-            @RequestParam(required = false) Long performerId,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) Long performerId) {
         Long userId = userContext.getUserId();
         log.info("Получен запрос на получение отфильтрованных задач проекта {} от пользователя с ID: {}", projectId, userId);
         try {
-            List<TaskDto> tasks = taskService.getFilteredTasks(projectId, status, keyword);
+            List<TaskDto> tasks = taskService.getFilteredTasks(projectId, status, performerId);
             return ResponseEntity.ok(tasks);
         } catch (SecurityException e) {
             log.warn("Пользователь с ID {} не имеет доступа к задачам проекта {}", userId, projectId);
