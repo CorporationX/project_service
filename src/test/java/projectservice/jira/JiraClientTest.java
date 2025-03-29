@@ -45,13 +45,13 @@ public class JiraClientTest {
     private WebClient webClient;
 
     @Mock
-    private WebClient.RequestBodyUriSpec requestBodyUriSpec;//post, get, put, delete
+    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
 
     @Mock
-    private WebClient.RequestBodySpec requestBodySpec;//uri, header, bodyValue
+    private WebClient.RequestBodySpec requestBodySpec;
 
     @Mock
-    private WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);//retrieve, exchange
+    private WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
     @Mock
     private WebClient.RequestHeadersUriSpec<?> requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
