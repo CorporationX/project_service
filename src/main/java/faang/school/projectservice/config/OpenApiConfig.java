@@ -14,9 +14,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Meet Service API")
+                        .title("Project Service API")
                         .version("1.0")
-                        .description("API для управления встречами"))
+                        .description("API for project management"))
                 .components(new Components()
                         .addSecuritySchemes("user-id",
                                 new SecurityScheme()

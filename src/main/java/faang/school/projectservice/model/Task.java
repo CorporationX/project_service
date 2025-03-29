@@ -30,7 +30,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "task")
-@Builder
+@Builder(toBuilder = true)
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

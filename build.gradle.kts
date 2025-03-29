@@ -70,6 +70,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 }
 
+tasks.test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    finalizedBy(tasks.jacocoTestReport)
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
@@ -104,4 +110,8 @@ tasks.jacocoTestReport {
             )
         })
     )
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
