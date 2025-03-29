@@ -2,12 +2,18 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    kotlin("jvm")
     jacoco
 }
 
 group = "faang.school"
 version = "1.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
+}
 
 repositories {
     mavenCentral()
@@ -17,7 +23,9 @@ dependencies {
     /**
      * Spring boot starters
      */
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
@@ -40,12 +48,17 @@ dependencies {
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
     implementation("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0")
 
     /**
      * Test containers
@@ -72,33 +85,38 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+kotlin {
+    jvmToolchain(17)
+}
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.8"
 }
 
 tasks.test {
-    outputs.upToDateWhen { false }  // To always rerun tests
+    outputs.upToDateWhen { false }
 }
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test)   // To start task after tests
+    dependsOn(tasks.test)
 
     reports {
-        xml.required.set(false)
-        csv.required.set(false)
+        xml.required.set(true)
+        csv.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
 }
 
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.jacocoTestReport)    // To start task after jacocoTestReport
+    dependsOn(tasks.jacocoTestReport)
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.projectservice.*",
+                "faang.school.projectservice.filter.*",
+                "faang.school.projectservice.service.",
+                "faang.school.projectservice.validator.*",
             )
 
             limit {
@@ -139,6 +157,18 @@ tasks.classes {
 }
 
 // To run check after rebuild
+tasks.compileJava {
+    finalizedBy(tasks.check)
+}
+
+tasks.build {
+    dependsOn(tasks.check)
+}
+
+tasks.classes {
+    finalizedBy(tasks.check)
+}
+
 tasks.compileJava {
     finalizedBy(tasks.check)
 }
