@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation.donation;
+package faang.school.projectservice.validation;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;

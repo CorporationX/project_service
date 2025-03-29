@@ -1,19 +1,19 @@
 package faang.school.projectservice.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationCreateDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.dto.donation.DonationViewDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.validation.donation.DonationValidator;
+import faang.school.projectservice.validation.DonationValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -85,7 +85,7 @@ public class DonationService {
     public DonationViewDto getDonationByIdForUser(long donationId, long userId) {
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
                 .orElseThrow(() ->
-                        new NotFoundException("donation with id " + donationId + "not found for user " + userId));
+                        new EntityNotFoundException("donation with id " + donationId + "not found for user " + userId));
         return donationMapper.toDto(donation);
     }
 
@@ -140,7 +140,7 @@ public class DonationService {
         Stream<Donation> donationStream = donations.stream();
         for (DonationFilter donationFilter : donationFilter) {
             if (donationFilter.isApplicable(filter)) {
-                donationStream = donationFilter.apply(donations.stream(), filter);
+                donationStream = donationFilter.apply(donationStream, filter);
             }
         }
         return donationStream

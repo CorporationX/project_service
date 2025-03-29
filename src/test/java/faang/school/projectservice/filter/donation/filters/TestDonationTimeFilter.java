@@ -1,21 +1,17 @@
-package faang.school.projectservice.filter.donation;
+package faang.school.projectservice.filter.donation.filters;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.model.Donation;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-/**
- * Фильтр для доната по дате
- */
-@Component
-public class DonationTimeFilter implements DonationFilter {
+public class TestDonationTimeFilter implements DonationFilter {
 
     @Override
     public boolean isApplicable(DonationFilterDto filter) {
-        return filter.getDonationTime() != null;
+        return true;
     }
 
     @Override

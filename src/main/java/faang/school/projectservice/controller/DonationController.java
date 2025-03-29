@@ -48,7 +48,7 @@ public class DonationController {
     private final UserContext userContext;
 
     @ModelAttribute("userId")
-    public long getUserId() {
+    private long getUserId() {
         return userContext.getUserId();
     }
 
