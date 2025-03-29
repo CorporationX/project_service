@@ -25,16 +25,16 @@ public class ResizeImagesService {
             BufferedImage bufferedImage = ImageIO.read(inputStream);
             if (bufferedImage == null) {
                 throw new UnsupportedResourceException(
-                        String.format("Uploaded file '%s' is not a valid image."
-                                , file.getOriginalFilename()));
+                        String.format("Uploaded file '%s' is not a valid image.",
+                                file.getOriginalFilename()));
             }
             log.info("File '{}' is a valid image.", file.getOriginalFilename());
             return bufferedImage;
 
         } catch (IOException e) {
             log.error("Error reading file '{}':{}", file.getOriginalFilename(), e.getMessage());
-            throw new RuntimeException(String.format("Error reading file '%s'"
-                    , file.getOriginalFilename()), e);
+            throw new RuntimeException(String.format("Error reading file '%s'",
+                    file.getOriginalFilename()), e);
         }
     }
 
@@ -76,8 +76,8 @@ public class ResizeImagesService {
             throw new RuntimeException(String.format("An error occurred while converting image into MultipartFile '%s'",
                     file.getOriginalFilename()), e);
         }
-        return new CustomMultipartFile(resizedImagesBytes
-                , file.getName(), file.getOriginalFilename(), file.getContentType());
+        return new CustomMultipartFile(resizedImagesBytes,
+                file.getName(), file.getOriginalFilename(), file.getContentType());
     }
 
     private String getResourceExtension(MultipartFile file) {
