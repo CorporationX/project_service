@@ -23,16 +23,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TeamService {
+
     private final TeamRepository teamRepository;
     private final S3Service s3Service;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ResizeImagesService resizeImagesService;
+    private final static double LIMITATION_FILE_SIZE = 5 * 1024 * 1024;
 
     public void upload(MultipartFile file, Long id) {
         log.info("Начало загрузки аватара для команды с ID: {}", id);
 
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 МБ
+        if (file.getSize() > LIMITATION_FILE_SIZE) { // 5 МБ
             log.warn("Размер файла превышает 5 МБ: {}", file.getSize());
             throw new IllegalArgumentException("Размер файла не должен превышать 5 МБ");
         }

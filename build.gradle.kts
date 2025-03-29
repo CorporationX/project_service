@@ -65,7 +65,7 @@ dependencies {
     implementation("org.apache.httpcomponents.client5:httpclient5:5.2") // или последняя версия
     implementation("org.apache.httpcomponents.core5:httpcore5:5.2")
 
-    implementation ("net.coobird:thumbnailator:0.4.14")
+    implementation("net.coobird:thumbnailator:0.4.14")
     implementation("org.imgscalr:imgscalr-lib:4.2")
     implementation("org.apache.james:apache-mime4j-core:0.8.12")
 

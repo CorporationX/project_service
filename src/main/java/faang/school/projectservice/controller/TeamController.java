@@ -19,13 +19,13 @@ public class TeamController {
     private final TeamService service;
     private final UserContext userContext;
 
-    @PostMapping("/upload/avatar/{id}")
-    public void upload(@NotNull @RequestBody MultipartFile file, @NotNull @PathVariable Long id) {
+    @PostMapping("/avatar/{id}")
+    public void upload(@NotNull @RequestBody MultipartFile file, @PathVariable Long id) {
         service.upload(file, id);
     }
 
-    @DeleteMapping("delete/avatar/{id}")
-    public void delete(@NotNull @PathVariable Long id) {
+    @DeleteMapping("/avatar/{id}")
+    public void delete(@PathVariable Long id) {
         service.deleteAvatar(id, userContext.getUserId());
     }
 }
