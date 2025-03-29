@@ -5,12 +5,11 @@ import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptionhandler.GlobalExceptionHandler;
+import faang.school.projectservice.exception.GlobalExceptionHandler;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.MinioService;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;
 import org.junit.jupiter.api.Assertions;
@@ -34,9 +33,6 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private ProjectController projectController;
-
-    @Autowired
-    private MinioService minioService;
 
     @Autowired
     private ProjectRepositoryAdapter projectRepositoryAdapter;
@@ -103,7 +99,8 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("name must be fielded"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.name")
+                        .value("name must be fielded"));
     }
 
     @Test
@@ -114,7 +111,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.description")
                         .value("description must be fielded"));
     }
 
@@ -173,7 +170,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("Only the owner of the project can add a cover"));
     }
 
@@ -192,7 +189,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/cover", testProjectId)
                         .file(IMAGE_MOCK_MULTIPART_FILE))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("The project with ID " + testProjectId + " already has a cover"));
     }
 
@@ -217,7 +214,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("Only the owner of the project can delete a cover"));
     }
 
@@ -225,7 +222,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void deleteProjectCover_shouldThrowBadRequestException_whenTheProjectDoesNotContainCover() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.nameError")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("The project with ID " + testProjectId + " does not have a cover"));
     }
 

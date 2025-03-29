@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptionhandler.GlobalExceptionHandler;
+import faang.school.projectservice.exception.GlobalExceptionHandler;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectCoverService;
 import faang.school.projectservice.service.project.ProjectService;
@@ -94,7 +94,8 @@ public class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("name must be fielded"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.name")
+                        .value("name must be fielded"));
     }
 
     @Test
@@ -108,7 +109,8 @@ public class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("description must be fielded"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.description")
+                        .value("description must be fielded"));
     }
 
     @Test
