@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -13,19 +14,16 @@ import org.springframework.stereotype.Component;
 public class TaskValidator {
 
     private final UserServiceClient userServiceClient;
-    private final UserContext userContext;
+    private final AuditorAwareImpl auditorAware;
 
     public long validateUserParticipationAndGetUserId() {
-        long currentUserId = userContext.getUserId();
-        log.info("Validating user participation for user ID: {}", currentUserId);
+        long currentUserId = validateCurrentAuditor();
 
         if (currentUserId <= 0) {
             throw new IllegalArgumentException("User is not a valid participant");
         }
         try {
-            log.info("Calling userServiceClient.getUser({})", currentUserId);
             UserDto user = userServiceClient.getUser(currentUserId);
-            log.info("Received user: {}", user);
             if (user == null) {
                 throw new IllegalArgumentException("User not found or not a participant");
             }
@@ -34,5 +32,13 @@ public class TaskValidator {
             throw new IllegalArgumentException("User is not a participant", e);
         }
         return currentUserId;
+    }
+
+    private long validateCurrentAuditor() {
+        return auditorAware.getCurrentAuditor()
+                .orElseThrow(() -> {
+                    log.warn("No active authorized user");
+                    return new SecurityException("No active authorized user");
+                });
     }
 }
