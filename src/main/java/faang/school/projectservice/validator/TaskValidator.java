@@ -2,7 +2,6 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.audit.AuditorAwareImpl;
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
