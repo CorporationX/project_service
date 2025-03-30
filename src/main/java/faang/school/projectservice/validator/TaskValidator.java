@@ -17,7 +17,6 @@ public class TaskValidator {
 
     public long validateUserParticipationAndGetUserId() {
         long currentUserId = validateCurrentAuditor();
-
         if (currentUserId <= 0) {
             throw new IllegalArgumentException("User is not a valid participant");
         }

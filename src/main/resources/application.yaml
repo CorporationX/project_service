@@ -41,8 +41,6 @@ springdoc:
     persist-authorization: true
   api-docs:
     path: /v3/api-docs
-  default-consumes-media-type: multipart/form-data
-  default-produces-media-type: application/json
 
 server:
   port: 8082
