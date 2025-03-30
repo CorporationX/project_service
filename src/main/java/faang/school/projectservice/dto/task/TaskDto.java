@@ -31,6 +31,7 @@ public class TaskDto {
     @NotNull(message = "Performer user id must not be null")
     private Long performerUserId;
 
+    @NotNull(message = "Performer user id must not be null")
     private Long reporterUserId;
 
     private Long parentTaskId;

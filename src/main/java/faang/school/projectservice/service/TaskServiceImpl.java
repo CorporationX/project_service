@@ -41,6 +41,9 @@ public class TaskServiceImpl implements TaskService {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         Task task = taskMapper.toEntity(taskDto);
         task.setReporterUserId(currentUserId);
+        if (task.getPerformerUserId() == null) {
+            task.setPerformerUserId(currentUserId);
+        }
         Task savedTask = taskRepository.save(task);
         return taskMapper.toDto(savedTask);
     }
