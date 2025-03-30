@@ -1,4 +1,4 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.config;
 
 import faang.school.projectservice.exception.StorageException;
 import io.minio.BucketExistsArgs;
@@ -26,7 +26,7 @@ public class MinioClientConfig {
     @Value("${services.minio.cover.bucket}")
     private String coverBucketName;
 
-    MinioClient minioClient;
+    private MinioClient minioClient;
 
     @Bean
     public MinioClient minioClient() {
