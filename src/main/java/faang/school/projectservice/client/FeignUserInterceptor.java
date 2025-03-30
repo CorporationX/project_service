@@ -6,7 +6,7 @@ import feign.RequestTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+/*@Slf4j
 @RequiredArgsConstructor
 public class FeignUserInterceptor implements RequestInterceptor {
 
@@ -24,5 +24,5 @@ public class FeignUserInterceptor implements RequestInterceptor {
 
     /*public void apply(RequestTemplate template) {
         template.header("x-user-id", String.valueOf(userContext.getUserId()));
-    }*/
-}
+    }
+}*/
