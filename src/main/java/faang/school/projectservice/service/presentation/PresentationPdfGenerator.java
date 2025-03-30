@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.presentation;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 public class PresentationPdfGenerator {
 
     private final FileStorageService fileStorageService;
+    private final UserServiceClient userServiceClient;
 
     public byte[] generatePdf(Project project) throws Exception {
         try (PDDocument document = new PDDocument();
@@ -39,7 +41,8 @@ public class PresentationPdfGenerator {
                 float yPosition = 750;
 
                 byte[] image = fileStorageService.downloadImageFromMinio(project.getCoverImageId());
-                PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, image, project.getCoverImageId());
+                PDImageXObject pdImage =
+                        PDImageXObject.createFromByteArray(document, image, project.getCoverImageId());
 
                 float imageX = 50;
                 float imageY = 625;
@@ -61,7 +64,7 @@ public class PresentationPdfGenerator {
                 yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Status: " + project.getStatus(), 15);
                 yPosition = drawText(contentStream, font, 12,
-                        xStart, yPosition, "Project Owner ID: " + project.getOwnerId(), 25);
+                        xStart, yPosition, "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
 
                 yPosition = drawText(contentStream, boldFont, 12,
                         xStart, yPosition, "Tasks: ", 25);

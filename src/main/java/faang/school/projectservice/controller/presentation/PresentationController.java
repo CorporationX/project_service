@@ -23,7 +23,9 @@ public class PresentationController {
     private final PresentationService presentationService;
 
     @PostMapping("/{projectId}/presentation/generate")
-    public ResponseEntity<String> generatePresentation(@PathVariable("projectId") Long projectId) {
+    public ResponseEntity<String> generatePresentation(
+            @PathVariable("projectId") Long projectId
+    ) {
         try {
             log.info("Generating presentation for project id: {}", projectId);
             String fileKey = presentationService.generateAndUploadPresentation(projectId);
