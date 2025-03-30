@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.presentation;
 
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.Team;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -59,6 +62,18 @@ public class PresentationPdfGenerator {
                         xStart, yPosition, "Status: " + project.getStatus(), 15);
                 yPosition = drawText(contentStream, boldFont, 12,
                         xStart, yPosition, "Project Owner ID: " + project.getOwnerId(), 25);
+
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Tasks: ", 25);
+
+                List<Task> tasks = project.getTasks();
+                for (Task task : tasks) {
+                    yPosition = drawText(contentStream, boldFont, 12,
+                            xStart, yPosition, " - " + task.getName(), 25);
+                }
+
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Teams: ", 25);
 
                 if (project.getParentProject() != null) {
                     yPosition = drawText(contentStream, boldFont, 18,
