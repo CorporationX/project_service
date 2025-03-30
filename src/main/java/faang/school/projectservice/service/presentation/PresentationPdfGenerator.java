@@ -63,8 +63,8 @@ public class PresentationPdfGenerator {
                         xStart, yPosition, "Creation Date: " + project.getCreatedAt(), 15);
                 yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Status: " + project.getStatus(), 15);
-                yPosition = drawText(contentStream, font, 12,
-                        xStart, yPosition, "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
+                yPosition = drawText(contentStream, font, 12, xStart, yPosition,
+                        "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
 
                 yPosition = drawText(contentStream, boldFont, 12,
                         xStart, yPosition, "Tasks: ", 25);
