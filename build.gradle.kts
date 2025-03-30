@@ -8,6 +8,10 @@ group = "faang.school"
 version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
+configurations.all {
+    exclude("com.vaadin.external.google", "android-json")
+}
+
 repositories {
     mavenCentral()
 }

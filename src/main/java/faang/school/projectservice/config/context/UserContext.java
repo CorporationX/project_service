@@ -12,7 +12,13 @@ public class UserContext {
     }
 
     public long getUserId() {
-        return userIdHolder.get();
+        long id = 0;
+        try {
+            id = userIdHolder.get();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return id;
     }
 
     public void clear() {

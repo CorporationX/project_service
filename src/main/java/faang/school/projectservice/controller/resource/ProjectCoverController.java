@@ -1,12 +1,16 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.client.PostServiceClient;
+import faang.school.projectservice.client.own_client.PostDto;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 public class ProjectCoverController {
 
     private final ProjectService projectService;
+    private final PostServiceClient postServiceClient;
+    //private final UserContext userContext;
 
     @PostMapping("/{projectId}/cover")
     public ResponseEntity<ProjectDto> addProjectCover(@PathVariable("projectId") Long projectId,
@@ -47,4 +54,44 @@ public class ProjectCoverController {
         ProjectDto projectDto = projectService.hardDeleteCoverImage(projectId);
         return ResponseEntity.ok(projectDto);
     }
+
+    /******************************************************************************************************************/
+    /*@GetMapping("/{id}/get_post")
+    public ResponseEntity<PostDto> sendToPost(
+            @PathVariable("id") Long postId,
+            @RequestHeader(value = "x-user-id", required = false) String userId) {
+        try {
+            // Заполняем UserContext из заголовка
+            if (userId != null) {
+                userContext.setUserId(Long.valueOf(userId));
+            } else {
+                log.warn("x-user-id header is missing, using default or skipping");
+                // Можно задать значение по умолчанию, если нужно
+                userContext.setUserId(1L);
+            }
+
+            var postDtoResponseEntity = postServiceClient.getPost(PostDto.builder().id(postId).build());
+            log.info("Received dto: {}", postDtoResponseEntity.getBody());
+            return ResponseEntity.ok(postDtoResponseEntity.getBody());
+        } catch (Exception e) {
+            log.error("Error calling post-service: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }*/
+    @GetMapping("/{id}/get_post")
+    public ResponseEntity<PostDto> sendToPost(@PathVariable("id") Long postId) {
+        /*var postDtoResponseEntity = postServiceClient.getPost(PostDto.builder().id(postId).build());
+        log.info("Received dto: {}", postDtoResponseEntity.getBody());
+        return ResponseEntity.ok(postDtoResponseEntity.getBody());*/
+        log.info("НАЧАЛО ОТПРАВКИ");
+        try {
+            var postDtoResponseEntity = postServiceClient.getPost(PostDto.builder().id(postId).build());
+            log.info("Received dto: {}", postDtoResponseEntity.getBody());
+            return ResponseEntity.ok(postDtoResponseEntity.getBody());
+        } catch (Exception e) {
+            log.error("Error calling post-service: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
