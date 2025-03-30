@@ -17,7 +17,6 @@ public class PresentationService {
     private final ProjectRepository projectRepository;
     private final PresentationPdfGenerator pdfGenerator;
     private final FileStorageService fileStorageService;
-//    private final UserServiceClient userServiceClient;
 
     public String generateAndUploadPresentation(Long projectId) throws Exception {
         log.info("Generating presentation PDF for project id {}", projectId);
@@ -39,7 +38,6 @@ public class PresentationService {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
         if (optionalProject.isEmpty()) {
             throw new ProjectNotFoundException("Project with ID " + projectId + " not found");
-            
         }
         return optionalProject.get();
     }

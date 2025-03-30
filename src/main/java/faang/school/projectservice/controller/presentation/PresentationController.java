@@ -38,7 +38,7 @@ public class PresentationController {
 
     @GetMapping("/presentations/{fileKey:.+}")
     public ResponseEntity<ByteArrayResource> downloadPresentation(@PathVariable("fileKey") String fileKey) {
-        log.info("Запрос на скачивание файла с ключом: {}", fileKey);
+        log.info("Request for download presentation with file key: {}", fileKey);
         try {
             log.info("Received download request for file with key: {}", fileKey);
             byte[] bytes = presentationService.downloadPresentation(fileKey);

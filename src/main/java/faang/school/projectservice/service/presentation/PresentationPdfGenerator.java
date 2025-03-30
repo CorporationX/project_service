@@ -19,6 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class PresentationPdfGenerator {
+
     private final FileStorageService fileStorageService;
 
     public byte[] generatePdf(Project project) throws Exception {
@@ -28,72 +29,60 @@ public class PresentationPdfGenerator {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
 
+            PDType1Font boldFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
+
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                float xStart = 50;
-                float yPosition = 700;
+                float xStart = 250;
+                float yPosition = 750;
 
                 byte[] image = fileStorageService.downloadImageFromMinio(project.getCoverImageId());
                 PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, image, project.getCoverImageId());
 
                 float imageX = 50;
-                float imageY = 800; // можно указать любую координату по оси Y
-                float imageWidth = 150;  // требуемая ширина картинки в точках
-                float imageHeight = 100; // требуемая высота картинки в точках
+                float imageY = 625;
+                float imageWidth = 150;
+                float imageHeight = 150;
 
                 contentStream.drawImage(pdImage, imageX, imageY, imageWidth, imageHeight);
 
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        26, xStart, yPosition, "Project presentation");
-                yPosition -= 40;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        18, xStart, yPosition, "Project Overview");
-                yPosition -= 25;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        12, xStart, yPosition, "Name: " + project.getName());
-                yPosition -= 15;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        12, xStart, yPosition, "Description: " + project.getDescription());
-                yPosition -= 15;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        12, xStart, yPosition, "Creation Date: " + project.getCreatedAt());
-                yPosition -= 15;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        12, xStart, yPosition, "Status: " + project.getStatus());
-                yPosition -= 15;
-
-                drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                        12, xStart, yPosition, "Project Owner ID: " + project.getOwnerId());
-                yPosition -= 25;
+                yPosition = drawText(contentStream, boldFont, 26,
+                        xStart, yPosition, "Project presentation", 40);
+                yPosition = drawText(contentStream, boldFont, 18,
+                        xStart, yPosition, "Project Overview", 25);
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Name: " + project.getName(), 15);
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Description: " + project.getDescription(), 15);
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Creation Date: " + project.getCreatedAt(), 15);
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Status: " + project.getStatus(), 15);
+                yPosition = drawText(contentStream, boldFont, 12,
+                        xStart, yPosition, "Project Owner ID: " + project.getOwnerId(), 25);
 
                 if (project.getParentProject() != null) {
-                    drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                            18, xStart, yPosition, "Parent Project");
-                    yPosition -= 15;
-
-                    drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
-                            12, xStart, yPosition, "Name: " + project.getParentProject().getName());
+                    yPosition = drawText(contentStream, boldFont, 18,
+                            xStart, yPosition, "Parent Project", 15);
+                    drawText(contentStream, boldFont, 12,
+                            xStart, yPosition, "Name: " + project.getParentProject().getName(), 0);
                 }
             }
 
             document.save(outputStream);
             return outputStream.toByteArray();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Error generating presentation PDF: {}", e.getMessage());
             throw e;
         }
     }
 
-    private void drawText(PDPageContentStream contentStream, PDType1Font font, float fontSize,
-                          float x, float y, String text) throws IOException {
+    private float drawText(PDPageContentStream contentStream, PDType1Font font, float fontSize,
+                           float x, float y, String text, float yDecrement) throws IOException {
         contentStream.beginText();
         contentStream.setFont(font, fontSize);
         contentStream.newLineAtOffset(x, y);
         contentStream.showText(text);
         contentStream.endText();
+        return y - yDecrement;
     }
 }
