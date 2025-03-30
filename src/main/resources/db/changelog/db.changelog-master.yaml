@@ -33,3 +33,7 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V019_alter_internship_add_role.sql
   - include:
       file: db/changelog/changeset/project_V020_alter_candidate_add_username.sql
+  - include:
+      file: db/changelog/changeset/project_V021_linked_task_add_table.sql
+  - include:
+      file: db/changelog/changeset/project_V022_add_column_deadline_to_task_table.sql

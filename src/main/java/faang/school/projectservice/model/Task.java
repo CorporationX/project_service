@@ -65,7 +65,7 @@ public class Task {
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "parent_task_id")
+    @JoinColumn(name = "parent_task_id", nullable = true)
     private Task parentTask;
 
     @ManyToMany
@@ -83,5 +83,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    @Column(name = "deadline")
+    private LocalDateTime deadline;
+
 }
 

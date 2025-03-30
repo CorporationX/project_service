@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
+import faang.school.projectservice.dto.task.TaskResponseDto;
 import faang.school.projectservice.exception.TaskNotFoundException;
 import faang.school.projectservice.filter.PerformerFilter;
 import faang.school.projectservice.filter.KeywordFilter;
@@ -37,55 +38,74 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskDto createTask(TaskDto taskDto) {
+    public TaskResponseDto createTask(TaskDto taskDto) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         Task task = taskMapper.toEntity(taskDto);
         task.setReporterUserId(currentUserId);
         if (task.getPerformerUserId() == null) {
             task.setPerformerUserId(currentUserId);
         }
+        if (task.getParentTask().getId() != null) {
+            Task parentTask = getTaskOrThrow(task.getParentTask().getId());
+            task.setParentTask(parentTask);
+        } else {
+            task.setParentTask(null);
+        }
+        if (taskDto.getLinkedTaskIds() != null) {
+            validateLinkedTasks(taskDto.getLinkedTaskIds());
+        }
         Task savedTask = taskRepository.save(task);
-        return taskMapper.toDto(savedTask);
+        return taskMapper.toResponseDto(savedTask);
     }
 
     @Override
     @Transactional
-    public TaskDto updateTask(Long id, TaskDto taskDto) {
+    public TaskResponseDto updateTask(Long id, TaskDto taskDto) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         Task existingTask = getTaskOrThrow(id);
         Task updatedTask = updateTaskFields(existingTask, taskDto);
         Task savedTask = taskRepository.save(updatedTask);
-        return taskMapper.toDto(savedTask);
+        return taskMapper.toResponseDto(savedTask);
     }
 
     @Override
-    public List<TaskDto> getFilteredTasks(TaskFilterDto filterDto) {
+    public List<TaskResponseDto> getFilteredTasks(TaskFilterDto filterDto) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         List<Task> tasks = taskRepository.findAll();
         List<TaskFilter> filters = createFilters(filterDto);
         List<Task> filteredTasks = tasks.stream()
                 .filter(task -> filters.stream().allMatch(filter -> filter.test(task)))
                 .collect(toList());
-        return taskMapper.toDtoList(filteredTasks);
+        return taskMapper.toResponseDtoList(filteredTasks);
     }
 
     @Override
-    public List<TaskDto> getAllTasks() {
+    public List<TaskResponseDto> getAllTasks() {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
-        return taskMapper.toDtoList(taskRepository.findAll());
+        return taskMapper.toResponseDtoList(taskRepository.findAll());
     }
 
     @Override
-    public List<TaskDto> getAllTasksByProjectId(Long projectId) {
+    public List<TaskResponseDto> getAllTasksByProjectId(Long projectId) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
-        return taskMapper.toDtoList(taskRepository.findAllByProjectId(projectId));
+        return taskMapper.toResponseDtoList(taskRepository.findAllByProjectId(projectId));
     }
 
     @Override
-    public TaskDto getTaskById(long id) {
+    public TaskResponseDto getTaskById(long id) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         Task task = getTaskOrThrow(id);
-        return taskMapper.toDto(task);
+        return taskMapper.toResponseDto(task);
+    }
+
+    @Override
+    public void deleteTask(Long id) {
+        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
+        taskRepository.deleteById(id);
+    }
+
+    private void validateLinkedTasks(List<Long> linkedTaskIds) {
+        linkedTaskIds.forEach(this::getTaskOrThrow);
     }
 
     private Task getTaskOrThrow(Long id) {

@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.task.TaskDto;
+import faang.school.projectservice.dto.task.TaskResponseDto;
 import faang.school.projectservice.model.Task;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,14 +13,16 @@ import java.util.List;
 public interface TaskMapper {
 
     @Mapping(target = "parentTaskId", source = "parentTask.id")
-    @Mapping(target = "linkedTaskIds", source = "linkedTasks")
-    TaskDto toDto(Task task);
+    @Mapping(target = "linkedTaskIds", expression = "java(task.getLinkedTasks().stream().map(Task::getId).collect(java.util.stream.Collectors.toList()))")
+    @Mapping(target = "projectId", source = "project.id")
+    TaskResponseDto toResponseDto(Task task);
 
-    @Mapping(target = "parentTask", source = "parentTaskId")
-    @Mapping(target = "linkedTasks", source = "linkedTaskIds")
+    @Mapping(target = "parentTask.id", source = "parentTaskId")
+    @Mapping(target = "linkedTasks", expression = "java(mapIdsToTasks(taskDto.getLinkedTaskIds()))")
+    @Mapping(target = "project.id", source = "projectId")
     Task toEntity(TaskDto taskDto);
 
-    List<TaskDto> toDtoList(List<Task> tasks);
+    List<TaskResponseDto> toResponseDtoList(List<Task> tasks);
 
     default Task mapIdToTask(Long id) {
         if (id == null) {
