@@ -2,7 +2,6 @@ package faang.school.projectservice.service.presentation;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.Team;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -33,6 +32,7 @@ public class PresentationPdfGenerator {
             document.addPage(page);
 
             PDType1Font boldFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
 
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
                 float xStart = 250;
@@ -52,15 +52,15 @@ public class PresentationPdfGenerator {
                         xStart, yPosition, "Project presentation", 40);
                 yPosition = drawText(contentStream, boldFont, 18,
                         xStart, yPosition, "Project Overview", 25);
-                yPosition = drawText(contentStream, boldFont, 12,
+                yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Name: " + project.getName(), 15);
-                yPosition = drawText(contentStream, boldFont, 12,
+                yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Description: " + project.getDescription(), 15);
-                yPosition = drawText(contentStream, boldFont, 12,
+                yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Creation Date: " + project.getCreatedAt(), 15);
-                yPosition = drawText(contentStream, boldFont, 12,
+                yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Status: " + project.getStatus(), 15);
-                yPosition = drawText(contentStream, boldFont, 12,
+                yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Project Owner ID: " + project.getOwnerId(), 25);
 
                 yPosition = drawText(contentStream, boldFont, 12,
@@ -68,17 +68,17 @@ public class PresentationPdfGenerator {
 
                 List<Task> tasks = project.getTasks();
                 for (Task task : tasks) {
-                    yPosition = drawText(contentStream, boldFont, 12,
+                    yPosition = drawText(contentStream, font, 12,
                             xStart, yPosition, " - " + task.getName(), 25);
                 }
 
                 yPosition = drawText(contentStream, boldFont, 12,
-                        xStart, yPosition, "Teams: ", 25);
+                        xStart, yPosition, "Team amount: " + project.getTeams().size(), 25);
 
                 if (project.getParentProject() != null) {
                     yPosition = drawText(contentStream, boldFont, 18,
                             xStart, yPosition, "Parent Project", 15);
-                    drawText(contentStream, boldFont, 12,
+                    drawText(contentStream, font, 12,
                             xStart, yPosition, "Name: " + project.getParentProject().getName(), 0);
                 }
             }
