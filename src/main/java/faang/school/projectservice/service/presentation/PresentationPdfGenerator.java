@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,16 @@ public class PresentationPdfGenerator {
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
                 float xStart = 50;
                 float yPosition = 700;
+
+                byte[] image = fileStorageService.downloadImageFromMinio(project.getCoverImageId());
+                PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, image, project.getCoverImageId());
+
+                float imageX = 50;
+                float imageY = 800; // можно указать любую координату по оси Y
+                float imageWidth = 150;  // требуемая ширина картинки в точках
+                float imageHeight = 100; // требуемая высота картинки в точках
+
+                contentStream.drawImage(pdImage, imageX, imageY, imageWidth, imageHeight);
 
                 drawText(contentStream, new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
                         26, xStart, yPosition, "Project presentation");
