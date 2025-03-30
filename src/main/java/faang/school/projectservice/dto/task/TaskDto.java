@@ -3,6 +3,7 @@ package faang.school.projectservice.dto.task;
 import faang.school.projectservice.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +18,6 @@ import java.util.List;
 @Builder
 public class TaskDto {
 
-    private Long id;
-
     @NotBlank(message = "Task name must not be blank")
     private String name;
 
@@ -31,9 +30,7 @@ public class TaskDto {
     @NotNull(message = "Performer user id must not be null")
     private Long performerUserId;
 
-    @NotNull(message = "Performer user id must not be null")
-    private Long reporterUserId;
-
+    @Positive(message = "Parent task id must be above zero")
     private Long parentTaskId;
 
     private List<Long> linkedTaskIds;
