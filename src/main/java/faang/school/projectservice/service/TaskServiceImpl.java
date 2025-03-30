@@ -76,6 +76,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<TaskDto> getAllTasksByProjectId(Long projectId) {
+        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
+        return taskMapper.toDtoList(taskRepository.findAllByProjectId(projectId));
+    }
+
+    @Override
     public TaskDto getTaskById(long id) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         Task task = getTaskOrThrow(id);

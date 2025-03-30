@@ -84,6 +84,16 @@ public class TaskController {
     }
 
     @Operation(
+            summary = "Get all tasks by project ID",
+            description = "Fetches a list of all tasks by project ID"
+    )
+    @GetMapping
+    public ResponseEntity<List<TaskDto>> getAllTasksByProjectId(Long projectId) {
+        List<TaskDto> tasks = taskService.getAllTasksByProjectId(projectId);
+        return ResponseEntity.ok(tasks);
+    }
+
+    @Operation(
             summary = "Get a task by ID",
             description = "Fetches a task by its ID"
     )

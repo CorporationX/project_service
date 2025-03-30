@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.task;
 
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,4 +35,6 @@ public class TaskDto {
     private Long parentTaskId;
 
     private List<Long> linkedTaskIds;
+
+    private Project project;
 }
