@@ -42,6 +42,11 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    coverImage:
+      #File size limit in MB
+      limitSize: 5
+      #Limit on the size of the largest side in pixels
+      limitSide: 512
   payment-service:
     host: http://localhost
     port: 9080
