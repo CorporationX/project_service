@@ -40,6 +40,11 @@ dependencies {
     implementation("io.minio:minio:8.4.6")
 
     /**
+     * Apache PDFBox
+     */
+    implementation("org.apache.pdfbox:pdfbox:3.0.4")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
