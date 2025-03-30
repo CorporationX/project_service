@@ -101,7 +101,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTask(Long id) {
         long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
-        taskRepository.deleteById(id);
+        Task task = getTaskOrThrow(id);
+        taskRepository.delete(task);
     }
 
     private void validateLinkedTasks(List<Long> linkedTaskIds) {
