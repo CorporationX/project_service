@@ -38,22 +38,39 @@ public class FileStorageService {
     @Value("${app.presentation.contentType}")
     private String contentTypePdf;
 
-    public String uploadFileToMinio(byte[] fileData) throws Exception {
-        String fileName = UUID.randomUUID().toString() + fileExtension;
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(fileData);
-
-        minioClient.putObject(PutObjectArgs.builder()
-                .bucket(bucketName)
-                .object(fileName)
-                .stream(inputStream, fileData.length, -1)
-                .contentType(contentTypePdf)
-                .build());
-        return fileName;
+    public String uploadFileToMinio(byte[] fileData) {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(fileData)) {
+            String fileName = UUID.randomUUID() + fileExtension;
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(fileName)
+                    .stream(inputStream, fileData.length, -1)
+                    .contentType(contentTypePdf)
+                    .build());
+            return fileName;
+        } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                 NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
+                 InternalException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public byte[] downloadPresentationFromMinio(String fileKey) {
+        log.info("Downloading presentation from Minio for file key: {}", fileKey);
+        byte[] bytes = downloadFileFromMinio(fileKey);
+        log.info("Successfully downloaded presentation file");
+        return bytes;
+    }
+
+    public byte[] downloadImageFromMinio(String fileKey) {
+        log.info("Downloading image from Minio for file key: {}", fileKey);
+        byte[] bytes = downloadFileFromMinio(fileKey);
+        log.info("Successfully downloaded image file");
+        return bytes;
+    }
+
+    private byte[] downloadFileFromMinio(String fileKey) {
         try {
-            log.info("Downloading presentation from Minio for file key: {}", fileKey);
             InputStream inputStream = minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(bucketName)
@@ -62,12 +79,12 @@ public class FileStorageService {
             );
             byte[] bytes = IOUtils.toByteArray(inputStream);
             inputStream.close();
-            log.info("Successfully downloaded presentation file");
+            log.info("Successfully downloaded file");
             return bytes;
         } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException |
                  InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException |
                  XmlParserException | IllegalArgumentException e) {
-            log.error("Error while downloading presentation with file key {}: {}", fileKey, e.getMessage());
+            log.error("Error while downloading with file key {}: {}", fileKey, e.getMessage());
             throw new RuntimeException(e);
         }
     }
