@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
@@ -78,6 +79,12 @@ class VacancyServiceTest {
     @Mock
     private VacancyFilter vacancyFilter2;
 
+    @Mock
+    private UserContext userContext;
+
+    @Mock
+    private S3ServiceImpl s3Service;
+
     @InjectMocks
     private VacancyServiceImpl vacancyService;
 
@@ -86,9 +93,9 @@ class VacancyServiceTest {
 
     @BeforeEach
     public void setUp() {
-        vacancyService = new VacancyServiceImpl(vacancyRepository, projectService, teamMemberService, candidateService,
+        vacancyService = new VacancyServiceImpl(s3Service, vacancyRepository, projectService, teamMemberService, candidateService,
                 openVacancyRequestValidator, updateVacancyRequestValidator, vacancyMapper, candidateMapper,
-                List.of(vacancyFilter1, vacancyFilter2));
+                List.of(vacancyFilter1, vacancyFilter2), userContext);
     }
 
     @Test

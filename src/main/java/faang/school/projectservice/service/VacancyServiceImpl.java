@@ -1,11 +1,14 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DatabaseCorruptedException;
+import faang.school.projectservice.exception.RecordNotFoundException;
+import faang.school.projectservice.exception.ResourceForbiddenException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.vacancy.CandidateMapper;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
@@ -17,16 +20,29 @@ import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.OpenVacancyRequestValidator;
 import faang.school.projectservice.validator.UpdateVacancyRequestValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
 
+    private final S3Service s3Service;
+    @Value("${services.s3.coverImage.limitSize}")
+    int limitSize;
+    @Value("${services.s3.coverImage.limitSide}")
+    int limitSide;
     private final VacancyRepository vacancyRepository;
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
@@ -36,6 +52,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyMapper vacancyMapper;
     private final CandidateMapper candidateMapper;
     private final List<VacancyFilter> filters;
+    private final UserContext userContext;
 
     public void openVacancy(OpenVacancyRequestDto requestDto) {
         var project = projectService.getProjectByIdOrEmpty(requestDto.projectId())
@@ -93,6 +110,34 @@ public class VacancyServiceImpl implements VacancyService {
         return vacancy.map(this::convertVacancyToVacancyDto);
     }
 
+    @Transactional
+    public String addOrChangeCoverToVacancy(long vacancyId, MultipartFile cover) {
+        Vacancy vacancy = findVacancyById(vacancyId);
+        checkUser(vacancy);
+        checkCoverSize(cover);
+        if (vacancy.getCoverImageKey() != null) {
+            s3Service.deleteFile(vacancy.getCoverImageKey());
+        }
+        String folder = vacancy.getId() + vacancy.getName();
+        String coverImageKey = s3Service.uploadFile(cover, folder);
+        vacancy.setCoverImageKey(coverImageKey);
+        vacancyRepository.save(vacancy);
+        return vacancy.getCoverImageKey();
+    }
+
+    public InputStream getVacancyCover(long vacancyId) {
+        Vacancy vacancy = findVacancyById(vacancyId);
+        return s3Service.downloadFile(vacancy.getCoverImageKey());
+    }
+
+    public void deleteCoverFromVacancy(long vacancyId) {
+        Vacancy vacancy = findVacancyById(vacancyId);
+        checkUser(vacancy);
+        if (vacancy.getCoverImageKey() != null) {
+            s3Service.deleteFile(vacancy.getCoverImageKey());
+        }
+    }
+
     private VacancyResponseDto convertVacancyToVacancyDto(Vacancy vacancy) {
         var vacancyDto = vacancyMapper.ToVacancyResponseDto(vacancy);
 
@@ -146,4 +191,33 @@ public class VacancyServiceImpl implements VacancyService {
 
         vacancyRepository.save(vacancy);
     }
+
+    private void checkUser(Vacancy vacancy) {
+        long userId = userContext.getUserId();
+        if (!(vacancy.getCreatedBy() == userId || vacancy.getProject().getOwnerId() == userId)) {
+            throw new ResourceForbiddenException(String.format(
+                    "You are not allowed to post on this resource (vacancy id:%d)", vacancy.getId()));
+        }
+    }
+
+    private void checkCoverSize(MultipartFile cover) {
+        BufferedImage image;
+        try {
+            image = ImageIO.read(cover.getInputStream());
+        } catch (IOException e) {
+            log.error("IOException", e);
+            throw new DataValidationException("IOException");
+        }
+        int maxSide = Math.max(image.getWidth(), image.getHeight());
+        if (!(cover.getSize() <= (limitSize * 1_048_576L) && maxSide <= limitSide)) {
+            throw new DataValidationException("Image is too big or too long");
+        }
+    }
+
+    private Vacancy findVacancyById(long vacancyId) {
+        return vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new RecordNotFoundException(
+                        "Vacancy with id: %d is not found."));
+    }
+
 }

@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost.85:5432/postgres
     username: user
     password: password
 
@@ -23,8 +23,13 @@ spring:
       host: localhost
       channels:
         calculations_channel:
-          name: calculations_channel
+         name: calculations_channel
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
 server:
   port: 8082
 
@@ -59,3 +64,5 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+
