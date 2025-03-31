@@ -92,8 +92,8 @@ public class PresentationPdfGenerator {
                         yPosition = drawText(contentStream, boldFont, 12,
                                 xStart, yPosition, "Team with ID: " + team.getId(), 25);
                         for (TeamMember teamMember : team.getTeamMembers()) {
-                            yPosition = drawText(contentStream, boldFont, 12, xStart, yPosition, " - "
-                                    + teamMember.getNickname() + ", " + teamMember.getRoles().toString(), 25);
+                            yPosition = drawText(contentStream, boldFont, 12, xStart, yPosition, " - " +
+                                    teamMember.getNickname() + ", " + teamMember.getRoles().toString(), 25);
                         }
                     }
                 }
