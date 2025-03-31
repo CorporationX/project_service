@@ -24,8 +24,9 @@ public class GalleryController {
     private final GalleryService galleryService;
 
     @PostMapping(value = "/project/{projectId}/upload", consumes = "multipart/form-data", produces = "application/json")
-    public ResponseEntity<GalleryResponseDto> uploadFiles(@PathVariable("projectId") long projectId,
-                                                          @RequestParam("files") List<MultipartFile> files
+    public ResponseEntity<GalleryResponseDto> uploadFiles(
+            @PathVariable("projectId") long projectId,
+            @RequestParam("files") List<MultipartFile> files
     ) {
         return new ResponseEntity<>(galleryService.uploadFiles(projectId, files), HttpStatus.OK);
     }
