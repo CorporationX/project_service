@@ -3,6 +3,8 @@ package faang.school.projectservice.service.presentation;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -77,6 +79,15 @@ public class PresentationPdfGenerator {
 
                 yPosition = drawText(contentStream, boldFont, 12,
                         xStart, yPosition, "Team amount: " + project.getTeams().size(), 25);
+
+                for (Team team : project.getTeams()) {
+                    yPosition = drawText(contentStream, boldFont, 12,
+                            xStart, yPosition, "Team with ID: " + team.getId(), 25);
+                    for (TeamMember teamMember : team.getTeamMembers()) {
+                        yPosition = drawText(contentStream, boldFont, 12, xStart, yPosition, " - "
+                                + teamMember.getNickname() + ", " + teamMember.getRoles().toString(), 25);
+                    }
+                }
 
                 if (project.getParentProject() != null) {
                     yPosition = drawText(contentStream, boldFont, 18,
