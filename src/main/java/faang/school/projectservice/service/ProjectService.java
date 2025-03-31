@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.model.Project;
 
@@ -9,4 +10,6 @@ public interface ProjectService {
     Optional<Project> getProjectByIdOrEmpty(long projectId);
 
     Project validateAndGetProject(OpenVacancyRequestDto requestDto);
+
+    ProjectDto getProject(Long projectId);
 }
