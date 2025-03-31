@@ -22,7 +22,7 @@ public class PresentationController {
 
     private final PresentationService presentationService;
 
-    @PostMapping("/{projectId}/presentation/generate")
+    @PostMapping("/{projectId}/presentation")
     public ResponseEntity<String> generatePresentation(
             @PathVariable("projectId") Long projectId
     ) {
