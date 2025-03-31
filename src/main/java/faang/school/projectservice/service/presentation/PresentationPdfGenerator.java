@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +27,10 @@ import java.util.List;
 public class PresentationPdfGenerator {
 
     private final FileStorageService fileStorageService;
-    private final UserServiceClient userServiceClient;
+
+//    в user_service нет нужных эндпоинтов которые указаны в конфиге project_service
+//    и при походе в user_service возникает ошибка
+//    private final UserServiceClient userServiceClient;
 
     public byte[] generatePdf(Project project) throws Exception {
         try (PDDocument document = new PDDocument();
@@ -68,8 +70,8 @@ public class PresentationPdfGenerator {
                 yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Status: " + project.getStatus().getName(), 32);
 
-                yPosition = drawText(contentStream, font, 12, xStart, yPosition,
-                        "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
+//                yPosition = drawText(contentStream, font, 12, xStart, yPosition,
+//                        "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
 
                 yPosition = drawText(contentStream, boldFont, 16,
                         xStart, yPosition, "Task amount: " + project.getTasks().size(), 32);
