@@ -1,4 +1,4 @@
-package faang.school.projectservice.adapter;
+package faang.school.projectservice.repository.adapter;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -14,7 +14,6 @@ public class TeamMemberRepositoryAdapter {
     public TeamMember getByUserIdAndProjectId(Long userId, Long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Team member not found with userId: " + userId + " and projectId: " + projectId));
+                        "Team member with user ID " + userId + " and project ID " + projectId + " not found"));
     }
-
 }

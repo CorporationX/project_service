@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.adapter.CandidateRepositoryAdapter;
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
-import faang.school.projectservice.adapter.TeamMemberRepositoryAdapter;
-import faang.school.projectservice.adapter.VacancyRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.CandidateRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.TeamMemberRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.VacancyRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.VacancyDTO;
 import faang.school.projectservice.exception.BadRequestException;
@@ -24,20 +24,28 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
+
     @InjectMocks
     private VacancyService vacancyService;
+
     @Mock
     private VacancyMapper vacancyMapper;
+
     @Mock
     private VacancyRepository vacancyRepository;
+
     @Mock
     private ProjectRepositoryAdapter projectRepositoryAdapter;
+
     @Mock
     private TeamMemberRepositoryAdapter teamMemberRepositoryAdapter;
+
     @Mock
     private UserContext userContext;
+
     @Mock
     private VacancyRepositoryAdapter vacancyRepositoryAdapter;
+
     @Mock
     private CandidateRepositoryAdapter candidateRepositoryAdapter;
 

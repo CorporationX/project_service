@@ -1,4 +1,4 @@
-package faang.school.projectservice.adapter;
+package faang.school.projectservice.repository.adapter;
 
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -13,6 +13,6 @@ public class VacancyRepositoryAdapter {
 
     public Vacancy getById(Long id) {
         return vacancyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Vacancy with ID " + id + " not found"));
     }
 }

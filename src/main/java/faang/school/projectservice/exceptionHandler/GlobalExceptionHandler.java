@@ -1,5 +1,6 @@
 package faang.school.projectservice.exceptionHandler;
 
+import faang.school.projectservice.exception.BadRequestException;
 import faang.school.projectservice.exception.DataAlreadyExistException;
 import faang.school.projectservice.exception.DataValidateException;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,23 +22,37 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errorAttributes = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
+            errorAttributes.put(error.getField(), error.getDefaultMessage());
         });
-        System.err.println("Validation error: " + errors);
-        return ResponseEntity.badRequest().body(errors);
+        System.err.println("Validation error: " + errorAttributes);
+        return ResponseEntity.badRequest().body(errorAttributes);
     }
 
     @ExceptionHandler(DataValidateException.class)
-    public ResponseEntity<ErrorResponse> handlerDataValidateException(DataValidateException e) {
+    public ResponseEntity<ErrorResponse> handleDataValidateException(DataValidateException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataAlreadyExistException.class)
-    public ResponseEntity<ErrorResponse> handlerDataAlreadyExistException(DataAlreadyExistException e) {
+    public ResponseEntity<ErrorResponse> handleDataAlreadyExistException(DataAlreadyExistException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDataNotFoundException(DataNotFoundException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -70,4 +85,5 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+}
 }

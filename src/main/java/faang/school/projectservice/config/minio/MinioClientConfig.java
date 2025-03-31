@@ -1,5 +1,6 @@
 package faang.school.projectservice.config.minio;
 
+import faang.school.projectservice.config.minio.properties.MinioProperties;
 import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,4 +20,3 @@ public class MinioClientConfig {
                 .build();
     }
 }
-

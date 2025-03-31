@@ -1,7 +1,6 @@
-package faang.school.projectservice.team;
+package faang.school.projectservice.controller;
 
-import faang.school.projectservice.controller.TeamController;
-import faang.school.projectservice.service.TeamService;
+import faang.school.projectservice.service.team.TeamAvatarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ class TeamControllerTest {
 
     private MockMvc mockMvc;
     @Mock
-    private TeamService teamService;
+    private TeamAvatarService teamAvatarService;
 
     @InjectMocks
     private TeamController teamController;
@@ -44,20 +43,20 @@ class TeamControllerTest {
                         .header("x-user-id", "2"))
                 .andExpect(status().isOk());
 
-        verify(teamService, times(1)).uploadAvatar(1L, file, 2L);
+        verify(teamAvatarService, times(1)).uploadAvatar(1L, file, 2L);
     }
 
     @Test
     void getAvatar_ShouldReturnAvatarBytes() throws Exception {
         byte[] avatarBytes = new byte[]{1, 2, 3};
-        when(teamService.getAvatar(1L)).thenReturn(new ByteArrayInputStream(avatarBytes));
+        when(teamAvatarService.getAvatar(1L)).thenReturn(new ByteArrayInputStream(avatarBytes));
 
         mockMvc.perform(get("/api/v1/team/1/avatar"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(content().bytes(avatarBytes));
 
-        verify(teamService, times(1)).getAvatar(1L);
+        verify(teamAvatarService, times(1)).getAvatar(1L);
     }
 
     @Test
@@ -66,6 +65,6 @@ class TeamControllerTest {
                         .header("x-user-id", "2"))
                 .andExpect(status().isOk());
 
-        verify(teamService, times(1)).deleteAvatar(1L, 2L);
+        verify(teamAvatarService, times(1)).deleteAvatar(1L, 2L);
     }
 }

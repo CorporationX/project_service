@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.service.TeamService;
+import faang.school.projectservice.service.team.TeamAvatarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -23,28 +23,27 @@ import java.io.InputStream;
 @RequestMapping("/api/v1/team")
 @Slf4j
 public class TeamController {
-    private final TeamService teamService;
+    private final TeamAvatarService teamAvatarService;
 
     @PostMapping("/{teamId}/upload/avatar")
     public void uploadAvatar(@PathVariable Long teamId,
-                       @RequestHeader(name = "x-user-id") Long userId,
-                       @RequestParam("file") MultipartFile file) {
-        teamService.uploadAvatar(teamId, file, userId);
+                             @RequestHeader(name = "x-user-id") Long userId,
+                             @RequestParam("file") MultipartFile file) {
+        teamAvatarService.uploadAvatar(teamId, file, userId);
     }
 
     @GetMapping("/{teamId}/avatar")
     public ResponseEntity<InputStreamResource> getAvatar(@PathVariable Long teamId) {
-        InputStream inputStream = teamService.getAvatar(teamId);
+        InputStream inputStream = teamAvatarService.getAvatar(teamId);
         InputStreamResource resource = new InputStreamResource(inputStream);
-        
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
 
     @DeleteMapping("/{teamId}/delete/avatar")
-    public void deleteAvatar(@PathVariable Long teamId,
-                       @RequestHeader(name = "x-user-id") Long userId) {
-        teamService.deleteAvatar(teamId, userId);
+    public void deleteAvatar(@PathVariable Long teamId, @RequestHeader(name = "x-user-id") Long userId) {
+        teamAvatarService.deleteAvatar(teamId, userId);
     }
 }

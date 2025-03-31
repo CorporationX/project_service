@@ -1,5 +1,6 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
@@ -12,6 +13,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProjectService implements ProjectServiceInterface {
+public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectRepositoryAdapter projectRepositoryAdapter;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
 
@@ -40,12 +44,16 @@ public class ProjectService implements ProjectServiceInterface {
         return projectMapper.toDto(project);
     }
 
+    public List<ProjectDto> getProjectsByIds(List<Long> ids) {
+        return projectMapper.toDtoList(projectRepository.findAllById(ids));
+    }
+
     @Transactional
-    public ProjectDto updatedProject(ProjectDto projectDto) {
+    public ProjectDto updateProject(ProjectDto projectDto) {
         Project projectToUpdate = projectRepository.findById(projectDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("This project does not found"));
 
-        projectMapper.updateProject(projectDto, projectToUpdate);
+        projectMapper.update(projectDto, projectToUpdate);
 
         return projectMapper.toDto(projectToUpdate);
     }
@@ -68,9 +76,8 @@ public class ProjectService implements ProjectServiceInterface {
                 .toList();
     }
 
-    public ProjectDto getProjectById(long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("This project does not found"));
+    public ProjectDto getProjectById(long id) {
+        Project project = projectRepositoryAdapter.getById(id);
         return projectMapper.toDto(project);
     }
 
