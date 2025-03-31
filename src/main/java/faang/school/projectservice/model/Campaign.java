@@ -24,6 +24,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Builder
 @Table(name = "campaign")
