@@ -25,8 +25,8 @@ import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class StageService {
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
@@ -53,22 +54,6 @@ public class StageService {
     private final StageRolesRepository stageRolesRepository;
     private final TaskRepository taskRepository;
     private final DeletionStrategyFactory strategyFactory;
-
-    @Autowired
-    public StageService(StageRepository stageRepository, TeamMemberRepository teamMemberRepository,
-                        ProjectRepository projectRepository, StageCreateMapper stageCreateMapper,
-                        StageRolesMapper stageRolesMapper, StageMapper stageMapper, StageInvitationRepository stageInvitationRepository, StageRolesRepository stageRolesRepository, TaskRepository taskRepository, DeletionStrategyFactory strategyFactory) {
-        this.stageRepository = stageRepository;
-        this.teamMemberRepository = teamMemberRepository;
-        this.projectRepository = projectRepository;
-        this.stageCreateMapper = stageCreateMapper;
-        this.stageRolesMapper = stageRolesMapper;
-        this.stageMapper = stageMapper;
-        this.stageInvitationRepository = stageInvitationRepository;
-        this.stageRolesRepository = stageRolesRepository;
-        this.taskRepository = taskRepository;
-        this.strategyFactory = strategyFactory;
-    }
 
     public StageDTO create(StageDtoCreate stageDtoCreate, Long creatorId, Long projectId) {
         Project project = projectRepository.findById(projectId)
@@ -87,20 +72,7 @@ public class StageService {
             log.error("Creator ID: {}, Project ID: {}, Stage DTO: {}", creatorId, projectId, stageDtoCreate);
             throw new DataValidException("Data not valid");
         }
-
-        Stage stage = stageCreateMapper.toEntity(stageDtoCreate);
-        List<StageRoles> stageRoles = stageRolesMapper.mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
-        stage.setStageRoles(stageRoles);
-        stageRolesRepository.saveAll(stageRoles);
-
-        if (project.getStages() == null) {
-            project.setStages(new ArrayList<>());
-        }
-        stage.setProject(project);
-        project.getStages().add(stage);
-        List<TeamMember> foundedExecutors = findAllExecutors(stageDtoCreate.getRoleAndCount(), stage, project);
-        stage.setExecutors(foundedExecutors);
-        sendInvite(stage, foundedExecutors, creator);
+        Stage stage = fillStage(stageDtoCreate, project, creator);
         stageRepository.save(stage);
         log.info("Created stage: {}", stage);
         return stageMapper.toDto(stage);
@@ -144,6 +116,9 @@ public class StageService {
     }
 
     public void deleteWithStrategy(Long stageId, String strategy, Long targetStageId) {
+        if (strategy == null|| strategy.isBlank()) {
+            throw new DataValidException("Strategy is null or empty");
+        }
         StageDeletionStrategy choseStrategy = strategyFactory.getStrategy(strategy);
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found with ID: " + stageId));
@@ -156,6 +131,23 @@ public class StageService {
                     .orElseThrow(() -> new EntityNotFoundException("Target stage not found with ID: " + targetStageId));
         }
         choseStrategy.deleteStage(stage, targetStage);
+    }
+
+    private Stage fillStage(StageDtoCreate stageDtoCreate, Project project, TeamMember creator) {
+        Stage stage = stageCreateMapper.toEntity(stageDtoCreate);
+        List<StageRoles> stageRoles = stageRolesMapper.mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
+        stage.setStageRoles(stageRoles);
+        stageRolesRepository.saveAll(stageRoles);
+
+        if (project.getStages() == null) {
+            project.setStages(new ArrayList<>());
+        }
+        stage.setProject(project);
+        project.getStages().add(stage);
+        List<TeamMember> foundedExecutors = findAllExecutors(stageDtoCreate.getRoleAndCount(), stage, project);
+        stage.setExecutors(foundedExecutors);
+        sendInvite(stage, foundedExecutors, creator);
+        return stage;
     }
 
     private List<TeamMember> findAllExecutors(Map<TeamRole, Integer> roleAndCount, Stage stage, Project project) {

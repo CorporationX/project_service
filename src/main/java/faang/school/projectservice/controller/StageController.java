@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.client.stage.StageDTO;
 import faang.school.projectservice.dto.client.stage.StageDtoCreate;
 import faang.school.projectservice.dto.client.stage.StageFilterDTO;
 import faang.school.projectservice.service.Stage.StageService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +25,9 @@ public class StageController {
     private final StageService stageService;
 
     @PostMapping("/{projectId}/{creatorId}")
-    public StageDTO create(@RequestBody @NotNull StageDtoCreate stageDtoCreate
-            , @PathVariable @NotNull Long projectId, @PathVariable @NotNull Long creatorId) {
+    public StageDTO create(@RequestBody StageDtoCreate stageDtoCreate,
+                           @PathVariable Long projectId,
+                           @PathVariable Long creatorId) {
         return stageService.create(stageDtoCreate, projectId, creatorId);
     }
 
@@ -43,17 +43,17 @@ public class StageController {
     }
 
     @GetMapping("/{projectId}/all")
-    public List<StageDTO> getAll(@PathVariable @NotNull Long projectId) {
+    public List<StageDTO> getAll(@PathVariable Long projectId) {
         return stageService.getAllProjectStages(projectId);
     }
 
     @GetMapping("/{stageId}")
-    public StageDTO get(@PathVariable @NotNull Long stageId) {
+    public StageDTO get(@PathVariable Long stageId) {
         return stageService.getStage(stageId);
     }
 
     @DeleteMapping("/{stageId}")
-    public void delete(@PathVariable @NotNull Long stageId,
+    public void delete(@PathVariable Long stageId,
                        @RequestParam String strategy,
                        @RequestParam(required = false) Long targetStageId) {
         stageService.deleteWithStrategy(stageId, strategy, targetStageId);

@@ -19,7 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static faang.school.projectservice.model.TeamRole.OWNER;
 import static java.util.stream.Collectors.toList;
@@ -29,7 +33,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
-    //TODO ExecuteCapture https://faang-school.com/courses/4jnzmndg/32dnjg9d 53min
     @Mock
     private StageRepository stageRepository;
     @Mock
@@ -63,7 +66,6 @@ class StageServiceTest {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(stageCreateMapper.toEntity(stageDtoCreate)).thenReturn(stage);
         when(stageRolesMapper.mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage)).thenReturn(stageRoles);
-       //when(stageCreateMapper.toDto(stage)).thenReturn(StageDtoCreate.builder().build());
         when(stageMapper.toDto(stage)).thenReturn(
                 StageDTO.builder()
                         .id(stage.getStageId())
@@ -82,7 +84,6 @@ class StageServiceTest {
         verify(stageRolesMapper).mapRolesToEntities(stageDtoCreate.getRoleAndCount(), stage);
         verify(stageMapper).toDto(stage);
         verify(stageRepository).save(stage);
-        System.out.println(result);
         assertThat(result).isNotNull();
 
     }
