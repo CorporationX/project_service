@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -61,34 +63,40 @@ public class PresentationPdfGenerator {
                         xStart, yPosition, "Name: " + project.getName(), 15);
                 yPosition = drawText(contentStream, font, 12,
                         xStart, yPosition, "Description: " + project.getDescription(), 15);
+                yPosition = drawText(contentStream, font, 12, xStart, yPosition, "Creation Date: " +
+                        formatCreatedAt(project.getCreatedAt()), 15);
                 yPosition = drawText(contentStream, font, 12,
-                        xStart, yPosition, "Creation Date: " + project.getCreatedAt(), 15);
-                yPosition = drawText(contentStream, font, 12,
-                        xStart, yPosition, "Status: " + project.getStatus(), 15);
-                yPosition = drawText(contentStream, font, 12, xStart, yPosition,
-                        "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
+                        xStart, yPosition, "Status: " + project.getStatus().getName(), 32);
 
-                yPosition = drawText(contentStream, boldFont, 12,
-                        xStart, yPosition, "Tasks: ", 25);
+//                yPosition = drawText(contentStream, font, 12, xStart, yPosition,
+//                        "Project Owner ID: " + userServiceClient.getUser(project.getOwnerId()), 25);
 
-                List<Task> tasks = project.getTasks();
-                for (Task task : tasks) {
-                    yPosition = drawText(contentStream, font, 12,
-                            xStart, yPosition, " - " + task.getName(), 25);
-                }
+                yPosition = drawText(contentStream, boldFont, 16,
+                        xStart, yPosition, "Task amount: " + project.getTasks().size(), 32);
 
-                yPosition = drawText(contentStream, boldFont, 12,
-                        xStart, yPosition, "Team amount: " + project.getTeams().size(), 25);
+                if (!project.getTasks().isEmpty()) {
+                    yPosition = drawText(contentStream, boldFont, 16,
+                            xStart, yPosition, "Tasks: ", 32);
 
-                for (Team team : project.getTeams()) {
-                    yPosition = drawText(contentStream, boldFont, 12,
-                            xStart, yPosition, "Team with ID: " + team.getId(), 25);
-                    for (TeamMember teamMember : team.getTeamMembers()) {
-                        yPosition = drawText(contentStream, boldFont, 12, xStart, yPosition, " - "
-                                + teamMember.getNickname() + ", " + teamMember.getRoles().toString(), 25);
+                    for (Task task : project.getTasks()) {
+                        yPosition = drawText(contentStream, font, 12,
+                                xStart, yPosition, " - " + task.getName(), 25);
                     }
                 }
 
+                yPosition = drawText(contentStream, boldFont, 16,
+                        xStart, yPosition, "Team amount: " + project.getTeams().size(), 32);
+
+                if (!project.getTeams().isEmpty()) {
+                    for (Team team : project.getTeams()) {
+                        yPosition = drawText(contentStream, boldFont, 12,
+                                xStart, yPosition, "Team with ID: " + team.getId(), 25);
+                        for (TeamMember teamMember : team.getTeamMembers()) {
+                            yPosition = drawText(contentStream, boldFont, 12, xStart, yPosition, " - "
+                                    + teamMember.getNickname() + ", " + teamMember.getRoles().toString(), 25);
+                        }
+                    }
+                }
                 if (project.getParentProject() != null) {
                     yPosition = drawText(contentStream, boldFont, 18,
                             xStart, yPosition, "Parent Project", 15);
@@ -113,5 +121,10 @@ public class PresentationPdfGenerator {
         contentStream.showText(text);
         contentStream.endText();
         return y - yDecrement;
+    }
+
+    private String formatCreatedAt(LocalDateTime createdAt) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return createdAt.format(formatter);
     }
 }
