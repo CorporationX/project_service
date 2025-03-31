@@ -75,6 +75,7 @@ public class VacancyController {
             if (inputStream == null) {
                 return ResponseEntity.notFound().build();
             }
+
             byte[] imageBytes = inputStream.readAllBytes();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(imageBytes.length);
