@@ -76,8 +76,12 @@ public class ResizeImagesService {
             throw new RuntimeException(String.format("An error occurred while converting image into MultipartFile '%s'",
                     file.getOriginalFilename()), e);
         }
-        return new CustomMultipartFile(resizedImagesBytes,
-                file.getName(), file.getOriginalFilename(), file.getContentType());
+        return CustomMultipartFile.builder()
+                .content(resizedImagesBytes)
+                .name(file.getName())
+                .originalFilename(file.getOriginalFilename())
+                .contentType(file.getContentType())
+                .build();
     }
 
     private String getResourceExtension(MultipartFile file) {
