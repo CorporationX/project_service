@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,19 +17,6 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder(exception,
                         exception.getStatusCode(), exception.getMessage())
                 .title("Something went wrong with Jira service.")
-                .detail(message)
-                .property("service", "jira")
-                .build();
-
-        return new ResponseEntity<>(errorResponse, exception.getStatusCode());
-    }
-
-    @ExceptionHandler(WebClientResponseException.class)
-    public ResponseEntity<ErrorResponse> handleWebClientResponseException(WebClientResponseException exception) {
-        String message = "There seems to be an issue with the Jira service. Please try again later.";
-        ErrorResponse errorResponse = ErrorResponse.builder(exception,
-                        exception.getStatusCode(), exception.getMessage())
-                .title("Jira service is currently unavailable.")
                 .detail(message)
                 .property("service", "jira")
                 .build();
