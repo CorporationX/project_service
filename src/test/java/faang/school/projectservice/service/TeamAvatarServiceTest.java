@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.minio.properties.TeamAvatarProperties;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -78,7 +78,7 @@ class TeamAvatarServiceTest {
         MultipartFile file = Mockito.mock(MultipartFile.class);
         Mockito.when(teamRepositoryAdapter.getById(1L)).thenReturn(team);
 
-        DataValidateException exception = Assertions.assertThrows(DataValidateException.class, () ->
+        DataValidationException exception = Assertions.assertThrows(DataValidationException.class, () ->
                 teamService.uploadAvatar(1L, file, 3L));
 
         Assertions.assertEquals("You're not in this team", exception.getMessage());
@@ -118,7 +118,7 @@ class TeamAvatarServiceTest {
 
         Mockito.when(teamRepositoryAdapter.getById(1L)).thenReturn(team);
 
-        DataValidateException exception = Assertions.assertThrows(DataValidateException.class, () ->
+        DataValidationException exception = Assertions.assertThrows(DataValidationException.class, () ->
                 teamService.deleteAvatar(1L, 3L));
 
         Assertions.assertEquals("You are not a team manager!", exception.getMessage());
