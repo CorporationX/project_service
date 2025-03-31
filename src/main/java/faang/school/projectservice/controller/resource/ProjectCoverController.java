@@ -4,8 +4,11 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -19,45 +22,29 @@ public class ProjectCoverController {
 
     private final ProjectService projectService;
 
-    @PutMapping("/{projectId}/cover")
+    @PostMapping("/{projectId}/cover")
     public ResponseEntity<ProjectDto> addProjectCover(@PathVariable("projectId") Long projectId,
                                                       @RequestPart("file") MultipartFile file) {
         ProjectDto projectDto = projectService.addCoverImage(projectId, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectDto);
+    }
+
+    @PutMapping("/{projectId}/cover")
+    public ResponseEntity<ProjectDto> updateProjectCover(@PathVariable("projectId") Long projectId,
+                                                         @RequestPart("file") MultipartFile file) {
+        ProjectDto projectDto = projectService.updateCoverImage(projectId, file);
         return ResponseEntity.ok(projectDto);
     }
 
-    /*private final ResourceService resourceService;
-
-    @PutMapping("/{projectId}/add")
-    public ResponseEntity<ResourceDto> addProjectCover(@PathVariable("projectId") Long projectId,
-                                                       @RequestBody MultipartFile file) {
-        ResourceDto resourceDto = resourceService.addResource(projectId, file);
-        return ResponseEntity.ok().body(resourceDto);
+    @DeleteMapping("/{projectId}/cover/soft")
+    public ResponseEntity<ProjectDto> softDeleteProjectCover(@PathVariable("projectId") Long projectId) {
+        ProjectDto projectDto = projectService.softDeleteCoverImage(projectId);
+        return ResponseEntity.ok(projectDto);
     }
 
-    @PostMapping("/{resourceId}")
-    public ResponseEntity<ResourceDto> updateProjectCover(@PathVariable("resourceId") Long resourceId,
-                                                          @RequestBody MultipartFile file) {
-        ResourceDto resourceDto = resourceService.updateResource(resourceId, file);
-        return ResponseEntity.ok().body(resourceDto);
+    @DeleteMapping("/{projectId}/cover/hard")
+    public ResponseEntity<?> hardDeleteProjectCover(@PathVariable("projectId") Long projectId) {
+        projectService.hardDeleteCoverImage(projectId);
+        return ResponseEntity.noContent().build();
     }
-
-    @DeleteMapping("/{resourceId}")
-    public ResponseEntity<String> deleteProjectCover(@PathVariable("resourceId") Long resourceId) {
-        resourceService.deleteResource(resourceId);
-        return ResponseEntity.ok("Resource deleted successfully");
-    }
-
-    @GetMapping(path = "/{resourceId}", produces = "application/octet-stream")
-    public ResponseEntity<byte[]> downloadProjectCover(@PathVariable("resourceId") Long resourceId) {
-        byte[] imageBytes = null;
-        try {
-            imageBytes = resourceService.downloadResource(resourceId).readAllBytes();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
-    }*/
 }

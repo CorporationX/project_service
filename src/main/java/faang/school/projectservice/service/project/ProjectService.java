@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.minio.MinioService;
@@ -26,22 +28,94 @@ public class ProjectService {
     public ProjectDto addCoverImage(Long projectId, MultipartFile file) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
-        Resource resource = minioService.uploadFile(file);
-        resource.setProject(project);
-        Resource savedResource = resourceRepository.save(resource);
-
-        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
-        //checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
-        project.setStorageSize(newStorageSize);
-        project.setCoverImageId(savedResource.getKey());
-        return projectMapper.toDto(projectRepository.save(project));
+        if (project.getCoverImageId() != null) {
+            throw new IllegalStateException("Project already has a cover image. Use update instead.");
+        }
+        return setCoverImage(project, file);
     }
 
     @Transactional
     public ProjectDto updateCoverImage(Long projectId, MultipartFile file) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+        if (project.getCoverImageId() == null) {
+            throw new IllegalStateException("Project has no cover image to update. Use add instead.");
+        }
 
+        resourceRepository.findByKey(project.getCoverImageId())
+                .ifPresent(resource -> {
+                    resource.setStatus(ResourceStatus.INACTIVE);
+                    resourceRepository.save(resource);
+                });
 
+        return setCoverImage(project, file);
+    }
 
-        return null;
+    @Transactional
+    public ProjectDto softDeleteCoverImage(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+        if (project.getCoverImageId() != null) {
+            resourceRepository.findByKey(project.getCoverImageId())
+                    .ifPresent(resource -> {
+                        resource.setStatus(ResourceStatus.INACTIVE);
+                        resourceRepository.save(resource);
+                    });
+            project.setCoverImageId(null);
+            return projectMapper.toDto(projectRepository.save(project));
+        }
+
+        return projectMapper.toDto(project);
+    }
+
+    @Transactional
+    public void hardDeleteCoverImage(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+        if (project.getCoverImageId() != null) {
+            resourceRepository.findByKey(project.getCoverImageId())
+                    .ifPresent(resource -> {
+                        BigInteger fileSize = resource.getSize();
+                        minioService.deleteFile(project.getCoverImageId());
+                        resourceRepository.delete(resource);
+
+                        BigInteger currentStorageSize = project.getStorageSize() != null
+                                ? project.getStorageSize() : BigInteger.ZERO;
+                        project.setStorageSize(currentStorageSize.subtract(fileSize));
+                    });
+            project.setCoverImageId(null);
+            projectRepository.save(project);
+        }
+    }
+
+    @Transactional
+    public ProjectDto setCoverImage(Project project, MultipartFile file) {
+        MinioService.CompressResult compressResult = minioService.compressImageIfNeeded(file);
+
+        BigInteger newFileSize = BigInteger.valueOf(compressResult.getSize());
+        BigInteger currentStorageSize = project.getStorageSize() != null ? project.getStorageSize() : BigInteger.ZERO;
+        BigInteger maxStorageSize = project.getMaxStorageSize();
+
+        BigInteger updatedStorageSize = currentStorageSize.add(newFileSize);
+        if (maxStorageSize != null && updatedStorageSize.compareTo(maxStorageSize) > 0) {
+            throw new IllegalStateException("Compressed file size exceeds project storage limit: " +
+                    updatedStorageSize + " > " + maxStorageSize);
+        }
+
+        String key = minioService.uploadFile(
+                compressResult.getFile(), compressResult.getContentType());
+
+        Resource resource = new Resource();
+        resource.setKey(key);
+        resource.setSize(newFileSize);
+        resource.setProject(project);
+        resource.setName(file.getOriginalFilename());
+        resource.setType(ResourceType.getResourceType(compressResult.getContentType()));
+        resource.setStatus(ResourceStatus.ACTIVE);
+        resourceRepository.save(resource);
+
+        project.setCoverImageId(key);
+        project.setStorageSize(updatedStorageSize);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 }
