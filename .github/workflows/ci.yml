@@ -1,0 +1,70 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "feature/BJS2-65208-add-ci", "griffon-master-stream9" ]
+  pull_request:
+    branches: [ "feature/BJS2-65208-add-ci", "griffon-master-stream9" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: ./gradlew build --info
+
+      - name: Run tests
+        id: tests
+        run: ./gradlew test
+
+      - name: Generate Jacoco report
+        run: ./gradlew jacocoTestReport
+
+      - name: Upload Jacoco report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/jacocoReports/test/html/
+
+      - name: Comment on PR if tests fail
+        if: ${{ failure() && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const hasExistingComment = comments.some(comment => comment.body.includes("❌ Сборка завалилась из-за неудачных тестов."));
+
+            if (!hasExistingComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "❌ Сборка завалилась из-за неудачных тестов. Пожалуйста, проверьте логи и исправьте ошибки.",
+              });
+            }
