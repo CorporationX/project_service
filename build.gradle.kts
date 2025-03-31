@@ -93,9 +93,6 @@ tasks.jacocoTestReport {
                 "**/config/**",
                 "**/dto/**",
                 "**/model/**",
-                "**/filter/**",
-                "**/mapper/**",
-                "**/service/**",
             )
         })
     )
