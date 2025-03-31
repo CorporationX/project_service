@@ -20,19 +20,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleDataValidationException(DataValidationException e) {
         log.error("Data validation error: {}", e.getMessage(), e);
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("Entity not found: {}", e.getMessage(), e);
-        return ResponseEntity.status(404).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<String> handleNullPointerException(NullPointerException e) {
         log.error("Null pointer exception: {}", e.getMessage(), e);
-        return ResponseEntity.badRequest().body("Не заполнено обязательное поле");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Не заполнено обязательное поле");
     }
 
     @ExceptionHandler(FeignException.class)
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
         log.error("Unexpected error: {}", e.getMessage(), e);
-        return ResponseEntity.status(500).body("Внутренняя ошибка сервера: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Внутренняя ошибка сервера: " + e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
