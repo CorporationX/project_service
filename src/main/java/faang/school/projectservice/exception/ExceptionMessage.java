@@ -16,7 +16,8 @@ public enum ExceptionMessage {
     FILE_NOT_SENT("File is missing"),
     UNABLE_READ_FILE("Error while reading file bytes"),
     IMAGE_PROCESSING_WRITE("Image processing error while saving"),
-    IMAGE_PROCESSING_READ("Image processing error while reading");
+    IMAGE_PROCESSING_READ("Image processing error while reading"),
+    S3_UPLOAD("Failed to upload file to S3");
 
 
     private final String message;

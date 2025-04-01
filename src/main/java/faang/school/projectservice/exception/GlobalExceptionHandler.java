@@ -71,4 +71,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(FileProcessingException.class)
+    public ResponseEntity<String > handleFileProcessingException(FileProcessingException ex) {
+        log.error("FileProcessingException occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.internalServerError().body(ex.getMessage());
+    }
+
 }
