@@ -82,12 +82,13 @@ public class StageService {
         Stage stage = stageRepository.findById(stageDTO.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
         List<Task> tasks = taskRepository.findByIdIn(stageDTO.getTasksIds());
+        Project project = projectRepository.findById(stageDTO.getProjectId()).orElseThrow(
+                () -> new EntityNotFoundException("Project not found"));
         stage = Stage.builder()
                 .stageId(stageDTO.getId())
                 .stageName(stageDTO.getStageName())
                 .tasks(tasks)
-                .project(projectRepository.findById(stageDTO.getProjectId()).orElseThrow(
-                        () -> new EntityNotFoundException("Project not found")))
+                .project(project)
                 .stageRoles(stage.getStageRoles())
                 .executors(stage.getExecutors())
                 .build();
@@ -116,7 +117,7 @@ public class StageService {
     }
 
     public void deleteWithStrategy(Long stageId, String strategy, Long targetStageId) {
-        if (strategy == null|| strategy.isBlank()) {
+        if (strategy == null || strategy.isBlank()) {
             throw new DataValidException("Strategy is null or empty");
         }
         StageDeletionStrategy choseStrategy = strategyFactory.getStrategy(strategy);
