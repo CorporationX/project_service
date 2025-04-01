@@ -5,7 +5,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.minio.ImageFormat;
 import faang.school.projectservice.config.minio.properties.ProjectCoverMinioProperties;
 import faang.school.projectservice.exception.BadRequestException;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.MinioService;
 import jakarta.transaction.Transactional;
@@ -96,7 +96,7 @@ public class ProjectCoverService {
         String fileContentType = file.getContentType();
 
         if (fileContentType == null || !fileContentType.startsWith("image/")) {
-            throw new DataValidateException("Project cover must be an image");
+            throw new DataValidationException("Project cover must be an image");
         }
 
         String key = String.format("%s/%s-%s", projectCoverMinioProperties.getFolderName(), UUID.randomUUID(),
@@ -122,7 +122,7 @@ public class ProjectCoverService {
             BufferedImage image = ImageIO.read(fileInputStream);
 
             if (image == null) {
-                throw new DataValidateException("An error occurred while reading the image");
+                throw new DataValidationException("An error occurred while reading the image");
             }
 
             int imageHeight = image.getHeight();

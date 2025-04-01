@@ -2,7 +2,7 @@ package faang.school.projectservice.service.team;
 
 import faang.school.projectservice.config.minio.ImageFormat;
 import faang.school.projectservice.config.minio.properties.TeamAvatarProperties;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.adapter.TeamRepositoryAdapter;
@@ -38,7 +38,7 @@ public class TeamAvatarService {
         boolean inTeam = team.getTeamMembers().stream()
                 .anyMatch(t -> Objects.equals(t.getUserId(), userId));
         if (!inTeam) {
-            throw new DataValidateException("You're not in this team");
+            throw new DataValidationException("You're not in this team");
         }
         String fileKey = uploadFile(file);
         team.setAvatarKey(fileKey);
@@ -57,7 +57,7 @@ public class TeamAvatarService {
                         && teamMember.getRoles().contains(TeamRole.MANAGER));
 
         if (!isManager) {
-            throw new DataValidateException("You are not a team manager!");
+            throw new DataValidationException("You are not a team manager!");
         }
         minioService.deleteFile(team.getAvatarKey());
         team.setAvatarKey(null);
@@ -66,12 +66,12 @@ public class TeamAvatarService {
     private String uploadFile(MultipartFile file) {
         long fileSize = file.getSize();
         if (fileSize > teamAvatarProperties.getMaxFileSize()) {
-            throw new DataValidateException("The file exceeds the allowed size");
+            throw new DataValidationException("The file exceeds the allowed size");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new DataValidateException("Only images can be uploaded!");
+            throw new DataValidationException("Only images can be uploaded!");
         }
 
         String uniqueKey = String.format("%s/%s-%s", teamAvatarProperties.getFolderName(), UUID.randomUUID(),
