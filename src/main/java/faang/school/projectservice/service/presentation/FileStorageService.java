@@ -43,16 +43,19 @@ public class FileStorageService {
     public String uploadFileToMinio(byte[] fileData) {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(fileData)) {
             String fileName = UUID.randomUUID() + fileExtension;
+            log.info("Starting file upload with name {} to bucket {}", fileName, bucketName);
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(fileName)
                     .stream(inputStream, fileData.length, -1)
                     .contentType(contentTypePdf)
                     .build());
+            log.info("File with name {} successfully uploaded to bucket {}", fileName, bucketName);
             return fileName;
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
                  NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
                  InternalException e) {
+            log.error("Error uploading file: {}", e.getMessage());
             throw new FileUploadException(e.getMessage());
         }
     }

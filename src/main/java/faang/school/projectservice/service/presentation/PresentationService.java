@@ -37,8 +37,10 @@ public class PresentationService {
     private Project fetchProject(Long projectId) throws ProjectNotFoundException {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
         if (optionalProject.isEmpty()) {
+            log.error("Project with ID {} not found", projectId);
             throw new ProjectNotFoundException("Project with ID " + projectId + " not found");
         }
+        log.info("Project with ID {} has been successfully fetched", projectId);
         return optionalProject.get();
     }
 }
