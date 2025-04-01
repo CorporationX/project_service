@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.presentation;
 
-import faang.school.projectservice.exception.presentation.DownloadFileFromMinioException;
-import faang.school.projectservice.exception.presentation.UploadFileToMinioError;
+import faang.school.projectservice.exception.presentation.FileDownloadException;
+import faang.school.projectservice.exception.presentation.FileUploadException;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -53,7 +53,7 @@ public class FileStorageService {
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
                  NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
                  InternalException e) {
-            throw new UploadFileToMinioError(e.getMessage());
+            throw new FileUploadException(e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class FileStorageService {
                  InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException |
                  XmlParserException | IllegalArgumentException e) {
             log.error("Error while downloading with file key {}: {}", fileKey, e.getMessage());
-            throw new DownloadFileFromMinioException(e.getMessage());
+            throw new FileDownloadException(e.getMessage());
         }
     }
 }

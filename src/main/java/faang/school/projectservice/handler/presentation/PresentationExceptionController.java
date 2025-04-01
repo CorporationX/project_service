@@ -1,8 +1,8 @@
 package faang.school.projectservice.handler.presentation;
 
-import faang.school.projectservice.exception.presentation.DownloadFileFromMinioException;
+import faang.school.projectservice.exception.presentation.FileDownloadException;
 import faang.school.projectservice.exception.presentation.ProjectNotFoundException;
-import faang.school.projectservice.exception.presentation.UploadFileToMinioError;
+import faang.school.projectservice.exception.presentation.FileUploadException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +23,8 @@ public class PresentationExceptionController {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(DownloadFileFromMinioException.class)
-    public ResponseEntity<ErrorResponse> handleDownloadFileFromMinioException(DownloadFileFromMinioException e) {
+    @ExceptionHandler(FileDownloadException.class)
+    public ResponseEntity<ErrorResponse> handleDownloadFileFromMinioException(FileDownloadException e) {
         ErrorResponse error = errorMessageService.buildErrorResponse(
                 "Download Error",
                 "Failed to download file from storage service.",
@@ -32,8 +32,8 @@ public class PresentationExceptionController {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(UploadFileToMinioError.class)
-    public ResponseEntity<ErrorResponse> handleUploadFileToMinioError(UploadFileToMinioError e) {
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorResponse> handleUploadFileToMinioError(FileUploadException e) {
         ErrorResponse error = errorMessageService.buildErrorResponse(
                 "Upload Error",
                 "Failed to upload file to storage service.",
