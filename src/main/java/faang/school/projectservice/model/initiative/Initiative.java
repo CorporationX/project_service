@@ -45,7 +45,7 @@ public class Initiative {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "curator_id",  nullable = false)
+    @JoinColumn(name = "curator_id", nullable = false)
     private TeamMember curator;
 
     @Column(name = "status", nullable = false)

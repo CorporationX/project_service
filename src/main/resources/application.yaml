@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -24,6 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
 
 server:
   port: 8082
@@ -48,3 +52,11 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+  minio:
+    endpoint: http://localhost:9000
+    access-key: ${MINIO_ACCESS_KEY:user}
+    secret-key: ${MINIO_SECRET_KEY:password}
+    cover:
+      bucket:
+        cover-bucket
+      max-image-dimension: 512

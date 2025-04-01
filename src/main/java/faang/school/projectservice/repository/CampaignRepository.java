@@ -15,10 +15,10 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
 
     @Query(
             "SELECT c FROM Campaign c " +
-            "WHERE (:namePattern IS NULL OR c.title LIKE %:namePattern%) " +
-            "AND (:minGoal IS NULL OR c.goal >= :minGoal) " +
-            "AND (:maxGoal IS NULL OR c.goal <= :maxGoal) " +
-            "AND (:status IS NULL OR c.status = :status)"
+                    "WHERE (:namePattern IS NULL OR c.title LIKE %:namePattern%) " +
+                    "AND (:minGoal IS NULL OR c.goal >= :minGoal) " +
+                    "AND (:maxGoal IS NULL OR c.goal <= :maxGoal) " +
+                    "AND (:status IS NULL OR c.status = :status)"
     )
     List<Campaign> findAllByFilters(@Param("namePattern") String namePattern,
                                     @Param("minGoal") BigDecimal minGoal,
