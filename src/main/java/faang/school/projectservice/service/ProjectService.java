@@ -49,7 +49,6 @@ public class ProjectService {
     public ResourceReadDto uploadResourceToGallery(long projectId, MultipartFile file) {
         resourceValidator.validateResource(file);
 
-
         Project project = getProject(projectId);
 
         //Путь с форматом "projects/123/my-cool-project"
