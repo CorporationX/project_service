@@ -10,6 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import faang.school.projectservice.exception.LimitSizeFileException;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.UnsupportedFileTypeException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Team;
@@ -117,14 +119,14 @@ class AvatarServiceTest {
 
     @Test
     void addAvatar_InvalidFileType_ThrowsException() {
-        Exception exception = assertThrows(UnsupportedFileTypeException.class, () -> avatarService.addAvatar(teamId, invalidFile));
+        UnsupportedFileTypeException exception = assertThrows(UnsupportedFileTypeException.class, () -> avatarService.addAvatar(teamId, invalidFile));
 
         assertEquals(ERROR_INVALID_FILE_TYPE, exception.getMessage());
     }
 
     @Test
     void addAvatar_FileTooLarge_ThrowsException() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> avatarService.addAvatar(teamId, largeFile));
+        LimitSizeFileException exception = assertThrows(LimitSizeFileException.class, () -> avatarService.addAvatar(teamId, largeFile));
 
         assertEquals(getErrorLimitSizeFile(MAX_FILE_SIZE), exception.getMessage());
     }
@@ -143,7 +145,7 @@ class AvatarServiceTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(teamMemberRepository.findByUserId(1L)).thenReturn(List.of(teamMember));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        UnauthorizedAccessException exception = assertThrows(UnauthorizedAccessException.class,
                 () -> avatarService.deleteAvatar(teamId, 1L));
         assertEquals(ERROR_UNAUTHORIZED_ACCESS, exception.getMessage());
     }

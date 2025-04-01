@@ -3,6 +3,9 @@ package faang.school.projectservice.service;
 import static faang.school.projectservice.contants.ErrorMessage.*;
 
 import faang.school.projectservice.contants.InfoMessage;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.LimitSizeFileException;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.UnsupportedFileTypeException;
 import faang.school.projectservice.imageUtils.ImageUtils;
 import faang.school.projectservice.model.Resource;
@@ -51,7 +54,7 @@ public class AvatarService {
         Team team = getTeam(teamId);
 
         if (!isUserTeamManager(team, userId)) {
-            throw new IllegalArgumentException(ERROR_UNAUTHORIZED_ACCESS);
+            throw new UnauthorizedAccessException(ERROR_UNAUTHORIZED_ACCESS);
         }
 
         if (team.getAvatarKey() == null) {
@@ -67,14 +70,14 @@ public class AvatarService {
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId).orElseThrow(() -> {
             log.error(getErrorNotFoundTeam(teamId));
-            return new IllegalArgumentException(getErrorNotFoundTeam(teamId));
+            return new EntityNotFoundException(getErrorNotFoundTeam(teamId));
         });
     }
 
     private void validateFile(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
             log.error(getErrorLimitSizeFile(MAX_FILE_SIZE));
-            throw new IllegalArgumentException(getErrorLimitSizeFile(MAX_FILE_SIZE));
+            throw new LimitSizeFileException(getErrorLimitSizeFile(MAX_FILE_SIZE));
         }
         String fileExtension = getFileExtension(file);
         if (!fileExtension.equals("jpg") && !fileExtension.equals("png")) {
