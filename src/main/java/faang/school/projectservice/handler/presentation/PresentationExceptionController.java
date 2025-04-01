@@ -3,26 +3,41 @@ package faang.school.projectservice.handler.presentation;
 import faang.school.projectservice.exception.presentation.DownloadFileFromMinioException;
 import faang.school.projectservice.exception.presentation.ProjectNotFoundException;
 import faang.school.projectservice.exception.presentation.UploadFileToMinioError;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class PresentationExceptionController {
+    private final ErrorMessageService errorMessageService;
 
     @ExceptionHandler(ProjectNotFoundException.class)
-    public ResponseEntity<String> handleProjectNotFoundException(ProjectNotFoundException e) {
-        return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleProjectNotFoundException(ProjectNotFoundException e) {
+        ErrorResponse error = errorMessageService.buildErrorResponse(
+                "Project Error",
+                "The project you are looking for was not found.",
+                e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DownloadFileFromMinioException.class)
-    public ResponseEntity<String> handleDownloadFileFromMinioException(DownloadFileFromMinioException e) {
-        return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleDownloadFileFromMinioException(DownloadFileFromMinioException e) {
+        ErrorResponse error = errorMessageService.buildErrorResponse(
+                "Download Error",
+                "Failed to download file from storage service.",
+                e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(UploadFileToMinioError.class)
-    public ResponseEntity<String> handleUploadFileToMinioError(UploadFileToMinioError e) {
-        return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleUploadFileToMinioError(UploadFileToMinioError e) {
+        ErrorResponse error = errorMessageService.buildErrorResponse(
+                "Upload Error",
+                "Failed to upload file to storage service.",
+                e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
