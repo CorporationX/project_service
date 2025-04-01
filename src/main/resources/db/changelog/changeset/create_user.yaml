@@ -2,6 +2,6 @@ databaseChangeLog:
   - changeSet:
       sqlFile:
         path: db/changelog/changeset/project_V000_create_user.sql
-      context: test
+      contexts: test
       id: 1
       author: author

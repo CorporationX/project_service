@@ -192,7 +192,7 @@ public class CampaignControllerTest {
     @ParameterizedTest
     @MethodSource({"invalidRequestDtos"})
     @DisplayName("Test for all invalid requests")
-    void negativeCreateCampaignTest(CampaignDto requestDto) throws Exception {
+    void invalidDtosTest(CampaignDto requestDto) throws Exception {
         String jsonRequestDto = OBJECT_MAPPER.writeValueAsString(requestDto);
 
         mockMvc.perform(post(URL)

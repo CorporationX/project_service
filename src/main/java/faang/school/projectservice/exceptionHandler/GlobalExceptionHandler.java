@@ -44,13 +44,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(DataNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleDataNotFoundException(DataNotFoundException e) {
-        log.error(e.getMessage());
-        ErrorResponse response = new ErrorResponse(e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
         log.error(e.getMessage());
@@ -86,4 +79,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
-}
+

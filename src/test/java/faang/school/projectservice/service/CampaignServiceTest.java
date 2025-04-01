@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.adapter.CampaignRepositoryAdapter;
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.CampaignRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.Currency;

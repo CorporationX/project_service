@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id bigint PRIMARY KEY,
     username varchar(64) UNIQUE NOT NULL,
     password varchar(128) NOT NULL,

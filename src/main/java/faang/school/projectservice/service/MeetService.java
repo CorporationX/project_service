@@ -8,7 +8,7 @@ import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
-import faang.school.projectservice.validation.MeetValidation;
+import faang.school.projectservice.validator.MeetValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,13 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MeetService {
     private final MeetRepository meetRepository;
-    private final MeetValidation meetValidation;
+    private final MeetValidator meetValidator;
     private final MeetMapper meetMapper;
     private final UserContext userContext;
     private final List<MeetFilter> filters;
 
     public MeetDto createMeet(MeetDto meet) {
-        meetValidation.validationMeet(meet);
+        meetValidator.validationMeet(meet);
         Meet meetEntity = meetMapper.toEntity(meet);
         meetEntity.setCreatedAt(LocalDateTime.now());
 
@@ -39,7 +39,7 @@ public class MeetService {
 
     @Transactional
     public MeetDto updateMeet(MeetDto meet) {
-        meetValidation.permissionCheck(userContext.getUserId(), meet.getCreatorId());
+        meetValidator.permissionCheck(userContext.getUserId(), meet.getCreatorId());
 
         Meet meetEntity = meetMapper.toEntity(meet);
         Meet updatedMeet = meetRepository.save(meetEntity);
@@ -49,8 +49,8 @@ public class MeetService {
 
     @Transactional
     public MeetDto cancelMeetById(Long id) {
-        Meet meetEntity = meetValidation.getMeet(id);
-        meetValidation.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
+        Meet meetEntity = meetValidator.getMeet(id);
+        meetValidator.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
 
         meetEntity.setStatus(MeetStatus.CANCELLED);
         meetEntity.setUpdatedAt(LocalDateTime.now());
@@ -62,8 +62,8 @@ public class MeetService {
 
     @Transactional
     public Long deleteMeetById(Long id) {
-        Meet meetEntity = meetValidation.getMeet(id);
-        meetValidation.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
+        Meet meetEntity = meetValidator.getMeet(id);
+        meetValidator.permissionCheck(userContext.getUserId(), meetEntity.getCreatorId());
         meetRepository.deleteById(id);
 
         log.info("Meeting deleted id : {}", id);
@@ -94,6 +94,6 @@ public class MeetService {
     }
 
     public MeetDto getMeetById(Long id) {
-        return meetMapper.toDto(meetValidation.getMeet(id));
+        return meetMapper.toDto(meetValidator.getMeet(id));
     }
 }

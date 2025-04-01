@@ -1,15 +1,15 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.integrationTests;
 
-import faang.school.projectservice.AbstractIntegrationTest;
-import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.controller.ProjectController;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptionhandler.GlobalExceptionHandler;
+import faang.school.projectservice.exceptionHandler.GlobalExceptionHandler;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.service.MinioService;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;

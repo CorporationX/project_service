@@ -1,4 +1,4 @@
-package faang.school.projectservice.adapter;
+package faang.school.projectservice.repository.adapter;
 
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.repository.CampaignRepository;

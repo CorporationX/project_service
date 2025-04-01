@@ -20,9 +20,8 @@ public interface ProjectMapper {
     List<ProjectDto> toDtoList(List<Project> project);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "name", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "visibility", ignore = true)
-    void updateProject(ProjectDto projectDto, @MappingTarget Project project);
+    void update(ProjectDto projectDto, @MappingTarget Project project);
 }
