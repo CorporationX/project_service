@@ -11,7 +11,9 @@ public enum ExceptionMessage {
     CAMPAIGN_NOT_FOUND("Campaign with id=%d not found"),
     CAMPAIGN_CREATOR_MODIFICATION("Unable to change campaign creator"),
     DATE_PARSE("Invalid date format: %s. Expected format: yyyy-MM-dd"),
-    EMPTY_FILTER("At least one filter parameter must be provided");
+    EMPTY_FILTER("At least one filter parameter must be provided"),
+    FILE_NOT_VALID("File not valid"),
+    IMAGE_PROCESSING_ERROR("Image processing error while saving");
 
 
     private final String message;
