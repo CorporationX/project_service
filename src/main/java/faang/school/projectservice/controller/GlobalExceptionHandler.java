@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,6 +43,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleResourceForbiddenException (ResourceForbiddenException e) {
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMultipartException(MultipartException e) {
+        return new ErrorResponse("You haven't passed an image. " +
+                "Or the Content-Type is invalid (multipart/form-data)");
     }
 
     @ExceptionHandler(Exception.class)

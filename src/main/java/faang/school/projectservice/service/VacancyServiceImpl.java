@@ -193,7 +193,13 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     private void checkUser(Vacancy vacancy) {
-        long userId = userContext.getUserId();
+        long userId;
+        try {
+            userId = userContext.getUserId();
+        } catch (Exception e) {
+            throw new DataValidationException("User id cannot be null");
+        }
+
         if (!(vacancy.getCreatedBy() == userId || vacancy.getProject().getOwnerId() == userId)) {
             throw new ResourceForbiddenException(String.format(
                     "You are not allowed to post on this resource (vacancy id:%d)", vacancy.getId()));
@@ -216,8 +222,9 @@ public class VacancyServiceImpl implements VacancyService {
 
     private Vacancy findVacancyById(long vacancyId) {
         return vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new RecordNotFoundException(
-                        "Vacancy with id: %d is not found."));
+                .orElseThrow(() -> new RecordNotFoundException(String.format(
+                        "Vacancy with id: %d is not found.", vacancyId
+                )));
     }
 
 }
