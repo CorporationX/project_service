@@ -13,7 +13,10 @@ public enum ExceptionMessage {
     DATE_PARSE("Invalid date format: %s. Expected format: yyyy-MM-dd"),
     EMPTY_FILTER("At least one filter parameter must be provided"),
     FILE_NOT_VALID("File not valid"),
-    IMAGE_PROCESSING_ERROR("Image processing error while saving");
+    FILE_NOT_SENT("File is missing"),
+    UNABLE_READ_FILE("Error while reading file bytes"),
+    IMAGE_PROCESSING_WRITE("Image processing error while saving"),
+    IMAGE_PROCESSING_READ("Image processing error while reading");
 
 
     private final String message;

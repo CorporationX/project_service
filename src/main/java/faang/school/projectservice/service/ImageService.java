@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.exception.ExceptionMessage;
+import faang.school.projectservice.exception.FileProcessingException;
 import faang.school.projectservice.exception.ImageProcessingException;
 import faang.school.projectservice.exception.InvalidFileException;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -12,29 +14,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 
+@Service
 public class ImageService {
     private static final int MAX_WIDTH_HORIZONTAL = 1080;
     private static final int MAX_HEIGHT_HORIZONTAL = 566;
     private static final int MAX_WIDTH_SQUARE = 1080;
     private static final int MAX_HEIGHT_SQUARE = 1080;
 
-    public byte[] resizeImage(MultipartFile multipartFile) throws IOException {
-        BufferedImage originalImage = ImageIO.read(multipartFile.getInputStream());
+    public byte[] resizeImage(MultipartFile multipartFile) {
+        BufferedImage originalImage = validateAndGetBufferedImage(multipartFile);
 
-        if (originalImage == null) {
-            throw new InvalidFileException(ExceptionMessage.FILE_NOT_VALID);
-        }
+        int originalWidth = originalImage.getWidth();
+        int originalHeight = originalImage.getHeight();
 
-        int width = originalImage.getWidth();
-        int height = originalImage.getHeight();
-
-
-        int[] newSizes = calculateNewSize(width, height);
+        int[] newSizes = calculateNewSize(originalWidth, originalHeight);
         int newWidth = newSizes[0];
         int newHeight = newSizes[1];
 
-        if (newWidth == width && newHeight == height) {
-            return multipartFile.getBytes();
+        if (newWidth == originalWidth && newHeight == originalHeight) {
+            try {
+                return multipartFile.getBytes();
+            } catch (IOException e) {
+                throw new FileProcessingException(ExceptionMessage.UNABLE_READ_FILE);
+            }
         }
 
         return createResizedImageBytes(multipartFile, originalImage, newWidth, newHeight);
@@ -51,7 +53,7 @@ public class ImageService {
         try {
             ImageIO.write(resizedImage, contentType, outputStream);
         } catch (IOException e) {
-            throw new ImageProcessingException(ExceptionMessage.IMAGE_PROCESSING_ERROR);
+            throw new ImageProcessingException(ExceptionMessage.IMAGE_PROCESSING_WRITE);
         }
         return outputStream.toByteArray();
     }
@@ -78,6 +80,25 @@ public class ImageService {
         }
 
         return new int[]{newWidth, newHeight};
+    }
+
+    private BufferedImage validateAndGetBufferedImage(MultipartFile multipartFile) {
+        if (multipartFile == null) {
+            throw new InvalidFileException(ExceptionMessage.FILE_NOT_SENT);
+        }
+
+        BufferedImage originalImage;
+        try {
+            originalImage = ImageIO.read(multipartFile.getInputStream());
+        } catch (IOException e) {
+            throw new ImageProcessingException(ExceptionMessage.IMAGE_PROCESSING_READ);
+        }
+
+        if (originalImage == null) {
+            throw new InvalidFileException(ExceptionMessage.FILE_NOT_VALID);
+        }
+
+        return originalImage;
     }
 
 }

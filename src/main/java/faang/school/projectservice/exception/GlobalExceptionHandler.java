@@ -65,4 +65,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<String> handleInvalidFileException(InvalidFileException ex) {
+        log.error("InvalidFileException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }
