@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -18,13 +18,13 @@ public class CampaignValidator {
     public void userStatusValidation(Long projectId) {
         TeamMember teamMember = teamMemberAdapter.getByUserIdAndProjectId(userContext.getUserId(), projectId);
         if (!(teamMember.getRoles().contains(TeamRole.MANAGER) || teamMember.getRoles().contains(TeamRole.OWNER))) {
-            throw new DataValidateException("You are not the creator or manager of the project");
+            throw new DataValidationException("You are not the creator or manager of the project");
         }
     }
 
     public void statusByCreateValidation(CampaignStatus status) {
         if (!status.equals(CampaignStatus.ACTIVE)) {
-            throw new DataValidateException("When created, the status can only be ACTIVE");
+            throw new DataValidationException("When created, the status can only be ACTIVE");
         }
     }
 }

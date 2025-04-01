@@ -2,7 +2,7 @@ package faang.school.projectservice.exceptionHandler;
 
 import faang.school.projectservice.exception.BadRequestException;
 import faang.school.projectservice.exception.DataAlreadyExistException;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +30,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorAttributes);
     }
 
-    @ExceptionHandler(DataValidateException.class)
-    public ResponseEntity<ErrorResponse> handleDataValidateException(DataValidateException e) {
+    @ExceptionHandler(DataValidationException.class)
+    public ResponseEntity<ErrorResponse> handleDataValidateException(DataValidationException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerDataNotFoundException(EntityNotFoundException e) {
+    public ResponseEntity<ErrorResponse> handlerEntityNotFoundException(EntityNotFoundException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -70,7 +70,7 @@ public class CampaignValidatorTest {
         when(userContext.getUserId()).thenReturn(1L);
         when(teamMemberRepositoryAdapter.getByUserIdAndProjectId(1L, 1L))
                 .thenReturn(teamMemberWithoutRequiredRoles);
-        assertThrows(DataValidateException.class,
+        assertThrows(DataValidationException.class,
                 () -> validator.userStatusValidation(1L),
                 "You are not the creator or manager of the project");
     }
@@ -83,7 +83,7 @@ public class CampaignValidatorTest {
     @ParameterizedTest
     @MethodSource({"invalidStatusesForCreate"})
     void statusByCreateValidationNegativeTest(CampaignStatus status) {
-        assertThrows(DataValidateException.class,
+        assertThrows(DataValidationException.class,
                 () -> validator.statusByCreateValidation(status),
                 "When created, the status can only be ACTIVE");
     }

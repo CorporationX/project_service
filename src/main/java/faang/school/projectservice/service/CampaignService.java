@@ -5,7 +5,7 @@ import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
-import faang.school.projectservice.exception.DataValidateException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -88,7 +88,7 @@ public class CampaignService {
         if (filterDto.getCreatorId() > 0) {
             specs.add(specification.getByCreatorId(filterDto.getCreatorId()));
         } else {
-            throw new DataValidateException("CreatorId must be > 0");
+            throw new DataValidationException("CreatorId must be > 0");
         }
     }
     specs.add(specification.getOrderedByDate());
