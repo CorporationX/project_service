@@ -1,18 +1,17 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCoverDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
+import faang.school.projectservice.event.ProjectEvent;
 import faang.school.projectservice.exception.AccessDeniedException;
+import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.*;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.imageprocessing.ImageProcessingUtils;
@@ -47,7 +46,24 @@ public class ProjectService {
     private final UserContext userContext;
     private final ProjectMapper projectMapper;
     private final ImageProcessingUtils imageProcessingUtils;
+    private final ProjectEventPublisher projectEventPublisher;
 
+    @Transactional
+    public ProjectDto createProject(ProjectDto projectDto){
+        if (projectRepository.existsByOwnerIdAndName(userContext.getUserId(), projectDto.getName())){
+            throw new BusinessException("У пользователя не могут быть проекты с одинаковым названием");
+        }
+
+        Project project = projectMapper.toEntity(projectDto);
+        project.setStatus(ProjectStatus.CREATED);
+        project.setVisibility(projectDto.getProjectVisibility());
+        project.setOwnerId(userContext.getUserId());
+
+        project = projectRepository.save(project);
+        projectEventPublisher.publish(new ProjectEvent(project.getOwnerId(), project.getId()));
+
+        return projectMapper.toProjectDto(project);
+    }
 
     public Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
@@ -57,7 +73,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectDto addProjectCover(Long projectId, MultipartFile file) {
+    public ProjectCoverDto addProjectCover(Long projectId, MultipartFile file) {
         Project project = getProject(projectId);
 
         resourceValidator.validateResource(file);
@@ -74,16 +90,16 @@ public class ProjectService {
         String key = amazonS3Client.uploadFile(resizedImageBytes, folder);
         project.setCoverImageId(key);
         Project updatedProject = projectRepository.save(project);
-        return projectMapper.toDto(updatedProject);
+        return projectMapper.toProjectCoverDto(updatedProject);
     }
 
     @Transactional
-    public ProjectDto deleteProjectCover(Long projectId) {
+    public ProjectCoverDto deleteProjectCover(Long projectId) {
         Project project = getProject(projectId);
         amazonS3Client.deleteFile(project.getCoverImageId());
         project.setCoverImageId(null);
         Project updatedProject = projectRepository.save(project);
-        return projectMapper.toDto(updatedProject);
+        return projectMapper.toProjectCoverDto(updatedProject);
     }
 
     @Transactional

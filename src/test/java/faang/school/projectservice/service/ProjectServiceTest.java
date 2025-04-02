@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCoverDto;
 import faang.school.projectservice.dto.resource.ResourceReadDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
@@ -13,6 +13,7 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.publisher.ProjectEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -62,6 +63,9 @@ class ProjectServiceTest {
     private ProjectValidator projectValidator;
 
     @Mock
+    private ProjectEventPublisher publisher;
+
+    @Mock
     private AmazonS3Service amazonS3Client;
 
     @Mock
@@ -104,7 +108,7 @@ class ProjectServiceTest {
             .galleryFileKeys(new ArrayList<>())
             .resources(new ArrayList<>())
             .build();
-    private final ProjectDto projectDto = ProjectDto.builder()
+    private final ProjectCoverDto projectDto = ProjectCoverDto.builder()
             .id(PROJECT_ID)
             .coverImageId(null)
             .build();
@@ -121,7 +125,8 @@ class ProjectServiceTest {
                 teamMemberRepository,
                 userContext,
                 projectMapper,
-                imageProcessingUtils);
+                imageProcessingUtils,
+                publisher);
     }
 
     @Test
@@ -324,9 +329,9 @@ class ProjectServiceTest {
         when(imageProcessingUtils.convertByteToMultipartFile(any(), any(), any())).thenReturn(file);
         when(amazonS3Client.uploadFile(any(MultipartFile.class), anyString())).thenReturn("s3-key");
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(projectMapper.toProjectCoverDto(project)).thenReturn(projectDto);
 
-        ProjectDto result = projectService.addProjectCover(PROJECT_ID, file);
+        ProjectCoverDto result = projectService.addProjectCover(PROJECT_ID, file);
 
         assertEquals(projectDto, result);
         verify(resourceValidator).validateResource(file);
@@ -340,13 +345,13 @@ class ProjectServiceTest {
     void testDeletingProjectCover() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
         when(projectRepository.save(project)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(projectMapper.toProjectCoverDto(project)).thenReturn(projectDto);
 
-        ProjectDto result = projectService.deleteProjectCover(PROJECT_ID);
+        ProjectCoverDto result = projectService.deleteProjectCover(PROJECT_ID);
 
         verify(amazonS3Client).deleteFile("coverImageId");
         verify(projectRepository).save(project);
-        verify(projectMapper).toDto(project);
+        verify(projectMapper).toProjectCoverDto(project);
         Assertions.assertNull(project.getCoverImageId());
     }
 }

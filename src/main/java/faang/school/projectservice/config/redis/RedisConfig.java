@@ -21,6 +21,9 @@ public class RedisConfig {
     @Value("${spring.data.redis.channels.invitation}")
     private String invitationTopicName;
 
+    @Value("${spring.data.redis.channels.project}")
+    private String projectTopicName;
+
     @Bean
     JedisConnectionFactory connectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);
@@ -37,5 +40,10 @@ public class RedisConfig {
     @Bean
     ChannelTopic invitationTopic() {
         return new ChannelTopic(invitationTopicName);
+    }
+
+    @Bean
+    ChannelTopic projectTopic() {
+        return new ChannelTopic(projectTopicName);
     }
 }
