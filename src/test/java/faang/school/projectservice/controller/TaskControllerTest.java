@@ -103,7 +103,7 @@ public class TaskControllerTest {
     public void testPositiveGetAllTasks() throws Exception {
         when(taskService.getAllTasks(firstId)).thenReturn(responseList);
 
-        mockMvc.perform(get("/tasks/{projectId}", firstId))
+        mockMvc.perform(get("/tasks/project/{projectId}", firstId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(responseList.size())));
     }
@@ -112,7 +112,7 @@ public class TaskControllerTest {
     public void testPositiveGetTaskById() throws Exception {
         when(taskService.getTaskById(firstId)).thenReturn(responseList.get(0));
 
-        mockMvc.perform(get("/tasks/task-{taskId}", firstId))
+        mockMvc.perform(get("/tasks/{taskId}", firstId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(responseList.get(0))));
     }

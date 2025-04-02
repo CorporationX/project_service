@@ -44,7 +44,7 @@ public class TaskService {
     private final UserServiceClient userServiceClient;
 
     public TaskResponse createTask(TaskCreateRequest taskDto) {
-        Long userId = checkUserId();
+        Long userId = getUserId();
         Project project = findProjectById(taskDto.projectId());
         checkUserOnMembership(userId, project);
         checkPerformerExisting(taskDto.performerUserId());
@@ -52,8 +52,8 @@ public class TaskService {
         Task task = taskRequestMapper.createdDtoToEntity(taskDto);
         task.setStatus(TaskStatus.TODO);
         task.setProject(project);
-        setParentTask(task, taskDto.parentTaskId());
-        setLinkedTasks(task, taskDto.linkedTasksIds());
+        task = setParentTask(task, taskDto.parentTaskId());
+        task = setLinkedTasks(task, taskDto.linkedTasksIds());
 
         task = taskRepository.save(task);
         log.info("\nSuccessful created task with id {}\nDate created: {}. User id who created: {}",
@@ -62,7 +62,7 @@ public class TaskService {
     }
 
     public TaskResponse updateTask(TaskUpdateRequest taskDto) {
-        Long userId = checkUserId();
+        Long userId = getUserId();
         Task task = findTaskById(taskDto.id());
         Project project = task.getProject();
 
@@ -72,11 +72,11 @@ public class TaskService {
         checkUserOnMembership(userId, project);
 
         taskRequestMapper.updateTaskFromDto(taskDto, task);
-        setParentTask(task, taskDto.parentTaskId());
-        setLinkedTasks(task, taskDto.linkedTasksIds());
+        task = setParentTask(task, taskDto.parentTaskId());
+        task = setLinkedTasks(task, taskDto.linkedTasksIds());
 
         task = taskRepository.save(task);
-        log.info("\nSuccessful updated task with id {}\nDate updated: {}. User id who updated: {}",
+        log.info("Successful updated task with id {}. Date updated: {}. User id who updated: {}",
                 task.getId(), task.getUpdatedAt(), userId);
         return taskResponseMapper.entityToDto(task);
     }
@@ -119,12 +119,12 @@ public class TaskService {
     }
 
     private void validateUserAccess(Long projectId) {
-        Long userId = checkUserId();
+        Long userId = getUserId();
         Project project = findProjectById(projectId);
         checkUserOnMembership(userId, project);
     }
 
-    private Long checkUserId() {
+    private Long getUserId() {
         return userServiceClient.getUser(userContext.getUserId()).id();
     }
 
@@ -145,18 +145,20 @@ public class TaskService {
         }
     }
 
-    private void setParentTask(Task task, Long parentTaskId) {
+    private Task setParentTask(Task task, Long parentTaskId) {
         if (parentTaskId != null) {
             Task parentTask = findTaskById(parentTaskId);
             task.setParentTask(parentTask);
         }
+        return task;
     }
 
-    private void setLinkedTasks(Task task, List<Long> linkedTasksIds) {
+    private Task setLinkedTasks(Task task, List<Long> linkedTasksIds) {
         if (linkedTasksIds != null && !linkedTasksIds.isEmpty()) {
             List<Task> linkedTasks = taskRepository.findAllById(linkedTasksIds);
             task.setLinkedTasks(linkedTasks);
         }
+        return task;
     }
 
     private Task findTaskById(Long taskId) {
