@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

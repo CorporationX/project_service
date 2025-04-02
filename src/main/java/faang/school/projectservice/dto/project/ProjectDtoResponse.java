@@ -6,7 +6,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import java.time.LocalDateTime;
 
 public record ProjectDtoResponse(
-
         long id,
         String name,
         long ownerId,

@@ -23,4 +23,5 @@ public record VacancyDto(
         VacancyStatus status,
         Double salary,
         WorkSchedule workSchedule,
-        Integer count) {}
+        Integer count) {
+}

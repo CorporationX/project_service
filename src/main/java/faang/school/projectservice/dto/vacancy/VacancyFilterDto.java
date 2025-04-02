@@ -6,4 +6,5 @@ import lombok.Builder;
 @Builder
 public record VacancyFilterDto(
         TeamRole position,
-        String nameContains) {}
+        String nameContains) {
+}
