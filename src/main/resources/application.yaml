@@ -36,11 +36,14 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
+    region: us-east-1
     bucketName: projectbucket
     isMocked: false
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080
