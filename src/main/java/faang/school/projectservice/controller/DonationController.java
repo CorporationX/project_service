@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,5 +33,13 @@ public class DonationController {
         donationCreateRequest.setUserId(userId);
 
         return donationService.createDonation(donationCreateRequest);
+    }
+
+    @GetMapping("/donations/{donationId}")
+    public DonationResponse getDonation(
+            @Min(1) @PathVariable long donationId,
+            @Min(1) @RequestHeader("x-user-id") long userId
+    ) {
+        return donationService.getDonation(donationId, userId);
     }
 }

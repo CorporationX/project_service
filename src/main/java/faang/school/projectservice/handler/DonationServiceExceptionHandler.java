@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.campaign.CampaignCanceledException;
 import faang.school.projectservice.exception.campaign.CampaignCompletedException;
 import faang.school.projectservice.exception.campaign.CampaignNotFoundException;
 import faang.school.projectservice.exception.campaign.UnknownCampaignStatusException;
+import faang.school.projectservice.exception.donation.DonationNotFoundException;
 import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,12 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice(assignableTypes = DonationController.class)
 public class DonationServiceExceptionHandler {
 
+    private static final String CAUGHT_EXCEPTION = "{} caught: {}";
+
     @ExceptionHandler(CampaignNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleCampaignNotFoundException(CampaignNotFoundException exception, WebRequest request) {
-        log.error("CampaignNotFoundException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
     }
@@ -30,7 +33,7 @@ public class DonationServiceExceptionHandler {
     @ExceptionHandler(CampaignCompletedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleCampaignCompletedException(CampaignCompletedException exception, WebRequest request) {
-        log.error("CampaignCompletedException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
@@ -38,7 +41,7 @@ public class DonationServiceExceptionHandler {
     @ExceptionHandler(CampaignCanceledException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleCampaignCanceledException(CampaignCanceledException exception, WebRequest request) {
-        log.error("CampaignCanceledException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
@@ -49,7 +52,7 @@ public class DonationServiceExceptionHandler {
             UnknownCampaignStatusException exception,
             WebRequest request
     ) {
-        log.error("UnknownCampaignStatusException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
@@ -57,7 +60,7 @@ public class DonationServiceExceptionHandler {
     @ExceptionHandler(PaymentFailedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlePaymentFailedException(PaymentFailedException exception, WebRequest request) {
-        log.error("PaymentFailedException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
@@ -65,8 +68,20 @@ public class DonationServiceExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFoundException(UserNotFoundException exception, WebRequest request) {
-        log.error("UserNotFoundException caught: {}", exception.getMessage());
+        registerException(exception);
 
         return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
+    }
+
+    @ExceptionHandler(DonationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleDonationNotFoundException(DonationNotFoundException exception, WebRequest request) {
+        registerException(exception);
+
+        return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
+    }
+
+    private void registerException(Exception exception) {
+        log.error(CAUGHT_EXCEPTION, exception.getClass(), exception.getMessage());
     }
 }

@@ -10,6 +10,8 @@ import faang.school.projectservice.exception.campaign.CampaignCanceledException;
 import faang.school.projectservice.exception.campaign.CampaignCompletedException;
 import faang.school.projectservice.exception.campaign.CampaignExceptionMessage;
 import faang.school.projectservice.exception.campaign.UnknownCampaignStatusException;
+import faang.school.projectservice.exception.donation.DonationExceptionMessage;
+import faang.school.projectservice.exception.donation.DonationNotFoundException;
 import faang.school.projectservice.exception.payment.PaymentExceptionMessage;
 import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserExceptionMessage;
@@ -65,6 +67,17 @@ public class DonationServiceImpl implements DonationService {
         donation.setCampaign(campaign);
 
         donationRepository.save(donation);
+
+        return donationMapper.toResponse(donation);
+    }
+
+    @Override
+    public DonationResponse getDonation(long donationId, long userId) {
+        //todo: метод валидации будет работать только после появления эндпоинта в UserService
+        validationUserId(userId);
+
+        Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
+                .orElseThrow(() -> new DonationNotFoundException(DonationExceptionMessage.NOT_FOUND));
 
         return donationMapper.toResponse(donation);
     }
