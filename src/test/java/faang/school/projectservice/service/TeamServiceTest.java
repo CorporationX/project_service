@@ -1,8 +1,12 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.filter.CustomMultipartFile;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
@@ -12,23 +16,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.after;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
@@ -46,7 +48,6 @@ public class TeamServiceTest {
     ResizeImagesService resizeImagesService;
     @InjectMocks
     TeamService teamService;
-
 
     @Test
     public void testPositiveGetImageFromMultiPartFile() {
@@ -78,11 +79,60 @@ public class TeamServiceTest {
     }
 
     @Test
+    public void testPositiveDeleteAvatar() {
+        Long id = 1L;
+        Team team = Team.builder()
+                .id(id)
+                .build();
+        List<TeamMember> teamMemberList = List.of(TeamMember.builder()
+                .team(Team.builder()
+                        .id(id)
+                        .build())
+                .roles(List.of(TeamRole.MANAGER))
+                .id(id).build());
+        Resource resource = Resource.builder()
+                .key("test")
+                .build();
+
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByUserId(id)).thenReturn(teamMemberList);
+        when(resourceRepository.findByKey(any())).thenReturn(resource);
+
+        teamService.deleteAvatar(id, id);
+
+        verify(resourceRepository, times(1)).save(resource);
+        verify(teamRepository, times(1)).save(team);
+        verify(s3Service, times(1)).deleteFile(any());
+
+        assertEquals(ResourceStatus.DELETED, resource.getStatus());
+    }
+
+    @Test
     public void testNegativeGetImageFromMultipartFileLimitSize() {
         MockMultipartFile file = new MockMultipartFile("file",
                 "test.jpg", "image/jpeg",
                 new byte[(int) LIMITATION_FILE_SIZE + 1]);
         assertThrows(IllegalArgumentException.class, () -> teamService.upload(file, 1L));
+    }
 
+    @Test
+    public void testNegativeDeleteAvatarIsNotManager() {
+        Long id = 1L;
+
+        List<TeamMember> teamMemberList = List.of(TeamMember.builder()
+                .team(Team.builder()
+                        .id(id)
+                        .build())
+                .roles(List.of(TeamRole.ANALYST))
+                .id(id)
+                .build());
+        Team team = Team.builder()
+                .id(id)
+                .teamMembers((teamMemberList))
+                .build();
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByUserId(id)).thenReturn(teamMemberList);
+
+        assertThrows(NotFoundException.class, () -> teamService.deleteAvatar(id, id));
     }
 }
