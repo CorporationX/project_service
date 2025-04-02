@@ -40,4 +40,9 @@ public class CustomMultipartFile implements MultipartFile {
     @Override
     public void transferTo(java.io.File dest) throws IOException, IllegalStateException {
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
