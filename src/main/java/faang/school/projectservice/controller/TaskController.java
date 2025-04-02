@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.dto.task.TaskResponse;
 import faang.school.projectservice.dto.task.TaskUpdateRequest;
 import faang.school.projectservice.service.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,26 +25,27 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public TaskResponse createTask(@RequestBody TaskCreateRequest taskDto) {
+    public TaskResponse createTask(@Valid @RequestBody TaskCreateRequest taskDto) {
         return taskService.createTask(taskDto);
     }
 
     @PutMapping
-    public TaskResponse updateTask(@RequestBody TaskUpdateRequest taskDto) {
+    public TaskResponse updateTask(@Valid @RequestBody TaskUpdateRequest taskDto) {
         return taskService.updateTask(taskDto);
     }
 
     @PostMapping("/{projectId}")
-    public List<TaskResponse> getAllTasksByFilters(@PathVariable Long projectId, @RequestBody TaskFilterDto filter) {
+    public List<TaskResponse> getAllTasksByFilters(@PathVariable Long projectId,
+                                                   @Valid @RequestBody TaskFilterDto filter) {
         return taskService.getAllTasksByFilters(projectId, filter);
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/project/{projectId}")
     public List<TaskResponse> getAllTasks(@PathVariable Long projectId) {
         return taskService.getAllTasks(projectId);
     }
 
-    @GetMapping("/task-{taskId}")
+    @GetMapping("/{taskId}")
     public TaskResponse getTaskById(@PathVariable Long taskId) {
         return taskService.getTaskById(taskId);
     }
