@@ -26,12 +26,12 @@ public class JiraTaskService {
         return jiraClient.updateJiraTask(issueKey, request);
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters() {
-        return jiraClient.getProjectJiraTasksByFilters();
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters(String projectId, String status, String assignee) {
+        return jiraClient.getProjectJiraTasksByFilters(projectId, status, assignee);
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasks() {
-        return jiraClient.getProjectJiraTasks();
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasks(String projectId) {
+        return jiraClient.getProjectJiraTasks(projectId);
     }
 
     public Mono<JiraTaskResponse> getTaskById(String issueKey) {

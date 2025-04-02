@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -38,14 +39,15 @@ public class JiraTaskController {
     }
 
     @GetMapping("/all-filtered")
-    public ResponseEntity<Mono<List<JiraTaskResponse>>> getProjectJiraTasksByFilters() {
-        Mono<List<JiraTaskResponse>> response = jiraTaskService.getProjectJiraTasksByFilters();
+    public ResponseEntity<Mono<List<JiraTaskResponse>>> getProjectJiraTasksByFilters(
+            @RequestParam String projectId, @RequestParam String status, @RequestParam String assignee) {
+        Mono<List<JiraTaskResponse>> response = jiraTaskService.getProjectJiraTasksByFilters(projectId, status, assignee);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Mono<List<JiraTaskResponse>>> getProjectJiraTasks() {
-        Mono<List<JiraTaskResponse>> response = jiraTaskService.getProjectJiraTasks();
+    public ResponseEntity<Mono<List<JiraTaskResponse>>> getProjectJiraTasks(@RequestParam String projectId) {
+        Mono<List<JiraTaskResponse>> response = jiraTaskService.getProjectJiraTasks(projectId);
         return ResponseEntity.ok(response);
     }
 

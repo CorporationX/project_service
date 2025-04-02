@@ -17,11 +17,13 @@ public class JiraConfigService {
     private final ConcurrentHashMap<Long, JiraProperties> jiraConfigs = new ConcurrentHashMap<>();
 
     private final UserContext userContext;
+    private final CryptoService cryptoService;
 
     public void addJiraConfig(JiraProperties jiraConfig) {
         Long userId = getUserId();
+        jiraConfig.setApiToken(cryptoService.encrypt(jiraConfig.getApiToken()));
         jiraConfigs.put(userId, jiraConfig);
-        log.debug("Added new Jira config on address: {}", jiraConfig.baseUrl());
+        log.debug("Added new Jira config on address: {}", jiraConfig.getBaseUrl());
     }
 
     public JiraProperties getJiraConfig() {
@@ -29,7 +31,9 @@ public class JiraConfigService {
         if (!jiraConfigs.containsKey(userId)) {
             throw new EntityNotFoundException("Jira config user with id {} not found", userId);
         }
-        return jiraConfigs.get(userId);
+        JiraProperties jiraConfig = jiraConfigs.get(userId);
+        jiraConfig.setApiToken(cryptoService.decrypt(jiraConfig.getApiToken()));
+        return jiraConfig;
     }
 
     private Long getUserId() {

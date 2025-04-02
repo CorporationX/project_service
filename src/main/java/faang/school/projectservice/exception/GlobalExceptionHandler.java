@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.dto.error.ErrorResponse;
 import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import faang.school.projectservice.dto.error.ErrorResponse;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -75,6 +75,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JiraApiException.class)
     public ResponseEntity<ErrorResponse> handleJiraApiException(JiraApiException ex) {
         return ResponseEntity.status(BAD_REQUEST_STATUS).body(getErrorResponse(ex, BAD_REQUEST_STATUS));
+    }
+
+    @ExceptionHandler(CryptoOperationException.class)
+    public ResponseEntity<ErrorResponse> handleGeneralSecurityException(CryptoOperationException ex) {
+        return ResponseEntity.status(FORBIDDEN_STATUS).body(getErrorResponse(ex, FORBIDDEN_STATUS));
     }
 
     private ErrorResponse getErrorResponse(Exception ex, Integer statusCode) {

@@ -1,5 +1,6 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.dto.jiratask.JiraSearchResponse;
 import faang.school.projectservice.dto.jiratask.JiraTaskCreateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskResponse;
 import faang.school.projectservice.dto.jiratask.JiraTaskUpdateRequest;
@@ -55,16 +56,39 @@ public class JiraClient {
                 .doOnError(e -> log.error("Failed to update task", e));
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters() {
-        return null;
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters(String projectKey,
+                                                                     String status, String assignee) {
+        String jql = String.format("project = '%s' AND status = '%s' AND assignee = '%s'",
+                projectKey, status, assignee);
+
+        return webClient.get()
+                .uri(uri -> uri.path(JIRA_REST_API_URL + "/search")
+                        .queryParam("jql", jql)
+                        .queryParam("fields", "summary,description,status,assignee,created")
+                        .queryParam("maxResults", 100)
+                        .build())
+                .retrieve()
+                .bodyToMono(JiraSearchResponse.class)
+                .map(JiraSearchResponse::issues);
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasks() {
-        return null;
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasks(String projectKey) {
+        return webClient.get()
+                .uri(uri -> uri.path(JIRA_REST_API_URL + "/search")
+                        .queryParam("jql", "project = " + projectKey)
+                        .queryParam("fields", "summary,status,assignee")
+                        .queryParam("maxResults", 100)
+                        .build())
+                .retrieve()
+                .bodyToMono(JiraSearchResponse.class)
+                .map(JiraSearchResponse::issues);
     }
 
     public Mono<JiraTaskResponse> getJiraTaskById(String issueKey) {
-        return null;
+        return webClient.get()
+                .uri("/rest/api/3/issue/{issueKey}?fields=summary,description,status,assignee", issueKey)
+                .retrieve()
+                .bodyToMono(JiraTaskResponse.class);
     }
 }
 
