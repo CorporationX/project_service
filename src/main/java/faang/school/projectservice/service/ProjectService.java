@@ -48,6 +48,7 @@ public class ProjectService {
     private final ImageProcessingUtils imageProcessingUtils;
     private final ProjectEventPublisher projectEventPublisher;
 
+    @Transactional
     public ProjectDto createProject(ProjectDto projectDto){
         if (projectRepository.existsByOwnerIdAndName(userContext.getUserId(), projectDto.getName())){
             throw new BusinessException("У пользователя не могут быть проекты с одинаковым названием");
