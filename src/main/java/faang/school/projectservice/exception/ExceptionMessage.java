@@ -12,7 +12,7 @@ public enum ExceptionMessage {
     CAMPAIGN_CREATOR_MODIFICATION("Unable to change campaign creator"),
     DATE_PARSE("Invalid date format: %s. Expected format: yyyy-MM-dd"),
     EMPTY_FILTER("At least one filter parameter must be provided"),
-    FILE_NOT_VALID("File not valid"),
+    FILE_NOT_VALID("File is not valid"),
     FILE_NOT_SENT("File is missing"),
     UNABLE_READ_FILE("Error while reading file bytes"),
     IMAGE_PROCESSING_WRITE("Image processing error while saving"),
