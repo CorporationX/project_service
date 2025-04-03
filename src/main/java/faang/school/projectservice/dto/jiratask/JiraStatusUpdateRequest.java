@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.jiratask.task.JiraTransitionDto;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record JiraStatusUpdateRequest(
-        @JsonProperty("transition") JiraTransitionDto transition
+
+        @JsonProperty("transition")
+        JiraTransitionDto transition
 ) {
 }

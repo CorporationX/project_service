@@ -3,6 +3,8 @@ package faang.school.projectservice.dto.jiratask.task.fields.issuelinkoperation.
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record JiraLinkTypeDto(
-        @JsonProperty("name") String name
+
+        @JsonProperty("name")
+        String name
 ) {
 }

@@ -5,7 +5,11 @@ import faang.school.projectservice.dto.jiratask.task.fields.description.content.
 import java.util.List;
 
 public record JiraContentDto(
-        @JsonProperty("type") String type,
-        @JsonProperty("content") List<JiraTextContentDto> content
+
+        @JsonProperty("type")
+        String type,
+
+        @JsonProperty("content")
+        List<JiraTextContentDto> content
 ) {
 }

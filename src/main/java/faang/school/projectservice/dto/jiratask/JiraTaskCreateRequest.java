@@ -9,6 +9,9 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record JiraTaskCreateRequest(
-        @JsonProperty("fields") @Valid JiraCreateFieldsDto fields
+
+        @JsonProperty("fields")
+        @Valid
+        JiraCreateFieldsDto fields
 ) {
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import faang.school.projectservice.dto.jiratask.task.fields.issuelinkoperation.JiraLinkOperationDto;
 
 public record JiraIssueLinkOperationDto(
-        @JsonProperty("add") JiraLinkOperationDto add
+
+        @JsonProperty("add")
+        JiraLinkOperationDto add
 ) {
 }

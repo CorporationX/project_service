@@ -5,7 +5,11 @@ import faang.school.projectservice.dto.jiratask.task.fields.issuelinkoperation.l
 import faang.school.projectservice.dto.jiratask.task.fields.issuelinkoperation.linkoperation.JiraLinkedIssueDto;
 
 public record JiraLinkOperationDto(
-        @JsonProperty("type") JiraLinkTypeDto type,
-        @JsonProperty("outwardIssue") JiraLinkedIssueDto outwardIssue
+
+        @JsonProperty("type")
+        JiraLinkTypeDto type,
+
+        @JsonProperty("outwardIssue")
+        JiraLinkedIssueDto outwardIssue
 ) {
 }

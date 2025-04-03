@@ -10,7 +10,12 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record JiraTaskUpdateRequest(
-        @JsonProperty("fields") @Valid JiraUpdateFieldsDto fields,
-        @JsonProperty("update") JiraUpdateDto update
+
+        @JsonProperty("fields")
+        @Valid
+        JiraUpdateFieldsDto fields,
+
+        @JsonProperty("update")
+        JiraUpdateDto update
 ) {
 }

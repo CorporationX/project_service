@@ -8,9 +8,17 @@ import lombok.Builder;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record JiraTaskResponse(
-        @JsonProperty("id") String id,
-        @JsonProperty("key") String key,
-        @JsonProperty("self") String selfUrl,
-        @JsonProperty("fields") JiraFieldsResponseDto fields
+
+        @JsonProperty("id")
+        String id,
+
+        @JsonProperty("key")
+        String key,
+
+        @JsonProperty("self")
+        String selfUrl,
+
+        @JsonProperty("fields")
+        JiraFieldsResponseDto fields
 ) {
 }

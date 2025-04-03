@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.jiratask.task.fields.JiraIssueLinkOperati
 import java.util.List;
 
 public record JiraUpdateDto(
-        @JsonProperty("issuelinks") List<JiraIssueLinkOperationDto> linkedTasks
+
+        @JsonProperty("issuelinks")
+        List<JiraIssueLinkOperationDto> linkedTasks
 ) {
 }
