@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Instant;
+
 @Data
 @Builder
 public class JiraProperties {
@@ -16,4 +18,6 @@ public class JiraProperties {
 
     @NotBlank(message = "Api token value is empty")
     private String apiToken;
+
+    private Instant usedAt;
 }
