@@ -25,15 +25,15 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  profiles:
+    active: local
+
   servlet:
     multipart:
       max-file-size: 10MB
 
 file:
   cover-max-size: 5242880
-
-  profiles:
-    active: local
 
 server:
   port: 8082
