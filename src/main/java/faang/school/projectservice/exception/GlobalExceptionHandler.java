@@ -29,11 +29,6 @@ public class GlobalExceptionHandler {
     private static final Integer INTERNAL_SERVER_ERROR_STATUS = 500;
     private static final String ERROR_EXAMPLE = "[{}] Status = {} | Message = {}";
 
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<ErrorResponse> handleFeignException(FeignException ex) {
-        return ResponseEntity.status(NOT_FOUND_STATUS).body(getErrorResponse(ex, NOT_FOUND_STATUS));
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -47,28 +42,10 @@ public class GlobalExceptionHandler {
         return errors;
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
-        return ResponseEntity.status(FORBIDDEN_STATUS).body(getErrorResponse(ex, FORBIDDEN_STATUS));
-    }
-
     @ExceptionHandler(ProjectNotFoundException.class)
     public ResponseEntity<String> handlerProjectNotFoundException(ProjectNotFoundException ex) {
         log.error("ProjectNotFoundException occurred: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
-    @ExceptionHandler(DataValidationException.class)
-    public ResponseEntity<ErrorResponse> handleDataValidationException(DataValidationException ex) {
-        return ResponseEntity.status(BAD_REQUEST_STATUS).body(getErrorResponse(ex, BAD_REQUEST_STATUS));
-    }
-
-    @ExceptionHandler({
-            jakarta.persistence.EntityNotFoundException.class,
-            faang.school.projectservice.exception.EntityNotFoundException.class
-    })
-    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
-        return ResponseEntity.status(NOT_FOUND_STATUS).body(getErrorResponse(ex, NOT_FOUND_STATUS));
     }
 
     @ExceptionHandler(PermissionDeniedException.class)
@@ -99,6 +76,29 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEmptyFilterException(EmptyFilterException ex) {
         log.error("EmptyFilterException occurred: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DataValidationException.class)
+    public ResponseEntity<ErrorResponse> handleDataValidationException(DataValidationException ex) {
+        return ResponseEntity.status(BAD_REQUEST_STATUS).body(getErrorResponse(ex, BAD_REQUEST_STATUS));
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeignException(FeignException ex) {
+        return ResponseEntity.status(NOT_FOUND_STATUS).body(getErrorResponse(ex, NOT_FOUND_STATUS));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        return ResponseEntity.status(FORBIDDEN_STATUS).body(getErrorResponse(ex, FORBIDDEN_STATUS));
+    }
+
+    @ExceptionHandler({
+            jakarta.persistence.EntityNotFoundException.class,
+            faang.school.projectservice.exception.EntityNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ResponseEntity.status(NOT_FOUND_STATUS).body(getErrorResponse(ex, NOT_FOUND_STATUS));
     }
 
     @ExceptionHandler(InternshipGetInternsIdException.class)
@@ -138,7 +138,7 @@ public class GlobalExceptionHandler {
     }
 
     private ErrorResponse getErrorResponse(Exception ex, Integer statusCode) {
-        log.error(ERROR_EXAMPLE, ex.toString(), statusCode, ex.getMessage());
+        log.error(ERROR_EXAMPLE, ex.getClass(), statusCode, ex.getMessage());
         return ErrorResponse.builder()
                 .title(ex.toString())
                 .details(ex.getMessage())

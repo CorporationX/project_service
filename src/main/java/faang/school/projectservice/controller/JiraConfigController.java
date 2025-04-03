@@ -15,7 +15,7 @@ public class JiraConfigController {
     private final JiraConfigService configService;
 
     @PostMapping("/jira/config")
-    public ResponseEntity<String> setConfig(@RequestBody JiraProperties config) {
+    public ResponseEntity<String> addConfig(@RequestBody JiraProperties config) {
         configService.addJiraConfig(config);
         return ResponseEntity.ok("Config saved successfully");
     }

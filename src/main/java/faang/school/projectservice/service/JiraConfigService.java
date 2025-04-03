@@ -29,11 +29,14 @@ public class JiraConfigService {
     public JiraProperties getJiraConfig() {
         Long userId = getUserId();
         if (!jiraConfigs.containsKey(userId)) {
-            throw new EntityNotFoundException("Jira config user with id {} not found", userId);
+            throw new EntityNotFoundException("Jira config user with id %s not found", userId.toString());
         }
         JiraProperties jiraConfig = jiraConfigs.get(userId);
-        jiraConfig.setApiToken(cryptoService.decrypt(jiraConfig.getApiToken()));
-        return jiraConfig;
+        return JiraProperties.builder()
+                .baseUrl(jiraConfig.getBaseUrl())
+                .apiToken(cryptoService.decrypt(jiraConfig.getApiToken()))
+                .email(jiraConfig.getEmail())
+                .build();
     }
 
     private Long getUserId() {

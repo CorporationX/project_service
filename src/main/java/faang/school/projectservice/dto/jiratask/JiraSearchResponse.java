@@ -9,8 +9,6 @@ import java.util.List;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record JiraSearchResponse(
-        @JsonProperty("issues") List<JiraTaskResponse> issues,
-        @JsonProperty("total") int total,
-        @JsonProperty("maxResults") int maxResults,
-        @JsonProperty("startAt") int startAt
-) {}
+        @JsonProperty("issues") List<JiraTaskResponse> issues
+) {
+}

@@ -1,9 +1,11 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.jiratask.JiraStatusUpdateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskCreateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskResponse;
 import faang.school.projectservice.dto.jiratask.JiraTaskUpdateRequest;
 import faang.school.projectservice.service.JiraTaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,15 +28,22 @@ public class JiraTaskController {
     private final JiraTaskService jiraTaskService;
 
     @PostMapping
-    public ResponseEntity<Mono<JiraTaskResponse>> createJiraTask(@RequestBody JiraTaskCreateRequest request) {
+    public ResponseEntity<Mono<JiraTaskResponse>> createJiraTask(@Valid @RequestBody JiraTaskCreateRequest request) {
         Mono<JiraTaskResponse> response = jiraTaskService.createJiraTask(request);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{issueKey}")
     public ResponseEntity<Mono<Void>> updateJiraTask(@PathVariable String issueKey,
-                                                     @RequestBody JiraTaskUpdateRequest request) {
+                                                     @Valid @RequestBody JiraTaskUpdateRequest request) {
         Mono<Void> response = jiraTaskService.updateJiraTask(issueKey, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/status/{issueKey}")
+    public ResponseEntity<Mono<Void>> updateStatusJiraTask(@PathVariable String issueKey,
+                                                           @Valid @RequestBody JiraStatusUpdateRequest request) {
+        Mono<Void> response = jiraTaskService.updateStatusJiraTask(issueKey, request);
         return ResponseEntity.ok(response);
     }
 

@@ -9,7 +9,10 @@ import lombok.Data;
 public class JiraProperties {
 
     @NotBlank(message = "Your Jira url is empty")
-    private String baseUrl;
+    private final String baseUrl;
+
+    @NotBlank(message = "Your email is empty")
+    private final String email;
 
     @NotBlank(message = "Api token value is empty")
     private String apiToken;

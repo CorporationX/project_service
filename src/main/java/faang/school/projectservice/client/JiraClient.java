@@ -1,17 +1,19 @@
 package faang.school.projectservice.client;
 
 import faang.school.projectservice.dto.jiratask.JiraSearchResponse;
+import faang.school.projectservice.dto.jiratask.JiraStatusUpdateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskCreateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskResponse;
 import faang.school.projectservice.dto.jiratask.JiraTaskUpdateRequest;
 import faang.school.projectservice.exception.JiraApiException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -20,7 +22,6 @@ import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Component
-@Slf4j
 public class JiraClient {
 
     private static final String JIRA_REST_API_URL = "/rest/api/3";
@@ -29,19 +30,12 @@ public class JiraClient {
     private static final Function<ClientResponse, Mono<? extends Throwable>> ERROR_HANDLER =
             response -> response.bodyToMono(String.class)
                     .flatMap(error -> Mono.error(new JiraApiException(error)));
+    private static final Integer MAX_RESULTS_RETURNING = 500;
 
     private final WebClient webClient;
 
     public Mono<JiraTaskResponse> createJiraTask(JiraTaskCreateRequest request) {
-        return webClient.post()
-                .uri(JIRA_REST_API_URL + "/issue")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(CODE_PREDICATE, ERROR_HANDLER)
-                .bodyToMono(JiraTaskResponse.class)
-                .doOnSuccess(response -> log.debug("Task created with key: {}", response.key()))
-                .doOnError(e -> log.error("Failed to create task", e));
+        return createPostingRequestOnJiraClient("/issue", request, JiraTaskResponse.class);
     }
 
     public Mono<Void> updateJiraTask(String issueKey, JiraTaskUpdateRequest request) {
@@ -51,44 +45,58 @@ public class JiraClient {
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(CODE_PREDICATE, ERROR_HANDLER)
-                .bodyToMono(Void.class)
-                .doOnSuccess(response -> log.debug("Task updated with key: {}", issueKey))
-                .doOnError(e -> log.error("Failed to update task", e));
+                .bodyToMono(Void.class);
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters(String projectKey,
-                                                                     String status, String assignee) {
-        String jql = String.format("project = '%s' AND status = '%s' AND assignee = '%s'",
+    public Mono<Void> updateStatusJiraTask(String issueKey, JiraStatusUpdateRequest request) {
+        String url = UriComponentsBuilder.fromPath("/issue/{issueKey}/transitions")
+                .buildAndExpand(issueKey)
+                .toUriString();
+        return createPostingRequestOnJiraClient(url, request, Void.class);
+    }
+
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters(@NotBlank String projectKey,
+                                                                     @NotBlank String status,
+                                                                     @NotBlank String assignee) {
+        String jql = String.format("project = \"%s\" AND status = \"%s\" AND assignee = \"%s\"",
                 projectKey, status, assignee);
-
-        return webClient.get()
-                .uri(uri -> uri.path(JIRA_REST_API_URL + "/search")
-                        .queryParam("jql", jql)
-                        .queryParam("fields", "summary,description,status,assignee,created")
-                        .queryParam("maxResults", 100)
-                        .build())
-                .retrieve()
-                .bodyToMono(JiraSearchResponse.class)
-                .map(JiraSearchResponse::issues);
+        return createGettingRequestOnJiraClient(jql);
     }
 
-    public Mono<List<JiraTaskResponse>> getProjectJiraTasks(String projectKey) {
-        return webClient.get()
-                .uri(uri -> uri.path(JIRA_REST_API_URL + "/search")
-                        .queryParam("jql", "project = " + projectKey)
-                        .queryParam("fields", "summary,status,assignee")
-                        .queryParam("maxResults", 100)
-                        .build())
-                .retrieve()
-                .bodyToMono(JiraSearchResponse.class)
-                .map(JiraSearchResponse::issues);
+    public Mono<List<JiraTaskResponse>> getProjectJiraTasks(@NotBlank String projectKey) {
+        String jql = String.format("project = \"%s\"", projectKey);
+        return createGettingRequestOnJiraClient(jql);
     }
 
     public Mono<JiraTaskResponse> getJiraTaskById(String issueKey) {
         return webClient.get()
-                .uri("/rest/api/3/issue/{issueKey}?fields=summary,description,status,assignee", issueKey)
+                .uri(JIRA_REST_API_URL + "/issue/{issueKey}?fields", issueKey)
                 .retrieve()
+                .onStatus(CODE_PREDICATE, ERROR_HANDLER)
                 .bodyToMono(JiraTaskResponse.class);
+    }
+
+    private Mono<List<JiraTaskResponse>> createGettingRequestOnJiraClient(String jql) {
+        return webClient.get()
+                .uri(uri -> uri.path(JIRA_REST_API_URL + "/search")
+                        .queryParam("jql", jql)
+                        .queryParam("fields")
+                        .queryParam("maxResults", MAX_RESULTS_RETURNING)
+                        .build())
+                .retrieve()
+                .onStatus(CODE_PREDICATE, ERROR_HANDLER)
+                .bodyToMono(JiraSearchResponse.class)
+                .map(JiraSearchResponse::issues);
+    }
+
+    private <T> Mono<T> createPostingRequestOnJiraClient(String url, Object request, Class<T> responseType) {
+        return webClient.post()
+                .uri(JIRA_REST_API_URL + url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(CODE_PREDICATE, ERROR_HANDLER)
+                .bodyToMono(responseType);
     }
 }
 
