@@ -416,7 +416,11 @@ class CampaignServiceTest {
 
         @Test
         public void projectFound() {
-            when(campaignRepository.findAll()).thenReturn(List.of(campaign));
+            when(campaignRepository.filterCampaigns(
+                    campaignDto.getCreatedAt(),
+                    campaignDto.getCreatedBy(),
+                    campaignDto.getStatus()))
+                    .thenReturn(List.of(campaign));
             when(projectRepository.findById(campaignID)).thenReturn(Optional.of(project));
 
             List<CampaignDto> results = campaignService.getCampaignByFilter(projectId, campaignDto);
@@ -425,9 +429,11 @@ class CampaignServiceTest {
         }
 
         @Test
-        public void projectFoundAndIncorrectOwner() {
+        public void projectFoundAndIncorrectFilter() {
             campaignDto.setCreatedBy(2L);
-            when(campaignRepository.findAll()).thenReturn(List.of(campaign));
+            campaignDto.setStatus(CampaignStatus.DELETED);
+            campaignDto.setCreatedAt(LocalDateTime.now());
+
             when(projectRepository.findById(campaignID)).thenReturn(Optional.of(project));
 
             List<CampaignDto> results = campaignService.getCampaignByFilter(projectId, campaignDto);

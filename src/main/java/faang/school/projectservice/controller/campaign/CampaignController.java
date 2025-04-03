@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/campaign")
+@RequestMapping("api/v1/campaign/projects/{projectId}")
 @RequiredArgsConstructor
 public class CampaignController {
 
     private final CampaignService campaignService;
 
-    @PostMapping("/{projectId}/{creatorId}")
+    @PostMapping("/{creatorId}")
     public ResponseEntity<CampaignDto> create(
             @RequestBody @Valid CampaignDto campaignDto,
             @PathVariable("projectId") long projectId,
@@ -29,12 +29,14 @@ public class CampaignController {
         campaignDto.setCreatedBy(creatorId);
         CampaignDto createdCampaign = campaignService.create(campaignDto, projectId, creatorId);
 
-        URI location = URI.create("/campaign/" + createdCampaign.getId());
+        URI location = URI.create(String.format("api/v1/campaign/projects/%d/campaigns/%d",
+                createdCampaign.getProjectId(),
+                createdCampaign.getId()));
 
         return ResponseEntity.created((location)).body(createdCampaign);
     }
 
-    @PutMapping("/{projectId}/{campaignId}/{updaterId}")
+    @PutMapping("/campaigns/{campaignId}/{updaterId}")
     public ResponseEntity<CampaignDto> update(
             @RequestBody CampaignDto campaignDto,
             @PathVariable("projectId") long projectId,
@@ -46,7 +48,7 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.update(campaignDto, projectId, campaignId, updaterId));
     }
 
-    @DeleteMapping("/{projectId}/{campaignId}/{deleterId}")
+    @DeleteMapping("/campaigns/{campaignId}/{deleterId}")
     public ResponseEntity<Map<String, String>> softDelete(
             @PathVariable("projectId") long projectId,
             @PathVariable("campaignId") long campaignId,
@@ -55,13 +57,13 @@ public class CampaignController {
         campaignService.softDelete(projectId, campaignId, deleterId);
 
         Map<String, String> response = Map.of(
-                "message", String.format("Campaign with %d id was soft-deleted successful", campaignId)
+                "message", String.format("Campaign with id %d was archived successfully", campaignId)
         );
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{projectId}/{campaignId}")
+    @GetMapping("/campaigns/{campaignId}")
     public ResponseEntity<CampaignDto> getCampaign(
             @PathVariable("projectId") long projectId,
             @PathVariable("campaignId") long campaignId
@@ -69,7 +71,7 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.getCampaign(projectId, campaignId));
     }
 
-    @PostMapping ("/{projectId}")
+    @PostMapping()
     public ResponseEntity<List<CampaignDto>> getCampaignByFilter(
             @RequestBody CampaignDto campaignDto,
             @PathVariable("projectId") long projectId

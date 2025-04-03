@@ -3,10 +3,6 @@ package faang.school.projectservice.service.campaign;
 import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.client.Campaign.CampaignDto;
 import faang.school.projectservice.exception.DuplicateTitleException;
-import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.filter.campaign.DateStart;
-import faang.school.projectservice.filter.campaign.Owner;
-import faang.school.projectservice.filter.campaign.Status;
 import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.CampaignRepository;
@@ -16,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -73,14 +68,13 @@ public class CampaignService {
     public List<CampaignDto> getCampaignByFilter(long projectId, CampaignDto campaignDto) {
         getProjectByIdAndValidate(projectId);
 
-        List<Filter<Campaign>> filters = new ArrayList<>();
-        filters.add(new DateStart(campaignDto.getCreatedAt()));
-        filters.add(new Owner(campaignDto.getCreatedBy()));
-        filters.add(new Status(campaignDto.getStatus()));
+        List<Campaign> campaigns = campaignRepository.filterCampaigns(
+                campaignDto.getCreatedAt(),
+                campaignDto.getCreatedBy(),
+                campaignDto.getStatus()
+        );
 
-        return campaignRepository.findAll().stream()
-                .filter(campaign -> filters.stream()
-                        .allMatch(filter -> filter.matches(campaign)))
+        return campaigns.stream()
                 .sorted(Comparator.comparing(Campaign::getCreatedAt).reversed())
                 .map(campaignMapper::toDto)
                 .collect(Collectors.toList());
