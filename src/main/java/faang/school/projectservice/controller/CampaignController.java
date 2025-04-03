@@ -27,16 +27,16 @@ public class CampaignController {
 
     @PostMapping
     public ResponseCampaignDto createCampaign(@RequestBody CampaignCreateDto campaignCreateDto) {
-        ResponseCampaignDto returnedCampaignCreateDto = campaignService.create(campaignCreateDto);
+        ResponseCampaignDto createdCampaignDto = campaignService.create(campaignCreateDto);
         log.info("The campaign has been created");
-        return returnedCampaignCreateDto;
+        return createdCampaignDto;
     }
 
     @PutMapping
-    public CampaignCreateDto updateCampaign(@RequestBody CampaignUpdateDto campaignUpdateDto) {
-        CampaignCreateDto returnedCampaignCreateDto = campaignService.update(campaignUpdateDto);
+    public ResponseCampaignDto updateCampaign(@RequestBody CampaignUpdateDto campaignUpdateDto) {
+        ResponseCampaignDto updatedCampaignDto = campaignService.update(campaignUpdateDto);
         log.info("The campaign has been updated");
-        return returnedCampaignCreateDto;
+        return updatedCampaignDto;
     }
 
     @DeleteMapping("/{campaignId}")
@@ -46,12 +46,12 @@ public class CampaignController {
     }
 
     @GetMapping("/{campaignId}")
-    public CampaignCreateDto getCampaign(@PathVariable Long campaignId) {
+    public ResponseCampaignDto getCampaign(@PathVariable Long campaignId) {
         return campaignService.getCampaign(campaignId);
     }
 
     @GetMapping
-    public List<CampaignCreateDto> getCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
+    public List<ResponseCampaignDto> getCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
         return campaignService.getCampaignsByProject(campaignFilterDto);
     }
 }

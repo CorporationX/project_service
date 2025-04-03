@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
 import faang.school.projectservice.dto.campaign.ResponseCampaignDto;
+import faang.school.projectservice.exception.CampaignNotFoundException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
@@ -14,8 +15,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.utils.validationsUtils.CampaignValidator;
-import jakarta.validation.Valid;
+import faang.school.projectservice.utils.validations_utils.CampaignValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.PROJECT_ID_NULL_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.PROJECT_ID_NULL_EXCEPTION;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,11 +58,12 @@ public class CampaignService {
         return responseCampaignMapper.toResponseCampaignDto(campaign);
     }
 
-    public CampaignCreateDto update(CampaignUpdateDto campaignUpdateDto) {
+    public ResponseCampaignDto update(CampaignUpdateDto campaignUpdateDto) {
         CampaignValidator.validateCampaignUpdateDto(campaignUpdateDto);
         log.info("All validation have been verifeied.\nStarting the campaign updating process");
 
-        Campaign campaign = campaignRepository.findById(campaignUpdateDto.getId()).get();
+        Campaign campaign = campaignRepository.findById(campaignUpdateDto.getId())
+                .orElseThrow(() -> new CampaignNotFoundException("Campaign not found"));
 
         if (!isManagerOrOwner(campaign.getCreatedBy(), campaign.getProject().getId())) {
             log.error(UPDATING_EXCEPTION);
@@ -74,7 +75,7 @@ public class CampaignService {
         campaign.setUpdatedBy(campaignUpdateDto.getUpdatedBy());
 
         campaignRepository.save(campaign);
-        return campaignMapper.toCampaignDto(campaign);
+        return responseCampaignMapper.toResponseCampaignDto(campaign);
     }
 
     public void delete(Long id) {
@@ -83,22 +84,24 @@ public class CampaignService {
             throw new DataValidationException(ID_NULL_EXCEPTION);
         }
 
-        Campaign campaign = campaignRepository.findById(id).get();
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new CampaignNotFoundException("Campaign not found"));
         campaign.setDeleted(true);
         campaignRepository.save(campaign);
     }
 
-    public CampaignCreateDto getCampaign(Long id) {
+    public ResponseCampaignDto getCampaign(Long id) {
         if (id == null) {
             log.error(ID_NULL_EXCEPTION);
             throw new DataValidationException(ID_NULL_EXCEPTION);
         }
 
-        Campaign campaign = campaignRepository.findById(id).get();
-        return campaignMapper.toCampaignDto(campaign);
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new CampaignNotFoundException("Campaign not found"));
+        return responseCampaignMapper.toResponseCampaignDto(campaign);
     }
 
-    public List<CampaignCreateDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
+    public List<ResponseCampaignDto> getCampaignsByProject(CampaignFilterDto campaignFilterDto) {
         if (campaignFilterDto.getProjectId() == null) {
             log.error(PROJECT_ID_NULL_EXCEPTION);
             throw new DataValidationException(PROJECT_ID_NULL_EXCEPTION);
@@ -114,7 +117,7 @@ public class CampaignService {
 
         return allCampaigns
                 .sorted(Comparator.comparing(Campaign::getCreatedAt).reversed())
-                .map(campaignMapper::toCampaignDto)
+                .map(responseCampaignMapper::toResponseCampaignDto)
                 .toList();
     }
 

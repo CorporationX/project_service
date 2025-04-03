@@ -1,4 +1,4 @@
-package faang.school.projectservice.utils.validationsUtils;
+package faang.school.projectservice.utils.validations_utils;
 
 import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;

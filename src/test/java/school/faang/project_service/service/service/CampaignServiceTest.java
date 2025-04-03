@@ -3,6 +3,7 @@ package school.faang.project_service.service.service;
 import faang.school.projectservice.dto.campaign.CampaignCreateDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.dto.campaign.CampaignUpdateDto;
+import faang.school.projectservice.dto.campaign.ResponseCampaignDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.campaign.CampaignDateFilter;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
@@ -10,7 +11,6 @@ import faang.school.projectservice.filter.campaign.CampaignOwnerFilter;
 import faang.school.projectservice.filter.campaign.CampaignProjectFilter;
 import faang.school.projectservice.filter.campaign.CampaignStatusFilter;
 import faang.school.projectservice.mapper.CampaignMapperImpl;
-import faang.school.projectservice.mapper.ResponseCampaignMapper;
 import faang.school.projectservice.mapper.ResponseCampaignMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -41,12 +41,12 @@ import java.util.Optional;
 
 import static faang.school.projectservice.service.CampaignService.CREATING_EXCEPTION;
 import static faang.school.projectservice.service.CampaignService.ID_NULL_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.DESCRIPTION_MAX_LENGTH_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.GOAL_MIN_DECIMAL_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.PROJECT_ID_NULL_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.TITLE_EMPTY_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.TITLE_MAX_LENGTH_EXCEPTION;
-import static faang.school.projectservice.utils.validationsUtils.CampaignValidator.TITLE_NULL_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.DESCRIPTION_MAX_LENGTH_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.GOAL_MIN_DECIMAL_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.PROJECT_ID_NULL_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.TITLE_EMPTY_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.TITLE_MAX_LENGTH_EXCEPTION;
+import static faang.school.projectservice.utils.validations_utils.CampaignValidator.TITLE_NULL_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -211,7 +211,7 @@ public class CampaignServiceTest {
     public void testUpdateCampaign() {
         setupRepositoryMocks();
 
-        CampaignCreateDto result = campaignService.update(campaignUpdateDto);
+        ResponseCampaignDto result = campaignService.update(campaignUpdateDto);
         verify(campaignRepository).save(campaignCaptor.capture());
         Campaign savedCampaign = campaignCaptor.getValue();
         assertEquals(result.getTitle(), savedCampaign.getTitle());
@@ -278,7 +278,7 @@ public class CampaignServiceTest {
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
-        List<CampaignCreateDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
+        List<ResponseCampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
         System.out.println(result);
         assertEquals(1, result.size());
     }
@@ -302,7 +302,7 @@ public class CampaignServiceTest {
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
-        List<CampaignCreateDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
+        List<ResponseCampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
         System.out.println(result);
         assertEquals(0, result.size());
     }
@@ -326,7 +326,7 @@ public class CampaignServiceTest {
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
-        List<CampaignCreateDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
+        List<ResponseCampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
         System.out.println(result);
         assertEquals(1, result.size());
     }
@@ -351,7 +351,7 @@ public class CampaignServiceTest {
 
         when(campaignRepository.findAll()).thenReturn(List.of(campaign1, campaign2));
 
-        List<CampaignCreateDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
+        List<ResponseCampaignDto> result = campaignService.getCampaignsByProject(campaignFilterDto);
         System.out.println(result);
         assertEquals(1, result.size());
     }

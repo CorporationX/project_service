@@ -16,6 +16,8 @@ public interface CampaignMapper {
 
     @Mapping(target = "project", source = "projectId")
     @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Campaign toCampaign(CampaignCreateDto campaignCreateDto);
 
     @Mapping(target = "projectId", source = "project.id")
