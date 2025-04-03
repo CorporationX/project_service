@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -31,6 +27,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "project")
 @Data
@@ -50,7 +50,7 @@ public class Project {
     private String description;
 
     @Column(name = "storage_size")
-    private BigInteger storageSize;
+    private BigInteger storageSize = BigInteger.ZERO;
 
     @Column(name = "max_storage_size")
     private BigInteger maxStorageSize;
