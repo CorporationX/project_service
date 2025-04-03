@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,7 +23,7 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
-    @PostMapping("/teams/{teamId}")
+    @PostMapping("/teams/{teamId}/avatar")
     public ResponseEntity<Map<String, Object>> uploadAvatarForTeam(
             @PathVariable Long teamId,
             @RequestParam MultipartFile file,
@@ -32,5 +33,13 @@ public class ResourceController {
         response.put("message", "Avatar for team successful upload");
         response.put("data", resourceDto);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/teams/{teamId}/avatar")
+    public ResponseEntity<String> deleteAvatarForTeam(
+            @PathVariable Long teamId,
+            @RequestHeader("X-User-Id") Long userId) {
+        resourceService.deleteAvatarForTeam(teamId);
+        return ResponseEntity.ok("Avatar successful deleted for team with id %d".formatted(teamId));
     }
 }

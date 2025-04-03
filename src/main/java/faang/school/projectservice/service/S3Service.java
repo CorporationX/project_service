@@ -51,4 +51,8 @@ public class S3Service {
         resource.setStatus(ResourceStatus.ACTIVE);
         return resource;
     }
+
+    public void deleteFile(String key) {
+        amazonS3.deleteObject(bucketName, key);
+    }
 }
