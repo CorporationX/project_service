@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
@@ -13,7 +14,7 @@ import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.DonationFilter;
+import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapper;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
@@ -35,11 +36,13 @@ public class DonationService {
     private final UserServiceClient userServiceClient;
     private final DonationMapper donationMapper;
     private final List<DonationFilter> donationFilters;
+    private final UserContext userContext;
 
     public void createDonation(DonationDto donationDto) {
         validateDonation(donationDto);
-        userServiceClient.getUser(donationDto.userId());
+        Long userId = userServiceClient.getUser(userContext.getUserId()).id();
         Donation donation = donationMapper.toEntity(donationDto);
+        donation.setUserId(userId);
         Long paymentNumber = sendPayment(donation.getAmount(), donation.getCurrency());
         donation.setPaymentNumber(paymentNumber);
         donationRepository.save(
@@ -47,7 +50,8 @@ public class DonationService {
         );
     }
 
-    public DonationDto getDonationByIdAndUserId(long id, long userId) {
+    public DonationDto getDonationByIdAndUserId(long id) {
+        long userId = userContext.getUserId();
         userServiceClient.getUser(userId);
         return donationMapper.toDto(
                 donationRepository.findByIdAndUserId(id, userId)
@@ -55,7 +59,8 @@ public class DonationService {
         );
     }
 
-    public List<DonationDto> getAllDonationsByUserId(Long userId, DonationFilterDto donationFilterDto) {
+    public List<DonationDto> getAllDonationsByUserId(DonationFilterDto donationFilterDto) {
+        long userId = userContext.getUserId();
         userServiceClient.getUser(userId);
         Stream<Donation> donationStream = donationRepository.findAllByUserId(userId).stream();
 

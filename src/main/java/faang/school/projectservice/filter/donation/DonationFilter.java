@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;

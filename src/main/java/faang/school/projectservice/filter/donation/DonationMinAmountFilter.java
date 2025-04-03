@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
@@ -17,7 +17,7 @@ public class DonationMinAmountFilter implements DonationFilter {
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto donationFilterDto) {
         return donations.filter(
-                donation -> donation.getAmount().compareTo(new BigDecimal(donationFilterDto.minAmount())) > 0
+                donation -> donation.getAmount().compareTo(donationFilterDto.minAmount()) >= 0
         );
     }
 }

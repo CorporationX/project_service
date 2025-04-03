@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
@@ -20,7 +20,7 @@ public class DonationDateFilter implements DonationFilter {
                 donation ->
                         donation.getDonationTime()
                                 .toLocalDate()
-                                .equals(LocalDate.parse(donationFilterDto.donationDate()))
+                                .equals(donationFilterDto.donationDate())
         );
     }
 }

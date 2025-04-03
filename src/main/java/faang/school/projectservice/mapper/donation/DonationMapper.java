@@ -11,6 +11,7 @@ import java.util.List;
 public interface DonationMapper {
 
     @Mapping(target = "campaign.id", source = "campaignId")
+    @Mapping(target = "userId", ignore = true)
     Donation toEntity(DonationDto dto);
 
     @Mapping(target = "campaignId", source = "campaign.id")

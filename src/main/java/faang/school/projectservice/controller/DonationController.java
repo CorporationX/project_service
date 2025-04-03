@@ -29,26 +29,24 @@ public class DonationController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/getByIdAndUserId")
+    @GetMapping("/getById/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<DonationDto> getDonation(
-            @RequestParam Long id,
-            @RequestParam Long userId
+            @PathVariable Long id
     ) {
         return ResponseEntity.ok(
-                donationService.getDonationByIdAndUserId(id, userId)
+                donationService.getDonationByIdAndUserId(id)
         );
     }
 
-    @GetMapping("/getAllByUserId/{userId}")
+    @GetMapping("/getAll")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<DonationDto>> getDonationsByUserId(
-            @PathVariable("userId") Long userId,
-            @ModelAttribute DonationFilterDto donationFilter
+            @RequestBody DonationFilterDto donationFilter
     ) {
         log.info("donationFilter: {}", donationFilter.toString());
         return ResponseEntity.ok(
-                donationService.getAllDonationsByUserId(userId, donationFilter)
+                donationService.getAllDonationsByUserId(donationFilter)
         );
     }
 

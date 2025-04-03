@@ -1,9 +1,8 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.model.Donation;
 
-import faang.school.projectservice.dto.client.Currency;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
@@ -20,7 +19,7 @@ public class DonationCurrencyFilter implements DonationFilter {
         return donations.filter(
                 donation ->
                         donation.getCurrency().equals(
-                                Currency.valueOf(donationFilterDto.currency())
+                                donationFilterDto.currency()
                         )
         );
     }
