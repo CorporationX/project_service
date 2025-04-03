@@ -3,6 +3,7 @@ package faang.scholl.projectsetvice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.multipartfile.CustomMultipartFile;
 import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.mapper.ResourceMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -51,7 +52,7 @@ public class ResourceServiceTest {
     @Mock private ResourceRepository resourceRepository;
     @Mock private TeamValidate teamValidate;
     @Mock private TeamMemberValidate teamMemberValidate;
-    @Mock private ResourceMapperImpl resourceMapper;
+    @Mock private ResourceMapper resourceMapper;
     @Mock private UserContext userContext;
     @Mock private TeamRepository teamRepository;
     @Mock private S3Service s3Service;

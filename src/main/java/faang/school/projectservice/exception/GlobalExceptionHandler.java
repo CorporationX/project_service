@@ -51,11 +51,14 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<Object> buildErrorResponse(Exception ex, HttpStatus status, String error) {
         return buildErrorResponse(cleanMessage(ex), status, error);
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException ex) {
         return ResponseEntity.badRequest()
                 .body("The size of the uploaded file exceeds the allowed limit %d");
     }
+
 
     private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status, String error) {
         Map<String, Object> body = new HashMap<>();
@@ -64,6 +67,8 @@ public class GlobalExceptionHandler {
         body.put("error", error);
         body.put("message", message);
         return new ResponseEntity<>(body, status);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
@@ -78,6 +83,8 @@ public class GlobalExceptionHandler {
             }
         }
         return message;
+    }
+
     @ExceptionHandler(IOException.class)
     public ResponseEntity<String> handleIOException(IOException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
