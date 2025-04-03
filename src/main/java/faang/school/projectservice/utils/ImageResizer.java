@@ -1,11 +1,10 @@
 package faang.school.projectservice.utils;
 
+import faang.school.projectservice.config.cover.ProjectCoverConfig;
 import faang.school.projectservice.exception.ImageProcessingException;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,13 +25,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ImageResizer {
     private final ImageProcessor imageProcessor;
-
-    @Value("${project-cover.dimensions.horizontal.max-width}")
-    private int maxWidth;
-    @Value("${project-cover.dimensions.horizontal.max-height}")
-    private int maxHeightHorizontal;
-    @Value("${project-cover.dimensions.square.max-side}")
-    private int maxHeightSquare;
+    private final ProjectCoverConfig projectCoverConfig;
 
     /**
      * Изменяет размер изображения согласно заданным ограничениям.
@@ -42,7 +35,7 @@ public class ImageResizer {
      * @throws ImageProcessingException если произошла ошибка обработки
      * @throws IllegalArgumentException если originalImage null или пустой
      */
-    public MultipartFile resizeImage(@NotNull MultipartFile originalImage) {
+    public MultipartFile resizeImage(MultipartFile originalImage) {
         BufferedImage sourceImage = imageProcessor.readImage(originalImage);
 
         int targetHeight = calculateNewHeight(sourceImage);
@@ -55,20 +48,16 @@ public class ImageResizer {
      * Определяет целевую высоту изображения на основе его пропорций.
      *
      * @param image изображение для анализа
-     * @return максимально допустимая высота:
-     * <ul>
-     *   <li>Для квадратных изображений - {@link #maxHeightSquare}</li>
-     *   <li>Для прямоугольных изображений - {@link #maxHeightHorizontal}</li>
-     * </ul>
+     * @return максимально допустимая высота
      */
     private int calculateNewHeight(BufferedImage image) {
         long height = image.getHeight();
         long width = image.getWidth();
 
         if (height == width) {
-            return maxHeightSquare;
+            return projectCoverConfig.getSquareSide();
         }
-        return maxHeightHorizontal;
+        return projectCoverConfig.getHorizontalHeight();
     }
 
     /**
@@ -83,7 +72,7 @@ public class ImageResizer {
                 originalImage,
                 Scalr.Method.QUALITY,
                 Scalr.Mode.FIT_EXACT,
-                maxWidth, targetHeight);
+                projectCoverConfig.getHorizontalWidth(), targetHeight);
     }
 
     /**

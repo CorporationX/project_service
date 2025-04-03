@@ -74,7 +74,7 @@ public class S3Service {
      * @param file загружаемый файл
      * @param key  уникальный ключ объекта в S3
      */
-    private void uploadToS3(MultipartFile file, String key) {
+    private void uploadToS3(@NotNull MultipartFile file, String key) {
         ObjectMetadata metadata = createS3Metadata(file);
 
         try (InputStream imageStream = file.getInputStream()) {
@@ -98,7 +98,7 @@ public class S3Service {
      *   <li>Настройки кэширования (30 дней)</li>
      * </ul>
      */
-    private ObjectMetadata createS3Metadata(MultipartFile file) {
+    private ObjectMetadata createS3Metadata(@NotNull MultipartFile file) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());

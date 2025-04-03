@@ -7,10 +7,10 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.utils.ImageResizer;
 import faang.school.projectservice.validation.ProjectCoverValidator;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -31,8 +31,9 @@ public class ProjectService {
      * @param projectId идентификатор проекта
      * @param image     файл изображения для обложки
      */
+    @Transactional
     public void uploadCover(long projectId,
-                            @NotNull MultipartFile image) {
+                            MultipartFile image) {
         projectCoverValidator.validateBasics(image);
 
         if (projectCoverValidator.isImageOversize(image)) {
@@ -49,7 +50,6 @@ public class ProjectService {
         if (oldKey != null) {
             s3Service.deleteImage(oldKey);
         }
-        projectRepository.save(project);
     }
 
     /**
@@ -58,6 +58,7 @@ public class ProjectService {
      * @param projectId идентификатор проекта
      * @throws DataValidationException если у проекта нет обложки
      */
+    @Transactional
     public void deleteCover(long projectId) {
         Project project = getProject(projectId);
         String key = project.getCoverImageId();
@@ -67,7 +68,6 @@ public class ProjectService {
         }
         s3Service.deleteImage(key);
         project.setCoverImageId(null);
-        projectRepository.save(project);
     }
 
     /**

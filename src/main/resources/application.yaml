@@ -51,9 +51,6 @@ services:
 
 project-cover:
     max-size-mb: 5
-    dimensions:
-      horizontal:
-        max-width: 1080
-        max-height: 566
-      square:
-        max-side: 1080
+    horizontal-width: 1080
+    horizontal-height: 566
+    square-side: 1080

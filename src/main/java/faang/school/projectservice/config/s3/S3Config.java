@@ -1,13 +1,16 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.config.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Objects;
 
 /**
  * Конфигурационный класс для настройки клиента Amazon S3.
@@ -16,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @RequiredArgsConstructor
-public class S3Configuration {
+public class S3Config {
 
     @Value("${services.s3.endpoint}")
     private String endpoint;
@@ -29,12 +32,16 @@ public class S3Configuration {
 
     @Bean
     public AmazonS3 amazonS3() {
+        Objects.requireNonNull(accessKey, "AWS access key must not be null");
+        Objects.requireNonNull(secretKey, "AWS secret key must not be null");
+        Objects.requireNonNull(endpoint, "AWS endpoint must not be null");
+
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(
-                        new AmazonS3ClientBuilder.EndpointConfiguration(endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(
                         new BasicAWSCredentials(accessKey, secretKey)))
-                .enablePathStyleAccess()
+                .withEndpointConfiguration(
+                        new AwsClientBuilder.EndpointConfiguration(endpoint, null))
+                .withPathStyleAccessEnabled(true)
                 .build();
     }
 }
