@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -51,9 +53,21 @@ public class DonationController {
     }
 
     private void validateDonation(DonationDto donationDto) {
-        if (donationDto == null || donationDto.amount() == null) {
-            log.error("Invalid donation");
-            throw new DataValidationException("Invalid donation");
+        if (donationDto == null) {
+            log.error("Donation must not be null");
+            throw new DataValidationException("Donation must not be null");
+        } else if (donationDto.amount() == null || donationDto.amount().compareTo(BigDecimal.ONE) < 0) {
+            log.error("Donation must have a valid amount");
+            throw new DataValidationException("Donation must have a valid amount");
+        } else if (donationDto.currency() == null) {
+            log.error("Donation must have a currency");
+            throw new DataValidationException("Donation must have a currency");
+        } else if (donationDto.donationTime() == null || !donationDto.donationTime().isBefore(LocalDateTime.now())) {
+            log.error("Donation must have a valid donation time");
+            throw new DataValidationException("Donation must have a valid donation time");
+        } else if (donationDto.campaignId() == null) {
+            log.error("Donation must have a campaign id");
+            throw new DataValidationException("Donation must have a campaign id");
         }
     }
 }

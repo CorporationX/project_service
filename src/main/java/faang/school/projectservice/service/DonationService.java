@@ -2,12 +2,12 @@ package faang.school.projectservice.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
@@ -16,7 +16,10 @@ import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapper;
+import faang.school.projectservice.model.Campaign;
+import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,7 @@ import org.springframework.validation.annotation.Validated;
 public class DonationService {
 
     private final DonationRepository donationRepository;
-    private final CampaignService campaignService;
+    private final CampaignRepository campaignRepository;
     private final PaymentServiceClient paymentServiceClient;
     private final UserServiceClient userServiceClient;
     private final DonationMapper donationMapper;
@@ -55,7 +58,10 @@ public class DonationService {
         userServiceClient.getUser(userId);
         return donationMapper.toDto(
                 donationRepository.findByIdAndUserId(id, userId)
-                        .orElseThrow(EntityNotFoundException::new)
+                        .orElseThrow(() -> {
+                            log.error("Donation with id {} not found", id);
+                            return new EntityNotFoundException(String.format("Donation with id %d not found", id));
+                        })
         );
     }
 
@@ -74,8 +80,14 @@ public class DonationService {
     }
 
     private void validateDonation(DonationDto donationDto) {
-        CampaignDto campaignDto = campaignService.getCampaignById(donationDto.campaignId());
-        if (!campaignDto.status().equals("ACTIVE")) {
+        Campaign campaign = campaignRepository.findById(donationDto.campaignId())
+                .orElseThrow(() -> {
+                    log.error("Campaign with id {} not found", donationDto.campaignId());
+                    return new EntityNotFoundException(
+                            String.format("Campaign with id %s not found", donationDto.campaignId())
+                    );
+                });
+        if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
             throw new DataValidationException("Campaign status is not ACTIVE");
         }
     }
@@ -83,7 +95,7 @@ public class DonationService {
     private Long sendPayment(BigDecimal amount, Currency currency) {
         PaymentResponse paymentResponse = paymentServiceClient.sendPayment(
                 new PaymentRequest(
-                        1L,
+                        UUID.randomUUID().getMostSignificantBits(),
                         amount,
                         currency
                 )

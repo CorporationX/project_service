@@ -12,7 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +76,7 @@ class DonationCurrencyFilterTest {
                 id,
                 8888L,
                 amount,
-                LocalDateTime.now(),
+                LocalDate.now().atTime(LocalTime.MIN),
                 campaign,
                 currency,
                 9999L

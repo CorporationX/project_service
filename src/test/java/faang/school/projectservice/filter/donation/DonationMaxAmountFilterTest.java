@@ -76,7 +76,7 @@ class DonationMaxAmountFilterTest {
                 id,
                 8888L,
                 amount,
-                LocalDateTime.now(),
+                null,
                 campaign,
                 currency,
                 9999L

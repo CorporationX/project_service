@@ -45,7 +45,7 @@ class DonationControllerTest {
 
 
     @Test
-    void createDonation() throws Exception {
+    void testCreateDonation() throws Exception {
 
         DonationDto donationDto = donationDtoList.get(0);
 
@@ -57,7 +57,7 @@ class DonationControllerTest {
     }
 
     @Test
-    void getDonation() throws Exception {
+    void testGetDonation() throws Exception {
 
         DonationDto donationDto = donationDtoList.get(1);
 
@@ -71,7 +71,7 @@ class DonationControllerTest {
     }
 
     @Test
-    void getDonationsByUserId() throws Exception {
+    void testGetAllDonations() throws Exception {
 
         DonationFilterDto donationFilterDto = new DonationFilterDto(
                 null,
@@ -82,7 +82,9 @@ class DonationControllerTest {
         when(donationService.getAllDonationsByUserId(donationFilterDto))
                 .thenReturn(donationDtoList);
 
-        mockMvc.perform(get("/donation/getAll/", donationFilterDto))
+        mockMvc.perform(get("/donation/getAll")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(donationFilterDto)))
                 .andExpect(status().isOk());
 //                .andExpect(content().json(objectMapper.writeValueAsString(donationDtoList)));
     }

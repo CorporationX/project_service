@@ -3,17 +3,20 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.donation.DonationCurrencyFilter;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapper;
+import faang.school.projectservice.model.Campaign;
+import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +42,7 @@ class DonationServiceTest {
     private DonationRepository donationRepository;
 
     @Mock
-    private CampaignService campaignService;
+    private CampaignRepository campaignRepository;
 
     @Mock
     private PaymentServiceClient paymentServiceClient;
@@ -67,7 +70,7 @@ class DonationServiceTest {
 
     private DonationDto donationDto;
     private Donation donation;
-    private CampaignDto campaignDto;
+    private Campaign campaign;
 
     @BeforeEach
     void setUp() {
@@ -83,29 +86,24 @@ class DonationServiceTest {
         donation.setAmount(BigDecimal.valueOf(100));
         donation.setCurrency(Currency.USD);
 
-        campaignDto = new CampaignDto(
-                123L,
-                "Campaign",
-                "Description",
-                "1000",
-                "500",
-                "ACTIVE",
-                1L,
-                "USD",
-                "2025-03-29",
-                1L,
-                "2025-03-29",
-                2L
-        );
+        campaign = new Campaign();
+        campaign.setId(123L);
+        campaign.setTitle("Campaign");
+        campaign.setDescription("Description");
+        campaign.setGoal(new BigDecimal("1000.00"));
+        campaign.setAmountRaised(new BigDecimal("500.00"));
+        campaign.setStatus(CampaignStatus.ACTIVE);
+        campaign.setCurrency(Currency.USD);
 
         donationFilters.add(donationCurrencyFilter);
     }
 
     @Test
     void testCreateDonationSuccess() {
+        UserDto userDto = new UserDto(2L, "elle two", "2l@mail.ru");
         when(userContext.getUserId()).thenReturn(2L);
-        when(campaignService.getCampaignById(123L)).thenReturn(campaignDto);
-        when(userServiceClient.getUser(2L)).thenReturn(null);
+        when(campaignRepository.findById(123L)).thenReturn(Optional.of(campaign));
+        when(userServiceClient.getUser(2L)).thenReturn(userDto);
         when(donationMapper.toEntity(donationDto)).thenReturn(donation);
         when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
                 .thenReturn(
@@ -127,8 +125,12 @@ class DonationServiceTest {
 
     @Test
     void testCreateDonationFailedCampaignStatus() {
-        campaignDto = new CampaignDto(123L, "Campaign", "Description", "1000", "500", "CLOSED", 1L, "USD", "2025-03-29", 1L, "2025-03-29", 2L);
-        when(campaignService.getCampaignById(123L)).thenReturn(campaignDto);
+        campaign = new Campaign();
+        campaign.setId(123L);
+        campaign.setTitle("Campaign title");
+        campaign.setCurrency(Currency.USD);
+        campaign.setStatus(CampaignStatus.COMPLETED);
+        when(campaignRepository.findById(123L)).thenReturn(Optional.of(campaign));
 
         assertThrows(DataValidationException.class, () -> donationService.createDonation(donationDto));
         verify(donationRepository, never()).save(any());
@@ -150,7 +152,6 @@ class DonationServiceTest {
     @Test
     void testGetDonationByIdAndUserIdNotFound() {
         when(userContext.getUserId()).thenReturn(2L);
-        when(userServiceClient.getUser(2L)).thenReturn(null);
         when(donationRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> donationService.getDonationByIdAndUserId(1L));
