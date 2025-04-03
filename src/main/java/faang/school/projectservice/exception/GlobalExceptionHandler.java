@@ -77,4 +77,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError().body(ex.getMessage());
     }
 
+    @ExceptionHandler(CoverMaxSizeException.class)
+    public ResponseEntity<String> handleCoverMaxSizeException(CoverMaxSizeException ex) {
+        log.error("CoverMaxSizeException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }

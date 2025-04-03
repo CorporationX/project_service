@@ -25,6 +25,13 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+file:
+  cover-max-size: 5242880
+
 server:
   port: 8082
 

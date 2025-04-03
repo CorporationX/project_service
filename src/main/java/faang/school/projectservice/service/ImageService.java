@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.exception.CoverMaxSizeException;
 import faang.school.projectservice.exception.ExceptionMessage;
 import faang.school.projectservice.exception.InvalidFileException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +37,12 @@ public class ImageService {
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
 
+    @Value("${file.cover-max-size}")
+    private long coverMaxFileSIze;
+
     public ResourceDto saveProjectCover(long projectId, MultipartFile multipartFile) {
+        checkCoverMaxSize(multipartFile.getSize());
+
         Project project = projectService.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(ExceptionMessage.PROJECT_NOT_FOUND, projectId));
         byte[] image = resizeImage(multipartFile);
@@ -127,6 +134,16 @@ public class ImageService {
         }
 
         return originalImage;
+    }
+
+    private void checkCoverMaxSize(long size) {
+        if (size > coverMaxFileSIze) {
+            throw new CoverMaxSizeException(ExceptionMessage.COVER_MAX_SIZE, toMegabytes(coverMaxFileSIze));
+        }
+    }
+
+    private long toMegabytes(long bytes) {
+        return bytes / (1024 * 1024);
     }
 
 }

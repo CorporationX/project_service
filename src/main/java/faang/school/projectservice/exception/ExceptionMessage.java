@@ -17,7 +17,9 @@ public enum ExceptionMessage {
     UNABLE_READ_FILE("Error while reading file bytes"),
     IMAGE_PROCESSING_WRITE("Image processing error while saving"),
     IMAGE_PROCESSING_READ("Image processing error while reading"),
-    S3_UPLOAD("Failed to upload file to S3");
+    S3_UPLOAD("Failed to upload file to S3"),
+    COVER_MAX_SIZE("The size of the cover for the project should not exceed %d megabytes."),
+    ;
 
 
     private final String message;
