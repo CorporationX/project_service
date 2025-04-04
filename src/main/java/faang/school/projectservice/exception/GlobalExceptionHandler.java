@@ -38,6 +38,16 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, "Not Found");
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "ForbiddenException");
+    }
+
+    @ExceptionHandler(DuplicateTitleException.class)
+    public ResponseEntity<Object> handleDuplicateTitleException(DuplicateTitleException ex) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, "DuplicateTitleException");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
