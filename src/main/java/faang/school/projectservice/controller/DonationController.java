@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.donation.DonationCreateRequest;
 import faang.school.projectservice.dto.donation.DonationResponse;
+import faang.school.projectservice.dto.donation.SearchDonationDto;
 import faang.school.projectservice.service.donation.DonationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,5 +44,13 @@ public class DonationController {
             @Min(1) @RequestHeader("x-user-id") long userId
     ) {
         return donationService.getDonation(donationId, userId);
+    }
+
+    @GetMapping("/donations")
+    public List<DonationResponse> getDonations(
+            @Valid @RequestBody @NotNull SearchDonationDto searchDonationDto,
+            @Min(1) @RequestHeader("x-user-id") long userId
+    ) {
+        return donationService.getDonations(userId, searchDonationDto);
     }
 }

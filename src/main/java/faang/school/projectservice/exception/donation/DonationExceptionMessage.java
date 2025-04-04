@@ -8,4 +8,5 @@ import lombok.RequiredArgsConstructor;
 public class DonationExceptionMessage {
 
     public static final String NOT_FOUND = "Donation not found";
+    public static final String EXCEED_AMOUNT = "The donation amount exceeds the amount required to achieve the goal";
 }

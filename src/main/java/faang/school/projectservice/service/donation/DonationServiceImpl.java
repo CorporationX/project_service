@@ -6,16 +6,19 @@ import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationCreateRequest;
 import faang.school.projectservice.dto.donation.DonationResponse;
+import faang.school.projectservice.dto.donation.SearchDonationDto;
 import faang.school.projectservice.exception.campaign.CampaignCanceledException;
 import faang.school.projectservice.exception.campaign.CampaignCompletedException;
 import faang.school.projectservice.exception.campaign.CampaignExceptionMessage;
 import faang.school.projectservice.exception.campaign.UnknownCampaignStatusException;
 import faang.school.projectservice.exception.donation.DonationExceptionMessage;
 import faang.school.projectservice.exception.donation.DonationNotFoundException;
+import faang.school.projectservice.exception.donation.ExceedDonationAmountException;
 import faang.school.projectservice.exception.payment.PaymentExceptionMessage;
 import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserExceptionMessage;
 import faang.school.projectservice.exception.user.UserNotFoundException;
+import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.donation.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -29,7 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -44,6 +50,7 @@ public class DonationServiceImpl implements DonationService {
     private final CampaignService campaignService;
     private final PaymentServiceClient paymentServiceClient;
     private final UserServiceClient userServiceClient;
+    private final List<DonationFilter> donationFilters;
 
     @Override
     @Transactional
@@ -53,6 +60,8 @@ public class DonationServiceImpl implements DonationService {
 
         Campaign campaign = campaignService.findById(donationCreateRequest.getCampaignId());
         validationCampaignStatus(campaign);
+
+        validationDonationAmount(donationCreateRequest, campaign);
 
         PaymentResponse paymentResponse = sendPayment(donationCreateRequest, campaign);
         log.info("\nPayment Status: {}\nPayment Number: {}\nMessage: {}",
@@ -82,6 +91,25 @@ public class DonationServiceImpl implements DonationService {
         return donationMapper.toResponse(donation);
     }
 
+    @Override
+    public List<DonationResponse> getDonations(long userId, SearchDonationDto searchDonationDto) {
+        //todo: метод валидации будет работать только после появления эндпоинта в UserService
+        validationUserId(userId);
+
+        Stream<Donation> filteredDonations = donationRepository.findAllByUserId(userId).stream();
+
+        for (DonationFilter donationFilter : donationFilters) {
+            if (donationFilter.isApplicable(searchDonationDto)) {
+                filteredDonations = donationFilter.apply(filteredDonations, searchDonationDto);
+            }
+        }
+
+        return filteredDonations
+                .map(donationMapper::toResponse)
+                .sorted(Comparator.comparing(DonationResponse::getDonationTime).reversed())
+                .toList();
+    }
+
     private void validationUserId(long userId) {
         try {
             userServiceClient.getUser(userId);
@@ -104,6 +132,12 @@ public class DonationServiceImpl implements DonationService {
                 throw new CampaignCanceledException(CampaignExceptionMessage.getCanceled(id));
             default:
                 throw new UnknownCampaignStatusException(CampaignExceptionMessage.getUnknownStatus(status));
+        }
+    }
+
+    private static void validationDonationAmount(DonationCreateRequest donationCreateRequest, Campaign campaign) {
+        if (donationCreateRequest.getAmount().compareTo(campaign.getGoal().subtract(campaign.getAmountRaised())) > 0) {
+            throw new ExceedDonationAmountException(DonationExceptionMessage.EXCEED_AMOUNT);
         }
     }
 

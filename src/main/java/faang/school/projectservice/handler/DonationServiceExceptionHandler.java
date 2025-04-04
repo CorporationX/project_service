@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.campaign.CampaignCompletedException
 import faang.school.projectservice.exception.campaign.CampaignNotFoundException;
 import faang.school.projectservice.exception.campaign.UnknownCampaignStatusException;
 import faang.school.projectservice.exception.donation.DonationNotFoundException;
+import faang.school.projectservice.exception.donation.ExceedDonationAmountException;
 import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,17 @@ public class DonationServiceExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnknownCampaignStatusException(
             UnknownCampaignStatusException exception,
+            WebRequest request
+    ) {
+        registerException(exception);
+
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+    }
+
+    @ExceptionHandler(ExceedDonationAmountException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleExceedDonationAmountException(
+            ExceedDonationAmountException exception,
             WebRequest request
     ) {
         registerException(exception);

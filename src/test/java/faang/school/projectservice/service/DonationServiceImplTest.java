@@ -7,16 +7,21 @@ import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationCreateRequest;
 import faang.school.projectservice.dto.donation.DonationResponse;
+import faang.school.projectservice.dto.donation.SearchDonationDto;
 import faang.school.projectservice.exception.campaign.CampaignCanceledException;
 import faang.school.projectservice.exception.campaign.CampaignCompletedException;
 import faang.school.projectservice.exception.campaign.CampaignExceptionMessage;
 import faang.school.projectservice.exception.campaign.CampaignNotFoundException;
 import faang.school.projectservice.exception.donation.DonationExceptionMessage;
 import faang.school.projectservice.exception.donation.DonationNotFoundException;
+import faang.school.projectservice.exception.donation.ExceedDonationAmountException;
 import faang.school.projectservice.exception.payment.PaymentExceptionMessage;
 import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserExceptionMessage;
 import faang.school.projectservice.exception.user.UserNotFoundException;
+import faang.school.projectservice.filter.donation.DonationFilter;
+import faang.school.projectservice.filter.donation.TestDonationCreationDateFilter;
+import faang.school.projectservice.filter.donation.TestDonationMinAmountFilter;
 import faang.school.projectservice.mapper.campaign.CampaignMapperImpl;
 import faang.school.projectservice.mapper.donation.DonationMapperImpl;
 import faang.school.projectservice.model.Campaign;
@@ -32,18 +37,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +69,9 @@ public class DonationServiceImplTest {
     private static final String PAYMENT_SUCCESSFUL_MESSAGE = "Dear friend! Thank you for your purchase! " +
             "Your payment on 1,00 USD was accepted.";
     private static final String PAYMENT_FAILS_MESSAGE = "payment is failed...";
+
+    private final DonationFilter donationCreationDateFilter = new TestDonationCreationDateFilter();
+    private final DonationFilter donationMinAmountFilter = new TestDonationMinAmountFilter();
 
     @Mock
     private DonationRepository donationRepository;
@@ -84,7 +94,6 @@ public class DonationServiceImplTest {
     @Captor
     private ArgumentCaptor<Donation> captor;
 
-    @InjectMocks
     private DonationServiceImpl donationService;
 
     private DonationCreateRequest donationCreateRequest;
@@ -96,6 +105,8 @@ public class DonationServiceImplTest {
         setUpCampaign();
 
         ReflectionTestUtils.setField(donationMapper, "campaignMapper", campaignMapper);
+
+        setUpDonationService();
     }
 
     @Test
@@ -148,6 +159,19 @@ public class DonationServiceImplTest {
                 () -> donationService.createDonation(donationCreateRequest));
 
         assertEquals(CampaignExceptionMessage.getCanceled(CAMPAIGN_ID), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("createDonation - exceeded donation amount")
+    public void testCreateDonationWithExceededAmount() {
+        donationCreateRequest.setAmount(BigDecimal.valueOf(100L));
+        when(campaignService.findById(CAMPAIGN_ID))
+                .thenReturn(campaign);
+
+        Exception exception = assertThrows(ExceedDonationAmountException.class,
+                () -> donationService.createDonation(donationCreateRequest));
+
+        assertEquals(DonationExceptionMessage.EXCEED_AMOUNT, exception.getMessage());
     }
 
     @Test
@@ -222,6 +246,52 @@ public class DonationServiceImplTest {
         assertEquals(DONATION_ID, donationResponse.getId());
     }
 
+    @Test
+    @DisplayName("getDonations - without suitable donation")
+    public void testGetDonationsNoSuitableDonation() {
+        Donation firstDonation = Donation.builder()
+                .donationTime(LocalDateTime.now().minusDays(1L))
+                .amount(BigDecimal.valueOf(25L))
+                .build();
+        Donation secondDonation = Donation.builder()
+                .donationTime(LocalDateTime.now().minusDays(1L))
+                .amount(BigDecimal.valueOf(45L))
+                .build();
+        when(donationRepository.findAllByUserId(USER_ID))
+                .thenReturn(List.of(firstDonation, secondDonation));
+
+        List<DonationResponse> result = donationService.getDonations(
+                USER_ID,
+                new SearchDonationDto(null, null, null, null)
+        );
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("getDonations - success")
+    public void testGetDonationsSuccess() {
+        Donation firstDonation = Donation.builder()
+                .donationTime(LocalDateTime.now())
+                .amount(BigDecimal.valueOf(50L))
+                .build();
+        Donation secondDonation = Donation.builder()
+                .donationTime(LocalDateTime.now().minusDays(1L))
+                .amount(BigDecimal.valueOf(45L))
+                .build();
+        when(donationRepository.findAllByUserId(USER_ID))
+                .thenReturn(List.of(firstDonation, secondDonation));
+
+        List<DonationResponse> result = donationService.getDonations(
+                USER_ID,
+                new SearchDonationDto(null, null, null, null)
+        );
+
+        assertEquals(1, result.size());
+        assertEquals(LocalDate.now(), result.get(0).getDonationTime().toLocalDate());
+        assertTrue(result.get(0).getAmount().compareTo(BigDecimal.valueOf(50L)) >= 0);
+    }
+
     private void setUpDonationRequest() {
         donationCreateRequest = DonationCreateRequest.builder()
                 .amount(BigDecimal.ONE)
@@ -243,6 +313,17 @@ public class DonationServiceImplTest {
                 .createdBy(USER_ID)
                 .currency(Currency.USD)
                 .build();
+    }
+
+    private void setUpDonationService() {
+        donationService = new DonationServiceImpl(
+                donationRepository,
+                donationMapper,
+                campaignService,
+                paymentServiceClient,
+                userServiceClient,
+                List.of(donationCreationDateFilter, donationMinAmountFilter)
+        );
     }
 
     private static PaymentResponse createPaymentResponse() {
