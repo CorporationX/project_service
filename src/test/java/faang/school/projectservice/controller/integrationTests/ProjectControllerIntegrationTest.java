@@ -26,7 +26,9 @@ import static faang.school.projectservice.constant.ImageTestConstants.IMAGE_MOCK
 import static faang.school.projectservice.constant.ProjectTestConstants.NOT_OWNER_ID;
 import static faang.school.projectservice.constant.ProjectTestConstants.OWNER_ID;
 import static faang.school.projectservice.constant.ProjectTestConstants.PROJECT_COVER_IMAGE_ID;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
+@Sql(scripts = {"/clear.sql"}, executionPhase = BEFORE_TEST_METHOD)
 public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
