@@ -20,7 +20,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V013_create_initiative.sql
   - include:
-        file: db/changelog/changeset/project_V014_resource.sql
+      file: db/changelog/changeset/project_V014_resource.sql
   - include:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V019_alter_internship_add_role.sql
   - include:
       file: db/changelog/changeset/project_V020_alter_candidate_add_username.sql
+  - include:
+      file: db/changelog/changeset/project_V021_alter_campaign_add_isDeleted.sql
