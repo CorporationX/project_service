@@ -26,9 +26,10 @@ import static faang.school.projectservice.constant.ImageTestConstants.IMAGE_MOCK
 import static faang.school.projectservice.constant.ProjectTestConstants.NOT_OWNER_ID;
 import static faang.school.projectservice.constant.ProjectTestConstants.OWNER_ID;
 import static faang.school.projectservice.constant.ProjectTestConstants.PROJECT_COVER_IMAGE_ID;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
-@Sql(scripts = {"/clear.sql"}, executionPhase = BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:db/changelog/changeset/project_V019_insert_project.sql"},
+        executionPhase = AFTER_TEST_METHOD)
 public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -220,7 +221,6 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql("classpath:db/changelog/changeset/project_V019_insert_project.sql")
     void deleteProjectCover_shouldBeCompletedSuccessfully() throws Exception {
         addTestProjectCover();
 
