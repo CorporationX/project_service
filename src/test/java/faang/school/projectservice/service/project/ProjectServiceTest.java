@@ -2,23 +2,22 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.presentation.PresentationRequestDto;
-import faang.school.projectservice.dto.presentation.PresentationFilterDto;
-import faang.school.projectservice.dto.presentation.PresentationUpdateDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.NameSpecification;
 import faang.school.projectservice.filter.SpecificationFilter;
 import faang.school.projectservice.filter.StatusSpecification;
-import faang.school.projectservice.mapper.PresentationMapperImpl;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.publisher.ProjectProfileViewPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.project.ProjectServiceImpl;
 import faang.school.projectservice.service.presentation.PresentationService;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.PresentationValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,14 +36,14 @@ public class ProjectServiceTest {
     private ProjectRepository projectRepository;
     private ProjectServiceImpl projectService;
     private ArgumentCaptor<Project> projectCaptor;
-    private PresentationRequestDto projectRequest;
+    private ProjectCreateRequestDto projectRequest;
     private ProjectProfileViewPublisher projectProfileViewPublisher;
 
     @BeforeEach
     void init() {
 
         projectRepository = Mockito.mock(ProjectRepository.class);
-        PresentationMapperImpl projectMapper = Mockito.spy(PresentationMapperImpl.class);
+        ProjectMapperImpl projectMapper = Mockito.spy(ProjectMapperImpl.class);
         UserContext userContext = Mockito.spy(UserContext.class);
         NameSpecification nameSpecification = Mockito.spy(NameSpecification.class);
         StatusSpecification statusSpecification = Mockito.spy(StatusSpecification.class);
@@ -52,15 +51,15 @@ public class ProjectServiceTest {
         S3Service s3client = Mockito.mock(S3Service.class);
         PresentationService presentationService = Mockito.mock(PresentationService.class);
         UserServiceClient userServiceClient = Mockito.mock(UserServiceClient.class);
-        PresentationValidator presentationValidator = Mockito.mock(PresentationValidator.class);
+        ProjectValidator projectValidator = Mockito.mock(ProjectValidator.class);
 
         projectService = new ProjectServiceImpl(
                 projectRepository, projectMapper, specificationFilters, projectProfileViewPublisher, userContext,
-                s3client, presentationService, userServiceClient, presentationValidator);
+                s3client, presentationService, userServiceClient, projectValidator);
 
         projectCaptor = ArgumentCaptor.forClass(Project.class);
 
-        projectRequest = PresentationRequestDto.builder()
+        projectRequest = ProjectCreateRequestDto.builder()
                 .name("excellent project")
                 .ownerId(1L)
                 .description("some description")
@@ -74,13 +73,13 @@ public class ProjectServiceTest {
 
         Mockito.when(projectRepository.existsByOwnerIdAndName(ownerId, name)).thenReturn(true);
 
-        PresentationRequestDto presentationRequestDto = PresentationRequestDto.builder()
+        ProjectCreateRequestDto projectCreateRequestDto = ProjectCreateRequestDto.builder()
                 .ownerId(ownerId)
                 .name(name)
                 .build();
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> projectService.save(presentationRequestDto));
+                () -> projectService.save(projectCreateRequestDto));
     }
 
     @Test
@@ -100,7 +99,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testFindAllByFilterSuccess() {
-        PresentationFilterDto filterDto = PresentationFilterDto.builder()
+        ProjectFilterDto filterDto = ProjectFilterDto.builder()
                 .name("super")
                 .status(ProjectStatus.CREATED)
                 .build();
@@ -114,7 +113,7 @@ public class ProjectServiceTest {
     @Test
     public void testUpdateWhenProjectIdIsNotExistsFailed() {
         Mockito.when(projectRepository.findById(1L)).thenThrow(new EntityNotFoundException(""));
-        PresentationUpdateDto request = PresentationUpdateDto.builder()
+        ProjectUpdateRequestDto request = ProjectUpdateRequestDto.builder()
                 .status(ProjectStatus.CREATED)
                 .description("description")
                 .build();
@@ -129,7 +128,7 @@ public class ProjectServiceTest {
                 .id(1L)
                 .build();
         Mockito.when(projectRepository.findById(1L)).thenReturn(Optional.of(responseEntity));
-        PresentationUpdateDto projectUpdateRequest = PresentationUpdateDto.builder()
+        ProjectUpdateRequestDto projectUpdateRequest = ProjectUpdateRequestDto.builder()
                 .description("updated description")
                 .status(ProjectStatus.COMPLETED)
                 .build();

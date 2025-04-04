@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.presentation.PresentationRequestDto;
-import faang.school.projectservice.dto.presentation.PresentationFilterDto;
-import faang.school.projectservice.dto.presentation.PresentationUpdateDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.service.project.ProjectService;
@@ -33,7 +33,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectResponseDto save(@RequestBody PresentationRequestDto projectDto) {
+    public ProjectResponseDto save(@RequestBody ProjectCreateRequestDto projectDto) {
         log.info("#ProjectContoller: create request for project:[{}] has been received", projectDto);
         return projectService.save(projectDto);
     }
@@ -44,13 +44,13 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ProjectResponseDto update(@PathVariable Long id, @RequestBody PresentationUpdateDto projectDto) {
+    public ProjectResponseDto update(@PathVariable Long id, @RequestBody ProjectUpdateRequestDto projectDto) {
         log.info("#ProjectContoller: request for updating project:[{}] with id: {} has been received", projectDto, id);
         return projectService.update(id, projectDto);
     }
 
     @GetMapping("/search")
-    public List<ProjectResponseDto> findAllByFilter(PresentationFilterDto filter) {
+    public List<ProjectResponseDto> findAllByFilter(ProjectFilterDto filter) {
         log.info("#ProjectController: request to find all projects matching the filter:[{}] has been received", filter);
         return projectService.findAllByFilter(filter);
     }

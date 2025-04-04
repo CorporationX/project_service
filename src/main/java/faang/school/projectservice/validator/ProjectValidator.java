@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class PresentationValidator {
+public class ProjectValidator {
 
     public void validateUserInProject(Long userId, Project project) {
         if (!isUserParticipatedInProject(userId, project)) {

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.presentation.PresentationFilterDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 public class StatusSpecification implements SpecificationFilter {
 
     @Override
-    public boolean isApplicable(PresentationFilterDto filters) {
+    public boolean isApplicable(ProjectFilterDto filters) {
         return filters.name() != null;
     }
 
     @Override
-    public Specification<Project> apply(PresentationFilterDto filters) {
+    public Specification<Project> apply(ProjectFilterDto filters) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), filters.status()));
     }

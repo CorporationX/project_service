@@ -2,9 +2,9 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.presentation.PresentationRequestDto;
-import faang.school.projectservice.dto.presentation.PresentationFilterDto;
-import faang.school.projectservice.dto.presentation.PresentationUpdateDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
@@ -12,7 +12,7 @@ import faang.school.projectservice.dto.project.ProjectViewProfileEvent;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.SpecificationFilter;
-import faang.school.projectservice.mapper.PresentationMapper;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Resource;
@@ -21,7 +21,7 @@ import faang.school.projectservice.publisher.ProjectProfileViewPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.presentation.PresentationService;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.PresentationValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,38 +43,38 @@ public class ProjectServiceImpl implements ProjectService {
     public static final String PDF_FILE_NAME = "presentation.pdf";
 
     private final ProjectRepository projectRepository;
-    private final PresentationMapper presentationMapper;
+    private final ProjectMapper projectMapper;
     private final List<SpecificationFilter> specificationFilters;
     private final ProjectProfileViewPublisher projectProfileViewPublisher;
     private final UserContext userContext;
     private final S3Service s3client;
     private final PresentationService presentationService;
     private final UserServiceClient userServiceClient;
-    private final PresentationValidator presentationValidator;
+    private final ProjectValidator projectValidator;
 
     @Override
-    public ProjectResponseDto save(PresentationRequestDto projectDto) {
+    public ProjectResponseDto save(ProjectCreateRequestDto projectDto) {
         validateProject(projectDto);
-        Project projectForSaving = presentationMapper.toProjectEntity(projectDto);
+        Project projectForSaving = projectMapper.toProjectEntity(projectDto);
         projectForSaving.setStatus(ProjectStatus.CREATED);
         Project projectEntity = projectRepository.save(projectForSaving);
-        return presentationMapper.toProjectResponseDto(projectEntity);
+        return projectMapper.toProjectResponseDto(projectEntity);
     }
 
     @Override
-    public List<ProjectResponseDto> findAllByFilter(PresentationFilterDto filter) {
+    public List<ProjectResponseDto> findAllByFilter(ProjectFilterDto filter) {
         Specification<Project> spec = getProjectSpecification(filter);
-        return presentationMapper.toProjectResponseDtos(projectRepository.findAll(spec));
+        return projectMapper.toProjectResponseDtos(projectRepository.findAll(spec));
     }
 
     @Override
-    public ProjectResponseDto update(Long id, PresentationUpdateDto projectDto) {
+    public ProjectResponseDto update(Long id, ProjectUpdateRequestDto projectDto) {
         Project project = projectRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(String.format("There is no project with id:%d in database", id)));
-        presentationMapper.update(projectDto, project);
+        projectMapper.update(projectDto, project);
         project.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(project);
-        return presentationMapper.toProjectResponseDto(project);
+        return projectMapper.toProjectResponseDto(project);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("#ProjectServiceImpl: project with id:%d has not been found", projectId)));
-        ProjectResponseDto projectResponseDto = presentationMapper.toProjectResponseDto(project);
+        ProjectResponseDto projectResponseDto = projectMapper.toProjectResponseDto(project);
         projectProfileViewPublisher.publish(new ProjectViewProfileEvent(
                 projectId, userContext.getUserId(), LocalDateTime.now()));
         return projectResponseDto;
@@ -91,7 +91,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponseDto> findAll() {
         List<Project> projects = projectRepository.findAll();
-        return presentationMapper.toProjectResponseDtos(projects);
+        return projectMapper.toProjectResponseDtos(projects);
     }
 
     @Transactional
@@ -100,10 +100,10 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = getProjectById(projectId);
         final long userId = getUserId();
 
-        presentationValidator.validateUserIsOwner(userId, project);
+        projectValidator.validateUserIsOwner(userId, project);
 
         UserDto owner = userServiceClient.getUser(userId);
-        ProjectPresentationDto presentationDto = presentationMapper.toProjectPresentationDto(project, owner);
+        ProjectPresentationDto presentationDto = projectMapper.toProjectPresentationDto(project, owner);
 
         String presentationFileKey = String.format("%s_%s_%s_%d",
                 project.getName(), project.getId(), PDF_FILE_NAME, System.currentTimeMillis());
@@ -166,7 +166,7 @@ public class ProjectServiceImpl implements ProjectService {
         return userContext.getUserId();
     }
 
-    private void validateProject(PresentationRequestDto projectDto) {
+    private void validateProject(ProjectCreateRequestDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(projectDto.ownerId(), projectDto.name())) {
             throw new IllegalArgumentException(String.format(
                     "#Validation error: the same user with id:%d cannot create projects with the same name: %s",
@@ -174,7 +174,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private Specification<Project> getProjectSpecification(PresentationFilterDto filter) {
+    private Specification<Project> getProjectSpecification(ProjectFilterDto filter) {
         return specificationFilters.stream()
                 .filter(spec -> spec.isApplicable(filter))
                 .map(spec -> spec.apply(filter))

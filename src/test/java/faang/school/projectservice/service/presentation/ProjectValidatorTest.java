@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.validator.PresentationValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class PresentationValidatorTest {
+class ProjectValidatorTest {
     @Mock
     private ProjectService projectServiceMock;
     @Mock
     ProjectRepository projectRepositoryMock;
     @InjectMocks
-    PresentationValidator presentationValidator;
+    ProjectValidator projectValidator;
     private Project project;
 
     @BeforeEach
@@ -75,9 +75,9 @@ class PresentationValidatorTest {
         Long userId = 1L;
         Long userNotInProjectId = 11L;
 
-        presentationValidator.validateUserInProject(userId, project);
+        projectValidator.validateUserInProject(userId, project);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> presentationValidator.validateUserInProject(userNotInProjectId, project));
+                () -> projectValidator.validateUserInProject(userNotInProjectId, project));
     }
 
     @Test
@@ -85,9 +85,9 @@ class PresentationValidatorTest {
     void testIsUserInProject() {
         long userId = 1L;
 
-        Assertions.assertTrue(presentationValidator.isUserParticipatedInProject(userId, project));
+        Assertions.assertTrue(projectValidator.isUserParticipatedInProject(userId, project));
         userId = 33L;
-        Assertions.assertFalse(presentationValidator.isUserParticipatedInProject(userId, project));
+        Assertions.assertFalse(projectValidator.isUserParticipatedInProject(userId, project));
     }
 
     @Test
@@ -100,7 +100,7 @@ class PresentationValidatorTest {
                 .visibility(ProjectVisibility.PRIVATE)
                 .build();
 
-        Assertions.assertTrue(presentationValidator.isProjectPublic(project));
-        Assertions.assertFalse(presentationValidator.isProjectPublic(privateProject));
+        Assertions.assertTrue(projectValidator.isProjectPublic(project));
+        Assertions.assertFalse(projectValidator.isProjectPublic(privateProject));
     }
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.presentation.PresentationRequestDto;
-import faang.school.projectservice.dto.presentation.PresentationUpdateDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
@@ -19,15 +19,15 @@ import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class PresentationMapper {
+public abstract class ProjectMapper {
 
-    public abstract Project toProjectEntity(PresentationRequestDto dto);
+    public abstract Project toProjectEntity(ProjectCreateRequestDto dto);
 
     public abstract ProjectResponseDto toProjectResponseDto(Project entity);
 
     public abstract List<ProjectResponseDto> toProjectResponseDtos(List<Project> entities);
 
-    public abstract void update(PresentationUpdateDto presentationUpdateDto, @MappingTarget Project project);
+    public abstract void update(ProjectUpdateRequestDto projectUpdateRequestDto, @MappingTarget Project project);
 
     @Mapping(target = "title", source = "project.name")
     @Mapping(target = "createdDate", source = "project.createdAt")
@@ -51,7 +51,7 @@ public abstract class PresentationMapper {
     protected List<List<ProjectTeamMemberDto>> mapTeams(Project project) {
         if (project != null) {
             List<Team> teams = project.getTeams();
-            return teams.stream().map(PresentationMapper::getListRoles).toList();
+            return teams.stream().map(ProjectMapper::getListRoles).toList();
         }
         return Collections.emptyList();
     }

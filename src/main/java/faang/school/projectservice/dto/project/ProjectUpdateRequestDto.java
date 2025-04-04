@@ -1,10 +1,10 @@
-package faang.school.projectservice.dto.presentation;
+package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.Builder;
 
 @Builder
-public record PresentationUpdateDto(
+public record ProjectUpdateRequestDto(
         ProjectStatus status,
         String description
 ) {

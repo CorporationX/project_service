@@ -5,10 +5,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.resource.ResourceServiceImpl;
-import faang.school.projectservice.service.resource.ResourceValidator;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
-import faang.school.projectservice.validator.PresentationValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +29,7 @@ class ResourceServiceImplTest {
     @Mock
     private ProjectService projectServiceMock;
     @Mock
-    private PresentationValidator presentationValidatorMock;
+    private ProjectValidator projectValidatorMock;
     @Mock
     private ResourceValidator resourceValidatorMock;
     @Spy

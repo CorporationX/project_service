@@ -10,7 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.PresentationValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,14 +31,14 @@ public class ResourceServiceImpl implements ResourceService {
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
     private final ResourceValidator resourceValidator;
-    private final PresentationValidator presentationValidator;
+    private final ProjectValidator projectValidator;
     private final ProjectService projectService;
 
     @Transactional
     @Override
     public ResourceResponseDto addResource(Long userId, Long projectId, MultipartFile file) {
         Project project = projectService.getProject(projectId);
-        presentationValidator.validateUserInProject(userId, project);
+        projectValidator.validateUserInProject(userId, project);
         resourceValidator.validateResourcesOversize(project);
         TeamMember teamMember = getTeamMember(userId);
         String folder = FOLDER_PREFIX + projectId;
@@ -59,7 +59,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public void deleteResource(Long userId, Long resourceId) {
         Resource resource = getResourceById(resourceId);
-        presentationValidator.validateUserInProject(userId, resource.getProject());
+        projectValidator.validateUserInProject(userId, resource.getProject());
         resourceRepository.deleteById(resourceId);
         String key = resource.getKey();
         s3Service.deleteFile(key);
