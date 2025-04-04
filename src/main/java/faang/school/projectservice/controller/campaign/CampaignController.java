@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/campaign/projects/{projectId}")
+@RequestMapping("api/v1/campaign/projects")
 @RequiredArgsConstructor
 public class CampaignController {
 
     private final CampaignService campaignService;
 
-    @PostMapping("/{creatorId}")
+    @PostMapping("/{projectId}")
     public ResponseEntity<CampaignDto> create(
             @RequestBody @Valid CampaignDto campaignDto,
             @PathVariable("projectId") long projectId,
-            @PathVariable("creatorId") long creatorId
+            @RequestParam("creatorId") long creatorId
     ) {
         campaignDto.setProjectId(projectId);
         campaignDto.setCreatedBy(creatorId);
@@ -36,23 +36,23 @@ public class CampaignController {
         return ResponseEntity.created((location)).body(createdCampaign);
     }
 
-    @PutMapping("/campaigns/{campaignId}/{updaterId}")
+    @PutMapping("/{projectId}/campaigns/{campaignId}")
     public ResponseEntity<CampaignDto> update(
             @RequestBody CampaignDto campaignDto,
             @PathVariable("projectId") long projectId,
             @PathVariable("campaignId") long campaignId,
-            @PathVariable("updaterId") long updaterId
+            @RequestParam("updaterId") long updaterId
     ) {
         CampaignValidator.checkForbiddenValue(campaignDto, updaterId);
         CampaignValidator.checkPermittedValue(campaignDto, updaterId);
         return ResponseEntity.ok(campaignService.update(campaignDto, projectId, campaignId, updaterId));
     }
 
-    @DeleteMapping("/campaigns/{campaignId}/{deleterId}")
+    @DeleteMapping("/{projectId}/campaigns/{campaignId}")
     public ResponseEntity<Map<String, String>> softDelete(
             @PathVariable("projectId") long projectId,
             @PathVariable("campaignId") long campaignId,
-            @PathVariable("deleterId") long deleterId
+            @RequestParam("deleterId") long deleterId
     ) {
         campaignService.softDelete(projectId, campaignId, deleterId);
 
@@ -63,7 +63,7 @@ public class CampaignController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/campaigns/{campaignId}")
+    @GetMapping("/{projectId}/campaigns/{campaignId}")
     public ResponseEntity<CampaignDto> getCampaign(
             @PathVariable("projectId") long projectId,
             @PathVariable("campaignId") long campaignId
@@ -71,7 +71,7 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.getCampaign(projectId, campaignId));
     }
 
-    @PostMapping()
+    @PostMapping("/filter/{projectId}")
     public ResponseEntity<List<CampaignDto>> getCampaignByFilter(
             @RequestBody CampaignDto campaignDto,
             @PathVariable("projectId") long projectId

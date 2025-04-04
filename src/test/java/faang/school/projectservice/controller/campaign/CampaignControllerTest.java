@@ -67,7 +67,7 @@ class CampaignControllerTest {
             when(campaignService.create(any(), eq(projectId), eq(userID)))
                     .thenReturn(returnedDto);
 
-            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}/{creatorId}", projectId, userID)
+            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}?creatorId={creatorId}", projectId, userID)
                             .contentType("application/json")
                             .content(campaignCreateJson))
                     .andExpect(status().isCreated());
@@ -79,7 +79,7 @@ class CampaignControllerTest {
             doThrow(new DuplicateTitleException("text"))
                     .when(campaignService).create(any(), eq(projectId), eq(userID));
 
-            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}/{creatorId}", projectId, userID)
+            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}?creatorId={creatorId}", projectId, userID)
                             .contentType("application/json")
                             .content(campaignCreateJson))
                     .andExpect(status().isConflict());
@@ -92,7 +92,7 @@ class CampaignControllerTest {
             doThrow(new NotFoundException("text"))
                     .when(campaignService).create(any(), eq(projectId), eq(userID));
 
-            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}/{creatorId}", projectId, userID)
+            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}?creatorId={creatorId}", projectId, userID)
                             .contentType("application/json")
                             .content(campaignCreateJson))
                     .andExpect(status().isNotFound());
@@ -108,7 +108,7 @@ class CampaignControllerTest {
             when(campaignService.update(any(), eq(projectId), eq(campaignID), eq(userID)))
                     .thenReturn(new CampaignDto());
 
-            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{updaterId}", projectId, campaignID, userID)
+            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?updaterId={updaterId}", projectId, campaignID, userID)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
                     .andExpect(status().isOk());
@@ -120,7 +120,7 @@ class CampaignControllerTest {
             doThrow(new NotFoundException("text"))
                     .when(campaignService).update(any(), eq(projectId), eq(campaignID), eq(userID));
 
-            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{updaterId}", projectId, campaignID, userID)
+            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?updaterId={updaterId}", projectId, campaignID, userID)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
                     .andExpect(status().isNotFound());
@@ -133,7 +133,7 @@ class CampaignControllerTest {
             doThrow(new IllegalArgumentException("text"))
                     .when(campaignService).update(any(), eq(projectId), eq(campaignID), eq(userID));
 
-            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{updaterId}", projectId, campaignID, userID)
+            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?updaterId={updaterId}", projectId, campaignID, userID)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
                     .andExpect(status().isBadRequest());
@@ -146,10 +146,10 @@ class CampaignControllerTest {
             doThrow(new ForbiddenException("text"))
                     .when(campaignService).update(any(), eq(projectId), eq(campaignID), eq(userID));
 
-            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{updaterId}", projectId, campaignID, userID)
+            mockMvc.perform(put("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?updaterId={updaterId}", projectId, campaignID, userID)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isBadRequest());
 
             verify(campaignService, times(1)).update(any(), eq(projectId), eq(campaignID), eq(userID));
         }
@@ -162,7 +162,7 @@ class CampaignControllerTest {
             doNothing().when(campaignService).softDelete(eq(projectId), eq(campaignID), eq(userID));
             String expectedMessage = String.format("Campaign with id %d was archived successfully", campaignID);
 
-            mockMvc.perform(delete("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{deleterId}", projectId, campaignID, userID))
+            mockMvc.perform(delete("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?deleterId={deleterId}", projectId, campaignID, userID))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value(expectedMessage));
             verify(campaignService, times(1)).softDelete(eq(projectId), eq(campaignID), eq(userID));
@@ -173,7 +173,7 @@ class CampaignControllerTest {
             doThrow(new NotFoundException("text"))
                     .when(campaignService).softDelete(eq(projectId), eq(campaignID), eq(userID));
 
-            mockMvc.perform(delete("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}/{deleterId}", projectId, campaignID, userID))
+            mockMvc.perform(delete("/api/v1/campaign/projects/{projectId}/campaigns/{campaignId}?deleterId={deleterId}", projectId, campaignID, userID))
                     .andExpect(status().isNotFound());
 
             verify(campaignService, times(1)).softDelete(eq(projectId), eq(campaignID), eq(userID));
@@ -210,7 +210,7 @@ class CampaignControllerTest {
         public void successful() throws Exception {
             when(campaignService.getCampaignByFilter(eq(projectId), any())).thenReturn(List.of(new CampaignDto()));
 
-            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}", projectId)
+            mockMvc.perform(post("/api/v1/campaign/projects/filter/{projectId}", projectId)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
                     .andExpect(status().isOk());
@@ -223,7 +223,7 @@ class CampaignControllerTest {
             doThrow(new NotFoundException("text"))
                     .when(campaignService).getCampaignByFilter(eq(projectId), any());
 
-            mockMvc.perform(post("/api/v1/campaign/projects/{projectId}", projectId, campaignID)
+            mockMvc.perform(post("/api/v1/campaign/projects/filter/{projectId}", projectId, campaignID)
                             .contentType("application/json")
                             .content(campaignUpdateJson))
                     .andExpect(status().isNotFound());

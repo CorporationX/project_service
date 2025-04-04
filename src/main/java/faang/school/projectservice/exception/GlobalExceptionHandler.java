@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex) {
-        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "ForbiddenException");
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "ForbiddenException");
     }
 
     @ExceptionHandler(DuplicateTitleException.class)
