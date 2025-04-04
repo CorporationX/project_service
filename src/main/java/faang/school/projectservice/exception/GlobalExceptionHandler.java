@@ -65,4 +65,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<String> handleInvalidFileException(InvalidFileException ex) {
+        log.error("InvalidFileException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FileProcessingException.class)
+    public ResponseEntity<String > handleFileProcessingException(FileProcessingException ex) {
+        log.error("FileProcessingException occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.internalServerError().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CoverMaxSizeException.class)
+    public ResponseEntity<String> handleCoverMaxSizeException(CoverMaxSizeException ex) {
+        log.error("CoverMaxSizeException occurred: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }
