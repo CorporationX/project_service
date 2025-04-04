@@ -34,6 +34,13 @@ spring:
       multiplier: 3
       max-interval: 5s
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+file:
+  cover-max-size: 5242880
+
 server:
   port: 8082
 
@@ -45,8 +52,9 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
+    region: us-east-1
   payment-service:
     host: http://localhost
     port: 9080
