@@ -11,12 +11,7 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ResourceMapper {
 
-    @Mapping(source = "createdBy", target = "createdBy", qualifiedByName = "mapTeamMemberToId")
-    @Mapping(source = "updatedBy", target = "updatedBy", qualifiedByName = "mapTeamMemberToId")
+    @Mapping(source = "createdBy.id", target = "createdBy")
+    @Mapping(source = "updatedBy.id", target = "updatedBy")
     ResourceDto toResource(Resource resource);
-
-    @Named("mapTeamMemberToId")
-    default Long mapTeamMemberToId(TeamMember teamMember) {
-        return teamMember != null ? teamMember.getId() : null;
-    }
 }

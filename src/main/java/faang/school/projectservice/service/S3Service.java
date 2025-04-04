@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -26,33 +26,44 @@ public class S3Service {
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
+    private final ImageCompressionService imageCompressionService;
 
     public Resource uploadFile(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
-            amazonS3.putObject(putObjectRequest);
-        } catch (IOException e) {
-            log.error("Error uploading file to S3. Bucket: {}, Key: {}, Error: {}", bucketName, key, e.getMessage());
-            throw new RuntimeException("Failed to upload file to S3", e);
-        }
+        byte[] compressedFileBytes = imageCompressionService.compressFile(file);
 
-        Resource resource = new Resource();
-        resource.setName(file.getOriginalFilename());
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(fileSize));
-        resource.setAllowedRoles(List.of(TeamRole.MANAGER));
-        resource.setType(ResourceType.IMAGE);
-        resource.setStatus(ResourceStatus.ACTIVE);
-        return resource;
+        String key = generateS3Key(folder, file.getOriginalFilename());
+        ObjectMetadata metadata = buildMetadata(compressedFileBytes.length, file.getContentType());
+
+        PutObjectRequest putObjectRequest = new PutObjectRequest(
+                bucketName, key, new ByteArrayInputStream(compressedFileBytes), metadata);
+        amazonS3.putObject(putObjectRequest);
+
+        return buildResource(file,key,compressedFileBytes.length);
     }
 
     public void deleteFile(String key) {
         amazonS3.deleteObject(bucketName, key);
+    }
+
+    private String generateS3Key(String folder, String originalFilename) {
+        return String.format("%s%d%s", folder, System.currentTimeMillis(), originalFilename);
+    }
+
+    private ObjectMetadata buildMetadata(long contentLength, String contentType) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(contentLength);
+        metadata.setContentType(contentType);
+        return metadata;
+    }
+
+    private Resource buildResource(MultipartFile file, String key, long size) {
+        Resource resource = new Resource();
+        resource.setName(file.getOriginalFilename());
+        resource.setKey(key);
+        resource.setSize(BigInteger.valueOf(size));
+        resource.setAllowedRoles(List.of(TeamRole.MANAGER));
+        resource.setType(ResourceType.IMAGE);
+        resource.setStatus(ResourceStatus.ACTIVE);
+        return resource;
     }
 }

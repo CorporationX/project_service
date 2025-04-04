@@ -1,10 +1,9 @@
-package faang.scholl.projectsetvice.service;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.multipartfile.CustomMultipartFile;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.mapper.ResourceMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Team;
@@ -12,9 +11,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamRepository;
-import faang.school.projectservice.service.ImageCompressionService;
-import faang.school.projectservice.service.ResourceService;
-import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.validate.TeamMemberValidate;
 import faang.school.projectservice.validate.TeamValidate;
 import jakarta.persistence.EntityNotFoundException;
@@ -133,8 +129,6 @@ public class ResourceServiceTest {
     public void testUploadFileSuccessful() {
         mockTeamValidation();
         mockTeamMemberValidation(TeamRole.MANAGER);
-
-        when(imageCompressionService.compressFile(any())).thenReturn(mockFile);
         when(s3Service.uploadFile(any(), any())).thenReturn(resource);
         when(resourceMapper.toResource(resource)).thenReturn(resourceDto);
 

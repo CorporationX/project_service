@@ -1,4 +1,4 @@
-package faang.scholl.projectsetvice.validate;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.TeamRepository;

@@ -1,4 +1,4 @@
-package faang.scholl.projectsetvice.validate;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -27,10 +27,10 @@ public class TeamMemberValidateTest {
     private static final Long TEAM_ID = 2L;
 
     @Mock
-    private TeamMemberRepository teamMemberRepository; // Мок репозитория
+    private TeamMemberRepository teamMemberRepository;
 
     @InjectMocks
-    private TeamMemberValidate teamMemberValidate; // Внедряем мок в тестируемый класс
+    private TeamMemberValidate teamMemberValidate;
 
     private TeamMember teamMember;
 

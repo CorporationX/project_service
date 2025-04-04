@@ -12,5 +12,5 @@ import org.springframework.context.annotation.Configuration;
                 description = "Документация для Project Service"
         )
 )
-public class OpenApiConfig {
+public class SwaggerOpenApiConfig {
 }

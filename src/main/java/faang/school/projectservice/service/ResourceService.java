@@ -9,7 +9,6 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ResourceRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validate.TeamMemberValidate;
 import faang.school.projectservice.validate.TeamValidate;
@@ -29,45 +28,62 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final UserContext userContext;
     private final TeamRepository teamRepository;
-    private final TeamMemberRepository teamMemberRepository;
     private final S3Service s3Service;
-    private final ImageCompressionService imageCompressionService;
     private final TeamValidate teamValidate;
     private final TeamMemberValidate teamMemberValidate;
 
     @Transactional
     public ResourceDto uploadAvatarForTeam(Long teamId, MultipartFile file) {
         Team team = teamValidate.validateTeamById(teamId);
+        TeamMember teamMember = validateTeamMember(teamId);
 
-        Long userId = userContext.getUserId();
-        TeamMember teamMember = teamMemberValidate.validateTeamMemberByUserIdAndByTeamId(userId, teamId);
-
-        MultipartFile compressedFile = imageCompressionService.compressFile(file);
-
-        String folder = "%d%s/teamId%d/"
-                .formatted(team.getProject().getId(),team.getProject().getName(), team.getId());
-        Resource resource = s3Service.uploadFile(compressedFile, folder);
+        String folder = getFolder(team);
+        Resource resource = s3Service.uploadFile(file, folder);
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
         resource.setProject(team.getProject());
-
-        resourceRepository.save(resource);
         team.setAvatarKey(resource.getKey());
-        teamRepository.save(team);
+
+        saveResourceAndTeam(resource, team);
 
         return resourceMapper.toResource(resource);
+    }
+
+    private void saveResourceAndTeam(Resource resource, Team team) {
+        resourceRepository.save(resource);
+        teamRepository.save(team);
+    }
+
+    private String getFolder(Team team) {
+        return "%d%s/teamId%d/".formatted(team.getProject().getId(), team.getProject().getName(), team.getId());
     }
 
     @Transactional
     public void deleteAvatarForTeam(Long teamId) {
         Team team = teamValidate.validateTeamById(teamId);
+        checkAvatarTeam(teamId, team);
+
+        TeamMember teamMember = validateTeamMember(teamId);
+        checkRoleTeamMember(teamMember);
+
+        s3Service.deleteFile(team.getAvatarKey());
+
+        Resource resource = resourceRepository.findByKey(team.getAvatarKey());
+        resource.setStatus(ResourceStatus.DELETED);
+        team.setAvatarKey(null);
+        saveResourceAndTeam(resource, team);
+
+        log.info("Avatar successful deleted for team with id {}", teamId);
+    }
+
+    private void checkAvatarTeam(Long teamId, Team team) {
         if (team.getAvatarKey() == null || team.getAvatarKey().isEmpty()) {
             log.error("Avatar for team with id {} not set", teamId);
             throw new IllegalStateException("Team avatar not set");
         }
+    }
 
-        Long userId = userContext.getUserId();
-        TeamMember teamMember = teamMemberValidate.validateTeamMemberByUserIdAndByTeamId(userId, teamId);
+    private void checkRoleTeamMember(TeamMember teamMember) {
         boolean isManager = teamMember.getRoles().stream()
                 .anyMatch(teamRole -> teamRole.equals(TeamRole.MANAGER));
 
@@ -75,15 +91,10 @@ public class ResourceService {
             log.error("A user with the manager role can delete a team avatar");
             throw new IllegalStateException("Only team managers can delete the avatar");
         }
+    }
 
-        s3Service.deleteFile(team.getAvatarKey());
-
-        Resource resource = resourceRepository.findByKey(team.getAvatarKey());
-        resource.setStatus(ResourceStatus.DELETED);
-        team.setAvatarKey(null);
-        resourceRepository.save(resource);
-        teamRepository.save(team);
-
-        log.info("Avatar successful deleted for team with id {}", teamId);
+    private TeamMember validateTeamMember(Long teamId) {
+        Long userId = userContext.getUserId();
+        return teamMemberValidate.validateTeamMemberByUserIdAndByTeamId(userId, teamId);
     }
 }

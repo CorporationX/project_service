@@ -1,6 +1,5 @@
-package faang.scholl.projectsetvice.controller;
+package faang.school.projectservice.controller;
 
-import faang.school.projectservice.controller.ResourceController;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.service.ResourceService;
 import org.junit.jupiter.api.BeforeEach;
