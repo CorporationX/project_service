@@ -16,14 +16,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@EnableConfigurationProperties(S3Properties.class) // Включаем конфигурацию свойств
+@ActiveProfiles("test")
+@EnableConfigurationProperties(S3Properties.class)
 @ExtendWith(MockitoExtension.class)
 public class S3ServiceTest {
     @Mock
@@ -32,6 +35,7 @@ public class S3ServiceTest {
     @InjectMocks
     private S3Service s3Service;
 
+    @MockBean
     private S3Properties properties;
 
     @Captor
@@ -42,7 +46,8 @@ public class S3ServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        properties = new S3Properties("1", "1", "test-bucket", "1");
+        properties = new S3Properties("test-access-key", "test-secret-key",
+                "test-bucket", "https://s3.test.amazonaws.com");
         s3Service = new S3Service(s3Client, properties);
     }
 
