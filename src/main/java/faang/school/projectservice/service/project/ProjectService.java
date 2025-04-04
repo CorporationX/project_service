@@ -4,13 +4,13 @@ import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto updateProject(ProjectDto projectDto) {
         Project projectToUpdate = projectRepository.findById(projectDto.getId())
-                .orElseThrow(() -> new DataNotFoundException("This project does not found"));
+                .orElseThrow(() -> new EntityNotFoundException("This project does not found"));
 
         projectMapper.update(projectDto, projectToUpdate);
 

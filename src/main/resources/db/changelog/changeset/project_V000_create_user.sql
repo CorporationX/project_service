@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id bigint PRIMARY KEY,
     username varchar(64) UNIQUE NOT NULL,
     password varchar(128) NOT NULL,
@@ -7,6 +7,7 @@ CREATE TABLE users (
     about_me varchar(4096),
     active boolean DEFAULT true NOT NULL,
     city varchar(64),
+    country_id bigint NOT NULL,
     experience int,
     created_at timestamptz DEFAULT current_timestamp,
     updated_at timestamptz DEFAULT current_timestamp

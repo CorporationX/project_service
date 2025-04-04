@@ -1,12 +1,12 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.minio.ImageFormat;
 import faang.school.projectservice.config.minio.properties.ProjectCoverMinioProperties;
 import faang.school.projectservice.exception.BadRequestException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.service.MinioService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

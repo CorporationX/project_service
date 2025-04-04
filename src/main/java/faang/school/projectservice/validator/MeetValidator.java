@@ -1,4 +1,4 @@
-package faang.school.projectservice.validation;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
@@ -20,7 +20,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MeetValidation {
+public class MeetValidator {
     private final MeetRepository meetRepository;
     private final UserServiceClient userServiceClient;
     private final ProjectRepository projectRepository;

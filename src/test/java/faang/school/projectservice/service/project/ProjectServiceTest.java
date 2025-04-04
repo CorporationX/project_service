@@ -1,10 +1,8 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataAlreadyExistException;
-import faang.school.projectservice.exception.DataNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.ProjectNameFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -14,6 +12,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.adapter.ProjectRepositoryAdapter;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -159,7 +158,7 @@ public class ProjectServiceTest {
 
         Mockito.when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(DataNotFoundException.class, () -> projectService.updateProject(generalDto));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> projectService.updateProject(generalDto));
     }
 
     @Test
