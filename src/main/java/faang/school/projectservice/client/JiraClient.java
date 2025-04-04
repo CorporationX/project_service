@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -21,62 +22,60 @@ import java.util.Map;
 public class JiraClient {
     private final WebClient jiraWebClient;
 
-    public IssueCreateResponseDto createIssue(IssueRequestDto issueRequestDto) {
+    public Mono<IssueCreateResponseDto> createIssue(IssueRequestDto issueRequestDto) {
         return jiraWebClient.post()
                 .uri("/issue")
                 .bodyValue(issueRequestDto)
                 .retrieve()
-                .bodyToMono(IssueCreateResponseDto.class)
-                .block();
+                .bodyToMono(IssueCreateResponseDto.class);
     }
 
-    public IssueResponseDto getIssueByKey(String issueKey) {
+    public Mono<IssueResponseDto> getIssueByKey(String issueKey) {
         return jiraWebClient.get()
                 .uri("/issue/{key}", issueKey)
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.NOT_FOUND,
                         response -> Mono.error(new IllegalArgumentException(
                                 "Issue with key " + issueKey + " not found")))
-                .bodyToMono(IssueResponseDto.class)
-                .block();
+                .bodyToMono(IssueResponseDto.class);
     }
 
-    public void createIssueLinks(List<IssueLinkDto> issueLinkDtos) {
-        issueLinkDtos.forEach(issueLink -> jiraWebClient.post()
-                .uri("/issueLink")
-                .bodyValue(issueLink)
-                .retrieve()
-                .toBodilessEntity()
-                .block()
-        );
+    public Mono<Void> createIssueLinks(List<IssueLinkDto> issueLinkDtos) {
+        return Flux.fromIterable(issueLinkDtos)
+                .flatMap(issueLink -> jiraWebClient.post()
+                        .uri("/issueLink")
+                        .bodyValue(issueLink)
+                        .retrieve()
+                        .toBodilessEntity()
+                )
+                .then();
     }
 
-    public void setTransitionByKey(String issueKey, TransitionDto transition) {
-        jiraWebClient.post()
+    public Mono<Void> setTransitionByKey(String issueKey, TransitionDto transition) {
+        return jiraWebClient.post()
                 .uri("/issue/{issueKey}/transitions", issueKey)
                 .bodyValue(Map.of("transition", transition))
                 .retrieve()
                 .toBodilessEntity()
-                .block();
+                .then();
     }
 
-    public void updateIssueByKey(String issueKey, IssueUpdateDto issueUpdateDto) {
-        jiraWebClient.put()
+    public Mono<Void> updateIssueByKey(String issueKey, IssueUpdateDto issueUpdateDto) {
+        return jiraWebClient.put()
                 .uri("/issue/{key}", issueKey)
                 .bodyValue(issueUpdateDto)
                 .retrieve()
                 .toBodilessEntity()
-                .block();
+                .then();
     }
 
-    public IssuesResponseDto getInfoByJql(String jql) {
+    public Mono<IssuesResponseDto> getInfoByJql(String query) {
         return jiraWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/search")
-                        .queryParam("jql", jql)
+                        .queryParam("jql", query)
                         .build())
                 .retrieve()
-                .bodyToMono(IssuesResponseDto.class)
-                .block();
+                .bodyToMono(IssuesResponseDto.class);
     }
 }

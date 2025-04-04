@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Validated
@@ -32,55 +32,51 @@ public class JiraController {
     private final JiraService jiraService;
 
     @PostMapping("/issue")
-    public IssueCreateResponseDto createIssue(@RequestBody @NotNull IssueRequestDto issueRequestDto) {
+    public Mono<IssueCreateResponseDto> createIssue(@RequestBody @NotNull IssueRequestDto issueRequestDto) {
         log.info("Creating issue started");
-        IssueCreateResponseDto response = jiraService.createIssue(issueRequestDto);
-        log.info("Creating issue completed");
-        return response;
+        return jiraService.createIssue(issueRequestDto)
+                .doOnTerminate(() -> log.info("Creating issue completed"));
     }
 
     @PutMapping("/issue/update/{key}")
-    public void updateIssue(@PathVariable @NotNull @NotBlank String key,
-                            @RequestBody @NotNull IssueUpdateDto issueUpdateDto) {
+    public Mono<Void> updateIssue(@PathVariable @NotNull @NotBlank String key,
+                                  @RequestBody @NotNull IssueUpdateDto issueUpdateDto) {
 
         log.info("Updating issue with key {} started", key);
-        jiraService.updateIssue(key, issueUpdateDto);
-        log.info("Updating issue with key {} completed", key);
+        return jiraService.updateIssue(key, issueUpdateDto)
+                .doOnTerminate(() -> log.info("Updating issue with key {} completed", key));
     }
 
     @GetMapping("/issue/project/{projectId}")
-    public List<IssueResponseDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
+    public Flux<IssueResponseDto> getAllIssuesWithFilter(@PathVariable @NotNull @NonNegative Long projectId,
                                                          @RequestBody @NotNull IssueFilterDto issueFilterDto) {
 
         log.info("Getting all issues with filter for project {} started", projectId);
-        List<IssueResponseDto> response = jiraService.getAllIssuesWithFilter(projectId, issueFilterDto);
-        log.info("Getting all issues with filter for project {} completed, found {} issues", projectId, response.size());
-        return response;
+        return jiraService.getAllIssuesWithFilter(projectId, issueFilterDto)
+                .doOnTerminate(() -> log.info("Getting all issues with filter for project" +
+                        " {} completed", projectId));
     }
 
     @GetMapping("/issues/project/{projectId}")
-    public List<IssueResponseDto> getAllIssuesByProjectId(@PathVariable @NotNull @NonNegative Long projectId) {
+    public Flux<IssueResponseDto> getAllIssuesByProjectId(@PathVariable @NotNull @NonNegative Long projectId) {
         log.info("Getting all issues for project {} started", projectId);
-        List<IssueResponseDto> response = jiraService.getAllIssuesByProject(projectId);
-        log.info("Getting all issues for project {} completed, found {} issues", projectId, response.size());
-        return response;
+        return jiraService.getAllIssuesByProject(projectId)
+                .doOnTerminate(() -> log.info("Getting all issues for project {} completed", projectId));
     }
 
     @GetMapping("/issues/{key}")
-    public IssueResponseDto getIssueByKey(@PathVariable @NotNull @NotBlank String key) {
+    public Mono<IssueResponseDto> getIssueByKey(@PathVariable @NotNull @NotBlank String key) {
         log.info("Getting issue by key {} started", key);
-        IssueResponseDto response = jiraService.getIssueByKey(key);
-        log.info("Getting issue by key {} completed", key);
-        return response;
+        return jiraService.getIssueByKey(key)
+                .doOnTerminate(() -> log.info("Getting issue by key {} completed", key));
     }
 
     @PostMapping("/project/{id}/key/{key}")
-    public ProjectResponseDto registerProject(@PathVariable @NotNull @NonNegative Long id,
-                                              @PathVariable @NotNull @NotBlank String key) {
+    public Mono<ProjectResponseDto> registerProject(@PathVariable @NotNull @NonNegative Long id,
+                                                    @PathVariable @NotNull @NotBlank String key) {
 
         log.info("Registering project with id {} and key {} started", id, key);
-        ProjectResponseDto response = jiraService.registerProject(id, key);
-        log.info("Registering project with id {} and key {} completed", id, key);
-        return response;
+        return jiraService.registerProject(id, key)
+                .doOnTerminate(() -> log.info("Registering project with id {} and key {} completed", id, key));
     }
 }

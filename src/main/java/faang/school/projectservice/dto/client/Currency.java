@@ -1,5 +1,5 @@
 package faang.school.projectservice.dto.client;
 
-public enum CurrencyDto {
+public enum Currency {
     USD, EUR
 }

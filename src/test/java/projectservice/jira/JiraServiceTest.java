@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.jira.filter.IssueFilterDto;
 import faang.school.projectservice.dto.jira.request.IssueRequestDto;
 import faang.school.projectservice.dto.jira.request.IssueStatusRequestDto;
 import faang.school.projectservice.dto.jira.request.ProjectRequestDto;
+import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.IssuesResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueLinkDto;
@@ -16,7 +17,7 @@ import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.jira.AssigneeFilter;
 import faang.school.projectservice.filter.jira.IssueFilter;
 import faang.school.projectservice.filter.jira.IssueStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.jira.JiraServiceImpl;
@@ -28,6 +29,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +42,12 @@ import static faang.school.projectservice.service.jira.JiraServiceImpl.PROJECT_D
 import static faang.school.projectservice.util.validation.JiraValidation.FIELD_CANT_BE_NULL;
 import static faang.school.projectservice.util.validation.JiraValidation.ISSUE_KEY_CANT_BE_NULL_OR_BLANK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +64,7 @@ public class JiraServiceTest {
     private final List<IssueFilter> issueFilters = new ArrayList<>();
 
     @Spy
-    private ProjectMapper projectMapper;
+    private ProjectMapperImpl projectMapper;
 
     @Mock
     private JiraClient jiraClient;
@@ -101,11 +106,11 @@ public class JiraServiceTest {
 
     @Test
     public void testUpdateIssue_updateAll() {
-        doNothing().when(jiraClient).createIssueLinks(any());
-        doNothing().when(jiraClient).setTransitionByKey(anyString(), any());
-        doNothing().when(jiraClient).updateIssueByKey(anyString(), any());
+        when(jiraClient.createIssueLinks(any())).thenReturn(Mono.empty());
+        when(jiraClient.setTransitionByKey(anyString(), any())).thenReturn(Mono.empty());
+        when(jiraClient.updateIssueByKey(anyString(), any())).thenReturn(Mono.empty());
 
-        jiraService.updateIssue("key", issueUpdateDto);
+        jiraService.updateIssue("key", issueUpdateDto).block();
 
         verify(jiraClient, times(1)).createIssueLinks(any());
         verify(jiraClient, times(1)).setTransitionByKey(anyString(), any());
@@ -114,11 +119,11 @@ public class JiraServiceTest {
 
     @Test
     public void testUpdateIssue_onlyUpdateIssueByKey() {
-        doNothing().when(jiraClient).updateIssueByKey(anyString(), any());
+        when(jiraClient.updateIssueByKey(anyString(), any())).thenReturn(Mono.empty());
         issueUpdateDto.getFields().setIssueLinks(null);
         issueUpdateDto.setTransition(null);
 
-        jiraService.updateIssue("key", issueUpdateDto);
+        jiraService.updateIssue("key", issueUpdateDto).block();
 
         verify(jiraClient, never()).createIssueLinks(any());
         verify(jiraClient, never()).setTransitionByKey(anyString(), any());
@@ -127,48 +132,62 @@ public class JiraServiceTest {
 
     @Test
     public void testGetAllIssuesWithFilter_allFiltersApplicable() {
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
-        when(jiraClient.getInfoByJql(anyString())).thenReturn(new IssuesResponseDto());
+        when(projectRepository.findById(anyLong()))
+                .thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
+        when(jiraClient.getInfoByJql(anyString())).thenReturn(Mono.just(new IssuesResponseDto()));
         IssueFilterDto issueFilterDto = new IssueFilterDto();
         issueFilterDto.setStatus(new IssueStatusRequestDto("status"));
         issueFilterDto.setAssignee(new AssigneeDto("name"));
 
-        jiraService.getAllIssuesWithFilter(1L, issueFilterDto);
+        jiraService.getAllIssuesWithFilter(1L, issueFilterDto).blockLast();
 
         verify(jiraClient, times(1)).getInfoByJql(anyString());
     }
 
     @Test
     public void testGetAllIssuesWithFilter_noApplicableFilters() {
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
+        when(projectRepository.findById(anyLong()))
+                .thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
         IssueFilterDto issueFilterDto = new IssueFilterDto();
         issueFilterDto.setStatus(new IssueStatusRequestDto());
         issueFilterDto.setAssignee(new AssigneeDto());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> jiraService.getAllIssuesWithFilter(1L, issueFilterDto)
-        );
+        Flux<IssueResponseDto> response = jiraService.getAllIssuesWithFilter(1L, issueFilterDto);
 
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(IllegalArgumentException.class, ex);
+                    assertEquals(NO_APPLICABLE_FILTERS_SET, ex.getMessage());
+                })
+                .verify();
         verify(jiraClient, never()).getInfoByJql(anyString());
-        assertEquals(NO_APPLICABLE_FILTERS_SET, exception.getMessage());
     }
 
     @Test
     public void testGetAllIssuesWithFilter_projectDoesNotExists() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ProjectNotFoundException exception = assertThrows(ProjectNotFoundException.class,
-                () -> jiraService.getAllIssuesWithFilter(1L, null)
-        );
+        Flux<IssueResponseDto> response = jiraService.getAllIssuesWithFilter(1L, null);
 
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(ProjectNotFoundException.class, ex);
+                    assertEquals(PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(1L), ex.getMessage());
+                })
+                .verify();
         verify(jiraClient, never()).getInfoByJql(anyString());
-        assertEquals(PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(1L), exception.getMessage());
     }
 
     @Test
     public void testGetAllIssuesByProject_projectExists() {
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
-        jiraService.getAllIssuesByProject(1L);
+        when(projectRepository.findById(anyLong()))
+                .thenReturn(Optional.of(Project.builder().jiraKey("key").build()));
+        when(jiraClient.getInfoByJql("project = key"))
+                .thenReturn(Mono.just(IssuesResponseDto.builder()
+                        .issues(List.of(new IssueResponseDto())).build()));
+
+        jiraService.getAllIssuesByProject(1L).blockLast();
+
         verify(jiraClient, times(1)).getInfoByJql("project = key");
     }
 
@@ -176,16 +195,28 @@ public class JiraServiceTest {
     public void testGetAllIssuesByProject_projectDoesNotExists() {
         when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ProjectNotFoundException exception = assertThrows(ProjectNotFoundException.class,
-                () -> jiraService.getAllIssuesByProject(1L)
-        );
+        Flux<IssueResponseDto> response = jiraService.getAllIssuesByProject(1L);
 
-        assertEquals(PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(1L), exception.getMessage());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(ProjectNotFoundException.class, ex);
+                    assertEquals(PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(1L), ex.getMessage());
+                })
+                .verify();
     }
 
     @Test
     public void testGetIssueByKey_validKey() {
-        jiraService.getIssueByKey("BJS2-66236");
+        String issueKey = "BJS2-66236";
+        IssueResponseDto expectedResponse = new IssueResponseDto(new Fields());
+        expectedResponse.getFields().setSummary("Test summary");
+        when(jiraClient.getIssueByKey(issueKey)).thenReturn(Mono.just(expectedResponse));
+
+        IssueResponseDto actualResponse = jiraService.getIssueByKey(issueKey).block();
+
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.getFields().getSummary(), actualResponse.getFields().getSummary());
+        verify(jiraClient, times(1)).getIssueByKey(issueKey);
     }
 
     @Test
@@ -198,8 +229,8 @@ public class JiraServiceTest {
 
     @Test
     public void testRegisterProject_validKey() {
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(new Project()));
-        ProjectResponseDto result = jiraService.registerProject(1L, "BJS2");
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(Project.builder().build()));
+        ProjectResponseDto result = jiraService.registerProject(1L, "BJS2").block();
         assertEquals(projectMapper.toProjectResponseDto(Project.builder().jiraKey("BJS2").build()), result);
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.model;
 
-import faang.school.projectservice.dto.client.CurrencyDto;
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,7 +48,7 @@ public class Campaign {
     private Project project;
 
     @Enumerated(EnumType.STRING)
-    private CurrencyDto currencyDto;
+    private Currency currency;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

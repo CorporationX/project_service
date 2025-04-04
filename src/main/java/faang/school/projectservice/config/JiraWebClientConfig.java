@@ -1,6 +1,5 @@
 package faang.school.projectservice.config;
 
-import faang.school.projectservice.config.context.jira.JiraContext;
 import faang.school.projectservice.exception.JiraClientException;
 import faang.school.projectservice.util.JiraTokenGenerator;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 public class JiraWebClientConfig {
-    private final JiraContext jiraContext;
+    @Value("${services.jira.email}")
+    private String jiraEmail;
+
+    @Value("${services.jira.token}")
+    private String jiraToken;
 
     @Value("${services.jira.endpoint}")
     private String jiraBaseUrl;
@@ -36,7 +39,7 @@ public class JiraWebClientConfig {
 
     private ExchangeFilterFunction addAuthorizationHeader() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            String token = JiraTokenGenerator.generate(jiraContext.getEmail(), jiraContext.getToken());
+            String token = JiraTokenGenerator.generate(jiraEmail, jiraToken);
             return Mono.just(ClientRequest.from(clientRequest)
                     .header(HttpHeaders.AUTHORIZATION, token)
                     .build());

@@ -6,19 +6,19 @@ import faang.school.projectservice.dto.jira.response.IssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.dto.jira.response.ProjectResponseDto;
 import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface JiraService {
-    IssueCreateResponseDto createIssue(IssueRequestDto issueRequestDto);
+    Mono<IssueCreateResponseDto> createIssue(IssueRequestDto issueRequestDto);
 
-    void updateIssue(String key, IssueUpdateDto issueUpdateDto);
+    Mono<Void> updateIssue(String key, IssueUpdateDto issueUpdateDto);
 
-    List<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto);
+    Flux<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto);
 
-    List<IssueResponseDto> getAllIssuesByProject(Long projectId);
+    Flux<IssueResponseDto> getAllIssuesByProject(Long projectId);
 
-    IssueResponseDto getIssueByKey(String key);
+    Mono<IssueResponseDto> getIssueByKey(String key);
 
-    ProjectResponseDto registerProject(Long id, String key);
+    Mono<ProjectResponseDto> registerProject(Long id, String key);
 }

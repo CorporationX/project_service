@@ -13,9 +13,9 @@ public record PaymentRequestDto(
         BigDecimal amount,
 
         @NotNull
-        CurrencyDto paymentCurrencyDto,
+        Currency paymentCurrency,
 
         @NotNull
-        CurrencyDto targetCurrencyDto
+        Currency targetCurrency
 ) {
 }

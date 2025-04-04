@@ -64,6 +64,7 @@ dependencies {
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("io.projectreactor:reactor-test:3.5.0")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 

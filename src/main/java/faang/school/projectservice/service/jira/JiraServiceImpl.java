@@ -11,13 +11,15 @@ import faang.school.projectservice.dto.jira.update.IssueUpdateDto;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.jira.IssueFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.validation.JiraValidation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,60 +39,73 @@ public class JiraServiceImpl implements JiraService {
     private final ProjectMapper projectMapper;
 
     @Override
-    public IssueCreateResponseDto createIssue(IssueRequestDto issueRequestDto) {
+    public Mono<IssueCreateResponseDto> createIssue(IssueRequestDto issueRequestDto) {
         JiraValidation.validateCreateIssue(issueRequestDto);
         log.info("Creating issue using JiraClient");
         return jiraClient.createIssue(issueRequestDto);
     }
 
     @Override
-    public void updateIssue(String key, IssueUpdateDto issueUpdateDto) {
+    public Mono<Void> updateIssue(String key, IssueUpdateDto issueUpdateDto) {
         JiraValidation.validateIssueKey(key);
         JiraValidation.validateIssueUpdateDto(issueUpdateDto);
+
+        Mono<Void> updateLinksMono = Mono.empty();
         if (issueUpdateDto.getFields().getIssueLinks() != null) {
             log.info("Creating issue link using JiraClient");
-            jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
+            updateLinksMono = jiraClient.createIssueLinks(issueUpdateDto.getFields().getIssueLinks());
         }
 
+        Mono<Void> transitionMono = Mono.empty();
         if (issueUpdateDto.getTransition() != null) {
             log.info("Setting transition using JiraClient");
-            jiraClient.setTransitionByKey(key, issueUpdateDto.getTransition());
+            transitionMono = jiraClient.setTransitionByKey(key, issueUpdateDto.getTransition());
         }
 
-        log.info("Updating issue using JiraClient");
         issueUpdateDto.getFields().setIssueLinks(null);
-        jiraClient.updateIssueByKey(key, issueUpdateDto);
+
+        return updateLinksMono
+                .then(transitionMono)
+                .then(Mono.defer(() -> {
+                    log.info("Updating issue using JiraClient");
+                    return jiraClient.updateIssueByKey(key, issueUpdateDto);
+                }));
     }
 
     @Override
-    public List<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto) {
-        String projectKey = getProjectKey(projectId);
-        String jql = issueFilters.stream()
-                .filter(issueFilter -> issueFilter.isApplicable(issueFilterDto))
-                .map(issueFilter -> issueFilter.createJql(issueFilterDto))
-                .collect(Collectors.joining(" AND "));
-        jql += " AND project = " + projectKey;
-        if (jql.charAt(0) == ' ') {
-            log.error(NO_APPLICABLE_FILTERS_SET);
-            throw new IllegalArgumentException(NO_APPLICABLE_FILTERS_SET);
-        }
-        log.info("Getting issues with filter using JiraClient");
-        return jiraClient.getInfoByJql(jql).getIssues();
+    public Flux<IssueResponseDto> getAllIssuesWithFilter(Long projectId, IssueFilterDto issueFilterDto) {
+        return getProjectKey(projectId)
+                .map(projectKey -> {
+                    String query = issueFilters.stream()
+                            .filter(issueFilter -> issueFilter.isApplicable(issueFilterDto))
+                            .map(issueFilter -> issueFilter.createJql(issueFilterDto))
+                            .collect(Collectors.joining(" AND "));
+
+                    query += " AND project = " + projectKey;
+                    if (query.charAt(0) == ' ') {
+                        log.error("No applicable filters set");
+                        throw new IllegalArgumentException("No applicable filters set");
+                    }
+
+                    log.info("Getting issues with filter using JiraClient");
+                    return query;
+                })
+                .flatMapMany(jiraClient::getInfoByJql)
+                .map(response -> Optional.ofNullable(response.getIssues()).orElse(Collections.emptyList()))
+                .flatMap(Flux::fromIterable);
     }
 
     @Override
-    public List<IssueResponseDto> getAllIssuesByProject(Long projectId) {
-        String projectKey = getProjectKey(projectId);
-        String jql = "project = " + projectKey;
-
-        log.info("Getting issues by project using JiraClient");
-        return Optional.ofNullable(jiraClient.getInfoByJql(jql))
+    public Flux<IssueResponseDto> getAllIssuesByProject(Long projectId) {
+        return getProjectKey(projectId)
+                .map(projectKey -> "project = " + projectKey)
+                .flatMapMany(jiraClient::getInfoByJql)
                 .map(IssuesResponseDto::getIssues)
-                .orElse(Collections.emptyList());
+                .flatMap(Flux::fromIterable);
     }
 
     @Override
-    public IssueResponseDto getIssueByKey(String key) {
+    public Mono<IssueResponseDto> getIssueByKey(String key) {
         JiraValidation.validateIssueKey(key);
         log.info("Getting issue by key using JiraClient");
         return jiraClient.getIssueByKey(key);
@@ -98,18 +113,25 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     @Transactional
-    public ProjectResponseDto registerProject(Long id, String key) {
+    public Mono<ProjectResponseDto> registerProject(Long id, String key) {
         JiraValidation.validateProjectKey(key);
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Project with id %d not found".formatted(id)));
-        project.setJiraKey(key);
-        return projectMapper.toProjectResponseDto(project);
+        return Mono.fromCallable(() -> projectRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optionalProject -> optionalProject
+                        .map(project -> {
+                            project.setJiraKey(key);
+                            return Mono.just(projectMapper.toProjectResponseDto(project));
+                        })
+                        .orElseGet(() -> Mono.error(new ProjectNotFoundException(
+                                "Project with id %d not found".formatted(id)))));
     }
 
-    private String getProjectKey(Long projectId) {
-        return projectRepository.findById(projectId)
-                .map(Project::getJiraKey)
-                .orElseThrow(() -> new ProjectNotFoundException(
-                        PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(projectId)));
+    private Mono<String> getProjectKey(Long projectId) {
+        return Mono.fromCallable(() -> projectRepository.findById(projectId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optionalProject -> optionalProject
+                        .map(project -> Mono.just(project.getJiraKey()))
+                        .orElseGet(() -> Mono.error(new ProjectNotFoundException(
+                                PROJECT_DOES_NOT_CONNECTED_TO_JIRA.formatted(projectId)))));
     }
 }

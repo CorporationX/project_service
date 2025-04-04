@@ -24,15 +24,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -98,9 +99,12 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssueCreateResponseDto.class))
                 .thenReturn(Mono.just(createResponseDto));
 
-        IssueCreateResponseDto response = jiraWebClient.createIssue(issueRequestDto);
+        Mono<IssueCreateResponseDto> response = jiraWebClient.createIssue(issueRequestDto);
 
-        assertNotNull(response);
+        StepVerifier.create(response)
+                .expectNext(createResponseDto)
+                .verifyComplete();
+
         verify(webClient, times(1)).post();
         verify(requestBodyUriSpec, times(1)).uri("/issue");
         verify(requestBodySpec, times(1)).bodyValue(issueRequestDto);
@@ -117,11 +121,15 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssueCreateResponseDto.class))
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", status)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.createIssue(issueRequestDto)
-        );
+        Mono<IssueCreateResponseDto> response = jiraWebClient.createIssue(issueRequestDto);
 
-        assertEquals(status, exception.getStatusCode());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(status, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
+
         verify(webClient, times(1)).post();
         verify(requestBodyUriSpec, times(1)).uri("/issue");
         verify(requestBodySpec, times(1)).bodyValue(issueRequestDto);
@@ -159,9 +167,12 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssueResponseDto.class))
                 .thenReturn(Mono.just(responseDto));
 
-        IssueResponseDto response = jiraWebClient.getIssueByKey(issueKey);
+        Mono<IssueResponseDto> response = jiraWebClient.getIssueByKey(issueKey);
 
-        assertNotNull(response);
+        StepVerifier.create(response)
+                .expectNext(responseDto)
+                .verifyComplete();
+
         verify(webClient, times(1)).get();
         verify(requestHeadersUriSpec, times(1)).uri("/issue/{key}", issueKey);
         verify(requestHeadersSpec, times(1)).retrieve();
@@ -179,11 +190,15 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssueResponseDto.class))
                 .thenReturn(Mono.error(new IllegalArgumentException("Issue with key " + issueKey + " not found")));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> jiraWebClient.getIssueByKey(issueKey)
-        );
+        Mono<IssueResponseDto> response = jiraWebClient.getIssueByKey(issueKey);
 
-        assertEquals("Issue with key " + issueKey + " not found", exception.getMessage());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(IllegalArgumentException.class, ex);
+                    assertEquals("Issue with key " + issueKey + " not found", ex.getMessage());
+                })
+                .verify();
+
         verify(webClient, times(1)).get();
     }
 
@@ -197,12 +212,16 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssueResponseDto.class))
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", HttpStatus.UNAUTHORIZED)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.getIssueByKey(issueKey)
-        );
+        Mono<IssueResponseDto> response = jiraWebClient.getIssueByKey(issueKey);
+
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(HttpStatus.UNAUTHORIZED, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
 
         verify(webClient, times(1)).get();
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
         verify(requestHeadersUriSpec, times(1)).uri("/issue/{key}", issueKey);
         verify(requestHeadersSpec, times(1)).retrieve();
         verify(responseSpec, times(1)).onStatus(any(), any());
@@ -220,7 +239,10 @@ public class JiraClientTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
 
-        jiraWebClient.createIssueLinks(links);
+        Mono<Void> response = jiraWebClient.createIssueLinks(links);
+
+        StepVerifier.create(response)
+                .verifyComplete();
 
         verify(webClient, times(2)).post();
         verify(requestBodyUriSpec, times(2)).uri("/issueLink");
@@ -239,11 +261,15 @@ public class JiraClientTest {
         when(responseSpec.toBodilessEntity())
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", status)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.createIssueLinks(links)
-        );
+        Mono<Void> response = jiraWebClient.createIssueLinks(links);
 
-        assertEquals(status, exception.getStatusCode());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(status, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
+
         verify(webClient, times(1)).post();
         verify(requestBodyUriSpec, times(1)).uri("/issueLink");
         verify(requestBodySpec, times(1)).bodyValue(links.get(0));
@@ -281,7 +307,10 @@ public class JiraClientTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
 
-        jiraWebClient.setTransitionByKey(issueKey, transition);
+        Mono<Void> response = jiraWebClient.setTransitionByKey(issueKey, transition);
+
+        StepVerifier.create(response)
+                .verifyComplete();
 
         verify(webClient, times(1)).post();
         verify(requestBodyUriSpec, times(1))
@@ -301,11 +330,15 @@ public class JiraClientTest {
         when(responseSpec.toBodilessEntity())
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", status)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.setTransitionByKey(issueKey, transition)
-        );
+        Mono<Void> response = jiraWebClient.setTransitionByKey(issueKey, transition);
 
-        assertEquals(status, exception.getStatusCode());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(status, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
+
         verify(webClient, times(1)).post();
         verify(requestBodyUriSpec, times(1))
                 .uri("/issue/{issueKey}/transitions", issueKey);
@@ -349,7 +382,10 @@ public class JiraClientTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toBodilessEntity()).thenReturn(Mono.empty());
 
-        jiraWebClient.updateIssueByKey(issueKey, issueUpdateDto);
+        Mono<Void> response = jiraWebClient.updateIssueByKey(issueKey, issueUpdateDto);
+
+        StepVerifier.create(response)
+                .verifyComplete();
 
         verify(webClient, times(1)).put();
         verify(requestBodyUriSpec, times(1))
@@ -369,11 +405,15 @@ public class JiraClientTest {
         when(responseSpec.toBodilessEntity())
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", status)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.updateIssueByKey(issueKey, issueUpdateDto)
-        );
+        Mono<Void> response = jiraWebClient.updateIssueByKey(issueKey, issueUpdateDto);
 
-        assertEquals(status, exception.getStatusCode());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(status, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
+
         verify(webClient, times(1)).put();
         verify(requestBodyUriSpec, times(1))
                 .uri("/issue/{key}", issueKey);
@@ -423,9 +463,12 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssuesResponseDto.class))
                 .thenReturn(Mono.just(new IssuesResponseDto()));
 
-        IssuesResponseDto response = jiraWebClient.getInfoByJql(jql);
+        Mono<IssuesResponseDto> response = jiraWebClient.getInfoByJql(jql);
 
-        assertNotNull(response);
+        StepVerifier.create(response)
+                .expectNextMatches(Objects::nonNull)
+                .verifyComplete();
+
         verify(webClient, times(1)).get();
         verify(requestHeadersUriSpec, times(1)).uri(any(Function.class));
         verify(requestHeadersSpec, times(1)).retrieve();
@@ -442,11 +485,15 @@ public class JiraClientTest {
         when(responseSpec.bodyToMono(IssuesResponseDto.class))
                 .thenReturn(Mono.error(new JiraClientException("Jira API error", status)));
 
-        JiraClientException exception = assertThrows(JiraClientException.class,
-                () -> jiraWebClient.getInfoByJql(jql)
-        );
+        Mono<IssuesResponseDto> response = jiraWebClient.getInfoByJql(jql);
 
-        assertEquals(status, exception.getStatusCode());
+        StepVerifier.create(response)
+                .expectErrorSatisfies(ex -> {
+                    assertInstanceOf(JiraClientException.class, ex);
+                    assertEquals(status, ((JiraClientException) ex).getStatusCode());
+                })
+                .verify();
+
         verify(webClient, times(1)).get();
         verify(requestHeadersUriSpec, times(1)).uri(any(Function.class));
         verify(requestHeadersSpec, times(1)).retrieve();

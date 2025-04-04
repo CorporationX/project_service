@@ -1,6 +1,6 @@
 package faang.school.projectservice.model;
 
-import faang.school.projectservice.dto.client.CurrencyDto;
+import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -40,7 +40,7 @@ public class Donation {
     private Campaign campaign;
 
     @Enumerated(EnumType.STRING)
-    private CurrencyDto currencyDto;
+    private Currency currency;
 
     private Long userId;
 }
