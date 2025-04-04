@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
@@ -118,7 +119,7 @@ public class VacancyServiceImpl implements VacancyService {
         if (vacancy.getCoverImageKey() != null) {
             s3Service.deleteFile(vacancy.getCoverImageKey());
         }
-        String folder = vacancy.getId() + vacancy.getName();
+        String folder ="cover_for_vacancy_" + vacancy.getId() + vacancy.getName();
         String coverImageKey = s3Service.uploadFile(cover, folder);
         vacancy.setCoverImageKey(coverImageKey);
         vacancyRepository.save(vacancy);
@@ -127,7 +128,13 @@ public class VacancyServiceImpl implements VacancyService {
 
     public InputStream getVacancyCover(long vacancyId) {
         Vacancy vacancy = findVacancyById(vacancyId);
-        return s3Service.downloadFile(vacancy.getCoverImageKey());
+        try {
+            return s3Service.downloadFile(vacancy.getCoverImageKey());
+        } catch (AmazonS3Exception e) {
+            vacancy.setCoverImageKey(null);
+            vacancyRepository.save(vacancy);
+            throw e;
+        }
     }
 
     public void deleteCoverFromVacancy(long vacancyId) {
@@ -136,6 +143,8 @@ public class VacancyServiceImpl implements VacancyService {
         if (vacancy.getCoverImageKey() != null) {
             s3Service.deleteFile(vacancy.getCoverImageKey());
         }
+        vacancy.setCoverImageKey(null);
+        vacancyRepository.save(vacancy);
     }
 
     private VacancyResponseDto convertVacancyToVacancyDto(Vacancy vacancy) {

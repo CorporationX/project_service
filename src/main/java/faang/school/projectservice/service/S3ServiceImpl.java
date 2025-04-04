@@ -4,13 +4,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import faang.school.projectservice.exception.FileException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,10 +26,13 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String uploadFile(MultipartFile file, String folder) {
+        if (file.isEmpty()) {
+            throw new FileException("File is empty");
+        }
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%d/%s",
+        String key = String.format("%s/%d_%s",
                 folder, System.currentTimeMillis(), file.getOriginalFilename());
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(

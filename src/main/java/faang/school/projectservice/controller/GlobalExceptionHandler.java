@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.DatabaseCorruptedException;
 import faang.school.projectservice.exception.ErrorResponse;
@@ -47,9 +48,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MultipartException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMultipartException(MultipartException e) {
+    public ErrorResponse handleMultipartException() {
         return new ErrorResponse("You haven't passed an image. " +
                 "Or the Content-Type is invalid (multipart/form-data)");
+    }
+
+    @ExceptionHandler(AmazonS3Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAmazonS3Exception(AmazonS3Exception e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

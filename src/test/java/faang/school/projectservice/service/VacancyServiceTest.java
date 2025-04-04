@@ -1,11 +1,15 @@
 package faang.school.projectservice.service;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.FilterVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.OpenVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequestDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.RecordNotFoundException;
+import faang.school.projectservice.exception.ResourceForbiddenException;
 import faang.school.projectservice.filter.vacancy.AdjustableVacancyAnswer;
 import faang.school.projectservice.filter.vacancy.ReturnEmptyStreamVacancyAnswer;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
@@ -34,9 +38,19 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.lang.Nullable;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -44,10 +58,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,11 +108,16 @@ class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyCaptor;
 
+    @Captor
+    private ArgumentCaptor<String> coverImageKeyCaptor;
+
     @BeforeEach
     public void setUp() {
         vacancyService = new VacancyServiceImpl(s3Service, vacancyRepository, projectService, teamMemberService, candidateService,
                 openVacancyRequestValidator, updateVacancyRequestValidator, vacancyMapper, candidateMapper,
                 List.of(vacancyFilter1, vacancyFilter2), userContext);
+        ReflectionTestUtils.setField(vacancyService, "limitSize", 5);
+        ReflectionTestUtils.setField(vacancyService, "limitSide", 512);
     }
 
     @Test
@@ -522,6 +544,190 @@ class VacancyServiceTest {
         verify(teamMemberService, times(1)).getTeamMemberById(authorId);
     }
 
+    @Test
+    public void testAddOrChangeCoverToVacancy_throw_vacancyNotFoundException() {
+        long vacancyId = 1L;
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
+        assertThrows(RecordNotFoundException.class,
+                () -> vacancyService.addOrChangeCoverToVacancy(vacancyId,
+                        createMockFile(200, 200)));
+
+    }
+
+    @Test
+    public void testAddOrChangeCoverToVacancy_throw_userNotAllowedException() {
+        long vacancyId = 1L;
+        long userId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById)
+                .project(project).build();
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        assertThrows(ResourceForbiddenException.class,
+                () -> vacancyService.addOrChangeCoverToVacancy(vacancyId,
+                        createMockFile(200, 200)));
+    }
+
+    @Test
+    public void testAddOrChangeCoverToVacancy_throw_fileTooLongException() {
+        long vacancyId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById)
+                .project(project).build();
+        when(userContext.getUserId()).thenReturn(createdById);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        DataValidationException exception = assertThrowsExactly(DataValidationException.class,
+                () -> vacancyService.addOrChangeCoverToVacancy(vacancyId,
+                        createMockFile(600, 400)));
+        assertEquals("Image is too big or too long", exception.getMessage());
+    }
+
+    @Test
+    public void testAddOrChangeCoverToVacancy_WhenCoverIsExist() {
+        long vacancyId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById).name("vacancy")
+                .project(project).coverImageKey("old cover").build();
+        MockMultipartFile cover = createMockFile(10, 10);
+        String expectedFolder = "cover_for_vacancy_" + vacancy.getId() + vacancy.getName();
+        assert cover != null;
+        String newCoverImageKey = expectedFolder + "/" + cover.getOriginalFilename();
+
+        when(userContext.getUserId()).thenReturn(ownerId);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        when(s3Service.uploadFile(Objects.requireNonNull(cover),expectedFolder))
+                .thenReturn(newCoverImageKey);
+
+        String resultCoverImageKey = vacancyService.addOrChangeCoverToVacancy(vacancyId,cover);
+        verify(s3Service, times(1))
+                .deleteFile(coverImageKeyCaptor.capture());
+        String oldCoverImageKey = coverImageKeyCaptor.getValue();
+        assertEquals("old cover", oldCoverImageKey);
+        verify(vacancyRepository,times(1)).findById(vacancyId);
+        verify(s3Service,times(1)).uploadFile(cover,expectedFolder);
+        verify(userContext,times(1)).getUserId();
+        verify(vacancyRepository,times(1)).save(vacancy);
+        assertEquals(newCoverImageKey,resultCoverImageKey);
+    }
+
+    @Test
+    public void testAddOrChangeCoverToVacancy_WhenCoverNotExist() {
+        long vacancyId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById).name("vacancy")
+                .project(project).build();
+        MockMultipartFile cover = createMockFile(10, 10);
+        String expectedFolder = "cover_for_vacancy_" + vacancy.getId() + vacancy.getName();
+        assert cover != null;
+        String newCoverImageKey = expectedFolder + "/" + cover.getOriginalFilename();
+
+        when(userContext.getUserId()).thenReturn(ownerId);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        when(s3Service.uploadFile(Objects.requireNonNull(cover),expectedFolder))
+                .thenReturn(newCoverImageKey);
+
+        String resultCoverImageKey = vacancyService.addOrChangeCoverToVacancy(vacancyId,cover);
+        verify(s3Service, never())
+                .deleteFile(anyString());
+        verify(vacancyRepository,times(1)).findById(vacancyId);
+        verify(s3Service,times(1)).uploadFile(cover,expectedFolder);
+        verify(userContext,times(1)).getUserId();
+        verify(vacancyRepository,times(1)).save(vacancy);
+        assertEquals(newCoverImageKey,resultCoverImageKey);
+    }
+
+    @Test
+    public void testGetVacancyCover_throw_WhenVacancyNotFound() {
+        long vacancyId = 1L;
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
+        assertThrowsExactly(RecordNotFoundException.class,
+                () -> vacancyService.getVacancyCover(vacancyId));
+
+    }
+
+    @Test
+    public void testGetVacancyCover_throw_WhenFileNotFound() {
+        long vacancyId = 1L;
+        String coverImageKey = "cover";
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).coverImageKey(coverImageKey).build();
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        when(s3Service.downloadFile(vacancy.getCoverImageKey())).thenThrow(AmazonS3Exception.class);
+
+        assertThrowsExactly(AmazonS3Exception.class,
+                ()->vacancyService.getVacancyCover(vacancyId));
+        verify(vacancyRepository, times(1)).save(vacancy);
+        verify(vacancyRepository,times(1)).findById(vacancyId);
+    }
+
+    @Test
+    public void testGetVacancyCover() {
+        long vacancyId = 1L;
+        String coverImageKey = "cover";
+        S3Object s3Object = new S3Object();
+        s3Object.setObjectContent(new ByteArrayInputStream("file-content".getBytes()));
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).coverImageKey(coverImageKey).build();
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        when(s3Service.downloadFile(vacancy.getCoverImageKey())).thenReturn(s3Object.getObjectContent());
+
+        InputStream inputStream = vacancyService.getVacancyCover(vacancyId);
+
+        assertNotNull(inputStream);
+        verify(vacancyRepository,times(1)).findById(vacancyId);
+        verify(s3Service, times(1)).downloadFile(vacancy.getCoverImageKey());
+        verify(vacancyRepository, never()).save(vacancy);
+    }
+
+    @Test
+    public void testDeleteCoverFromVacancy_throw_WhenVacancyNotFound() {
+        long vacancyId = 1L;
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
+        assertThrowsExactly(RecordNotFoundException.class,
+                () -> vacancyService.deleteCoverFromVacancy(vacancyId));
+
+    }
+
+    @Test
+    public void testDeleteCoverFromVacancy_throw_userNotAllowedException() {
+        long vacancyId = 1L;
+        long userId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById)
+                .project(project).build();
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        assertThrowsExactly(ResourceForbiddenException.class,
+                () -> vacancyService.deleteCoverFromVacancy(vacancyId));
+    }
+
+    @Test
+    public void testDeleteCoverFromVacancy() {
+        long vacancyId = 1L;
+        long createdById = 2L;
+        long ownerId = 3L;
+        String coverImageKey = "cover";
+        Project project = Project.builder().id(1L).ownerId(ownerId).build();
+        Vacancy vacancy = Vacancy.builder().id(vacancyId).createdBy(createdById)
+                .project(project).coverImageKey(coverImageKey).build();
+        when(userContext.getUserId()).thenReturn(createdById);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        vacancyService.deleteCoverFromVacancy(vacancyId);
+        verify(s3Service,times(1)).deleteFile(coverImageKeyCaptor.capture());
+        verify(vacancyRepository,times(1)).save(vacancyCaptor.capture());
+
+        assertEquals(coverImageKey, coverImageKeyCaptor.getValue());
+        assertNull(vacancyCaptor.getValue().getCoverImageKey());
+    }
+
     private static OpenVacancyRequestDto createOpenVacancyRequestDto(long projectId, long authorId, Double salary) {
         return OpenVacancyRequestDto.builder()
                 .name("Test name")
@@ -535,7 +741,7 @@ class VacancyServiceTest {
     }
 
     private static UpdateVacancyRequestDto createUpdateVacancyRequestDto(long vacancyId, long updaterId,
-            @Nullable VacancyStatus status, @Nullable Integer requiredCandidatesCount) {
+                                                                         @Nullable VacancyStatus status, @Nullable Integer requiredCandidatesCount) {
         return UpdateVacancyRequestDto.builder()
                 .vacancyId(vacancyId)
                 .teamMemberUpdaterId(updaterId)
@@ -560,8 +766,31 @@ class VacancyServiceTest {
     }
 
     private void setupVacancyFilter(VacancyFilter filter, FilterVacancyRequestDto filterDto, boolean isApplicable,
-            Answer<Stream<Vacancy>> filterApplyAnswer) {
+                                    Answer<Stream<Vacancy>> filterApplyAnswer) {
         when(filter.isApplicable(filterDto)).thenReturn(isApplicable);
         when(filter.apply(any(), any())).thenAnswer(filterApplyAnswer);
     }
+
+    static MockMultipartFile createMockFile(int width, int height) {
+        try {
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+            g.setColor(Color.RED);
+            g.fillRect(0, 0, width, height);
+            g.dispose();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            byte[] imageData = baos.toByteArray();
+            return new MockMultipartFile(
+                    "cover",
+                    "cover.png",
+                    "multipart/form-data",
+                    imageData
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
