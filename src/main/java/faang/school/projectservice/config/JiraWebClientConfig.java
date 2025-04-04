@@ -33,7 +33,6 @@ public class JiraWebClientConfig {
                 .baseUrl(jiraBaseUrl)
                 .filter(addAuthorizationHeader())
                 .filter(errorHandlingFilter())
-                .codecs(ClientCodecConfigurer::defaultCodecs)
                 .build();
     }
 
