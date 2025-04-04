@@ -12,22 +12,17 @@ import java.util.List;
 public record VacancyRequestDto(
         @NotBlank
         String name,
-
         @NotBlank
         String description,
-
         @NotNull
         TeamRole position,
-
         @NotNull
         Long projectId,
-
         List<Long> candidatesIds,
         @NotNull
         Long createdBy,
         Long updatedBy,
-
         @NotNull
         VacancyStatus status,
-
-        Integer count) {}
+        Integer count) {
+}

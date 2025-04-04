@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectCreateRequestDto;
-import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;

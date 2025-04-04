@@ -1,6 +1,6 @@
 package faang.school.projectservice.handler;
 
-import faang.school.projectservice.dto.ErrorDto;
+import faang.school.projectservice.dto.error.ErrorDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;

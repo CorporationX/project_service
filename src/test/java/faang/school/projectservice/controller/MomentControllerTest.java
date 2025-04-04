@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
-import faang.school.projectservice.service.impl.MomentServiceImpl;
+import faang.school.projectservice.service.moment.MomentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
-import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.resource.ResourceService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

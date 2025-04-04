@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ResourceDto(
-
         Long id,
         String key,
         LocalDateTime createAt

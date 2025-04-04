@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.dto.subproject.SubProjectResponseDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
-import faang.school.projectservice.service.SubProjectService;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,11 +1,11 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.ProjectCreateRequestDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.dto.ProjectUpdateRequestDto;
+import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.resource.S3ObjectDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
