@@ -123,7 +123,7 @@ public class JiraServiceImpl implements JiraService {
                             return Mono.just(projectMapper.toProjectResponseDto(project));
                         })
                         .orElseGet(() -> Mono.error(new ProjectNotFoundException(
-                                "Project with id %d not found".formatted(id)))));
+                                "Project with id %d not found" .formatted(id)))));
     }
 
     private Mono<String> getProjectKey(Long projectId) {

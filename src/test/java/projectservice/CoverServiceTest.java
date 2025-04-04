@@ -107,7 +107,7 @@ public class CoverServiceTest {
     @Test
     public void testUploadCover_nullFilename() {
         validImageFile = new MockMultipartFile("name",
-                null, "image/jpeg", "imageBytes".getBytes());
+                null, "image/jpeg", "imageBytes" .getBytes());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> coverService.uploadCover(validImageFile, vacancyId)
@@ -131,7 +131,7 @@ public class CoverServiceTest {
     @Test
     public void testUploadCover_invalidImageFormat() {
         validImageFile = new MockMultipartFile("name",
-                "originalName", "image/gif", "imageBytes".getBytes());
+                "originalName", "image/gif", "imageBytes" .getBytes());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> coverService.uploadCover(validImageFile, vacancyId)

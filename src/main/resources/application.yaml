@@ -54,8 +54,8 @@ services:
     port: 8080
   jira:
     endpoint: http://localhost:8095/rest/api/2
-    email: ${JIRA_EMAIL:emailnotset@gmail.com}
-    token: ${JIRA_TOKEN:tokenNotSet}
+    email: ${JIRA_EMAIL:email}
+    token: ${JIRA_TOKEN:token}
   minio:
     endpoint: http://localhost:9000
     access-key: ${MINIO_ACCESS_KEY:user}
