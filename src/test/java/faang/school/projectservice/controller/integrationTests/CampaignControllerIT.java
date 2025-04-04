@@ -6,14 +6,10 @@ import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.repository.CampaignRepository;
-import io.minio.MinioClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 
@@ -29,7 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
 @Sql(scripts = {"/clear.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
 public class CampaignControllerIT extends AbstractIntegrationTest {
 
@@ -42,28 +37,23 @@ public class CampaignControllerIT extends AbstractIntegrationTest {
             .currency(Currency.USD)
             .build();
 
-     CampaignDto updatedRequestDto = CampaignDto.builder()
-             .title("updateTitle")
-             .description("updateDescription")
-             .goal(BigDecimal.valueOf(3))
-             .status(CampaignStatus.CANCELED)
-             .projectId(1L)
-             .currency(Currency.USD)
-             .build();
+    CampaignDto updatedRequestDto = CampaignDto.builder()
+            .title("updateTitle")
+            .description("updateDescription")
+            .goal(BigDecimal.valueOf(3))
+            .status(CampaignStatus.CANCELED)
+            .projectId(1L)
+            .currency(Currency.USD)
+            .build();
 
-     CampaignFilterDto filterDto = CampaignFilterDto.builder()
-             .status(CampaignStatus.COMPLETED)
-             .build();
-
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    CampaignFilterDto filterDto = CampaignFilterDto.builder()
+            .status(CampaignStatus.COMPLETED)
+            .build();
 
     private final String URL = "/api/v1/campaigns";
 
     @Autowired
     public CampaignRepository campaignRepository;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Test
     void createCampaignTest() throws Exception {
@@ -100,8 +90,8 @@ public class CampaignControllerIT extends AbstractIntegrationTest {
         String jsonRequestDto = OBJECT_MAPPER.writeValueAsString(updatedRequestDto);
 
         mockMvc.perform(put("/api/v1/campaigns/2")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequestDto)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequestDto)
                         .header("x-user-id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(2)))

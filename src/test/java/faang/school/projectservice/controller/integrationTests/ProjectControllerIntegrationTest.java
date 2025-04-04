@@ -4,7 +4,6 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.controller.ProjectController;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exceptionHandler.GlobalExceptionHandler;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -18,12 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static faang.school.projectservice.constant.ImageTestConstants.IMAGE_MOCK_MULTIPART_FILE;
 import static faang.school.projectservice.constant.ProjectTestConstants.NOT_OWNER_ID;
@@ -47,10 +44,6 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private UserContext userContext;
 
-    private MockMvc mockMvc;
-
-    private ObjectMapper objectMapper;
-
     private long testProjectId;
 
     ProjectDto testProjectDto = new ProjectDto();
@@ -58,12 +51,6 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         userContext.setUserId(OWNER_ID);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(projectController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-
-        objectMapper = new ObjectMapper();
 
         Project testProject = Project.builder()
                 .name("Test")
@@ -87,7 +74,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     void testSuccessCreateProject() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("test"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Test project"))
@@ -101,7 +88,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("name must be fielded"));
     }
@@ -112,7 +99,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(testProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description")
                         .value("description must be fielded"));
@@ -128,7 +115,7 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(updatedProjectDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Project name"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Project description"))
@@ -142,13 +129,14 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/projects/user/{userId}/filter", OWNER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(nameFilter)))
+                        .content(OBJECT_MAPPER.writeValueAsString(nameFilter)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Test"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value("Test project"));
     }
 
     @Test
+    @Sql("classpath:db/changelog/changeset/project_V019_insert_project.sql")
     void testGetAllAvailableProjectsForUser() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/user/{userId}", OWNER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -230,11 +218,13 @@ public class ProjectControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql("classpath:db/changelog/changeset/project_V019_insert_project.sql")
     void deleteProjectCover_shouldBeCompletedSuccessfully() throws Exception {
         addTestProjectCover();
 
         MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId))
+                .perform(MockMvcRequestBuilders.delete("/api/v1/projects/{id}/cover", testProjectId)
+                        .header("x-user-id", 1L))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
