@@ -1,5 +1,6 @@
 package faang.school.projectservice.client;
 
+import faang.school.projectservice.annotation.RetryJiraOperation;
 import faang.school.projectservice.dto.jiratask.JiraSearchResponse;
 import faang.school.projectservice.dto.jiratask.JiraStatusUpdateRequest;
 import faang.school.projectservice.dto.jiratask.JiraTaskCreateRequest;
@@ -11,7 +12,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -41,12 +41,12 @@ public class JiraClient {
 
     private final WebClient webClient;
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<JiraTaskResponse> createJiraTask(JiraTaskCreateRequest request) {
         return createPostingRequestOnJiraClient("/issue", request, JiraTaskResponse.class);
     }
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<Void> updateJiraTask(String issueKey, JiraTaskUpdateRequest request) {
         return webClient.put()
                 .uri(JIRA_REST_API_URL + "/issue/{issueKey}", issueKey)
@@ -58,7 +58,7 @@ public class JiraClient {
                 .bodyToMono(Void.class);
     }
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<Void> updateStatusJiraTask(String issueKey, JiraStatusUpdateRequest request) {
         String url = UriComponentsBuilder.fromPath("/issue/{issueKey}/transitions")
                 .buildAndExpand(issueKey)
@@ -66,7 +66,7 @@ public class JiraClient {
         return createPostingRequestOnJiraClient(url, request, Void.class);
     }
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<List<JiraTaskResponse>> getProjectJiraTasksByFilters(@NotBlank String projectKey,
                                                                      @NotBlank String status,
                                                                      @NotBlank String assignee) {
@@ -75,13 +75,13 @@ public class JiraClient {
         return createGettingRequestOnJiraClient(jql);
     }
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<List<JiraTaskResponse>> getProjectJiraTasks(@NotBlank String projectKey) {
         String jql = String.format("project = \"%s\"", projectKey);
         return createGettingRequestOnJiraClient(jql);
     }
 
-    @Retryable
+    @RetryJiraOperation
     public Mono<JiraTaskResponse> getJiraTaskById(String issueKey) {
         return webClient.get()
                 .uri(JIRA_REST_API_URL + "/issue/{issueKey}?fields", issueKey)

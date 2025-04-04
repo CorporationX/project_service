@@ -29,14 +29,17 @@ spring:
     active: local
 
   retry:
-    backoff:
-      initial-interval: 1s
-      multiplier: 3
-      max-interval: 5s
+    enabled: true
 
   servlet:
     multipart:
       max-file-size: 10MB
+
+retry:
+  backoff:
+    initial-interval: 1s
+    multiplier: 3
+    max-interval: 5s
 
 file:
   cover-max-size: 5242880
