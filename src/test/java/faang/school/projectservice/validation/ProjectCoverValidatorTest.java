@@ -101,7 +101,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Квадратное изображение - превышение максимальной стороны")
-    void isImageOversize_WhenSquareImageExceedsMaxSide_ReturnsTrue() {
+    public void isImageOversize_WhenSquareImageExceedsMaxSide_ReturnsTrue() {
         BufferedImage squareImageOversized = new BufferedImage(SQUARE_SIDE + 1, SQUARE_SIDE + 1, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getSquareSide()).thenReturn(SQUARE_SIDE);
         when(imageProcessor.readImage(any())).thenReturn(squareImageOversized);
@@ -111,7 +111,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Квадратное изображение - допустимый размер")
-    void isImageOversize_WhenSquareImageWithinLimits_ReturnsFalse()  {
+    public void isImageOversize_WhenSquareImageWithinLimits_ReturnsFalse()  {
         BufferedImage squareImageValid = new BufferedImage(SQUARE_SIDE, SQUARE_SIDE, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getSquareSide()).thenReturn(SQUARE_SIDE);
         when(imageProcessor.readImage(any())).thenReturn(squareImageValid);
@@ -121,7 +121,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Горизонтальное изображение - превышение ширины")
-    void isImageOversize_WhenHorizontalImageExceedsMaxWidth_ReturnsTrue() {
+    public void isImageOversize_WhenHorizontalImageExceedsMaxWidth_ReturnsTrue() {
         BufferedImage horizontalImageOversized = new BufferedImage(HORIZONTAL_WIDTH + 1, HORIZONTAL_HEIGHT - 10, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getHorizontalWidth()).thenReturn(HORIZONTAL_WIDTH);
         when(imageProcessor.readImage(any())).thenReturn(horizontalImageOversized);
@@ -131,7 +131,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Горизонтальное изображение - превышение высоты")
-    void isImageOversize_WhenHorizontalImageExceedsMaxHeight_ReturnsTrue()  {
+    public void isImageOversize_WhenHorizontalImageExceedsMaxHeight_ReturnsTrue()  {
         BufferedImage horizontalImageOversized = new BufferedImage(HORIZONTAL_WIDTH - 10, HORIZONTAL_HEIGHT + 1, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getHorizontalWidth()).thenReturn(HORIZONTAL_WIDTH);
         when(projectCoverConfig.getHorizontalHeight()).thenReturn(HORIZONTAL_HEIGHT);
@@ -142,7 +142,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Горизонтальное изображение - допустимые размеры")
-    void isImageOversize_WhenHorizontalImageWithinLimits_ReturnsFalse() {
+    public void isImageOversize_WhenHorizontalImageWithinLimits_ReturnsFalse() {
         BufferedImage horizontalImageValid = new BufferedImage(HORIZONTAL_WIDTH, HORIZONTAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getHorizontalWidth()).thenReturn(HORIZONTAL_WIDTH);
         when(projectCoverConfig.getHorizontalHeight()).thenReturn(HORIZONTAL_HEIGHT);
@@ -153,7 +153,7 @@ public class ProjectCoverValidatorTest {
 
     @Test
     @DisplayName("Пограничный случай - размеры равны максимуму")
-    void isImageOversize_WhenDimensionsExactlyAtLimit_ReturnsFalse(){
+    public void isImageOversize_WhenDimensionsExactlyAtLimit_ReturnsFalse(){
         BufferedImage exactSizeImage = new BufferedImage(HORIZONTAL_WIDTH, HORIZONTAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
         when(projectCoverConfig.getHorizontalWidth()).thenReturn(HORIZONTAL_WIDTH);
         when(projectCoverConfig.getHorizontalHeight()).thenReturn(HORIZONTAL_HEIGHT);

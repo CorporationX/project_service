@@ -38,7 +38,7 @@ public class ProjectControllerTest {
 
     @Test
     @DisplayName("Загрузка обложки - успешный запрос")
-    void uploadCover_WhenValidRequest_ReturnsOk() throws Exception {
+    public void uploadCover_WhenValidRequest_ReturnsOk() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
                 "cover",
                 TEST_IMAGE_NAME,
@@ -56,7 +56,7 @@ public class ProjectControllerTest {
 
     @Test
     @DisplayName("Загрузка обложки - отсутствует файл")
-    void uploadCover_WhenMissingFile_ReturnsBadRequest() throws Exception {
+    public void uploadCover_WhenMissingFile_ReturnsBadRequest() throws Exception {
         mockMvc.perform(multipart(COVER_URL)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
@@ -64,7 +64,7 @@ public class ProjectControllerTest {
 
     @Test
     @DisplayName("Удаление обложки - успешный запрос")
-    void deleteCover_WhenValidRequest_ReturnsOk() throws Exception {
+    public void deleteCover_WhenValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(delete(COVER_URL))
                 .andExpect(status().isNoContent());
 
