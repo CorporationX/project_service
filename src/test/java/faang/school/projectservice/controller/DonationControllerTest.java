@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
@@ -17,10 +18,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -35,7 +39,9 @@ class DonationControllerTest {
             buildDonationDto(12321L, BigDecimal.valueOf(3000L), Currency.EUR)
     );
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @Autowired
     private MockMvc mockMvc;
@@ -63,11 +69,12 @@ class DonationControllerTest {
 
         when(donationService.getDonationByIdAndUserId(donationDto.id())).thenReturn(donationDto);
 
-        mockMvc.perform(
-                get("/donation/getById/{id}",donationDto.id()))
-                .andExpect(status().isOk());
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(content().json(objectMapper.writeValueAsString(donationDto)));
+        System.out.println(objectMapper.writeValueAsString(donationDto));;
+
+        mockMvc.perform(get("/donation/getById/{id}",donationDto.id()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(donationDto)));
     }
 
     @Test
@@ -85,8 +92,9 @@ class DonationControllerTest {
         mockMvc.perform(get("/donation/getAll")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(donationFilterDto)))
-                .andExpect(status().isOk());
-//                .andExpect(content().json(objectMapper.writeValueAsString(donationDtoList)));
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(donationDtoList)));
     }
 
     DonationDto buildDonationDto(Long donationId, BigDecimal amount, Currency currency) {
@@ -95,7 +103,7 @@ class DonationControllerTest {
                 donationId,
                 null,
                 amount,
-                LocalDateTime.now(),
+                LocalDate.now().atTime(LocalTime.MIN),
                 2L,
                 currency
         );

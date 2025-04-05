@@ -27,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +80,7 @@ class DonationServiceTest {
                 1L,
                 null,
                 BigDecimal.valueOf(100L),
-                LocalDateTime.now(),
+                LocalDate.now().atTime(LocalTime.MIN),
                 123L,
                 Currency.USD
         );
