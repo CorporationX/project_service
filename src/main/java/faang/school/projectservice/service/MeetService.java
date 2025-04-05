@@ -63,7 +63,7 @@ public class MeetService {
         Meet meet = meetRepository.findById(id)
                 .orElseThrow(() -> meetNotFoundException(id));
         if (meet.getCreatorId() != meetDto.creatorId()) {
-            log.info("Meet with id {} is not created by user with id {}", id, meetDto.creatorId());
+            log.error("Meet with id {} is not created by user with id {}", id, meetDto.creatorId());
             throw new IllegalArgumentException("Only creator can update the meet");
         }
         meet.setTitle(meetDto.title());
@@ -87,7 +87,7 @@ public class MeetService {
     }
 
     private IllegalArgumentException meetNotFoundException(long id) {
-        log.info("Meet with id {} not found", id);
+        log.error("Meet with id {} not found", id);
         return new IllegalArgumentException("Meet not found");
     }
 }
