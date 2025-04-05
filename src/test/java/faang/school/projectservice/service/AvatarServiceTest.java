@@ -10,7 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import faang.school.projectservice.exception.LimitSizeFileException;
+import faang.school.projectservice.exception.FileSizeLimitException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.UnsupportedFileTypeException;
 import faang.school.projectservice.model.Resource;
@@ -126,7 +126,7 @@ class AvatarServiceTest {
 
     @Test
     void addAvatar_FileTooLarge_ThrowsException() {
-        LimitSizeFileException exception = assertThrows(LimitSizeFileException.class, () -> avatarService.addAvatar(teamId, largeFile));
+        FileSizeLimitException exception = assertThrows(FileSizeLimitException.class, () -> avatarService.addAvatar(teamId, largeFile));
 
         assertEquals(getErrorLimitSizeFile(MAX_FILE_SIZE), exception.getMessage());
     }
