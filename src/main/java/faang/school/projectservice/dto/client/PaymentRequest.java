@@ -4,8 +4,12 @@ import java.math.BigDecimal;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
-public record PaymentRequest (
+@Builder
+public record PaymentRequest(
+
+        @NotNull
         Long paymentNumber,
 
         @Min(1)
@@ -13,9 +17,6 @@ public record PaymentRequest (
         BigDecimal amount,
 
         @NotNull
-        Currency paymentCurrency,
-
-        @NotNull
-        Currency targetCurrency
+        Currency currency
 ) {
 }

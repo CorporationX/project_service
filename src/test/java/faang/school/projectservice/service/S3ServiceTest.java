@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import faang.school.projectservice.config.properties.S3Properties;
+import faang.school.projectservice.exception.ExceptionMessage;
+import faang.school.projectservice.exception.FileProcessingException;
 import faang.school.projectservice.config.S3Properties;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.s3.S3Service;
@@ -21,54 +23,64 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@ActiveProfiles("test")
-@EnableConfigurationProperties(S3Properties.class)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 public class S3ServiceTest {
+
     @Mock
-    private AmazonS3 s3Client;
+    AmazonS3 amazonS3;
+
+    @Mock
+    S3Properties s3Properties;
 
     @InjectMocks
-    private S3Service s3Service;
+    S3Service s3Service;
 
-    @MockBean
-    private S3Properties properties;
+    ArgumentCaptor<PutObjectRequest> putObjectRequestCaptor = ArgumentCaptor.forClass(PutObjectRequest.class);
 
-    @Captor
-    private ArgumentCaptor<PutObjectRequest> argumentCaptor;
-    @Captor
-    private ArgumentCaptor<DeleteObjectRequest> argumentCaptor1;
+    private byte[] fileBytes;
+    private String folder;
+    private String fileName;
+    private String contentType;
+    private String bucketName;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        properties = new S3Properties("test-access-key", "test-secret-key",
-                "test-bucket", "https://s3.test.amazonaws.com");
-        s3Service = new S3Service(s3Client, properties);
+    void setUp() {
+        fileBytes = "S3Service test".getBytes();
+        folder = "cover";
+        fileName = "test";
+        contentType = "text/plain";
+        bucketName = "test-bucket";
     }
 
     @Test
-    public void testPositiveUpload() {
-        MockMultipartFile file = new MockMultipartFile("file",
-                "test.txt", "text/plain", "Hello World".getBytes());
+    void testUploadFromBytesNegative() {
+        when(s3Properties.bucketName()).thenReturn(bucketName);
+        Resource resource = s3Service.uploadFromBytes(fileBytes, folder, fileName, contentType);
 
-        Resource resource = s3Service.uploadFile(file, "test30");
-        verify(s3Client, times(1)).putObject(argumentCaptor.capture());
-        PutObjectRequest putObjectRequest = argumentCaptor.getValue();
-        assertEquals(putObjectRequest.getMetadata().getContentType(), file.getContentType());
-        assertNotNull(resource);
+        verify(amazonS3, times(1)).putObject(putObjectRequestCaptor.capture());
+        PutObjectRequest putObjectRequest = putObjectRequestCaptor.getValue();
+
+        assertEquals(putObjectRequest.getBucketName(), bucketName);
+        assertEquals(resource.getName(), fileName);
     }
 
     @Test
-    public void testPositiveDeleteFile() {
-        String key = "test";
-        s3Service.deleteFile("test");
-        verify(s3Client, times(1)).deleteObject(argumentCaptor1.capture());
-        assertEquals(argumentCaptor1.getValue().getKey(), key);
-        assertEquals(argumentCaptor1.getValue().getBucketName(), "test-bucket");
+    void testUploadFromBytesSuccess() {
+        when(s3Properties.bucketName()).thenReturn(bucketName);
+        when(amazonS3.putObject(any(PutObjectRequest.class))).thenThrow(RuntimeException.class);
+
+        var exception = assertThrows(
+                FileProcessingException.class,
+                () -> s3Service.uploadFromBytes(fileBytes, folder, fileName, contentType)
+        );
+
+        assertEquals(exception.getMessage(), ExceptionMessage.S3_UPLOAD.getMessage());
     }
+
 }

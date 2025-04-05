@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.service.ImageService;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,6 +25,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ImageService imageService;
 
     @PostMapping("/new")
     public void createProject(@RequestParam Long userId, @RequestBody ProjectDto projectDto) {
@@ -47,4 +52,10 @@ public class ProjectController {
     public ProjectDto getProjectById(@RequestParam Long userId, @PathVariable Long projectId) {
         return projectService.getProjectById(userId, projectId);
     }
+
+    @PostMapping("/cover/{id}")
+    public ResourceDto addCover(@PathVariable long id, @RequestBody MultipartFile file) throws IOException {
+        return imageService.saveProjectCover(id, file);
+    }
+
 }

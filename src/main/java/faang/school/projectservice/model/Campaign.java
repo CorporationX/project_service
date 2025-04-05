@@ -13,7 +13,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,7 +25,10 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Builder
 @Table(name = "campaign")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Campaign {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

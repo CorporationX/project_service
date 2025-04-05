@@ -5,11 +5,6 @@ spring:
     username: user
     password: password
 
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -30,6 +25,16 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  profiles:
+    active: local
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+file:
+  cover-max-size: 5242880
+
 server:
   port: 8082
 
@@ -46,7 +51,8 @@ services:
     accessKey: user
     secretKey: password
     bucketName: corpbucket
-
+    isMocked: false
+    region: us-east-1
 
   payment-service:
     host: http://localhost
@@ -54,5 +60,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
-
