@@ -1,9 +1,8 @@
 package faang.school.projectservice.service.projectresource;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ResourceHandlingException;
 import faang.school.projectservice.exception.StorageSizeExceededException;
@@ -108,7 +107,7 @@ class ProjectResourceServiceImplTest {
         doNothing().when(s3Service).uploadFile(any(), any());
         when(resourceRepository.save(any())).thenReturn(resource);
         when(tikaService.detectMimeType(any(MultipartFile.class))).thenReturn("text/plain");
-        ResourceDto expectedDto = ResourceDto.builder()
+        ResourceFileDto expectedDto = ResourceFileDto.builder()
                 .id(1L)
                 .name("test.txt")
                 .size(BigInteger.valueOf(100))
@@ -117,7 +116,7 @@ class ProjectResourceServiceImplTest {
         when(resourceMapper.toDto(any())).thenReturn(expectedDto);
         ReflectionTestUtils.setField(projectResourceService, "maxStorageSize", 1000L);
 
-        ResourceDto result = projectResourceService.uploadFile(1L, file);
+        ResourceFileDto result = projectResourceService.uploadFile(1L, file);
 
         assertNotNull(result);
         assertEquals(expectedDto, result);

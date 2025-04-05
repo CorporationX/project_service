@@ -4,6 +4,13 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+  servlet:
+    multipart:
+      max-file-size: 150MB
+      max-request-size: 170MB
+    avatar:
+      max-file-size: 5MB
+      max-image-size: 512
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -24,12 +31,6 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
-  servlet:
-    multipart:
-      max-file-size: 150MB
-      max-request-size: 170MB
-  avatar:
-    max-image-size: 512
 
 springdoc:
   swagger-ui:
