@@ -160,7 +160,7 @@ class ProjectResourceServiceImplTest {
         when(resourceRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
+        assertThrows(ResourceHandlingException.class,
                 () -> projectResourceService.downloadFile(1L));
 
         verify(s3Service, never()).downloadFile(any());
