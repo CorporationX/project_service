@@ -6,9 +6,11 @@ import faang.school.projectservice.dto.jiratask.task.fields.JiraDescriptionDto;
 import faang.school.projectservice.dto.jiratask.task.fields.JiraParentDto;
 import faang.school.projectservice.dto.jiratask.task.fields.JiraPriorityDto;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
 public record JiraUpdateFieldsDto(
 
         @JsonProperty("summary")

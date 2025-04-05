@@ -10,9 +10,11 @@ import faang.school.projectservice.dto.jiratask.task.fields.JiraProjectDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
 public record JiraCreateFieldsDto(
 
         @JsonProperty("project")
