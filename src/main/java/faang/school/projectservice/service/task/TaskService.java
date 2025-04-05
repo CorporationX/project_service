@@ -20,7 +20,6 @@ public class TaskService {
     private final ProjectRepository projectRepository;
     private final TaskMapper taskMapper;
 
-    //TODO: "1. Создание задачи. Задачи могут создавать все участники проекта.
     @Transactional
     public TaskDto createTask(TaskDto taskDto) {
         Task task = taskMapper.taskDtoToTask(taskDto);
@@ -28,9 +27,6 @@ public class TaskService {
         return taskMapper.taskToTaskDto(savedTask);
     }
 
-
-    //TODO: "2. Изменение задачи (описание, статус, deadline, исполнитель, изменение родительской задачи,
-    // изменение связанных задач).
     @Transactional
     public TaskDto updateTask(Long taskId, TaskDto taskDto, Long userId) {
         Task task = taskRepository.findById(taskId)
@@ -45,8 +41,6 @@ public class TaskService {
         return taskMapper.taskToTaskDto(savedTask);
     }
 
-    //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
-    // (буду использовать по исполнителю).
     public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
         List<Task> tasks = taskRepository.findAll();
         List<Task> filteredTasks = tasks.stream()
@@ -59,7 +53,6 @@ public class TaskService {
                 .toList();
     }
 
-    //TODO: "4. Получить все задачи проекта."
     public List<TaskDto> getAllTasksByProjectId(long projectId) {
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
         return tasks.stream()
@@ -67,7 +60,6 @@ public class TaskService {
                 .toList();
     }
 
-    //TODO: "5. Получить задачу по id"
     public TaskDto getTaskById(long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));

@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class TaskDto {
-    private Long id;                // для идентификации обновляемой задачи
-    private String description;     // описание
-    private TaskStatus status;      // статус
-    private Long performerUserId;   // исполнитель
-    private LocalDateTime deadline; // deadline
+    private Long id;
+    private String description;
+    private TaskStatus status;
+    private Long performerUserId;
+    private LocalDateTime deadline;
 }

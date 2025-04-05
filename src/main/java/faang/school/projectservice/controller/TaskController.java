@@ -27,7 +27,6 @@ public class TaskController {
     private final TaskService taskService;
     private final UserContext userContext;
 
-    //TODO: "1. Создание задачи. Задачи могут создавать все участники проекта.
     @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto) {
         Long userId = userContext.getUserId();
@@ -41,9 +40,6 @@ public class TaskController {
         }
     }
 
-    //TODO: "2. Изменение задачи (описание, статус, deadline, исполнитель, изменение родительской задачи,
-    // изменение связанных задач). Изменение могут делать все участники,
-    // важно логировать для аудита дату изменения и пользователя, который изменил данные.
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskDto> updateTask(@PathVariable Long taskId, @RequestBody TaskDto taskDto) {
         Long userId = userContext.getUserId();
@@ -64,8 +60,6 @@ public class TaskController {
         }
     }
 
-    //TODO: "3. Получить все задачи проекта с фильтрами по статусу, исполнителю или ключевому слову.
-    // (буду использовать по исполнителю).
     @GetMapping("/project/{projectId}/filtered")
     public ResponseEntity<List<TaskDto>> getFilteredTasks(
             @PathVariable Long projectId,
@@ -85,7 +79,6 @@ public class TaskController {
         }
     }
 
-    //TODO: "4. Получить все задачи проекта."
     @GetMapping("/project/{projectId}")
     public ResponseEntity<List<TaskDto>> getAllTasks(@PathVariable Long projectId) {
         Long userId = userContext.getUserId();
@@ -99,7 +92,6 @@ public class TaskController {
         }
     }
 
-    //TODO: "5. Получить задачу по id"
     @GetMapping("/task/{taskId}")
     public ResponseEntity<TaskDto> getTaskById(@PathVariable Long taskId) {
         Long userId = userContext.getUserId();
