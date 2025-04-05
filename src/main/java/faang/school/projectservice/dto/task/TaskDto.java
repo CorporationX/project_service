@@ -3,6 +3,7 @@ package faang.school.projectservice.dto.task;
 import faang.school.projectservice.model.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -32,10 +33,12 @@ public class TaskDto {
     @Schema(example = "TODO")
     private TaskStatus status;
 
+    @NotNull(message = "Performer ID is required")
     @Schema(example = "1")
     private Long performerUserId;
 
-    @Schema(example = "null")
+    @Schema(example = "1")
+    @Min(value = 1, message = "parentTaskId must be greater than 0")
     private Long parentTaskId;
 
     @Schema(example = "[31, 32, 33]")

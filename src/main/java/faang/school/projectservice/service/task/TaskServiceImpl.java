@@ -1,17 +1,12 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.task;
 
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.dto.task.TaskResponseDto;
 import faang.school.projectservice.exception.TaskNotFoundException;
-import faang.school.projectservice.filter.PerformerFilter;
-import faang.school.projectservice.filter.KeywordFilter;
-import faang.school.projectservice.filter.StatusFilter;
-import faang.school.projectservice.filter.TaskFilter;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.validator.TaskValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,11 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
+import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Validated
@@ -34,19 +27,16 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    private final TaskValidator taskValidator;
+    private final TaskPermissionService taskPermissionService;
 
     @Override
     @Transactional
     public TaskResponseDto createTask(TaskDto taskDto) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
+        long currentUserId = taskPermissionService.validateTaskAccess();
         Task task = taskMapper.toEntity(taskDto);
         task.setReporterUserId(currentUserId);
-        if (task.getPerformerUserId() == null) {
-            task.setPerformerUserId(currentUserId);
-        }
-        if (task.getParentTask().getId() != null) {
-            Task parentTask = getTaskOrThrow(task.getParentTask().getId());
+        if (taskDto.getParentTaskId() != null && taskDto.getParentTaskId() != 0) {
+            Task parentTask = getTaskOrThrow(taskDto.getParentTaskId());
             task.setParentTask(parentTask);
         } else {
             task.setParentTask(null);
@@ -60,9 +50,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskResponseDto updateTask(Long id, TaskDto taskDto) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
+    public TaskResponseDto updateTask(Long id, TaskDto taskDto) throws AccessDeniedException {
         Task existingTask = getTaskOrThrow(id);
+        taskPermissionService.validateTaskUpdatePermission(existingTask);
         Task updatedTask = updateTaskFields(existingTask, taskDto);
         Task savedTask = taskRepository.save(updatedTask);
         return taskMapper.toResponseDto(savedTask);
@@ -70,38 +60,33 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskResponseDto> getFilteredTasks(TaskFilterDto filterDto) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
-        List<Task> tasks = taskRepository.findAll();
-        List<TaskFilter> filters = createFilters(filterDto);
-        List<Task> filteredTasks = tasks.stream()
-                .filter(task -> filters.stream().allMatch(filter -> filter.test(task)))
-                .collect(toList());
-        return taskMapper.toResponseDtoList(filteredTasks);
+        List<Task> tasks = taskRepository.findFilteredTasks(
+                filterDto.getStatus(),
+                filterDto.getPerformerId(),
+                filterDto.getKeyword()
+        );
+        return taskMapper.toResponseDtoList(tasks);
     }
 
     @Override
     public List<TaskResponseDto> getAllTasks() {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         return taskMapper.toResponseDtoList(taskRepository.findAll());
     }
 
     @Override
     public List<TaskResponseDto> getAllTasksByProjectId(Long projectId) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
         return taskMapper.toResponseDtoList(taskRepository.findAllByProjectId(projectId));
     }
 
     @Override
     public TaskResponseDto getTaskById(long id) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
-        Task task = getTaskOrThrow(id);
-        return taskMapper.toResponseDto(task);
+        return taskMapper.toResponseDto(getTaskOrThrow(id));
     }
 
     @Override
-    public void deleteTask(Long id) {
-        long currentUserId = taskValidator.validateUserParticipationAndGetUserId();
+    public void deleteTask(Long id) throws AccessDeniedException {
         Task task = getTaskOrThrow(id);
+        taskPermissionService.validateTaskDeletePermission(task);
         taskRepository.delete(task);
     }
 
@@ -137,22 +122,5 @@ public class TaskServiceImpl implements TaskService {
             builder.linkedTasks(Collections.emptyList());
         }
         return builder.build();
-    }
-
-    private List<TaskFilter> createFilters(TaskFilterDto filterDto) {
-        if (filterDto == null) {
-            return Collections.emptyList();
-        }
-        List<TaskFilter> filters = new ArrayList<>();
-        if (filterDto.getStatus() != null && !filterDto.getStatus().trim().isEmpty()) {
-            filters.add(new StatusFilter(filterDto.getStatus()));
-        }
-        if (filterDto.getPerformerId() != null) {
-            filters.add(new PerformerFilter(filterDto.getPerformerId()));
-        }
-        if (filterDto.getKeyword() != null && !filterDto.getKeyword().trim().isEmpty()) {
-            filters.add(new KeywordFilter(filterDto.getKeyword()));
-        }
-        return filters;
     }
 }

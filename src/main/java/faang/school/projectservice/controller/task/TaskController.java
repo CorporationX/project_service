@@ -3,7 +3,8 @@ package faang.school.projectservice.controller.task;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.dto.task.TaskResponseDto;
-import faang.school.projectservice.service.TaskService;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.service.task.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -55,22 +57,29 @@ public class TaskController {
     public ResponseEntity<TaskResponseDto> updateTask(
             @Parameter(description = "ID of the task to update") @PathVariable Long id,
             @Valid @RequestBody TaskDto taskDto
-    ) {
+    ) throws AccessDeniedException {
         TaskResponseDto updatedTask = taskService.updateTask(id, taskDto);
         return ResponseEntity.ok(updatedTask);
     }
 
-    @Operation(
-            summary = "Get tasks with filters",
-            description = "Fetches tasks based on filters like status, performer, or keyword"
-    )
+    @Operation(summary = "Get filtered tasks")
     @GetMapping("/search")
     public ResponseEntity<List<TaskResponseDto>> getTasksFiltered(
-            @Parameter(description = "Filter tasks by status") @RequestParam(required = false) String status,
-            @Parameter(description = "Filter tasks by performer ID") @RequestParam(required = false) Long performerId,
-            @Parameter(description = "Filter tasks by a keyword in title or description") @RequestParam(required = false) String keyword
-    ) {
-        TaskFilterDto filterDto = new TaskFilterDto(status, performerId, keyword);
+            @Parameter(description = "Task status filter")
+            @RequestParam(required = false) TaskStatus status,
+
+            @Parameter(description = "Performer ID filter")
+            @RequestParam(required = false) Long performerId,
+
+            @Parameter(description = "Search keyword")
+            @RequestParam(required = false) String keyword) {
+
+        TaskFilterDto filterDto = TaskFilterDto.builder()
+                .status(status != null ? TaskStatus.valueOf(status.getValue()) : null)
+                .performerId(performerId)
+                .keyword(keyword)
+                .build();
+
         List<TaskResponseDto> tasks = taskService.getFilteredTasks(filterDto);
         return ResponseEntity.ok(tasks);
     }
@@ -116,7 +125,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
             @Parameter(description = "ID of the task to delete") @PathVariable Long id
-    ) {
+    ) throws AccessDeniedException {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
