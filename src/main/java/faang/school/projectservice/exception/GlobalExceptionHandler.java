@@ -52,19 +52,34 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, "DuplicateTitleException");
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Data Validation Failed");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
     }
 
-    @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<Object> handleTaskNotFoundException(TaskNotFoundException ex) {
-        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, "Not Found Error");
+    @ExceptionHandler(StorageSizeExceededException.class)
+    public ResponseEntity<Object> handleStorageSizeExceededException(StorageSizeExceededException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Storage Size Exceeded");
+    }
+
+    @ExceptionHandler(ResourceHandlingException.class)
+    public ResponseEntity<Object> handleResourceHandlingException(ResourceHandlingException ex) {
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Resource Handling Error");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
-        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "Access Denied Error");
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "Access Denied");
+    }
+
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<Object> handleTaskNotFoundException(TaskNotFoundException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, "Not Found Error");
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

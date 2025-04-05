@@ -17,7 +17,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Project Service API")
                         .version("1.0")
-                        .description("API for project management"))
+                        .description("API for project_service"))
                 .components(new Components()
                         .addSecuritySchemes("user-id",
                                 new SecurityScheme()

@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -48,6 +49,7 @@ public class Resource {
             joinColumns = @JoinColumn(name = "resource_id"))
     @Column(name = "role_id")
     @Enumerated(EnumType.STRING)
+    @JsonManagedReference
     private List<TeamRole> allowedRoles;
 
     @Enumerated(EnumType.STRING)

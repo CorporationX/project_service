@@ -26,7 +26,8 @@ spring:
           name: calculations_channel
   servlet:
     multipart:
-      max-file-size: 5MB
+      max-file-size: 150MB
+      max-request-size: 170MB
   avatar:
     max-image-size: 512
 
@@ -41,9 +42,12 @@ springdoc:
     persist-authorization: true
   api-docs:
     path: /v3/api-docs
+  default-consumes-media-type: multipart/form-data
+  default-produces-media-type: application/json
 
 server:
   port: 8082
+  address: 0.0.0.0
 
 logging:
   level:
@@ -59,9 +63,74 @@ services:
     secretKey: password
     bucketName: projectbucket
     region: us-east-1
+    isMocked: false
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+  project-service:
+    host: localhost
+    port: 8082
+
+amazonS3:
+  endpoint: http://127.0.0.1:9000
+  access-key: user
+  secret-key: password
+  bucket-name: corpbucket
+  region: ap-southeast-2
+
+file-upload:
+  post:
+    minimum-amount: 1
+    maximum-amount: 10
+    info-by-file-type:
+      image:
+        max-size: 5242880
+        allowed-extensions:
+          - jpg
+          - jpeg
+          - png
+      video:
+        max-size: 157286400
+        allowed-extensions:
+          - mp4
+          - mkv
+          - avi
+          - mov
+          - quicktime
+      audio:
+        max-size: 10485760
+        allowed-extensions:
+          - mp3
+          - wav
+          - ogg
+          - mpeg
+      another:
+        max-size: 0
+        allowed-extensions:
+          - xls
+          - xlsx
+          - doc
+          - docx
+          - pdf
+          - txt
+          - zip
+          - rar
+    image-size-limits:
+      square:
+        max-length: 1080
+      rectangular:
+        max-long-side-length: 1080
+        max-short-side-length: 566
+
+task-executor:
+  file-upload:
+    core-pool-size: 10
+    max-pool-size: 20
+    queue-capacity: 50
+
+project:
+  storage:
+    max-size: 2147483648
