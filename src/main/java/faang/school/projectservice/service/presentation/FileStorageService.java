@@ -52,9 +52,7 @@ public class FileStorageService {
                     .build());
             log.info("File with name {} successfully uploaded to bucket {}", fileName, bucketName);
             return fileName;
-        } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
-                 NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                 InternalException e) {
+        } catch (Exception e) {
             log.error("Error uploading file: {}", e.getMessage());
             throw new FileUploadException(e.getMessage());
         }
@@ -86,9 +84,7 @@ public class FileStorageService {
             inputStream.close();
             log.info("Successfully downloaded file");
             return bytes;
-        } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException |
-                 InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException |
-                 XmlParserException | IllegalArgumentException e) {
+        } catch (Exception e) {
             log.error("Error while downloading with file key {}: {}", fileKey, e.getMessage());
             throw new FileDownloadException(e.getMessage());
         }
