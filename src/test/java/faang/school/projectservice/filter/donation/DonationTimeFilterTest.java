@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Тест фильтра DonationCurrencyFilter")
 class DonationTimeFilterTest {
 
     private DonationTimeFilter filter;
@@ -26,7 +27,7 @@ class DonationTimeFilterTest {
     @Test
     @DisplayName("Фильтр без даты")
     void isApplicableNullValue() {
-        donationFilterDto.setValue(null);
+        donationFilterDto.setExtremumType(null);
 
         boolean result = filter.isApplicable(donationFilterDto);
 

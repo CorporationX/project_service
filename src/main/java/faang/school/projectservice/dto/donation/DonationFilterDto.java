@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.donation;
 
 import faang.school.projectservice.dto.client.Currency;
-import faang.school.projectservice.filter.donation.Value;
+import faang.school.projectservice.filter.donation.ExtremumType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -17,5 +17,5 @@ public class DonationFilterDto {
     private Currency currency;
 
     @Schema(description = "Используется для поиска максимального или минимального доната", allowableValues = {"MIN", "MAX"})
-    private Value value;
+    private ExtremumType extremumType;
 }

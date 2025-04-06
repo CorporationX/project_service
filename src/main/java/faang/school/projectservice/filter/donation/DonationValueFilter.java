@@ -15,12 +15,12 @@ public class DonationValueFilter implements DonationFilter {
 
     @Override
     public boolean isApplicable(DonationFilterDto filter) {
-        return filter.getValue() != null;
+        return filter.getExtremumType() != null;
     }
 
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto filter) {
-        if (filter.getValue() == Value.MAX) {
+        if (filter.getExtremumType() == ExtremumType.MAX) {
             return donations.max(Comparator.comparing(Donation::getAmount))
                     .stream();
         } else {

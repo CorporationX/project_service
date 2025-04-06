@@ -3,10 +3,12 @@ package faang.school.projectservice.filter.donation.filters;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.model.Donation;
+import org.junit.jupiter.api.DisplayName;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
+@DisplayName("Фильтр по дате доната для тестов")
 public class TestDonationTimeFilter implements DonationFilter {
 
     @Override

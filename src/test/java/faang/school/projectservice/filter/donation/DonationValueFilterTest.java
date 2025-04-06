@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Тест фильтра DonationValueFilter")
 class DonationValueFilterTest {
 
     private DonationFilterDto donationFilterDto;
@@ -26,7 +27,7 @@ class DonationValueFilterTest {
     @Test
     @DisplayName("Фильтр без значения")
     void isApplicableNullValue() {
-        donationFilterDto.setValue(null);
+        donationFilterDto.setExtremumType(null);
 
         boolean result = filter.isApplicable(donationFilterDto);
 
@@ -36,7 +37,7 @@ class DonationValueFilterTest {
     @Test
     @DisplayName("Фильтр с корректными входными данными")
     void isApplicableTrue() {
-        donationFilterDto.setValue(Value.MAX);
+        donationFilterDto.setExtremumType(ExtremumType.MAX);
 
         boolean result = filter.isApplicable(donationFilterDto);
 
@@ -46,7 +47,7 @@ class DonationValueFilterTest {
     @Test
     @DisplayName("Успешное применение фильтра для поиска максимальной суммы")
     void testApplyFilterMaxValue() {
-        donationFilterDto.setValue(Value.MAX);
+        donationFilterDto.setExtremumType(ExtremumType.MAX);
         Stream<Donation> donations = Stream.of(
                 Donation.builder().amount(BigDecimal.valueOf(100)).build(),
                 Donation.builder().amount(BigDecimal.valueOf(200)).build(),
@@ -63,7 +64,7 @@ class DonationValueFilterTest {
     @Test
     @DisplayName("Успешное применение фильтра для поиска максимальной суммы")
     void testApplyFilterMinValue() {
-        donationFilterDto.setValue(Value.MIN);
+        donationFilterDto.setExtremumType(ExtremumType.MIN);
         Stream<Donation> donations = Stream.of(
                 Donation.builder().amount(BigDecimal.valueOf(100)).build(),
                 Donation.builder().amount(BigDecimal.valueOf(200)).build(),

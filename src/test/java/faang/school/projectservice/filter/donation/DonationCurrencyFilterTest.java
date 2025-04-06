@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+@DisplayName("Тест фильтра DonationCurrencyFilter")
 class DonationCurrencyFilterTest {
 
     private DonationCurrencyFilter filter;
