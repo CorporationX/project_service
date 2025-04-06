@@ -24,6 +24,11 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+  servlet:
+    multipart:
+      max-file-size: 5MB
+  avatar:
+    max-image-size: 512
 
 server:
   port: 8082
@@ -41,7 +46,7 @@ services:
     accessKey: user
     secretKey: password
     bucketName: projectbucket
-    isMocked: false
+    region: us-east-1
   payment-service:
     host: http://localhost
     port: 9080

@@ -1,12 +1,15 @@
 package faang.school.projectservice.exception;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +60,13 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(cleanMessage(ex), status, error);
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.badRequest()
+                .body("The size of the uploaded file exceeds the allowed limit %d");
+    }
+
+
     private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status, String error) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().withNano(0));
@@ -64,6 +74,11 @@ public class GlobalExceptionHandler {
         body.put("error", error);
         body.put("message", message);
         return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     private String cleanMessage(Exception ex) {
@@ -75,5 +90,23 @@ public class GlobalExceptionHandler {
             }
         }
         return message;
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handleIOException(IOException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    public ResponseEntity<Map<String, String>> handleImageProcessingException(ImageProcessingException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Image processing failed");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
