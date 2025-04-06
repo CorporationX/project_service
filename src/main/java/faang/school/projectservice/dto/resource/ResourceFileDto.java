@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceDto {
+public class ResourceFileDto {
 
     @NotNull(message = "Resource ID cannot be null")
     @Positive(message = "Resource ID must be positive")

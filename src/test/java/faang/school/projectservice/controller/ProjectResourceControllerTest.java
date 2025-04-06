@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.GlobalExceptionHandler;
 import faang.school.projectservice.exception.ResourceHandlingException;
 import faang.school.projectservice.service.projectresource.ProjectResourceService;
@@ -46,7 +46,7 @@ class ProjectResourceControllerTest {
     private ProjectResourceController projectResourceController;
 
     private MockMvc mockMvc;
-    private ResourceDto resourceDto;
+    private ResourceFileDto resourceFileDto;
     private MultipartFile file;
 
     @BeforeEach
@@ -55,7 +55,7 @@ class ProjectResourceControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
-        resourceDto = ResourceDto.builder()
+        resourceFileDto = ResourceFileDto.builder()
                 .id(1L)
                 .name("test.txt")
                 .size(BigInteger.valueOf(100))
@@ -75,7 +75,7 @@ class ProjectResourceControllerTest {
 
     @Test
     void testUploadFileValidRequest() throws Exception {
-        when(projectResourceService.uploadFile(1L, file)).thenReturn(resourceDto);
+        when(projectResourceService.uploadFile(1L, file)).thenReturn(resourceFileDto);
 
         mockMvc.perform(multipart("/api/v1/resources/upload/{projectId}", 1L)
                         .file((MockMultipartFile) file))
@@ -100,7 +100,7 @@ class ProjectResourceControllerTest {
     @Test
     void testDownloadFileValidResourceId() throws Exception {
         when(projectResourceService.downloadFile(anyLong())).thenReturn(file.getInputStream());
-        when(projectResourceService.getResourceInfo(anyLong())).thenReturn(resourceDto);
+        when(projectResourceService.getResourceInfo(anyLong())).thenReturn(resourceFileDto);
 
         mockMvc.perform(get("/api/v1/resources/download/{resourceId}", 1L))
                 .andExpect(status().isOk())

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.projectresource;
 
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ResourceHandlingException;
 import faang.school.projectservice.exception.StorageSizeExceededException;
@@ -53,7 +53,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     @Override
     @Async("fileUploadTaskExecutor")
-    public ResourceDto uploadFile(Long projectId, MultipartFile file) throws IOException {
+    public ResourceFileDto uploadFile(Long projectId, MultipartFile file) throws IOException {
         Project project = projectService.getProjectById(projectId);
         TeamMember currentMember = teamMemberService.getCurrentTeamMember(projectId);
         validateStorageLimit(project, file.getSize());
@@ -92,7 +92,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     }
 
     @Override
-    public ResourceDto getResourceInfo(Long resourceId) throws ResourceHandlingException {
+    public ResourceFileDto getResourceInfo(Long resourceId) throws ResourceHandlingException {
         Resource resource = findResourceById(resourceId);
         return resourceMapper.toDto(resource);
     }

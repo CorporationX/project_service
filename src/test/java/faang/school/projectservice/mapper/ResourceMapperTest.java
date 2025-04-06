@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -32,7 +32,7 @@ class ResourceMapperTest {
                 .project(project)
                 .build();
 
-        ResourceDto dto = resourceMapper.toDto(resource);
+        ResourceFileDto dto = resourceMapper.toDto(resource);
 
         assertNotNull(dto);
         assertEquals(resource.getId(), dto.getId());
@@ -45,7 +45,7 @@ class ResourceMapperTest {
 
     @Test
     void testToEntity() {
-        ResourceDto dto = ResourceDto.builder()
+        ResourceFileDto dto = ResourceFileDto.builder()
                 .id(1L)
                 .name("test.txt")
                 .size(BigInteger.valueOf(100))

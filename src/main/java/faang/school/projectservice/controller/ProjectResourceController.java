@@ -1,14 +1,10 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.ResourceHandlingException;
 import faang.school.projectservice.service.projectresource.ProjectResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -38,13 +34,13 @@ public class ProjectResourceController {
 
     @Operation(summary = "Upload a file to a project", description = "Uploads a file and associates it with a given project ID")
     @PostMapping("/upload/{projectId}")
-    public ResponseEntity<ResourceDto> uploadFile(
+    public ResponseEntity<ResourceFileDto> uploadFile(
             @Parameter(description = "Project ID", example = "2")
             @PathVariable("projectId") Long projectId,
 
             @Parameter(description = "File to upload")
             @RequestParam("file") MultipartFile file) throws IOException {
-        ResourceDto uploadedFile = projectResourceService.uploadFile(projectId, file);
+        ResourceFileDto uploadedFile = projectResourceService.uploadFile(projectId, file);
         return ResponseEntity.ok(uploadedFile);
     }
 
@@ -54,7 +50,7 @@ public class ProjectResourceController {
             @Parameter(description = "Resource ID", example = "10")
             @PathVariable("resourceId") Long resourceId) throws ResourceHandlingException {
         InputStream fileStream = projectResourceService.downloadFile(resourceId);
-        ResourceDto resourceInfo = projectResourceService.getResourceInfo(resourceId);
+        ResourceFileDto resourceInfo = projectResourceService.getResourceInfo(resourceId);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
