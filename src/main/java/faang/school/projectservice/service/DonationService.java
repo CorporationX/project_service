@@ -17,6 +17,7 @@ import faang.school.projectservice.validation.DonationValidator;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -62,6 +63,7 @@ public class DonationService {
      * @param userId Идентификатор пользователя
      * @return созданный донат
      */
+    @Transactional
     public DonationViewDto sendDonation(@NotNull DonationCreateDto donationDto, long userId) {
         validator.validateDonation(donationDto, userId);
         Campaign campaign = campaignRepository.findById(donationDto.getCampaignId()).orElseThrow();
@@ -82,6 +84,7 @@ public class DonationService {
      * @param userId Идентификатор пользователя
      * @return найденный донат
      */
+    @Transactional
     public DonationViewDto getDonationByIdForUser(long donationId, long userId) {
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
                 .orElseThrow(() ->
@@ -96,6 +99,7 @@ public class DonationService {
      * @param filter Фильтр для донатов
      * @return список донатов пользователя
      */
+    @Transactional
     public List<DonationViewDto> getUserDonations(long userId, @NotNull DonationFilterDto filter) {
         var donations = donationRepository.findAllByUserId(userId);
         return applyFilters(donations, filter);
