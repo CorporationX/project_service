@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class PresentationExceptionController {
+public class GlobalExceptionHandler {
     private final ErrorMessageService errorMessageService;
 
     @ExceptionHandler(ProjectNotFoundException.class)
