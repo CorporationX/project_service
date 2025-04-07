@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MeetDto;
 import faang.school.projectservice.service.MeetService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MeetController {
     private final MeetService meetService;
+    private final UserContext userContext;
 
     @GetMapping
     public List<MeetDto> getAllMeets() {
@@ -42,17 +44,17 @@ public class MeetController {
 
     @PutMapping("/{id}")
     public MeetDto updateMeet(@PathVariable long id, @Valid @RequestBody MeetDto meetDto) {
-        return meetService.updateMeet(id, meetDto);
+        return meetService.updateMeet(id, meetDto, userContext.getUserId());
     }
 
     @PatchMapping("/{id}/cancel")
     public MeetDto cancelMeet(@PathVariable long id) {
-        return meetService.cancelMeet(id);
+        return meetService.cancelMeet(id, userContext.getUserId());
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMeet(@PathVariable long id) {
-        meetService.deleteMeet(id);
+        meetService.deleteMeet(id, userContext.getUserId());
     }
 }
