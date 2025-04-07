@@ -94,6 +94,6 @@ public class DonationServiceExceptionHandler {
     }
 
     private void registerException(Exception exception) {
-        log.error(CAUGHT_EXCEPTION, exception.getClass(), exception.getMessage());
+        log.error(CAUGHT_EXCEPTION, exception.getClass(), exception.getMessage(), exception);
     }
 }

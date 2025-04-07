@@ -5,8 +5,7 @@ import faang.school.projectservice.dto.donation.DonationResponse;
 import faang.school.projectservice.dto.donation.SearchDonationDto;
 import faang.school.projectservice.service.donation.DonationService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +27,9 @@ public class DonationController {
     @PostMapping("/campaigns/{campaignId}/donations")
     @ResponseStatus(HttpStatus.CREATED)
     public DonationResponse createDonation(
-            @Min(1) @PathVariable long campaignId,
-            @Valid @RequestBody @NotNull DonationCreateRequest donationCreateRequest,
-            @Min(1) @RequestHeader("x-user-id") long userId
+            @Positive @PathVariable long campaignId,
+            @Valid @RequestBody DonationCreateRequest donationCreateRequest,
+            @Positive @RequestHeader("x-user-id") long userId
     ) {
         donationCreateRequest.setCampaignId(campaignId);
         donationCreateRequest.setUserId(userId);
@@ -40,16 +39,16 @@ public class DonationController {
 
     @GetMapping("/donations/{donationId}")
     public DonationResponse getDonation(
-            @Min(1) @PathVariable long donationId,
-            @Min(1) @RequestHeader("x-user-id") long userId
+            @Positive @PathVariable long donationId,
+            @Positive @RequestHeader("x-user-id") long userId
     ) {
         return donationService.getDonation(donationId, userId);
     }
 
     @GetMapping("/donations")
     public List<DonationResponse> getDonations(
-            @Valid @RequestBody @NotNull SearchDonationDto searchDonationDto,
-            @Min(1) @RequestHeader("x-user-id") long userId
+            @Valid @RequestBody SearchDonationDto searchDonationDto,
+            @Positive @RequestHeader("x-user-id") long userId
     ) {
         return donationService.getDonations(userId, searchDonationDto);
     }

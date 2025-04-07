@@ -1,8 +1,8 @@
 package faang.school.projectservice.dto.donation;
 
 import faang.school.projectservice.dto.client.Currency;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 public class DonationCreateRequest {
 
-    @Min(1)
+    @Positive
     @NotNull
     private BigDecimal amount;
 
