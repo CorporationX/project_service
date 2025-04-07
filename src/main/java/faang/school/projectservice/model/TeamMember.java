@@ -19,7 +19,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -39,11 +42,11 @@ public class TeamMember {
     private String nickname;
 
     @ElementCollection(targetClass = TeamRole.class)
-    @CollectionTable(name = "team_member_roles",
-            joinColumns = @JoinColumn(name = "team_member_id"))
+    @CollectionTable(name = "team_member_roles", joinColumns = @JoinColumn(name = "team_member_id"))
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private List<TeamRole> roles;
+    @Builder.Default
+    private Set<TeamRole> roles = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
@@ -51,4 +54,12 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    @ManyToMany(mappedBy = "memberRoles.keySet")
+    @Builder.Default
+    private Set<Project> projects = new HashSet<>();
+
+    public boolean hasRoleInProject(Project project, TeamRole role) {
+        return project.getMemberRoles().getOrDefault(this, Collections.emptySet()).contains(role);
+    }
 }

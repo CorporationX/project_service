@@ -48,3 +48,10 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+    minio:
+      endpoint: http://localhost:9000
+      accessKey: user
+      secretKey: password
+      bucket:
+        name: projectBucket
