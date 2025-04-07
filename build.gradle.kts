@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
+
     /**
      * Database
      */
@@ -63,6 +64,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2") // или последняя версия
+    implementation("org.apache.httpcomponents.core5:httpcore5:5.2")
+
+    implementation("net.coobird:thumbnailator:0.4.14")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
+    implementation("org.apache.james:apache-mime4j-core:0.8.12")
+
+
 }
 
 tasks.withType<Test> {
