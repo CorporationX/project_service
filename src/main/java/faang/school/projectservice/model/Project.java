@@ -1,5 +1,9 @@
 package faang.school.projectservice.model;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -30,8 +34,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,8 +66,8 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "parent_project_id")
+    @ManyToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name="parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
@@ -119,24 +123,8 @@ public class Project {
     @Column(name = "presentation_generated_at")
     private LocalDateTime presentationGeneratedAt;
 
-    @Column(name = "has_extended_storage", nullable = false)
-    @Builder.Default
-    private boolean hasExtendedStorage = false;
-
     @ElementCollection
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
     private List<String> galleryFileKeys;
-
-    @ElementCollection
-    @CollectionTable(name = "project_member_roles", joinColumns = @JoinColumn(name = "project_id"))
-    @MapKeyJoinColumn(name = "team_member_id")
-    @Column(name = "roles")
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Map<TeamMember, Set<TeamRole>> memberRoles = new HashMap<>();
-
-    public boolean isHasExtendedStorage() {
-        return hasExtendedStorage;
-    }
 }
