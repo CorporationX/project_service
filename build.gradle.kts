@@ -37,7 +37,7 @@ dependencies {
     /**
      * MinIO
      */
-    implementation("io.minio:minio:8.5.17")
+    implementation("io.minio:minio:8.5.9")
 
     /**
      * Utils & Logging
