@@ -50,7 +50,7 @@ public class DonationController {
 
     @GetMapping("/donations")
     public ResponseEntity<List<DonationResponse>> getDonations(
-            @Valid @RequestBody SearchDonationDto searchDonationDto,
+            @Valid SearchDonationDto searchDonationDto,
             @Positive @RequestHeader("x-user-id") long userId
     ) {
         List<DonationResponse> response = donationService.getDonations(userId, searchDonationDto);

@@ -63,11 +63,19 @@ public class DonationServiceImpl implements DonationService {
 
         validationDonationAmount(donationCreateRequest, campaign);
 
+        log.info("Starting payment processing...");
         PaymentResponse paymentResponse = sendPayment(donationCreateRequest, campaign);
-        log.info("\nPayment Status: {}\nPayment Number: {}\nMessage: {}",
-                paymentResponse.status(), paymentResponse.paymentNumber(), paymentResponse.message());
+        log.info("""
+                Payment Response:
+                - Payment Status: {}
+                - Payment Number: {}
+                - Message: {}""",
+                paymentResponse.status(),
+                paymentResponse.paymentNumber(),
+                paymentResponse.message());
         validationPaymentStatus(paymentResponse);
 
+        log.info("Starting donation persistence...");
         campaign.setAmountRaised(campaign.getAmountRaised().add(paymentResponse.amount()));
 
         Donation donation = donationMapper.toEntity(donationCreateRequest);
@@ -76,6 +84,7 @@ public class DonationServiceImpl implements DonationService {
         donation.setCampaign(campaign);
 
         donationRepository.save(donation);
+        log.info("Donation successfully persisted. Donation ID: {}", donation.getId());
 
         return donationMapper.toResponse(donation);
     }
@@ -85,8 +94,10 @@ public class DonationServiceImpl implements DonationService {
         //todo: метод валидации будет работать только после появления эндпоинта в UserService
         validationUserId(userId);
 
+        log.info("Starting donation searching for user '{}'...", userId);
         Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
                 .orElseThrow(() -> new DonationNotFoundException(DonationExceptionMessage.NOT_FOUND));
+        log.info("Donation successfully searched. Donation ID: {}", donationId);
 
         return donationMapper.toResponse(donation);
     }
@@ -98,11 +109,13 @@ public class DonationServiceImpl implements DonationService {
 
         Stream<Donation> filteredDonations = donationRepository.findAllByUserId(userId).stream();
 
+        log.info("Starting donation filtering from user '{}'...", userId);
         for (DonationFilter donationFilter : donationFilters) {
             if (donationFilter.isApplicable(searchDonationDto)) {
                 filteredDonations = donationFilter.apply(filteredDonations, searchDonationDto);
             }
         }
+        log.info("Donations successfully filtered");
 
         return filteredDonations
                 .map(donationMapper::toResponse)
