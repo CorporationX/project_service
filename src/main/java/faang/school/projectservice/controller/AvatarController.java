@@ -21,13 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class AvatarController {
     private final AvatarService avatarService;
 
-    @PostMapping("/teams/{teamId}/avatar")
+    @PostMapping("/teams/{teamId}")
     public void addAvatarTeam(@PathVariable Long teamId, @RequestBody MultipartFile file) {
         log.info(INFO_START_CONTROLLER_ADD_AVATAR, teamId);
         avatarService.addAvatar(teamId, file);
     }
 
-    @DeleteMapping("/teams/{teamId}/avatar")
+    @DeleteMapping("/teams/{teamId}")
     public void deleteAvatarTeam(@PathVariable Long teamId, @RequestHeader Long userId) {
         log.info(INFO_START_CONTROLLER_DELETE_AVATAR, teamId);
         avatarService.deleteAvatar(teamId, userId);
