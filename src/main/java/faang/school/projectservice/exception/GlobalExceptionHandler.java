@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +57,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
     }
 
-    private ResponseEntity<Object> buildErrorResponse(Exception ex, HttpStatus status, String error) {
-        return buildErrorResponse(cleanMessage(ex), status, error);
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<Object> handleTaskNotFoundException(TaskNotFoundException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, "Not Found Error");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "Access Denied Error");
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -66,30 +73,9 @@ public class GlobalExceptionHandler {
                 .body("The size of the uploaded file exceeds the allowed limit %d");
     }
 
-
-    private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status, String error) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().withNano(0));
-        body.put("status", status.value());
-        body.put("error", error);
-        body.put("message", message);
-        return new ResponseEntity<>(body, status);
-    }
-
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    private String cleanMessage(Exception ex) {
-        String message = ex.getMessage();
-        if (message != null) {
-            int index = message.indexOf("(");
-            if (index != -1) {
-                message = message.substring(0, index).trim();
-            }
-        }
-        return message;
     }
 
     @ExceptionHandler(IOException.class)
@@ -108,5 +94,29 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", "Image processing failed");
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(Exception ex, HttpStatus status, String error) {
+        return buildErrorResponse(cleanMessage(ex), status, error);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status, String error) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().withNano(0));
+        body.put("status", status.value());
+        body.put("error", error);
+        body.put("message", message);
+        return new ResponseEntity<>(body, status);
+    }
+
+    private String cleanMessage(Exception ex) {
+        String message = ex.getMessage();
+        if (message != null) {
+            int index = message.indexOf("(");
+            if (index != -1) {
+                message = message.substring(0, index).trim();
+            }
+        }
+        return message;
     }
 }

@@ -63,11 +63,16 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-
     /**
      * Swagger
      */
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.withType<Test> {
@@ -87,7 +92,6 @@ jacoco {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
-
     reports {
         xml.required.set(true)
         csv.required.set(false)
@@ -104,4 +108,8 @@ tasks.jacocoTestReport {
             )
         })
     )
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
