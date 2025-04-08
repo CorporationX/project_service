@@ -12,8 +12,8 @@ import faang.school.projectservice.exception.payment.PaymentFailedException;
 import faang.school.projectservice.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
@@ -24,73 +24,99 @@ public class DonationServiceExceptionHandler {
     private static final String CAUGHT_EXCEPTION = "{} caught: {}";
 
     @ExceptionHandler(CampaignNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleCampaignNotFoundException(CampaignNotFoundException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCampaignNotFoundException(
+            CampaignNotFoundException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         registerException(exception);
+        ErrorResponse errorResponse = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     @ExceptionHandler(CampaignCompletedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleCampaignCompletedException(CampaignCompletedException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCampaignCompletedException(
+            CampaignCompletedException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         registerException(exception);
+        ErrorResponse errorResponse = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     @ExceptionHandler(CampaignCanceledException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleCampaignCanceledException(CampaignCanceledException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCampaignCanceledException(
+            CampaignCanceledException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         registerException(exception);
+        ErrorResponse errorResponse = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     @ExceptionHandler(UnknownCampaignStatusException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUnknownCampaignStatusException(
+    public ResponseEntity<ErrorResponse> handleUnknownCampaignStatusException(
             UnknownCampaignStatusException exception,
             WebRequest request
     ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         registerException(exception);
+        ErrorResponse response = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(ExceedDonationAmountException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleExceedDonationAmountException(
+    public ResponseEntity<ErrorResponse> handleExceedDonationAmountException(
             ExceedDonationAmountException exception,
             WebRequest request
     ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         registerException(exception);
+        ErrorResponse response = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(PaymentFailedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlePaymentFailedException(PaymentFailedException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handlePaymentFailedException(
+            PaymentFailedException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         registerException(exception);
+        ErrorResponse response = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, exception, request);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(UserNotFoundException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(
+            UserNotFoundException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         registerException(exception);
+        ErrorResponse response = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(DonationNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleDonationNotFoundException(DonationNotFoundException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleDonationNotFoundException(
+            DonationNotFoundException exception,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         registerException(exception);
+        ErrorResponse response = new ErrorResponse(status, exception, request);
 
-        return new ErrorResponse(HttpStatus.NOT_FOUND, exception, request);
+        return new ResponseEntity<>(response, status);
     }
 
     private void registerException(Exception exception) {

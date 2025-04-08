@@ -8,12 +8,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,8 +25,7 @@ public class DonationController {
     private final DonationService donationService;
 
     @PostMapping("/campaigns/{campaignId}/donations")
-    @ResponseStatus(HttpStatus.CREATED)
-    public DonationResponse createDonation(
+    public ResponseEntity<DonationResponse> createDonation(
             @Positive @PathVariable long campaignId,
             @Valid @RequestBody DonationCreateRequest donationCreateRequest,
             @Positive @RequestHeader("x-user-id") long userId
@@ -34,22 +33,28 @@ public class DonationController {
         donationCreateRequest.setCampaignId(campaignId);
         donationCreateRequest.setUserId(userId);
 
-        return donationService.createDonation(donationCreateRequest);
+        DonationResponse response = donationService.createDonation(donationCreateRequest);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/donations/{donationId}")
-    public DonationResponse getDonation(
+    public ResponseEntity<DonationResponse> getDonation(
             @Positive @PathVariable long donationId,
             @Positive @RequestHeader("x-user-id") long userId
     ) {
-        return donationService.getDonation(donationId, userId);
+        DonationResponse response = donationService.getDonation(donationId, userId);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/donations")
-    public List<DonationResponse> getDonations(
+    public ResponseEntity<List<DonationResponse>> getDonations(
             @Valid @RequestBody SearchDonationDto searchDonationDto,
             @Positive @RequestHeader("x-user-id") long userId
     ) {
-        return donationService.getDonations(userId, searchDonationDto);
+        List<DonationResponse> response = donationService.getDonations(userId, searchDonationDto);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
