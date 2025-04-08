@@ -9,6 +9,7 @@ import faang.school.projectservice.mapper.StageCreateMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
@@ -24,7 +25,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.Stage.CascadeDeleteStrategy;
 import faang.school.projectservice.service.Stage.CloseTasksStrategy;
 import faang.school.projectservice.service.Stage.MoveTasksStrategy;
-import faang.school.projectservice.service.Stage.StageDeletionStrategy;
 import faang.school.projectservice.service.Stage.StageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -50,6 +50,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -78,7 +80,6 @@ class StageServiceTest {
 
     @InjectMocks
     private StageService stageService;
-
     private StageDtoCreate stageDtoCreate;
     private StageDTO stageDTO;
     private Project project;
@@ -254,6 +255,112 @@ class StageServiceTest {
     }
 
     @Test
+    void NegativeCreate_shouldThrowExceptionProjectNotFound() {
+        Long projectId = 2L;
+        Long creatorId = 1L;
+        StageDtoCreate stageDtoCreate = getStageDtoCreate();
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
+                stageService.create(stageDtoCreate, creatorId, projectId)
+        );
+        assertEquals("Project not found with ID: " + projectId, ex.getMessage());
+    }
+
+    @Test
+    void NegativeCreate_shouldThrowExceptionTeamMemberNotFound() {
+        project = getProject();
+        Long creatorId = 11L;
+        StageDtoCreate stageDtoCreate = getStageDtoCreate();
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
+                stageService.create(stageDtoCreate, creatorId, project.getId())
+        );
+        assertEquals("TeamMember not found with ID: " + creatorId, ex.getMessage());
+    }
+
+    @Test
+    void NegativeCreate_shouldThrowExceptionCreatorHasNoPermission() {
+        TeamMember teamMember = new TeamMember();
+        teamMember.setRoles(List.of(DESIGNER));
+        project = getProject();
+        Long creatorId = 11L;
+        StageDtoCreate stageDtoCreate = getStageDtoCreate();
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findById(anyLong())).thenReturn(Optional.of(teamMember));
+
+        DataValidException ex = assertThrows(DataValidException.class, () ->
+                stageService.create(stageDtoCreate, creatorId, project.getId())
+        );
+        Assertions.assertTrue(ex.getMessage().contains("Don`t have permission"));
+    }
+
+    @Test
+    void NegativeCreate_shouldThrowExceptionStageDtoCreateIsNull() {
+        project = getProject();
+        TeamMember teamMember = getCreator();
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findById(anyLong())).thenReturn(Optional.of(teamMember));
+
+        DataValidException ex = assertThrows(DataValidException.class, () ->
+                stageService.create(null, teamMember.getId(), project.getId())
+        );
+        assertEquals("Data not valid", ex.getMessage());
+    }
+
+    @Test
+    void NegativeCreate_shouldThrowExceptionProjectStatusIsCompleted() {
+        project = getProject();
+        project.setStatus(ProjectStatus.COMPLETED);
+        TeamMember teamMember = getCreator();
+        Long creatorId = 11L;
+        StageDtoCreate stageDtoCreate = getStageDtoCreate();
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamMemberRepository.findById(anyLong())).thenReturn(Optional.of(teamMember));
+
+        DataValidException ex = assertThrows(DataValidException.class, () ->
+                stageService.create(stageDtoCreate, creatorId, project.getId())
+        );
+        assertEquals("Project status is COMPLETED", ex.getMessage());
+    }
+
+    @Test
+    void NegativeUpdate_shouldThrowExceptionStageNotFound() {
+        stageDTO = getStageDTO();
+        Map<String, String> roleAndCount = Map.of("1","DEVELOPER");
+        when(stageRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
+                stageService.update(stageDTO, roleAndCount)
+        );
+        assertEquals("Stage not found", ex.getMessage());
+    }
+
+    @Test
+    void NegativeUpdate_shouldThrowExceptionProjectNotFound() {
+        stage = getStage();
+        stageDTO = getStageDTO();
+        Map<String, String> roleAndCount = Map.of("1","DEVELOPER");
+        when(stageRepository.findById(anyLong())).thenReturn(Optional.of(stage));
+        when(taskRepository.findByIdIn(anyList())).thenReturn(List.of());
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
+                stageService.update(stageDTO, roleAndCount)
+        );
+        assertEquals("Project not found", ex.getMessage());
+    }
+    @Test
+    void NegativeGetRoleAndStatus_shouldReturnEmptyListNoMatchingStages() {
+        when(stageRepository.findStagesByRolesAndTaskStatus(anyList(), anyList())).thenReturn(List.of());
+
+        List<StageDTO> result = stageService.getRoleAndStatus(new StageFilterDTO(List.of(), List.of()));
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
     void NegativeDelete_shouldThrowExceptionStrategyIsNullOrEmpty() {
         assertThrows(DataValidException.class, () -> stageService.deleteWithStrategy(1L, null, null));
         assertThrows(DataValidException.class, () -> stageService.deleteWithStrategy(1L, " ", null));
@@ -364,7 +471,7 @@ class StageServiceTest {
         stageRole.setId(1L);
         stageRole.setTeamRole(OWNER);
         stageRole.setCount(1);
-        stageRole.setStage(stage); // Устанавливаем stage для StageRoles
+        stageRole.setStage(stage);
         stageRoles.add(stageRole);
         return stageRoles;
     }

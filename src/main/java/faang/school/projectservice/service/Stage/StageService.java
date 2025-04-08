@@ -60,7 +60,7 @@ public class StageService {
                 .orElseThrow(() -> new EntityNotFoundException("Project not found with ID: " + projectId));
         TeamMember creator = teamMemberRepository.findById(creatorId)
                 .orElseThrow(() -> new EntityNotFoundException("TeamMember not found with ID: " + creatorId));
-        if (!creator.getRoles().contains(TeamRole.OWNER) || !creator.getRoles().contains(TeamRole.MANAGER)) {
+        if (!creator.getRoles().contains(TeamRole.OWNER) && !creator.getRoles().contains(TeamRole.MANAGER)) {
             log.error("TeamMember roles not allowed to be OWNER or MANAGER");
             throw new DataValidException("Don`t have permission " + creator.getRoles());
         }
