@@ -1,0 +1,68 @@
+package faang.school.projectservice.service.task;
+
+import faang.school.projectservice.dto.client.TaskDto;
+import faang.school.projectservice.mapper.TaskMapper;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TaskRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class TaskService {
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final TaskMapper taskMapper;
+
+    @Transactional
+    public TaskDto createTask(TaskDto taskDto) {
+        Task task = taskMapper.taskDtoToTask(taskDto);
+        Task savedTask = taskRepository.save(task);
+        return taskMapper.taskToTaskDto(savedTask);
+    }
+
+    @Transactional
+    public TaskDto updateTask(Long taskId, TaskDto taskDto, Long userId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
+        Task updatedTask = taskMapper.taskDtoToTask(taskDto);
+        updatedTask.setId(task.getId());
+        updatedTask.setCreatedAt(task.getCreatedAt());
+        updatedTask.setUpdatedAt(LocalDateTime.now());
+        updatedTask.setReporterUserId(userId);
+
+        Task savedTask = taskRepository.save(updatedTask);
+        return taskMapper.taskToTaskDto(savedTask);
+    }
+
+    public List<TaskDto> getFilteredTasks(Long projectId, TaskStatus status, Long performerId) {
+        List<Task> tasks = taskRepository.findAll();
+        List<Task> filteredTasks = tasks.stream()
+                .filter(task -> task.getProject().equals(projectId))
+                .filter(task -> task.getStatus().equals(status))
+                .filter(task -> task.getPerformerUserId().equals(performerId))
+                .toList();
+        return filteredTasks.stream()
+                .map(taskMapper::taskToTaskDto)
+                .toList();
+    }
+
+    public List<TaskDto> getAllTasksByProjectId(long projectId) {
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        return tasks.stream()
+                .map(taskMapper::taskToTaskDto)
+                .toList();
+    }
+
+    public TaskDto getTaskById(long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Задача не найдена."));
+        return taskMapper.taskToTaskDto(task);
+    }
+}
