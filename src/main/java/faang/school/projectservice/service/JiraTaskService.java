@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.jiratask.JiraTaskResponse;
 import faang.school.projectservice.dto.jiratask.JiraTaskUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +25,7 @@ public class JiraTaskService {
         return jiraClient.createJiraTask(request);
     }
 
-    public Mono<Void> updateJiraTask(String issueKey, JiraTaskUpdateRequest request) {
+    public Mono<ResponseEntity<Void>> updateJiraTask(String issueKey, JiraTaskUpdateRequest request) {
         printLogMessage("update");
         return jiraClient.updateJiraTask(issueKey, request);
     }

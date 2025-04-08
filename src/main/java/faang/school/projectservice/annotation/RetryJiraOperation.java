@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
 @Retryable(
         retryFor = JiraConnectionException.class,
         backoff = @Backoff(
-                delayExpression = "${retry.default.initial-interval}",
-                multiplierExpression = "${retry.default.multiplier}",
-                maxDelayExpression = "${retry.default.max-interval}"
+                delayExpression = "#{@retryJiraConfig.getInitialInterval()}",
+                multiplierExpression = "#{@retryJiraConfig.getMultiplier()}",
+                maxDelayExpression = "#{@retryJiraConfig.getMaxInterval()}"
         )
 )
 public @interface RetryJiraOperation {

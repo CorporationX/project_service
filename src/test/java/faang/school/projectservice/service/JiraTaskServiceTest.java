@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -49,10 +50,10 @@ public class JiraTaskServiceTest {
     @Test
     void testPositiveUpdateJiraTask() {
         JiraTaskUpdateRequest request = createRequestOnUpdate();
-        Mono<Void> response = Mono.empty();
+        Mono<ResponseEntity<Void>> response = Mono.empty();
         when(jiraClient.updateJiraTask(issueKey, request)).thenReturn(response);
 
-        Mono<Void> result = jiraTaskService.updateJiraTask(issueKey, request);
+        Mono<ResponseEntity<Void>> result = jiraTaskService.updateJiraTask(issueKey, request);
 
         assertEquals(result, response);
         result.block();

@@ -37,9 +37,16 @@ spring:
 
 retry:
   backoff:
-    initial-interval: 1s
+    initial-interval: 1000
     multiplier: 3
-    max-interval: 5s
+    max-interval: 5000
+
+clearing-configs-properties:
+  poolSize: 1
+
+jira-api-setting:
+  jira-api-url: /rest/api/3
+  max-results-returning: 500
 
 file:
   cover-max-size: 5242880
