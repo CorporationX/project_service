@@ -41,16 +41,17 @@ public class DonationService {
     private final List<DonationFilter> donationFilters;
     private final UserContext userContext;
 
-    public void createDonation(DonationDto donationDto) {
+    public Long createDonation(DonationDto donationDto) {
         validateDonation(donationDto);
         Long userId = userServiceClient.getUser(userContext.getUserId()).id();
         Donation donation = donationMapper.toEntity(donationDto);
         donation.setUserId(userId);
         Long paymentNumber = sendPayment(donation.getAmount(), donation.getCurrency());
         donation.setPaymentNumber(paymentNumber);
-        donationRepository.save(
+        Donation savedDonation = donationRepository.save(
             donation
         );
+        return savedDonation.getId();
     }
 
     public DonationDto getDonationByIdAndUserId(long id) {
@@ -88,7 +89,10 @@ public class DonationService {
                     );
                 });
         if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
-            throw new DataValidationException("Campaign status is not ACTIVE");
+            log.error("Campaign with id {} status is not ACTIVE", campaign.getId());
+            throw new DataValidationException(
+                    String.format("Campaign with id %s status is not ACTIVE", campaign.getId())
+            );
         }
     }
 
@@ -102,6 +106,7 @@ public class DonationService {
         );
 
         if (!paymentResponse.status().equals("SUCCESS")) {
+            log.error("Payment failed {}, {}", paymentResponse.status(), paymentResponse.message());
             throw new DataValidationException(
                     String.format("Payment failed: %s, %s", paymentResponse.status(), paymentResponse.message())
             );

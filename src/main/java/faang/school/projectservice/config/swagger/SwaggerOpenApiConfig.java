@@ -12,9 +12,5 @@ import org.springframework.context.annotation.Configuration;
                 description = "Документация для Project Service"
         )
 )
-<<<<<<<< HEAD:src/main/java/faang/school/projectservice/config/swagger/SwaggerOpenApiConfig.java
 public class SwaggerOpenApiConfig {
-========
-public class OpenApiSwaggerConfig {
->>>>>>>> 58a300de1 (BSJ-65404-donations-cross-review):src/main/java/faang/school/projectservice/config/swagger/OpenApiSwaggerConfig.java
 }

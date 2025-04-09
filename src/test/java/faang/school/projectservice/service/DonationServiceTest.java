@@ -118,6 +118,7 @@ class DonationServiceTest {
                                 "message"
                         )
                 );
+        when(donationRepository.save(donation)).thenReturn(donation);
 
         donationService.createDonation(donationDto);
 

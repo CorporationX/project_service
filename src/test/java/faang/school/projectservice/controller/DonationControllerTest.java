@@ -55,11 +55,14 @@ class DonationControllerTest {
 
         DonationDto donationDto = donationDtoList.get(0);
 
+        when(donationService.createDonation(donationDto)).thenReturn(donationDto.id());
+
         mockMvc.perform(post("/donation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(donationDto))
                 )
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().json(objectMapper.writeValueAsString(donationDto.id())));
     }
 
     @Test
@@ -71,7 +74,7 @@ class DonationControllerTest {
 
         System.out.println(objectMapper.writeValueAsString(donationDto));;
 
-        mockMvc.perform(get("/donation/getById/{id}",donationDto.id()))
+        mockMvc.perform(get("/donation/{id}",donationDto.id()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(donationDto)));
@@ -89,7 +92,7 @@ class DonationControllerTest {
         when(donationService.getAllDonationsByUserId(donationFilterDto))
                 .thenReturn(donationDtoList);
 
-        mockMvc.perform(get("/donation/getAll")
+        mockMvc.perform(get("/donation/donations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(donationFilterDto)))
                 .andExpect(status().isOk())

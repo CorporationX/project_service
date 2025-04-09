@@ -24,14 +24,14 @@ public class DonationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Void> createDonation(@RequestBody DonationDto donationDto) {
+    public ResponseEntity<Long> createDonation(@RequestBody DonationDto donationDto) {
         log.info("Create donation");
         validateDonation(donationDto);
-        donationService.createDonation(donationDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        Long donationId = donationService.createDonation(donationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(donationId);
     }
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<DonationDto> getDonation(
             @PathVariable Long id
@@ -41,7 +41,7 @@ public class DonationController {
         );
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/donations")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<DonationDto>> getDonationsByUserId(
             @RequestBody DonationFilterDto donationFilter
