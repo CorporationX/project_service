@@ -1,23 +1,34 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.dto.error.ErrorResponse;
+import faang.school.projectservice.exceptions.InternshipGetInternsIdException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+@RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(BAD_REQUEST)
     @ResponseBody
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
@@ -65,6 +76,76 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(DataValidationException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handleDataValidationException(DataValidationException ex) {
+        return getErrorResponse(ex, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(NOT_FOUND)
+    public ErrorResponse handleFeignException(FeignException ex) {
+        return getErrorResponse(ex, NOT_FOUND);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(FORBIDDEN)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException ex) {
+        return getErrorResponse(ex, FORBIDDEN);
+    }
+
+    @ExceptionHandler({
+            jakarta.persistence.EntityNotFoundException.class,
+            faang.school.projectservice.exception.EntityNotFoundException.class
+    })
+    @ResponseStatus(NOT_FOUND)
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
+        return getErrorResponse(ex, NOT_FOUND);
+    }
+
+    @ExceptionHandler(InternshipGetInternsIdException.class)
+    @ResponseStatus(NOT_FOUND)
+    public ErrorResponse handleInternshipGetInternsIdException(InternshipGetInternsIdException ex) {
+        return getErrorResponse(ex, NOT_FOUND);
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInputOutputException(IOException ex) {
+        return getErrorResponse(ex, INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ServletRequestBindingException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handleBindingException(ServletRequestBindingException ex) {
+        return getErrorResponse(ex, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handleMultipartException(MultipartException ex) {
+        return getErrorResponse(ex, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JiraApiException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handleJiraApiException(JiraApiException ex) {
+        return getErrorResponse(ex, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CryptoOperationException.class)
+    @ResponseStatus(FORBIDDEN)
+    public ErrorResponse handleGeneralSecurityException(CryptoOperationException ex) {
+        return getErrorResponse(ex, FORBIDDEN);
+    }
+
+    private ErrorResponse getErrorResponse(Exception ex, HttpStatus statusCode) {
+        log.error("{}", ex.toString());
+        return ErrorResponse.builder()
+                .statusCode(statusCode.name())
+                .message(ex.getMessage())
+                .build();
+    }
     @ExceptionHandler(InvalidFileException.class)
     public ResponseEntity<String> handleInvalidFileException(InvalidFileException ex) {
         log.error("InvalidFileException occurred: {}", ex.getMessage());
