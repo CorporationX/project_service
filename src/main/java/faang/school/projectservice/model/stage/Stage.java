@@ -1,5 +1,6 @@
 package faang.school.projectservice.model.stage;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
@@ -15,10 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -28,6 +26,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
+@ToString(exclude = "stageRoles")
 public class Stage {
     @Id
     @Column(name = "project_stage_id")
@@ -53,4 +52,5 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
+
 }

@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -119,4 +120,9 @@ public class Project {
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
     private List<String> galleryFileKeys;
+
+    @Override
+    public String toString() {
+        return "Project{id=" + id + ", name='" + name + "'}";
+    }
 }
