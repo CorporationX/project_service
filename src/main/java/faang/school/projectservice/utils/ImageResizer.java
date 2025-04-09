@@ -37,7 +37,7 @@ public class ImageResizer {
     public MultipartFile resizeImage(MultipartFile originalImage, CoverConfiguration.Section config) {
         BufferedImage sourceImage = imageProcessor.readImage(originalImage);
 
-        int targetHeight = calculateNewHeight(sourceImage, config);
+        int targetHeight = config.getMaxSide() != null ? 0 : calculateNewHeight(sourceImage, config);
         BufferedImage resizedImage = resizeToExactDimensions(sourceImage, targetHeight, config);
 
         return createMultipartFile(originalImage, resizedImage);

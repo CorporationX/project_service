@@ -32,11 +32,13 @@ public class VacancyController {
     @PostMapping("/cover")
     public ResponseEntity<Void> uploadCover(
             @Parameter(description = "Vacancy ID", example = "1234", required = true)
+            @NotNull
             @PathVariable
-            @NotNull Long vacancyId,
+            Long vacancyId,
             @Parameter(description = "Vacancy cover file", required = true)
+            @NotNull
             @RequestParam("cover")
-            @NotNull MultipartFile image) {
+            MultipartFile image) {
         vacancyService.uploadCover(vacancyId, image);
         return ResponseEntity.noContent().build();
     }
