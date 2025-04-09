@@ -30,6 +30,18 @@ spring:
   avatar:
     max-image-size: 512
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+    try-it-out-enabled: true
+    filter: true
+    persist-authorization: true
+  api-docs:
+    path: /v3/api-docs
+
 server:
   port: 8082
 
