@@ -3,8 +3,8 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.cover.CoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.utils.ImageResizer;
 import faang.school.projectservice.validation.CoverValidator;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -29,9 +30,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class VacancyServiceTest {
     @Mock
-    private ProjectRepository projectRepository;
+    private VacancyRepository vacancyRepository;
     @Mock
     private S3Service s3Service;
     @Mock
@@ -42,44 +43,48 @@ public class ProjectServiceTest {
     private MultipartFile image;
     @Mock
     private CoverConfiguration coverConfig;
+    @Mock
+    private Resource coverResource;
 
     @InjectMocks
-    private ProjectService projectService;
+    private VacancyService vacancyService;
 
     private static final String KEY = "key";
     private static final String OLD_KEY = "oldKey";
-    private final Project project = new Project();
-    private final Long projectId = 1L;
+    private final Vacancy vacancy = new Vacancy();
+    private final Long vacancyId = 1L;
     private String folder;
     private CoverConfiguration.Section config;
 
     @BeforeEach
     public void setUp() {
         CoverConfiguration.Section projectSection = new CoverConfiguration.Section();
+        projectSection.setMaxSide(5);
+        projectSection.setMaxSide(512);
 
         Map<String, CoverConfiguration.Section> typesMap = new HashMap<>();
-        typesMap.put("project", projectSection);
+        typesMap.put("vacancy", projectSection);
         lenient().when(coverConfig.getTypes()).thenReturn(typesMap);
-        config = coverConfig.getTypes().get("project");
+        config = coverConfig.getTypes().get("vacancy");
 
-        project.setId(projectId);
-        folder = String.format("projects/%d/cover", projectId);
+        vacancy.setId(vacancyId);
+        folder = String.format("vacancies/%d/cover", vacancyId);
     }
 
-    @DisplayName("Успешная загрузка новой обложки проекта")
+    @DisplayName("Успешная загрузка новой обложки вакансии")
     @Test
     public void uploadCover_WhenValidImage_ThenUploadsAndUpdatesProject() {
         when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
         when(s3Service.uploadImage(folder, image))
                 .thenReturn(KEY);
 
-        projectService.uploadCover(projectId, image);
+        vacancyService.uploadCover(vacancyId, image);
 
         verify(coverValidator, times(1)).validateBasics(image, config);
         verify(coverValidator, times(1)).isImageOversize(image, config);
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
         verify(s3Service, times(1)).uploadImage(folder, image);
     }
 
@@ -89,35 +94,35 @@ public class ProjectServiceTest {
         when(coverValidator.isImageOversize(image, config))
                 .thenReturn(true);
         when(imageResizer.resizeImage(image, config)).thenReturn(image);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
         when(s3Service.uploadImage(folder, image))
                 .thenReturn(KEY);
 
-        projectService.uploadCover(projectId, image);
+        vacancyService.uploadCover(vacancyId, image);
 
         verify(coverValidator, times(1)).validateBasics(image, config);
         verify(coverValidator, times(1)).isImageOversize(image, config);
         verify(imageResizer, times(1)).resizeImage(image, config);
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
         verify(s3Service, times(1)).uploadImage(folder, image);
     }
 
     @DisplayName("Удаление старой обложки при загрузке новой")
     @Test
     public void uploadCover_WhenExistingCover_ThenDeletesOldImage() {
-        project.setCoverImageId(OLD_KEY);
+        vacancy.setCoverImageKey(OLD_KEY);
 
         when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
         when(s3Service.uploadImage(folder, image))
                 .thenReturn(KEY);
 
-        projectService.uploadCover(projectId, image);
+        vacancyService.uploadCover(vacancyId, image);
 
         verify(coverValidator, times(1)).validateBasics(image, config);
         verify(coverValidator, times(1)).isImageOversize(image, config);
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
         verify(s3Service, times(1)).uploadImage(folder, image);
         verify(s3Service, times(1)).deleteImage(OLD_KEY);
     }
@@ -127,50 +132,64 @@ public class ProjectServiceTest {
     public void uploadCover_WhenProjectNotFound_ThenThrowsException() {
         when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> projectService.uploadCover(projectId, image));
-        assertEquals("Project not found", exception.getMessage());
+                () -> vacancyService.uploadCover(vacancyId, image));
+        assertEquals("Vacancy not found", exception.getMessage());
 
         verify(coverValidator, times(1)).validateBasics(image, config);
         verify(coverValidator, times(1)).isImageOversize(image, config);
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
     }
 
     @DisplayName("Успешное удаление обложки")
     @Test
     public void deleteCover_WhenKeyExists_DeletesImageAndUpdatesProject() {
-        project.setCoverImageId(OLD_KEY);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        vacancy.setCoverImageKey(OLD_KEY);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
 
-        projectService.deleteCover(projectId);
+        vacancyService.deleteCover(vacancyId);
 
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
         verify(s3Service, times(1)).deleteImage(OLD_KEY);
     }
 
-    @DisplayName("Ошибка при удалении: проект не найден")
+    @DisplayName("Ошибка при удалении: вакансия не найдена")
     @Test
     public void deleteCover_WhenProjectNotFound_ThrowsException() {
-        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> projectService.deleteCover(projectId));
-        assertEquals("Project not found", exception.getMessage());
+                () -> vacancyService.deleteCover(vacancyId));
+        assertEquals("Vacancy not found", exception.getMessage());
 
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
     }
 
     @DisplayName("Ошибка при удалении: обложка не найдена")
     @Test
     public void deleteCover_WhenKeyIsNull_ThrowsException() {
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> projectService.deleteCover(projectId));
+                () -> vacancyService.deleteCover(vacancyId));
         assertEquals("Cover image id is null", exception.getMessage());
 
-        verify(projectRepository, times(1)).findById(projectId);
+        verify(vacancyRepository, times(1)).findById(vacancyId);
+    }
+
+    @Test
+    @DisplayName("Успешное получение обложки")
+    public void givenValidData_WhenGetVacancyCover_ThenSuccess() {
+        vacancy.setCoverImageKey(KEY);
+        when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.of(vacancy));
+        when(s3Service.getImage(KEY)).thenReturn(coverResource);
+
+        Resource result = vacancyService.getCover(vacancyId);
+
+        assertEquals(coverResource, result);
+        verify(vacancyRepository).findById(vacancyId);
+        verify(s3Service).getImage(KEY);
     }
 }

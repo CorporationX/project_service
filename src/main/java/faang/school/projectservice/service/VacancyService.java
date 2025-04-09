@@ -62,11 +62,7 @@ public class VacancyService {
     @Transactional
     public void deleteCover(long vacancyId) {
         Vacancy vacancy = getVacancy(vacancyId);
-        String key = vacancy.getCoverImageKey();
-        if (key == null) {
-            log.error("Cover image id is null");
-            throw new DataValidationException("Cover image id is null");
-        }
+        String key = findVacancyCoverKey(vacancy);
         s3Service.deleteImage(key);
         vacancy.setCoverImageKey(null);
     }
@@ -74,10 +70,7 @@ public class VacancyService {
     @Transactional
     public Resource getCover(long vacancyId) {
         Vacancy vacancy = getVacancy(vacancyId);
-        String key = vacancy.getCoverImageKey();
-        if (key == null) {
-            log.error("Cover image id is null");
-        }
+        String key = findVacancyCoverKey(vacancy);
         return s3Service.getImage(key);
     }
 
@@ -90,7 +83,16 @@ public class VacancyService {
      */
     private Vacancy getVacancy(long vacancyId) {
         return vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
+    }
+
+    private String findVacancyCoverKey(Vacancy vacancy) {
+        String key = vacancy.getCoverImageKey();
+        if (key == null) {
+            log.error("Cover image id is null");
+            throw new DataValidationException("Cover image id is null");
+        }
+        return key;
     }
 
 }
