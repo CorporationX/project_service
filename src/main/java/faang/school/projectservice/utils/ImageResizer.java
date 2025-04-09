@@ -1,6 +1,6 @@
 package faang.school.projectservice.utils;
 
-import faang.school.projectservice.config.cover.ProjectCoverConfig;
+import faang.school.projectservice.config.cover.CoverConfiguration;
 import faang.school.projectservice.exception.ImageProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Компонент для изменения размеров изображений с сохранением пропорций.
  * <p>
- * {@link #resizeImage(MultipartFile)} - основной метод для изменения размера изображения
+ * {@link #resizeImage(MultipartFile, CoverConfiguration.Section)} - основной метод для изменения размера изображения
  *
  * @author gulnaz21
  */
@@ -25,7 +25,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ImageResizer {
     private final ImageProcessor imageProcessor;
-    private final ProjectCoverConfig projectCoverConfig;
 
     /**
      * Изменяет размер изображения согласно заданным ограничениям.
@@ -35,11 +34,11 @@ public class ImageResizer {
      * @throws ImageProcessingException если произошла ошибка обработки
      * @throws IllegalArgumentException если originalImage null или пустой
      */
-    public MultipartFile resizeImage(MultipartFile originalImage) {
+    public MultipartFile resizeImage(MultipartFile originalImage, CoverConfiguration.Section config) {
         BufferedImage sourceImage = imageProcessor.readImage(originalImage);
 
-        int targetHeight = calculateNewHeight(sourceImage);
-        BufferedImage resizedImage = resizeToExactDimensions(sourceImage, targetHeight);
+        int targetHeight = calculateNewHeight(sourceImage, config);
+        BufferedImage resizedImage = resizeToExactDimensions(sourceImage, targetHeight, config);
 
         return createMultipartFile(originalImage, resizedImage);
     }
@@ -50,14 +49,14 @@ public class ImageResizer {
      * @param image изображение для анализа
      * @return максимально допустимая высота
      */
-    private int calculateNewHeight(BufferedImage image) {
+    private int calculateNewHeight(BufferedImage image, CoverConfiguration.Section config) {
         long height = image.getHeight();
         long width = image.getWidth();
 
         if (height == width) {
-            return projectCoverConfig.getSquareSide();
+            return config.getSquareSide();
         }
-        return projectCoverConfig.getHorizontalHeight();
+        return config.getHorizontalHeight();
     }
 
     /**
@@ -67,12 +66,34 @@ public class ImageResizer {
      * @param targetHeight  целевая высота
      * @return изображение с новыми размерами
      */
-    private BufferedImage resizeToExactDimensions(BufferedImage originalImage, int targetHeight) {
+    private BufferedImage resizeToExactDimensions(BufferedImage originalImage,
+                                                  int targetHeight,
+                                                  CoverConfiguration.Section config) {
+        if (config.getMaxSide() != null && config.getMaxSide() > 0) {
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+            int maxDimension = Math.max(width, height);
+
+            if (maxDimension > config.getMaxSide()) {
+                double scaleFactor = config.getMaxSide() / (double) maxDimension;
+                int newWidth = (int) Math.round(width * scaleFactor);
+                int newHeight = (int) Math.round(height * scaleFactor);
+
+                return getImage(originalImage, newWidth, newHeight);
+            }
+
+            return originalImage;
+        }
+
+        return getImage(originalImage, config.getHorizontalWidth(), targetHeight);
+    }
+
+    private BufferedImage getImage(BufferedImage originalImage, int newWidth, int newHeight) {
         return Scalr.resize(
                 originalImage,
                 Scalr.Method.QUALITY,
                 Scalr.Mode.FIT_EXACT,
-                projectCoverConfig.getHorizontalWidth(), targetHeight);
+                newWidth, newHeight);
     }
 
     /**

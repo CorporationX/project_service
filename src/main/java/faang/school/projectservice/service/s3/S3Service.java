@@ -3,6 +3,7 @@ package faang.school.projectservice.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.ImageProcessingException;
 import faang.school.projectservice.utils.ImageProcessor;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
 import java.util.UUID;
@@ -50,6 +52,16 @@ public class S3Service {
 
         uploadToS3(image, key);
         return key;
+    }
+
+    public Resource getImage(@NotNull String key) {
+        try {
+            S3Object s3Object = s3Client.getObject(bucketName, key);
+            return new S3Resource(s3Object, key);
+        } catch (Exception e) {
+            log.error("Failed to get image from S3", e);
+            throw new ImageProcessingException("Error getting file from S3", e);
+        }
     }
 
     /**

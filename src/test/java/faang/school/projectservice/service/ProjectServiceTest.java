@@ -1,12 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.cover.CoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.utils.ImageResizer;
-import faang.school.projectservice.validation.ProjectCoverValidator;
+import faang.school.projectservice.validation.CoverValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,10 +17,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,11 +35,13 @@ public class ProjectServiceTest {
     @Mock
     private S3Service s3Service;
     @Mock
-    private ProjectCoverValidator projectCoverValidator;
+    private CoverValidator coverValidator;
     @Mock
     private ImageResizer imageResizer;
     @Mock
     private MultipartFile image;
+    @Mock
+    private CoverConfiguration coverConfig;
 
     @InjectMocks
     private ProjectService projectService;
@@ -45,9 +51,21 @@ public class ProjectServiceTest {
     private final Project project = new Project();
     private final Long projectId = 1L;
     private String folder;
+    private CoverConfiguration.Section config;
 
     @BeforeEach
     public void setUp() {
+        CoverConfiguration.Section projectSection = new CoverConfiguration.Section();
+        projectSection.setMaxSide(5);
+        projectSection.setHorizontalWidth(1080);
+        projectSection.setHorizontalHeight(566);
+        projectSection.setSquareSide(1080);
+
+        Map<String, CoverConfiguration.Section> typesMap = new HashMap<>();
+        typesMap.put("project", projectSection);
+        lenient().when(coverConfig.getTypes()).thenReturn(typesMap);
+        config = coverConfig.getTypes().get("project");
+
         project.setId(projectId);
         folder = String.format("projects/%d/cover", projectId);
     }
@@ -55,7 +73,7 @@ public class ProjectServiceTest {
     @DisplayName("Успешная загрузка новой обложки проекта")
     @Test
     public void uploadCover_WhenValidImage_ThenUploadsAndUpdatesProject() {
-        when(projectCoverValidator.isImageOversize(image))
+        when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(s3Service.uploadImage(folder, image))
@@ -63,8 +81,8 @@ public class ProjectServiceTest {
 
         projectService.uploadCover(projectId, image);
 
-        verify(projectCoverValidator, times(1)).validateBasics(image);
-        verify(projectCoverValidator, times(1)).isImageOversize(image);
+        verify(coverValidator, times(1)).validateBasics(image, config);
+        verify(coverValidator, times(1)).isImageOversize(image, config);
         verify(projectRepository, times(1)).findById(projectId);
         verify(s3Service, times(1)).uploadImage(folder, image);
     }
@@ -72,18 +90,18 @@ public class ProjectServiceTest {
     @DisplayName("Сжатие и загрузка слишком большой обложки")
     @Test
     public void uploadCover_WhenOversizeImage_ThenResizesAndUploads() {
-        when(projectCoverValidator.isImageOversize(image))
+        when(coverValidator.isImageOversize(image, config))
                 .thenReturn(true);
-        when(imageResizer.resizeImage(image)).thenReturn(image);
+        when(imageResizer.resizeImage(image, config)).thenReturn(image);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(s3Service.uploadImage(folder, image))
                 .thenReturn(KEY);
 
         projectService.uploadCover(projectId, image);
 
-        verify(projectCoverValidator, times(1)).validateBasics(image);
-        verify(projectCoverValidator, times(1)).isImageOversize(image);
-        verify(imageResizer, times(1)).resizeImage(image);
+        verify(coverValidator, times(1)).validateBasics(image, config);
+        verify(coverValidator, times(1)).isImageOversize(image, config);
+        verify(imageResizer, times(1)).resizeImage(image, config);
         verify(projectRepository, times(1)).findById(projectId);
         verify(s3Service, times(1)).uploadImage(folder, image);
     }
@@ -93,7 +111,7 @@ public class ProjectServiceTest {
     public void uploadCover_WhenExistingCover_ThenDeletesOldImage() {
         project.setCoverImageId(OLD_KEY);
 
-        when(projectCoverValidator.isImageOversize(image))
+        when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(s3Service.uploadImage(folder, image))
@@ -101,8 +119,8 @@ public class ProjectServiceTest {
 
         projectService.uploadCover(projectId, image);
 
-        verify(projectCoverValidator, times(1)).validateBasics(image);
-        verify(projectCoverValidator, times(1)).isImageOversize(image);
+        verify(coverValidator, times(1)).validateBasics(image, config);
+        verify(coverValidator, times(1)).isImageOversize(image, config);
         verify(projectRepository, times(1)).findById(projectId);
         verify(s3Service, times(1)).uploadImage(folder, image);
         verify(s3Service, times(1)).deleteImage(OLD_KEY);
@@ -111,7 +129,7 @@ public class ProjectServiceTest {
     @DisplayName("Ошибка при загрузке: проект не найден")
     @Test
     public void uploadCover_WhenProjectNotFound_ThenThrowsException() {
-        when(projectCoverValidator.isImageOversize(image))
+        when(coverValidator.isImageOversize(image, config))
                 .thenReturn(false);
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
@@ -119,8 +137,8 @@ public class ProjectServiceTest {
                 () -> projectService.uploadCover(projectId, image));
         assertEquals("Project not found", exception.getMessage());
 
-        verify(projectCoverValidator, times(1)).validateBasics(image);
-        verify(projectCoverValidator, times(1)).isImageOversize(image);
+        verify(coverValidator, times(1)).validateBasics(image, config);
+        verify(coverValidator, times(1)).isImageOversize(image, config);
         verify(projectRepository, times(1)).findById(projectId);
     }
 

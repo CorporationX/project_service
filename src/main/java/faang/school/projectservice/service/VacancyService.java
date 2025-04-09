@@ -3,25 +3,23 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.cover.CoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.utils.ImageResizer;
 import faang.school.projectservice.validation.CoverValidator;
+import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Сервис для управления обложками проектов.
- */
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class ProjectService {
-    private final ProjectRepository projectRepository;
+@Slf4j
+public class VacancyService {
+    private final VacancyRepository vacancyRepository;
     private final S3Service s3Service;
     private final CoverValidator coverValidator;
     private final ImageResizer imageResizer;
@@ -30,25 +28,25 @@ public class ProjectService {
     /**
      * Загружает обложку для проекта.
      *
-     * @param projectId идентификатор проекта
-     * @param image     файл изображения для обложки
+     * @param vacancyId идентификатор проекта
+     * @param image файл изображения для обложки
      */
     @Transactional
-    public void uploadCover(long projectId,
+    public void uploadCover(long vacancyId,
                             MultipartFile image) {
-        CoverConfiguration.Section config = coverConfig.getTypes().get("project");
+        CoverConfiguration.Section config = coverConfig.getTypes().get("vacancy");
         coverValidator.validateBasics(image, config);
 
         if (coverValidator.isImageOversize(image, config)) {
             image = imageResizer.resizeImage(image, config);
         }
 
-        Project project = getProject(projectId);
-        String oldKey = project.getCoverImageId();
-        String folder = String.format("projects/%d/cover", projectId);
+        Vacancy vacancy = getVacancy(vacancyId);
+        String oldKey = vacancy.getCoverImageKey();
+        String folder = String.format("vacancies/%d/cover", vacancyId);
 
         String key = s3Service.uploadImage(folder, image);
-        project.setCoverImageId(key);
+        vacancy.setCoverImageKey(key);
 
         if (oldKey != null) {
             s3Service.deleteImage(oldKey);
@@ -58,30 +56,41 @@ public class ProjectService {
     /**
      * Удаляет обложку проекта.
      *
-     * @param projectId идентификатор проекта
+     * @param vacancyId идентификатор проекта
      * @throws DataValidationException если у проекта нет обложки
      */
     @Transactional
-    public void deleteCover(long projectId) {
-        Project project = getProject(projectId);
-        String key = project.getCoverImageId();
+    public void deleteCover(long vacancyId) {
+        Vacancy vacancy = getVacancy(vacancyId);
+        String key = vacancy.getCoverImageKey();
         if (key == null) {
             log.error("Cover image id is null");
             throw new DataValidationException("Cover image id is null");
         }
         s3Service.deleteImage(key);
-        project.setCoverImageId(null);
+        vacancy.setCoverImageKey(null);
+    }
+
+    @Transactional
+    public Resource getCover(long vacancyId) {
+        Vacancy vacancy = getVacancy(vacancyId);
+        String key = vacancy.getCoverImageKey();
+        if (key == null) {
+            log.error("Cover image id is null");
+        }
+        return s3Service.getImage(key);
     }
 
     /**
      * Получает проект по идентификатору.
      *
-     * @param projectId идентификатор проекта
+     * @param vacancyId идентификатор проекта
      * @return найденный проект
      * @throws EntityNotFoundException если проект не найден
      */
-    private Project getProject(long projectId) {
-        return projectRepository.findById(projectId)
+    private Vacancy getVacancy(long vacancyId) {
+        return vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
+
 }

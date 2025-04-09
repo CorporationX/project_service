@@ -49,8 +49,13 @@ services:
     host: http://localhost
     port: 8080
 
-project-cover:
-    max-size-mb: 5
-    horizontal-width: 1080
-    horizontal-height: 566
-    square-side: 1080
+cover:
+  types:
+    project:
+      maxSizeMB: 5
+      horizontalWidth: 1080
+      horizontalHeight: 566
+      squareSide: 1080
+    vacancy:
+      maxSizeMB: 5
+      maxSide: 512
