@@ -1,10 +1,13 @@
 package faang.school.projectservice.resourceService;
 
-import faang.school.projectservice.exceptions.ForbiddenException;
-import faang.school.projectservice.exceptions.NotFoundException;
-import faang.school.projectservice.exceptions.StorageLimitExceededException;
+import faang.school.projectservice.exception.AccessToDeniedException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
+import faang.school.projectservice.exception.ResourceNotFoundException;
+import faang.school.projectservice.exception.StorageLimitExceededException;
+import faang.school.projectservice.exception.UserNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -34,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,14 +83,22 @@ public class ResourceServiceTest {
     public void testUploadFileSuccessful() throws IOException {
         project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
 
+        String expectedKey = String.format("project %d/random key", PROJECT_ID);
+
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(member));
+        doNothing().when(minioService).uploadFile(anyString(), eq(FILE));
         when(resourceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         Resource result = resourceService.uploadFile(FILE, USER_ID, PROJECT_ID);
 
         assertNotNull(result);
         assertEquals(FILE_SIZE, result.getSize());
+        assertEquals(ResourceStatus.ACTIVE, result.getStatus());
+        assertEquals(member, result.getCreatedBy());
+        assertEquals(project, result.getProject());
+        assertNotNull(result.getKey());
+
         verify(minioService).uploadFile(anyString(), eq(FILE));
         verify(projectRepository).save(project);
         verify(resourceRepository).save(any());
@@ -97,14 +109,14 @@ public class ResourceServiceTest {
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(member));
 
-        assertThrows(ForbiddenException.class, () -> resourceService.uploadFile(FILE, USER_ID, PROJECT_ID));
+        assertThrows(AccessToDeniedException.class, () -> resourceService.uploadFile(FILE, USER_ID, PROJECT_ID));
     }
 
     @Test
     public void testUploadFile_projectNotFound() {
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
+        assertThrows(ProjectNotFoundException.class,
                 () -> resourceService.uploadFile(FILE, USER_ID, PROJECT_ID));
     }
 
@@ -113,7 +125,7 @@ public class ResourceServiceTest {
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> resourceService.uploadFile(FILE, USER_ID, PROJECT_ID));
+        assertThrows(UserNotFoundException.class, () -> resourceService.uploadFile(FILE, USER_ID, PROJECT_ID));
     }
 
     @Test
@@ -129,25 +141,30 @@ public class ResourceServiceTest {
 
     @Test
     public void testDeleteFile_success_byCreator() {
+        member.setId(USER_ID);
+        member.setRoles(Set.of(TeamRole.DEVELOPER));
+
+        project.setStorageSize(FILE_SIZE);
+        project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
+
         Resource resource = new Resource();
         resource.setId(1L);
         resource.setProject(project);
         resource.setKey("valid-key");
         resource.setSize(FILE_SIZE);
         resource.setCreatedBy(member);
-
-        project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
-
-        project.setStorageSize(FILE_SIZE);
+        resource.setStatus(ResourceStatus.ACTIVE);
 
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(member));
+        when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         resourceService.deleteFile(1L, USER_ID);
 
         verify(minioService).deleteFile("valid-key");
         verify(resourceRepository).save(any());
-        assertEquals(0, project.getStorageSize().compareTo(BigInteger.ZERO));
+        verify(projectRepository).save(project);
+        assertEquals(1, project.getStorageSize().compareTo(BigInteger.ZERO));
     }
 
     @Test
@@ -162,7 +179,8 @@ public class ResourceServiceTest {
         resource.setProject(project);
         resource.setKey("key");
         resource.setSize(FILE_SIZE);
-        resource.setCreatedBy(new TeamMember());
+        resource.setCreatedBy(member);
+        resource.setStatus(ResourceStatus.ACTIVE);
 
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(manager));
@@ -183,7 +201,7 @@ public class ResourceServiceTest {
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> resourceService.deleteFile(1L, USER_ID));
+        assertThrows(UserNotFoundException.class, () -> resourceService.deleteFile(1L, USER_ID));
     }
 
     @Test
@@ -202,13 +220,13 @@ public class ResourceServiceTest {
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(other));
 
-        assertThrows(ForbiddenException.class, () -> resourceService.deleteFile(1L, USER_ID));
+        assertThrows(AccessToDeniedException.class, () -> resourceService.deleteFile(1L, USER_ID));
     }
 
     @Test
     public void testDeleteFile_notFound() {
         when(resourceRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> resourceService.deleteFile(1L, USER_ID));
+        assertThrows(ResourceNotFoundException.class, () -> resourceService.deleteFile(1L, USER_ID));
     }
 }

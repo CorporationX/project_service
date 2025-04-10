@@ -1,10 +1,7 @@
 package faang.school.projectservice.minioServiceImpl;
 
-import faang.school.projectservice.config.MinioConfig;
-import faang.school.projectservice.exceptions.FileStorageException;
+import faang.school.projectservice.exception.FileStorageException;
 import faang.school.projectservice.service.MinioServiceImpl;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
@@ -21,14 +18,15 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import static faang.school.projectservice.constants.Constants.DELETE_FAIL;
+import static faang.school.projectservice.constants.Constants.UPLOAD_FAIL;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,22 +35,17 @@ public class MinioServiceImplTest {
     @Mock
     private MinioClient minioClient;
 
-    @Mock
-    private MinioConfig minioConfig;
+    private final String bucketName = "test-bucket";
 
     @InjectMocks
     private MinioServiceImpl minioServiceImpl;
 
-    private final String bucketName = "test-bucket";
     private final String objectKey = "project-1/file.txt";
     private final String contentType = "text/plain";
 
     @BeforeEach
     void setUp() {
-        MinioConfig.Bucket bucket = new MinioConfig.Bucket();
-        bucket.setName(bucketName);
-
-        when(minioConfig.getBucket()).thenReturn(bucket);
+        minioServiceImpl = new MinioServiceImpl(minioClient, bucketName);
     }
 
     @Test
@@ -66,7 +59,8 @@ public class MinioServiceImplTest {
 
         assertDoesNotThrow(() -> minioServiceImpl.uploadFile(objectKey, file));
 
-        verify(minioClient).putObject(any(PutObjectArgs.class));
+        verify(minioClient).putObject(argThat(args -> args.bucket().equals(bucketName)
+                && args.object().equals(objectKey)));
     }
 
     @Test
@@ -83,7 +77,7 @@ public class MinioServiceImplTest {
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 minioServiceImpl.uploadFile(objectKey, file));
 
-        assertTrue(ex.getMessage().contains("Failed to upload file to MinIO"));
+        assertTrue(ex.getMessage().contains(UPLOAD_FAIL));
     }
 
     @Test
@@ -92,7 +86,8 @@ public class MinioServiceImplTest {
 
         minioServiceImpl.deleteFile(objectKey);
 
-        verify(minioClient).removeObject(any(RemoveObjectArgs.class));
+        verify(minioClient).removeObject(argThat(args -> args.bucket().equals(bucketName)
+                && args.object().equals(objectKey)));
     }
 
     @Test
@@ -104,34 +99,6 @@ public class MinioServiceImplTest {
                 minioServiceImpl.deleteFile(objectKey));
 
         assertTrue(ex.getMessage().contains(DELETE_FAIL));
-    }
-
-    @Test
-    void testProvideBuckets_bucketDoesNotExist_shouldCreateBucket() throws Exception {
-        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenReturn(false);
-
-        minioServiceImpl.provideBuckets();
-
-        verify(minioClient).makeBucket(any(MakeBucketArgs.class));
-    }
-
-    @Test
-    void testProvideBuckets_bucketExists_shouldNotCreateBucket() throws Exception {
-        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenReturn(true);
-
-        minioServiceImpl.provideBuckets();
-
-        verify(minioClient, never()).makeBucket(any(MakeBucketArgs.class));
-    }
-
-    @Test
-    void testProvideBuckets_exceptionThrown_shouldThrowRuntimeException() throws Exception {
-        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenThrow(new RuntimeException("Minio error"));
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                minioServiceImpl.provideBuckets());
-
-        assertTrue(exception.getMessage().contains("Failed to created/check bucket"));
     }
 }
 

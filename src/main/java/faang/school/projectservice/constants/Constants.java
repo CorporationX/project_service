@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 public class Constants {
     public static final BigInteger BASE_MAX_STORAGE_BYTES = BigInteger.valueOf(2L * 1024 * 1024 * 1024);
-    public static final BigInteger SUBSCRIBE_MAX_STORAGE_BYTES = BigInteger.valueOf(2L * 1024 * 1024 * 1024);
+    public static final BigInteger SUBSCRIBE_MAX_STORAGE_BYTES = BigInteger.valueOf(10L * 1024 * 1024 * 1024);
     public static final String PROJECT_NOT_FOUND = "Project not found.";
     public static final String STORAGE_LIMIT_EXCEEDED = "Project storage limit exceeded.";
     public static final String USER_NOT_FOUND = "User not found.";

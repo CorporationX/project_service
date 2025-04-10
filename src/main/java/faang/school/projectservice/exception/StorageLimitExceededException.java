@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptions;
+package faang.school.projectservice.exception;
 
 public class StorageLimitExceededException extends IllegalStateException {
     public StorageLimitExceededException(String message) {

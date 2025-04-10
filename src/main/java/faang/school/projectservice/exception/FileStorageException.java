@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptions;
+package faang.school.projectservice.exception;
 
 public class FileStorageException extends RuntimeException {
     public FileStorageException(String message) {
