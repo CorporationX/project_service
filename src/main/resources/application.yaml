@@ -28,15 +28,35 @@ spring:
   profiles:
     active: local
 
+  retry:
+    enabled: true
+
   servlet:
     multipart:
       max-file-size: 10MB
+
+retry:
+  backoff:
+    initial-interval: 1000
+    multiplier: 3
+    max-interval: 5000
+
+clearing-configs-properties:
+  poolSize: 1
+
+jira-api-setting:
+  jira-api-url: /rest/api/3
+  max-results-returning: 500
 
 file:
   cover-max-size: 5242880
 
 server:
   port: 8082
+
+logging:
+  level:
+    root: info
 
 calculations_messages_processing:
   enabled: true
@@ -49,9 +69,14 @@ services:
     bucketName: corpbucket
     isMocked: false
     region: us-east-1
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+app:
+  scheduler:
+    jira-token-cleanup: "0 */10 * * * *"

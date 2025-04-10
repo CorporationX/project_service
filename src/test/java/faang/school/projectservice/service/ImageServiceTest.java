@@ -14,16 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,6 +29,15 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageServiceTest {
@@ -89,9 +88,6 @@ public class ImageServiceTest {
     @Test
     @DisplayName("Negative: error when multipartFile is null")
     void testValidateImageNegativeNoFile() {
-        var idForSearch = 1L;
-        when(projectService.findById(idForSearch)).thenReturn(Optional.of(createProject(idForSearch)));
-
         asserException(() -> imageService.saveProjectCover(idForSearch, null), InvalidFileException.class,
                 ExceptionMessage.FILE_NOT_SENT.getMessage());
     }

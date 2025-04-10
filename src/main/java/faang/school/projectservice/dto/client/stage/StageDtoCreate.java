@@ -1,0 +1,22 @@
+package faang.school.projectservice.dto.client.stage;
+
+import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.HashMap;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StageDtoCreate {
+    private Long id;
+    @Size(min = 3, max = 100)
+    private String stageName;
+    private HashMap<TeamRole, Integer> roleAndCount;
+
+}
