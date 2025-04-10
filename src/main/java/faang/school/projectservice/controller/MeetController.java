@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MeetDto;
 import faang.school.projectservice.service.MeetService;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +38,12 @@ public class MeetController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MeetDto createMeet(@Valid @RequestBody MeetDto meetDto) {
+    public MeetDto createMeet(@NotNull @RequestBody MeetDto meetDto) {
         return meetService.createMeet(meetDto);
     }
 
     @PutMapping("/{id}")
-    public MeetDto updateMeet(@PathVariable long id, @Valid @RequestBody MeetDto meetDto) {
+    public MeetDto updateMeet(@PathVariable long id, @NotNull @RequestBody MeetDto meetDto) {
         return meetService.updateMeet(id, meetDto, userContext.getUserId());
     }
 

@@ -7,13 +7,13 @@ import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -54,59 +54,64 @@ public class MeetService {
     }
 
     public MeetDto getMeetById(long id) {
-        Meet meet = meetRepository.findById(id)
-                .orElseThrow(() -> meetNotFoundException(id));
+        Meet meet = getMeet(id);
         return meetMapper.toDto(meet);
     }
 
-    public MeetDto createMeet(@NotNull MeetDto meetDto) {
+    public MeetDto createMeet(MeetDto meetDto) {
         Meet meet = meetMapper.toEntity(meetDto);
         meet.setStatus(MeetStatus.PENDING);
-        meet = meetRepository.save(meet);
+        Meet createdMeet = meetRepository.save(meet);
         log.info("Meet with id {} created", meet.getId());
-        return meetMapper.toDto(meet);
+        return meetMapper.toDto(createdMeet);
     }
 
-    public MeetDto updateMeet(long id, @NotNull MeetDto meetDto, long userId) {
-        Meet meet = meetRepository.findById(id)
-                .orElseThrow(() -> meetNotFoundException(id));
+    public MeetDto updateMeet(long id, MeetDto meetDto, long userId) {
+        Meet meet = getMeet(id);
         if (meet.getCreatorId() != meetDto.creatorId()) {
-            throw meetWrongCreatorException(id, userId);
+            meetWrongCreatorException(id, userId);
         }
         meet.setTitle(meetDto.title());
         meet.setDescription(meetDto.description());
         meet.setStartsAt(meetDto.startsAt());
         meet.setUpdatedAt(LocalDateTime.now());
-        meet = meetRepository.save(meet);
-        return meetMapper.toDto(meet);
+        Meet updatedMeet = meetRepository.save(meet);
+        return meetMapper.toDto(updatedMeet);
     }
 
     public MeetDto cancelMeet(long id, long userId) {
-        Meet meet = meetRepository.findById(id)
-                .orElseThrow(() -> meetNotFoundException(id));
+        Meet meet = getMeet(id);
         if (meet.getCreatorId() != userId) {
-            throw meetWrongCreatorException(id, userId);
+            meetWrongCreatorException(id, userId);
         }
         meet.setStatus(MeetStatus.CANCELLED);
-        meet = meetRepository.save(meet);
-        return meetMapper.toDto(meet);
+        Meet canceledMeet = meetRepository.save(meet);
+        return meetMapper.toDto(canceledMeet);
     }
 
     public void deleteMeet(long id, long userId) {
-        Meet meet = meetRepository.findById(id).orElseThrow(() -> meetNotFoundException(id));
+        Meet meet = getMeet(id);
         if (meet.getCreatorId() != userId) {
-            throw meetWrongCreatorException(id, userId);
+            meetWrongCreatorException(id, userId);
         }
         meetRepository.deleteById(id);
     }
 
-    private MeetNotFoundException meetNotFoundException(long id) {
+    private void meetNotFoundException(long id) {
         log.error("Meet with id {} not found", id);
-        return new MeetNotFoundException(id);
+        throw new MeetNotFoundException(id);
     }
 
-    private MeetWrongCreatorException meetWrongCreatorException(long id, long userId) {
+    private void meetWrongCreatorException(long id, long userId) {
         log.error("Meet with id {} is not created by user with id {}", id, userId);
-        return new MeetWrongCreatorException("Only creator can update the meet");
+        throw new MeetWrongCreatorException("Only creator can update the meet");
+    }
+
+    private Meet getMeet(long id) {
+        Optional<Meet> optionalMeet = meetRepository.findById(id);
+        if (optionalMeet.isEmpty()) {
+            meetNotFoundException(id);
+        }
+        return optionalMeet.get();
     }
 }
