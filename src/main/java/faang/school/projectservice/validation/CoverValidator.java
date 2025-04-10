@@ -1,6 +1,8 @@
 package faang.school.projectservice.validation;
 
 import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.ProjectCoverConfiguration;
+import faang.school.projectservice.config.cover.VacancyCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.utils.ImageProcessor;
 import jakarta.validation.constraints.NotNull;
@@ -17,10 +19,10 @@ import java.util.List;
  *
  * <p><b>Основные методы:</b>
  * <ul>
- *   <li>{@link #validateBasics(MultipartFile, CoverConfiguration.Section)} - проверяет базовые требования:
+ *   <li>{@link #validateBasics(MultipartFile, CoverConfiguration)} - проверяет базовые требования:
  *       непустой файл, MIME-тип image/, формат JPEG/PNG, размер файла в MB</li>
  *
- *   <li>{@link #isImageOversize(MultipartFile, CoverConfiguration.Section)} - проверяет превышение максимальных
+ *   <li>{@link #isImageOversize(MultipartFile, CoverConfiguration)} - проверяет превышение максимальных
  *       размеров</li>
  * </ul>
  *
@@ -42,7 +44,7 @@ public class CoverValidator {
      * @param file   файл изображения для валидации
      * @param config конфигурация ограничений
      */
-    public void validateBasics(MultipartFile file, CoverConfiguration.Section config) {
+    public void validateBasics(MultipartFile file, CoverConfiguration config) {
         String contentType = file.getContentType();
 
         validateFileNotEmpty(file);
@@ -58,27 +60,32 @@ public class CoverValidator {
      * @param config конфигурация ограничений
      * @return true — если превышает допустимые размеры, иначе false
      */
-    public boolean isImageOversize(MultipartFile file, CoverConfiguration.Section config) {
+    public boolean isImageOversize(MultipartFile file, CoverConfiguration config) {
         BufferedImage image = imageProcessor.readImage(file);
         int width = image.getWidth();
         int height = image.getHeight();
 
-        if (config.getMaxSide() != null) {
-            int maxSide = config.getMaxSide();
-            return width > maxSide || height > maxSide;
+        if (config instanceof VacancyCoverConfiguration vacancyConfig) {
+            Integer maxSide = vacancyConfig.getMaxSide();
+            return maxSide != null && (width > maxSide || height > maxSide);
         }
 
-        if (width == height) {
-            return width > config.getSquareSide();
+        if (config instanceof ProjectCoverConfiguration projectConfig) {
+            if (width == height) {
+                return width > projectConfig.getSquareSide();
+            }
+            return width > projectConfig.getHorizontalWidth()
+                    || height > projectConfig.getHorizontalHeight();
         }
 
-        return width > config.getHorizontalWidth() || height > config.getHorizontalHeight();
+        log.warn("Unsupported config type for oversize check: {}", config.getClass().getSimpleName());
+        return false;
     }
 
     /**
      * Проверка размера файла.
      */
-    private void validateFileSize(long fileSize, CoverConfiguration.Section config) {
+    private void validateFileSize(long fileSize, CoverConfiguration config) {
         long maxSizeInBytes = config.getMaxSizeMB() * BYTES_IN_MEGABYTE;
         if (fileSize > maxSizeInBytes) {
             log.warn("File size exceeds maximum allowed size");

@@ -9,6 +9,22 @@ import org.springframework.core.io.AbstractResource;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Реализация {@link org.springframework.core.io.Resource} для работы с объектами Amazon S3.
+ * <p>
+ * Позволяет использовать объекты из S3 как обычные ресурсы в Spring-приложениях,
+ * автоматически управляя жизненным циклом соединений и потоков данных.
+ * </p>
+ *
+ * <p><b>Основные особенности:</b></p>
+ * <ul>
+ *   <li>Автоматическое закрытие S3-соединения при завершении работы с ресурсом</li>
+ *   <li>Поддержка стандартных операций чтения данных</li>
+ *   <li>Предоставление метаинформации о файле (имя, размер)</li>
+ *   <li>Интеграция с механизмами Spring для работы с ресурсами</li>
+ * </ul>
+ *
+ */
 @RequiredArgsConstructor
 public class S3Resource extends AbstractResource implements AutoCloseable {
 

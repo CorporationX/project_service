@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.ProjectCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
@@ -24,8 +24,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
     private final CoverValidator coverValidator;
-    private final ImageResizer imageResizer;
-    private final CoverConfiguration coverConfig;
+    private final ImageResizer<ProjectCoverConfiguration> imageResizer;
+    private final ProjectCoverConfiguration coverConfig;
 
     /**
      * Загружает обложку для проекта.
@@ -36,11 +36,10 @@ public class ProjectService {
     @Transactional
     public void uploadCover(long projectId,
                             MultipartFile image) {
-        CoverConfiguration.Section config = coverConfig.getTypes().get("project");
-        coverValidator.validateBasics(image, config);
+        coverValidator.validateBasics(image, coverConfig);
 
-        if (coverValidator.isImageOversize(image, config)) {
-            image = imageResizer.resizeImage(image, config);
+        if (coverValidator.isImageOversize(image, coverConfig)) {
+            image = imageResizer.resizeImage(image, coverConfig);
         }
 
         Project project = getProject(projectId);

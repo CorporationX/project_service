@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.ProjectCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
@@ -17,13 +17,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,11 +34,11 @@ public class ProjectServiceTest {
     @Mock
     private CoverValidator coverValidator;
     @Mock
-    private ImageResizer imageResizer;
+    private ImageResizer<ProjectCoverConfiguration> imageResizer;
     @Mock
     private MultipartFile image;
     @Mock
-    private CoverConfiguration coverConfig;
+    private ProjectCoverConfiguration config;
 
     @InjectMocks
     private ProjectService projectService;
@@ -51,16 +48,9 @@ public class ProjectServiceTest {
     private final Project project = new Project();
     private final Long projectId = 1L;
     private String folder;
-    private CoverConfiguration.Section config;
 
     @BeforeEach
     public void setUp() {
-        CoverConfiguration.Section projectSection = new CoverConfiguration.Section();
-
-        Map<String, CoverConfiguration.Section> typesMap = new HashMap<>();
-        typesMap.put("project", projectSection);
-        lenient().when(coverConfig.getTypes()).thenReturn(typesMap);
-        config = coverConfig.getTypes().get("project");
 
         project.setId(projectId);
         folder = String.format("projects/%d/cover", projectId);

@@ -1,6 +1,6 @@
 package faang.school.projectservice.validation;
 
-import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.ProjectCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.utils.ImageProcessor;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,15 +40,14 @@ public class CoverValidatorTest {
     private static final String FILE_EXTENSION = "jpeg";
     private static final String INVALID_FILE_EXTENSION = "gif";
     private static final long TOO_LARGE_FILE_SIZE_BYTES = 11 * 1024 * 1024;
-    private CoverConfiguration.Section config;
+    private final ProjectCoverConfiguration projectConfig = new ProjectCoverConfiguration();
 
     @BeforeEach
     public void setUp() {
-        config = new CoverConfiguration.Section();
-        config.setMaxSizeMB(MAX_SIZE_MB);
-        config.setHorizontalWidth(HORIZONTAL_WIDTH);
-        config.setHorizontalHeight(HORIZONTAL_HEIGHT);
-        config.setSquareSide(SQUARE_SIDE);
+        projectConfig.setMaxSizeMB(MAX_SIZE_MB);
+        projectConfig.setHorizontalWidth(HORIZONTAL_WIDTH);
+        projectConfig.setHorizontalHeight(HORIZONTAL_HEIGHT);
+        projectConfig.setSquareSide(SQUARE_SIDE);
     }
 
     @Test
@@ -57,7 +56,7 @@ public class CoverValidatorTest {
         when(multipartFile.getContentType()).thenReturn(CONTENT_TYPE);
         when(imageProcessor.getFileExtension(CONTENT_TYPE)).thenReturn(FILE_EXTENSION);
 
-        assertDoesNotThrow(() -> coverValidator.validateBasics(multipartFile, config));
+        assertDoesNotThrow(() -> coverValidator.validateBasics(multipartFile, projectConfig));
     }
 
     @Test
@@ -66,7 +65,7 @@ public class CoverValidatorTest {
         MultipartFile emptyFile = new MockMultipartFile("empty.txt", new byte[0]);
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> coverValidator.validateBasics(emptyFile, config));
+                () -> coverValidator.validateBasics(emptyFile, projectConfig));
         assertEquals(String.format("File '%s' must not be empty",
                 emptyFile.getOriginalFilename()), exception.getMessage());
     }
@@ -77,7 +76,7 @@ public class CoverValidatorTest {
         when(multipartFile.getSize()).thenReturn(TOO_LARGE_FILE_SIZE_BYTES);
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> coverValidator.validateBasics(multipartFile, config));
+                () -> coverValidator.validateBasics(multipartFile, projectConfig));
         assertEquals(String.format("File size exceeds maximum allowed size of %dMB", MAX_SIZE_MB),
                 exception.getMessage());
     }
@@ -88,7 +87,7 @@ public class CoverValidatorTest {
         when(multipartFile.getContentType()).thenReturn(INVALID_CONTENT_TYPE);
 
         Exception exception = assertThrows(DataValidationException.class,
-                () -> coverValidator.validateBasics(multipartFile, config));
+                () -> coverValidator.validateBasics(multipartFile, projectConfig));
         assertEquals("Only image files are supported", exception.getMessage());
     }
 
@@ -99,7 +98,7 @@ public class CoverValidatorTest {
         when(imageProcessor.getFileExtension(CONTENT_TYPE)).thenReturn(INVALID_FILE_EXTENSION);
 
         assertThrows(DataValidationException.class,
-                () -> coverValidator.validateBasics(multipartFile, config));
+                () -> coverValidator.validateBasics(multipartFile, projectConfig));
     }
 
 
@@ -110,7 +109,7 @@ public class CoverValidatorTest {
         BufferedImage squareImageOversized = new BufferedImage(SQUARE_SIDE + 1, SQUARE_SIDE + 1, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(squareImageOversized);
 
-        assertTrue(coverValidator.isImageOversize(multipartFile, config));
+        assertTrue(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 
     @Test
@@ -119,7 +118,7 @@ public class CoverValidatorTest {
         BufferedImage squareImageValid = new BufferedImage(SQUARE_SIDE, SQUARE_SIDE, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(squareImageValid);
 
-        assertFalse(coverValidator.isImageOversize(multipartFile, config));
+        assertFalse(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 
     @Test
@@ -128,7 +127,7 @@ public class CoverValidatorTest {
         BufferedImage horizontalImageOversized = new BufferedImage(HORIZONTAL_WIDTH + 1, HORIZONTAL_HEIGHT - 10, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(horizontalImageOversized);
 
-        assertTrue(coverValidator.isImageOversize(multipartFile, config));
+        assertTrue(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 
     @Test
@@ -137,7 +136,7 @@ public class CoverValidatorTest {
         BufferedImage horizontalImageOversized = new BufferedImage(HORIZONTAL_WIDTH - 10, HORIZONTAL_HEIGHT + 1, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(horizontalImageOversized);
 
-        assertTrue(coverValidator.isImageOversize(multipartFile, config));
+        assertTrue(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 
     @Test
@@ -146,7 +145,7 @@ public class CoverValidatorTest {
         BufferedImage horizontalImageValid = new BufferedImage(HORIZONTAL_WIDTH, HORIZONTAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(horizontalImageValid);
 
-        assertFalse(coverValidator.isImageOversize(multipartFile, config));
+        assertFalse(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 
     @Test
@@ -155,6 +154,6 @@ public class CoverValidatorTest {
         BufferedImage exactSizeImage = new BufferedImage(HORIZONTAL_WIDTH, HORIZONTAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
         when(imageProcessor.readImage(any())).thenReturn(exactSizeImage);
 
-        assertFalse(coverValidator.isImageOversize(multipartFile, config));
+        assertFalse(coverValidator.isImageOversize(multipartFile, projectConfig));
     }
 }

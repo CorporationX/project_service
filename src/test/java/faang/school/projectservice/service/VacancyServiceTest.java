@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.VacancyCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Vacancy;
@@ -18,13 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,13 +35,13 @@ public class VacancyServiceTest {
     @Mock
     private CoverValidator coverValidator;
     @Mock
-    private ImageResizer imageResizer;
+    private ImageResizer<VacancyCoverConfiguration> imageResizer;
     @Mock
     private MultipartFile image;
     @Mock
-    private CoverConfiguration coverConfig;
-    @Mock
     private Resource coverResource;
+    @Mock
+    private VacancyCoverConfiguration config;
 
     @InjectMocks
     private VacancyService vacancyService;
@@ -54,19 +51,9 @@ public class VacancyServiceTest {
     private final Vacancy vacancy = new Vacancy();
     private final Long vacancyId = 1L;
     private String folder;
-    private CoverConfiguration.Section config;
 
     @BeforeEach
     public void setUp() {
-        CoverConfiguration.Section projectSection = new CoverConfiguration.Section();
-        projectSection.setMaxSide(5);
-        projectSection.setMaxSide(512);
-
-        Map<String, CoverConfiguration.Section> typesMap = new HashMap<>();
-        typesMap.put("vacancy", projectSection);
-        lenient().when(coverConfig.getTypes()).thenReturn(typesMap);
-        config = coverConfig.getTypes().get("vacancy");
-
         vacancy.setId(vacancyId);
         folder = String.format("vacancies/%d/cover", vacancyId);
     }

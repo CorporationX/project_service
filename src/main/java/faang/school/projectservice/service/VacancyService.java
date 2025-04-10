@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.cover.CoverConfiguration;
+import faang.school.projectservice.config.cover.VacancyCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Vacancy;
@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Сервис для управления обложками вакансий.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,8 +25,8 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final S3Service s3Service;
     private final CoverValidator coverValidator;
-    private final ImageResizer imageResizer;
-    private final CoverConfiguration coverConfig;
+    private final ImageResizer<VacancyCoverConfiguration> imageResizer;
+    private final VacancyCoverConfiguration coverConfig;
 
     /**
      * Загружает обложку для проекта.
@@ -34,11 +37,10 @@ public class VacancyService {
     @Transactional
     public void uploadCover(long vacancyId,
                             MultipartFile image) {
-        CoverConfiguration.Section config = coverConfig.getTypes().get("vacancy");
-        coverValidator.validateBasics(image, config);
+        coverValidator.validateBasics(image, coverConfig);
 
-        if (coverValidator.isImageOversize(image, config)) {
-            image = imageResizer.resizeImage(image, config);
+        if (coverValidator.isImageOversize(image, coverConfig)) {
+            image = imageResizer.resizeImage(image, coverConfig);
         }
 
         Vacancy vacancy = getVacancy(vacancyId);
@@ -67,6 +69,13 @@ public class VacancyService {
         vacancy.setCoverImageKey(null);
     }
 
+    /**
+     * Получает обложку проекта.
+     *
+     * @param vacancyId идентификатор вакансии
+     * @return полученная обложка
+     * @throws DataValidationException если у проекта нет обложки
+     */
     @Transactional
     public Resource getCover(long vacancyId) {
         Vacancy vacancy = getVacancy(vacancyId);
@@ -86,6 +95,13 @@ public class VacancyService {
                 .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
     }
 
+    /**
+     * Находит ключ обложки вакансии.
+     *
+     * @param vacancy вакансия
+     * @return ключ обложки
+     * @throws DataValidationException если ключ обложки равен null
+     */
     private String findVacancyCoverKey(Vacancy vacancy) {
         String key = vacancy.getCoverImageKey();
         if (key == null) {
@@ -94,5 +110,4 @@ public class VacancyService {
         }
         return key;
     }
-
 }
