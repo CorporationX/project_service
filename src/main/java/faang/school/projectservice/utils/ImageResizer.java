@@ -26,11 +26,35 @@ public abstract class ImageResizer<T extends CoverConfiguration> {
     protected final ImageProcessor imageProcessor;
     protected CoverConfiguration config;
 
+    /**
+     * Изменяет размер изображения согласно заданным ограничениям.
+     *
+     * @param originalImage исходное изображение (не null)
+     * @return изображение с новыми размерами в виде MultipartFile
+     * @throws ImageProcessingException если произошла ошибка обработки
+     * @throws IllegalArgumentException если originalImage null или пустой
+     */
     public abstract MultipartFile resizeImage(MultipartFile originalImage, T config);
+
+    /**
+     * Изменяет размер изображения до точных указанных размеров.
+     *
+     * @param originalImage исходное изображение
+     * @param targetHeight целевая высота
+     * @return изображение с новыми размерами
+     */
     public abstract BufferedImage resizeToExactDimensions(BufferedImage originalImage,
                                                           int targetHeight,
                                                           T config);
 
+    /**
+     * Изменяет размер изображения до указанных размеров с сохранением пропорций.
+     *
+     * @param originalImage исходное изображение
+     * @param newWidth новая ширина
+     * @param newHeight новая высота
+     * @return изображение с новыми размерами
+     */
     protected BufferedImage getImage(BufferedImage originalImage, int newWidth, int newHeight) {
         return Scalr.resize(
                 originalImage,
@@ -58,7 +82,7 @@ public abstract class ImageResizer<T extends CoverConfiguration> {
     /**
      * Конвертирует BufferedImage в массив байтов.
      *
-     * @param image       изображение для конвертации
+     * @param image изображение для конвертации
      * @param imageFormat целевой формат (например "jpg", "png")
      * @return массив байтов изображения
      * @throws ImageProcessingException если конвертация не удалась

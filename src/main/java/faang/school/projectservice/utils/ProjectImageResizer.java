@@ -21,6 +21,13 @@ public class ProjectImageResizer extends ImageResizer<ProjectCoverConfiguration>
         return createMultipartFile(originalImage, resizedImage);
     }
 
+    /**
+     * Вычисляет новую высоту изображения в зависимости от его пропорций.
+     *
+     * @param image оригинальное изображение
+     * @param config конфигурация для изменения размера
+     * @return новая высота изображения
+     */
     public int calculateNewHeight(BufferedImage image, ProjectCoverConfiguration config) {
         long height = image.getHeight();
         long width = image.getWidth();
