@@ -9,6 +9,7 @@ import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.dto.event.FundRaisedEvent;
 import faang.school.projectservice.exception.CampaignNotActiveException;
 import faang.school.projectservice.exception.DifferentCurrencyException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -18,6 +19,8 @@ import faang.school.projectservice.mapper.donation.PaymentMapperImpl;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +40,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -95,13 +99,16 @@ public class DonationServiceTest {
     private UserContext userContext;
 
     @Mock
+    private FundRaisedEventPublisher eventPublisher;
+
+    @Mock
     private UserServiceClient userClient;
 
     @BeforeEach
     public void setUp() {
         donationService = new DonationService(donationRepository, campaignRepository, donationMapper, paymentMapper,
                 paymentClient, List.of(createdFromDateFilter, createdToDateFilter, currencyFilter, maxAmountFilter,
-                minAmountFilter), userContext, userClient);
+                minAmountFilter), userContext, userClient, eventPublisher);
     }
 
     @Test
@@ -223,6 +230,9 @@ public class DonationServiceTest {
     private Campaign createCampaign(CampaignStatus status, Currency currency) {
         return Campaign.builder()
                 .status(status)
+                .project(Project.builder()
+                        .id(1L)
+                        .build())
                 .currency(currency)
                 .build();
     }

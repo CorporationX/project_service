@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.dto.event.FundRaisedEvent;
 import faang.school.projectservice.exception.CampaignNotActiveException;
 import faang.school.projectservice.exception.DifferentCurrencyException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -16,6 +17,7 @@ import faang.school.projectservice.mapper.donation.PaymentMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.DonationRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +48,7 @@ public class DonationService {
     private final List<DonationFilter> filters;
     private final UserContext userContext;
     private final UserServiceClient userClient;
+    private final FundRaisedEventPublisher fundRaisedEventPublisher;
 
     @Transactional
     public PaymentResponse sendDonation(DonationDto donationDto) {
@@ -77,6 +81,12 @@ public class DonationService {
         PaymentResponse response = paymentClient.sendPayment(request);
         log.info("\n{}\nStatus: {}\nYour verification code: {}",
                 response.message(), response.status(), response.verificationCode());
+        fundRaisedEventPublisher.publishFundRaisedEvent(FundRaisedEvent.builder()
+                .userId(userId)
+                .projectId(campaign.getProject().getId())
+                .raisedAmount(donation.getAmount())
+                .raiseDate(LocalDate.now())
+                .build());
         return response;
     }
 
