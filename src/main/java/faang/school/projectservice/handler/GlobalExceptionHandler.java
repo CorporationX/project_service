@@ -1,6 +1,13 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.handler;
 
 
+import faang.school.projectservice.exception.AccessToDeniedException;
+import faang.school.projectservice.exception.BucketCreationException;
+import faang.school.projectservice.exception.FileStorageException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
+import faang.school.projectservice.exception.ResourceNotFoundException;
+import faang.school.projectservice.exception.StorageLimitExceededException;
+import faang.school.projectservice.exception.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
