@@ -1,12 +1,13 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.cover.ProjectCoverConfiguration;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.utils.ImageResizer;
-import faang.school.projectservice.validation.ProjectCoverValidator;
+import faang.school.projectservice.validation.CoverValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
-    private final ProjectCoverValidator projectCoverValidator;
-    private final ImageResizer imageResizer;
+    private final CoverValidator coverValidator;
+    private final ImageResizer<ProjectCoverConfiguration> imageResizer;
+    private final ProjectCoverConfiguration coverConfig;
 
     /**
      * Загружает обложку для проекта.
@@ -34,10 +36,10 @@ public class ProjectService {
     @Transactional
     public void uploadCover(long projectId,
                             MultipartFile image) {
-        projectCoverValidator.validateBasics(image);
+        coverValidator.validateBasics(image, coverConfig);
 
-        if (projectCoverValidator.isImageOversize(image)) {
-            image = imageResizer.resizeImage(image);
+        if (coverValidator.isImageOversize(image, coverConfig)) {
+            image = imageResizer.resizeImage(image, coverConfig);
         }
 
         Project project = getProject(projectId);

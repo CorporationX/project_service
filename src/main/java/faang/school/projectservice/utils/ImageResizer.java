@@ -1,11 +1,10 @@
 package faang.school.projectservice.utils;
 
-import faang.school.projectservice.config.cover.ProjectCoverConfig;
+import faang.school.projectservice.config.cover.CoverConfiguration;
 import faang.school.projectservice.exception.ImageProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
-import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -16,16 +15,16 @@ import java.io.IOException;
 /**
  * Компонент для изменения размеров изображений с сохранением пропорций.
  * <p>
- * {@link #resizeImage(MultipartFile)} - основной метод для изменения размера изображения
+ * {@link #resizeImage(MultipartFile, CoverConfiguration)} - основной метод для изменения размера изображения
  *
  * @author gulnaz21
  */
-@Component
+
 @Slf4j
 @RequiredArgsConstructor
-public class ImageResizer {
-    private final ImageProcessor imageProcessor;
-    private final ProjectCoverConfig projectCoverConfig;
+public abstract class ImageResizer<T extends CoverConfiguration> {
+    protected final ImageProcessor imageProcessor;
+    protected CoverConfiguration config;
 
     /**
      * Изменяет размер изображения согласно заданным ограничениям.
@@ -35,44 +34,33 @@ public class ImageResizer {
      * @throws ImageProcessingException если произошла ошибка обработки
      * @throws IllegalArgumentException если originalImage null или пустой
      */
-    public MultipartFile resizeImage(MultipartFile originalImage) {
-        BufferedImage sourceImage = imageProcessor.readImage(originalImage);
-
-        int targetHeight = calculateNewHeight(sourceImage);
-        BufferedImage resizedImage = resizeToExactDimensions(sourceImage, targetHeight);
-
-        return createMultipartFile(originalImage, resizedImage);
-    }
-
-    /**
-     * Определяет целевую высоту изображения на основе его пропорций.
-     *
-     * @param image изображение для анализа
-     * @return максимально допустимая высота
-     */
-    private int calculateNewHeight(BufferedImage image) {
-        long height = image.getHeight();
-        long width = image.getWidth();
-
-        if (height == width) {
-            return projectCoverConfig.getSquareSide();
-        }
-        return projectCoverConfig.getHorizontalHeight();
-    }
+    public abstract MultipartFile resizeImage(MultipartFile originalImage, T config);
 
     /**
      * Изменяет размер изображения до точных указанных размеров.
      *
      * @param originalImage исходное изображение
-     * @param targetHeight  целевая высота
+     * @param targetHeight целевая высота
      * @return изображение с новыми размерами
      */
-    private BufferedImage resizeToExactDimensions(BufferedImage originalImage, int targetHeight) {
+    public abstract BufferedImage resizeToExactDimensions(BufferedImage originalImage,
+                                                          int targetHeight,
+                                                          T config);
+
+    /**
+     * Изменяет размер изображения до указанных размеров с сохранением пропорций.
+     *
+     * @param originalImage исходное изображение
+     * @param newWidth новая ширина
+     * @param newHeight новая высота
+     * @return изображение с новыми размерами
+     */
+    protected BufferedImage getImage(BufferedImage originalImage, int newWidth, int newHeight) {
         return Scalr.resize(
                 originalImage,
                 Scalr.Method.QUALITY,
                 Scalr.Mode.FIT_EXACT,
-                projectCoverConfig.getHorizontalWidth(), targetHeight);
+                newWidth, newHeight);
     }
 
     /**
@@ -82,7 +70,7 @@ public class ImageResizer {
      * @param resizedImage  измененное изображение
      * @return новый MultipartFile
      */
-    private MultipartFile createMultipartFile(MultipartFile originalImage, BufferedImage resizedImage) {
+    protected MultipartFile createMultipartFile(MultipartFile originalImage, BufferedImage resizedImage) {
         String fileName = originalImage.getOriginalFilename();
         String contentType = originalImage.getContentType();
         String imageFormat = imageProcessor.getFileExtension(contentType);
@@ -94,12 +82,12 @@ public class ImageResizer {
     /**
      * Конвертирует BufferedImage в массив байтов.
      *
-     * @param image       изображение для конвертации
+     * @param image изображение для конвертации
      * @param imageFormat целевой формат (например "jpg", "png")
      * @return массив байтов изображения
      * @throws ImageProcessingException если конвертация не удалась
      */
-    private byte[] convertToBytes(BufferedImage image, String imageFormat) {
+    protected byte[] convertToBytes(BufferedImage image, String imageFormat) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             ImageIO.write(image, imageFormat, outputStream);
             return outputStream.toByteArray();
