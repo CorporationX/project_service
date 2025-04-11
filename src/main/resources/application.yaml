@@ -24,6 +24,7 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        team-channel: team-channel
 
   profiles:
     active: local

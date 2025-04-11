@@ -1,12 +1,16 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.team.TeamCreateDto;
+import faang.school.projectservice.dto.team.TeamEvent;
 import faang.school.projectservice.filter.CustomMultipartFile;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.publisher.TeamEventPublisher;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
@@ -26,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,17 +37,30 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
 public class TeamServiceTest {
+
     private static final long LIMITATION_FILE_SIZE = 5 * 1024 * 1024; // 5 МБ
+
     @Mock
     TeamRepository teamRepository;
+
     @Mock
     S3Service s3Service;
+
     @Mock
     ResourceRepository resourceRepository;
+
     @Mock
     TeamMemberRepository teamMemberRepository;
+
     @Mock
     ResizeImagesService resizeImagesService;
+
+    @Mock
+    ProjectService projectService;
+
+    @Mock
+    TeamEventPublisher teamEventPublisher;
+
     @InjectMocks
     TeamService teamService;
 
@@ -133,5 +149,49 @@ public class TeamServiceTest {
         when(teamMemberRepository.findByUserId(id)).thenReturn(teamMemberList);
 
         assertThrows(NotFoundException.class, () -> teamService.deleteAvatar(id, id));
+    }
+
+    @Test
+    void testPositiveAddTeamOnProject() {
+        Long id = 1L;
+        TeamCreateDto teamDto = createTeamDto(id);
+        Project project = createProject(id, id);
+        Team team = createTeam(project);
+        TeamEvent teamEvent = createTeamEvent(id, project.getId(), team.getId());
+        when(projectService.findById(id)).thenReturn(Optional.of(project));
+        when(teamRepository.save(team)).thenReturn(team);
+
+        teamService.addTeamOnProject(teamDto, id);
+
+        verify(teamRepository, times(1)).save(team);
+        verify(teamEventPublisher, times(1)).publish(teamEvent);
+    }
+
+    private TeamCreateDto createTeamDto(Long projectId) {
+        return TeamCreateDto.builder()
+                .projectId(projectId)
+                .build();
+    }
+
+    private Project createProject(Long id, Long ownerId) {
+        return Project.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .build();
+    }
+
+    private Team createTeam(Project project) {
+        return Team.builder()
+                .project(project)
+                .teamMembers(List.of())
+                .build();
+    }
+
+    private TeamEvent createTeamEvent(Long userId, Long projectId, Long teamId) {
+        return TeamEvent.builder()
+                .creatorId(userId)
+                .projectId(projectId)
+                .teamId(teamId)
+                .build();
     }
 }
