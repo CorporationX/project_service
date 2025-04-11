@@ -101,6 +101,7 @@ public class TeamService {
             throw new AccessDeniedException("User with id %d isn't owner project with id %d", userId, projectId);
         }
         Team team = teamRepository.save(createTeam(project));
+        log.info("Add new team: {} on project {}", team.getId(), projectId);
         teamEventPublisher.publish(createTeamEvent(userId, projectId, team.getId()));
     }
 
