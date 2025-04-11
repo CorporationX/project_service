@@ -24,6 +24,7 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        fundRaised: fundRaised_topic
 
   profiles:
     active: local
