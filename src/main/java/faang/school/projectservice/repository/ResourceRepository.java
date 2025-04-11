@@ -9,7 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     @Modifying
-    @Query("UPDATE Resource r SET r.status = 'DELETED', " + "r.updatedBy = :updatedBy, " +
-            "r.updatedAt = CURRENT_TIMESTAMP " + "WHERE r.id = :id")
+    @Query("""
+            UPDATE Resource r SET r.status = 'DELETED',
+            r.updatedBy = :updatedBy, 
+            r.updatedAt = CURRENT_TIMESTAMP 
+            WHERE r.id = :id
+            """)
     void softDelete(@Param("id") Long id, @Param("updatedBy") TeamMember updatedBy);
 }

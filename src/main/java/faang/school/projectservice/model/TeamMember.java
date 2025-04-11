@@ -17,12 +17,12 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -31,9 +31,11 @@ import java.util.Set;
 @Entity
 @Table(name = "team_member")
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TeamMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "user_id", nullable = false)
@@ -62,19 +64,5 @@ public class TeamMember {
 
     public boolean hasRoleInProject(Project project, TeamRole role) {
         return project.getMemberRoles().getOrDefault(this, Collections.emptySet()).contains(role);
-    }
-
-    @Override
-    public boolean equals(Object o) {  // [!] Необходимо для работы с Map
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TeamMember that = (TeamMember) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId)
-                && Objects.equals(nickname, that.nickname);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

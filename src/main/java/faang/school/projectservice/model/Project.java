@@ -126,8 +126,8 @@ public class Project {
 
     @ElementCollection
     @CollectionTable(name = "project_member_roles", joinColumns = @JoinColumn(name = "project_id"))
-    @MapKeyJoinColumn(name = "team_member_id")  // [!] Ключ мапы - TeamMember
-    @Column(name = "roles")  // [!] Колонка для хранения ролей
+    @MapKeyJoinColumn(name = "team_member_id")
+    @Column(name = "roles")
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Map<TeamMember, Set<TeamRole>> memberRoles = new HashMap<>();

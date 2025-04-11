@@ -22,6 +22,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             log.info("Uploading file for project {} by user {}", projectId, uploaderId);
             return resourceService.uploadFile(file, uploaderId, projectId);
         } catch (Exception e) {
+            log.error("Error uploading file for project {} by user {}", projectId, uploaderId);
             throw new FileStorageException(UPLOAD_FAIL);
         }
 
@@ -29,7 +30,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public void deleteFile(Long resourceId, Long currentMemberId) {
-        log.info("Deleting file with ID {} by user", resourceId, currentMemberId);
+        log.info("Deleting file with ID {} by user {}", resourceId, currentMemberId);
         resourceService.deleteFile(resourceId, currentMemberId);
     }
 }
