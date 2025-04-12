@@ -26,7 +26,7 @@ class PresentationServiceTest {
     private PresentationPdfGenerator pdfGenerator;
 
     @Mock
-    private FileStorageService fileStorageService;
+    private PdfFileStorageService fileStorageService;
 
     @InjectMocks
     private PresentationService presentationService;
@@ -59,7 +59,7 @@ class PresentationServiceTest {
     void testGenerateAndUploadPresentation_ProjectNotFound() {
         when(projectRepository.findById(2L)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ProjectNotFoundException.class, () ->
+        Exception exception = assertThrows(RuntimeException.class, () ->
                 presentationService.generateAndUploadPresentation(2L));
         assertTrue(exception.getMessage().contains("Project with ID 2 not found"));
     }
@@ -69,7 +69,7 @@ class PresentationServiceTest {
         byte[] expectedBytes = "dummy pdf content".getBytes();
         String fileKey = "file-key-123";
 
-        when(fileStorageService.downloadPresentationFromMinio(fileKey)).thenReturn(expectedBytes);
+        when(fileStorageService.downloadFileFromMinio(fileKey)).thenReturn(expectedBytes);
 
         byte[] actualBytes = presentationService.downloadPresentation(fileKey);
         assertArrayEquals(expectedBytes, actualBytes);

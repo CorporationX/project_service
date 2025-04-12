@@ -27,12 +27,12 @@ public class MinioBucketInitializer {
     @PostConstruct
     public void initializeBucket() {
         try {
-            boolean found = minioClient.bucketExists(
+            boolean isBucketNotFound = minioClient.bucketExists(
                     BucketExistsArgs.builder()
                             .bucket(bucketName)
                             .build()
             );
-            if (!found) {
+            if (!isBucketNotFound) {
                 log.info(INITIALIZING_BUCKET_LOG, bucketName);
                 minioClient.makeBucket(
                         MakeBucketArgs.builder()

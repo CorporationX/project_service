@@ -1,4 +1,4 @@
-package faang.school.projectservice.handler.presentation;
+package faang.school.projectservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -5,12 +5,6 @@ import faang.school.projectservice.exception.presentation.FileUploadException;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidResponseException;
-import io.minio.errors.ServerException;
-import io.minio.errors.XmlParserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
@@ -18,16 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FileStorageService {
+public class PdfFileStorageService {
 
     private final MinioClient minioClient;
 
@@ -35,14 +26,14 @@ public class FileStorageService {
     private String bucketName;
 
     @Value("${app.presentation.fileExtension}")
-    private String fileExtension;
+    private String pdfFileExtension;
 
     @Value("${app.presentation.contentType}")
     private String contentTypePdf;
 
     public String uploadFileToMinio(byte[] fileData) {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(fileData)) {
-            String fileName = UUID.randomUUID() + fileExtension;
+            String fileName = UUID.randomUUID() + pdfFileExtension;
             log.info("Starting file upload with name {} to bucket {}", fileName, bucketName);
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
@@ -58,21 +49,7 @@ public class FileStorageService {
         }
     }
 
-    public byte[] downloadPresentationFromMinio(String fileKey) {
-        log.info("Downloading presentation from Minio for file key: {}", fileKey);
-        byte[] bytes = downloadFileFromMinio(fileKey);
-        log.info("Successfully downloaded presentation file");
-        return bytes;
-    }
-
-    public byte[] downloadImageFromMinio(String fileKey) {
-        log.info("Downloading image from Minio for file key: {}", fileKey);
-        byte[] bytes = downloadFileFromMinio(fileKey);
-        log.info("Successfully downloaded image file");
-        return bytes;
-    }
-
-    private byte[] downloadFileFromMinio(String fileKey) {
+    public byte[] downloadFileFromMinio(String fileKey) {
         try {
             InputStream inputStream = minioClient.getObject(
                     GetObjectArgs.builder()

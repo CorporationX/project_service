@@ -16,9 +16,9 @@ public class PresentationService {
 
     private final ProjectRepository projectRepository;
     private final PresentationPdfGenerator pdfGenerator;
-    private final FileStorageService fileStorageService;
+    private final PdfFileStorageService fileStorageService;
 
-    public String generateAndUploadPresentation(Long projectId) throws Exception {
+    public String generateAndUploadPresentation(Long projectId) {
         log.info("Generating presentation PDF for project id {}", projectId);
         Project project = fetchProject(projectId);
         byte[] pdfPresentation = pdfGenerator.generatePdf(project);
@@ -31,16 +31,20 @@ public class PresentationService {
     }
 
     public byte[] downloadPresentation(String fileKey) {
-        return fileStorageService.downloadPresentationFromMinio(fileKey);
+        return fileStorageService.downloadFileFromMinio(fileKey);
     }
 
-    private Project fetchProject(Long projectId) throws ProjectNotFoundException {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isEmpty()) {
+    private Project fetchProject(Long projectId) {
+        try {
+            Optional<Project> optionalProject = projectRepository.findById(projectId);
+            if (optionalProject.isEmpty()) {
+                throw new ProjectNotFoundException("Project with ID " + projectId + " not found");
+            }
+            log.info("Project with ID {} has been successfully fetched", projectId);
+            return optionalProject.get();
+        } catch (ProjectNotFoundException e) {
             log.error("Project with ID {} not found", projectId);
-            throw new ProjectNotFoundException("Project with ID " + projectId + " not found");
+            throw new RuntimeException(e.getMessage());
         }
-        log.info("Project with ID {} has been successfully fetched", projectId);
-        return optionalProject.get();
     }
 }

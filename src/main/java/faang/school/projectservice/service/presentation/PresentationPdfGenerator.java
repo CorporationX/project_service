@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.presentation;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.Team;
@@ -26,9 +25,9 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class PresentationPdfGenerator {
 
-    private final FileStorageService fileStorageService;
+    private final PdfFileStorageService fileStorageService;
 
-    public byte[] generatePdf(Project project) throws Exception {
+    public byte[] generatePdf(Project project) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
@@ -42,7 +41,7 @@ public class PresentationPdfGenerator {
                 float xStart = 250;
                 float yPosition = 750;
 
-                byte[] image = fileStorageService.downloadImageFromMinio(project.getCoverImageId());
+                byte[] image = fileStorageService.downloadFileFromMinio(project.getCoverImageId());
                 PDImageXObject pdImage =
                         PDImageXObject.createFromByteArray(document, image, project.getCoverImageId());
 
@@ -104,7 +103,7 @@ public class PresentationPdfGenerator {
             return outputStream.toByteArray();
         } catch (IOException e) {
             log.error("Error generating presentation PDF: {}", e.getMessage());
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
