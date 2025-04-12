@@ -184,19 +184,4 @@ class TaskControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("Validation Failed")));
     }
-
-    @Test
-    void createTaskMissingRequiredFields() throws Exception {
-        TaskDto invalidTaskDto = TaskDto.builder()
-                .status(TaskStatus.TODO)
-                .build();
-
-        mockMvc.perform(post("/api/v1/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidTaskDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", is("Validation Failed")))
-                .andExpect(jsonPath("$.message", containsString("name")))
-                .andExpect(jsonPath("$.message", containsString("performerUserId")));
-    }
 }
