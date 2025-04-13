@@ -35,13 +35,14 @@ public class MeetServiceImpl implements MeetService {
     private final MeetMapper meetMapper;
     private final UserContext userContext;
     private final UserServiceClient userServiceClient;
+    private final MeetSpecification meetSpecification;
 
     @Override
     @Transactional
     public MeetResponseDto createMeet(MeetCreateDto meetCreateDto) {
         long userId = userContext.getUserId();
         checkUser(userId);
-        Project project = checkProject(meetCreateDto.getProjectId());
+        Project project = getProjectById(meetCreateDto.getProjectId());
         project.getMeets().stream()
                 .filter(m -> m.getTitle().equals(meetCreateDto.getTitle()) &&
                         m.getStartsAt().equals(meetCreateDto.getStartsAt()) &&
@@ -50,9 +51,7 @@ public class MeetServiceImpl implements MeetService {
                     throw new EntityAlreadyExistException(String.format("Meet with title %s already exists: meetId: %d",
                             m.getTitle(), m.getId()));
                 });
-        Meet meet = meetMapper.toEntity(meetCreateDto);
-        meet.setCreatorId(userId);
-        meet.setProject(project);
+        Meet meet = meetMapper.toEntity(meetCreateDto, userId);
         return meetMapper.toDto(meetRepository.save(meet));
     }
 
@@ -60,8 +59,8 @@ public class MeetServiceImpl implements MeetService {
     @Transactional
     public MeetResponseDto updateMeet(MeetUpdateDto meetUpdateDto) {
         checkUser(userContext.getUserId());
-        Project project = checkProject(meetUpdateDto.getProjectId());
-        Meet meet = checkMeet(meetUpdateDto.getId());
+        Project project = getProjectById(meetUpdateDto.getProjectId());
+        Meet meet = getMeetById(meetUpdateDto.getId());
         checkUserWithCreator(meet);
         meetMapper.updateMeetFromDto(meetUpdateDto, meet);
         return meetMapper.toDto(meetRepository.save(meet));
@@ -71,19 +70,19 @@ public class MeetServiceImpl implements MeetService {
     @Transactional
     public void deleteMeet(long meetId) {
         checkUser(userContext.getUserId());
-        Meet meet = checkMeet(meetId);
+        Meet meet = getMeetById(meetId);
         checkUserWithCreator(meet);
         meetRepository.delete(meet);
     }
 
     @Override
     public MeetResponseDto getMeet(long meetId) {
-        return meetMapper.toDto(checkMeet(meetId));
+        return meetMapper.toDto(getMeetById(meetId));
     }
 
     @Override
-    public List<MeetResponseDto> getMeetsByProjectId(long projectId, MeetFilterDto meetFilterDto) {
-        Specification<Meet> spec = MeetSpecification.filterBy(
+    public List<MeetResponseDto> getFilteredMeetsByProjectId(long projectId, MeetFilterDto meetFilterDto) {
+        Specification<Meet> spec = meetSpecification.filterBy(
                 projectId,
                 meetFilterDto.getTitle(),
                 meetFilterDto.getStartDate(),
@@ -112,13 +111,13 @@ public class MeetServiceImpl implements MeetService {
         }
     }
 
-    private Project checkProject(long projectId) {
+    private Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Project not found: projectId: %d",
                         projectId)));
     }
 
-    private Meet checkMeet(long meetId) {
+    private Meet getMeetById(long meetId) {
         return meetRepository.findById(meetId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Meet not found: meetId: %d",
                         meetId)));

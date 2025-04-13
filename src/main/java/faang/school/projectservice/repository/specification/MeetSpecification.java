@@ -3,14 +3,16 @@ package faang.school.projectservice.repository.specification;
 import faang.school.projectservice.model.Meet;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class MeetSpecification {
 
-    public static Specification<Meet> filterBy(long projectId, String title, LocalDateTime startDate, LocalDateTime endDate) {
+    public Specification<Meet> filterBy(long projectId, String title, LocalDateTime startDate, LocalDateTime endDate) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (projectId > 0) {

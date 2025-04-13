@@ -198,7 +198,7 @@ class MeetControllerTest {
                 .startDate(LocalDateTime.parse("2025-03-01T10:30:00"))
                 .endDate(LocalDateTime.parse("2025-05-01T10:30:00"))
                 .build();
-        when(meetService.getMeetsByProjectId(projectId, filterDto))
+        when(meetService.getFilteredMeetsByProjectId(projectId, filterDto))
                 .thenReturn(java.util.List.of(meetResponseDto));
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/meets", projectId)
@@ -211,6 +211,6 @@ class MeetControllerTest {
                 .andExpect(jsonPath("$[0].title").value(meetResponseDto.getTitle()))
                 .andExpect(jsonPath("$[0].projectId").value(projectId));
 
-        verify(meetService, Mockito.times(1)).getMeetsByProjectId(projectId, filterDto);
+        verify(meetService, Mockito.times(1)).getFilteredMeetsByProjectId(projectId, filterDto);
     }
 }

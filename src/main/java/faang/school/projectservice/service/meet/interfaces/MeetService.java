@@ -17,5 +17,5 @@ public interface MeetService {
 
     MeetResponseDto getMeet(long meetId);
 
-    List<MeetResponseDto> getMeetsByProjectId(long projectId, MeetFilterDto meetFilterDto);
+    List<MeetResponseDto> getFilteredMeetsByProjectId(long projectId, MeetFilterDto meetFilterDto);
 }

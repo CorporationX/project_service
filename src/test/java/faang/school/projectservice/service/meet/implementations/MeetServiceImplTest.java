@@ -16,6 +16,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.specification.MeetSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,8 @@ class MeetServiceImplTest {
     private UserServiceClient userServiceClient;
     @Mock
     private MeetMapper meetMapper;
+    @Mock
+    private MeetSpecification meetSpecification;
     private long userId;
     private long projectId;
     private long meetId;
@@ -110,7 +113,7 @@ class MeetServiceImplTest {
     void testCreateMeetWhenSuccessful() {
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(meetMapper.toEntity(meetCreateDto)).thenReturn(meet);
+        when(meetMapper.toEntity(meetCreateDto, userId)).thenReturn(meet);
         when(meetRepository.save(any(Meet.class))).thenReturn(meet);
         when(meetMapper.toDto(meet)).thenReturn(meetResponseDto);
 
@@ -202,7 +205,7 @@ class MeetServiceImplTest {
     }
 
     @Test
-    void testGetMeetsByProjectIdSuccessful() {
+    void testGetFilteredMeetsByProjectIdSuccessful() {
         Meet firstMeet = Meet.builder()
                 .id(1L).title("First meet").description("First meet description")
                 .startsAt(LocalDateTime.parse("2025-04-01T10:00:00")).project(project).creatorId(userId)
@@ -222,17 +225,18 @@ class MeetServiceImplTest {
         List<Meet> meets = List.of(firstMeet, secondMeet);
         List<MeetResponseDto> expectedDtos = List.of(firstDto, secondDto);
 
-        MeetFilterDto filterDto = MeetFilterDto.builder()
-                .title("some tilte")
-                .startDate(LocalDateTime.parse("2025-04-01T10:00:00"))
-                .endDate(LocalDateTime.parse("2025-04-02T10:00:00"))
-                .build();
+        MeetFilterDto filterDto = MeetFilterDto.builder().build();
+        Specification<Meet> spec = (root, query, cb) -> null;
 
-        when(meetRepository.findAll(any(Specification.class))).thenReturn(meets);
+        when(meetSpecification.filterBy(projectId, filterDto.getTitle(),
+                filterDto.getStartDate(),
+                filterDto.getEndDate()))
+                .thenReturn(spec);
+        when(meetRepository.findAll(spec)).thenReturn(meets);
         when(meetMapper.toDto(meets)).thenReturn(expectedDtos);
 
-        List<MeetResponseDto> result = meetService.getMeetsByProjectId(projectId, filterDto);
+        List<MeetResponseDto> result = meetService.getFilteredMeetsByProjectId(projectId, filterDto);
 
-        verify(meetRepository, times(1)).findAll(any(Specification.class));
+        verify(meetRepository, times(1)).findAll(spec);
     }
 }
