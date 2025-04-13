@@ -53,3 +53,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+validation:
+  meet:
+    titleMaxLength: 128
+    descriptionMaxLength: 512
