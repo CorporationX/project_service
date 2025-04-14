@@ -4,6 +4,7 @@ public class ErrorMessage {
     public static final String ERROR_INVALID_FILE_TYPE = "Invalid file type\n";
     public static final String ERROR_FILE_EXCEPTION = "Failed to read file input stream\n";
     public static final String ERROR_UNAUTHORIZED_ACCESS = "Only the team manager can delete the avatar.\n";
+    public static final String ERROR_COMPRESS_IMAGE = "Failed to compress image: {}\n";
 
     public static String getErrorLimitSizeFile(long maxLimitSize){
         return String.format(ERROR_LIMIT_SIZE_FILE, maxLimitSize);
