@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class ProjectViewEventPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("spring.data.redis.topics.project_view_topic")
+    @Value("${spring.data.redis.channels.project_view_channel.name}")
     private String projectViewTopic;
 
     public void publish(ProjectViewEvent projectViewEvent) {

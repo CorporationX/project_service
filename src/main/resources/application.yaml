@@ -24,8 +24,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
-      topics:
-        project_view_topic: project_view_topic
+        project_view_channel:
+          name: project_view_channel
 
   profiles:
     active: local
