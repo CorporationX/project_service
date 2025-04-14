@@ -29,6 +29,8 @@ spring:
       max-file-size: 5MB
   avatar:
     max-image-size: 512
+  vacancy-cover:
+    max-side: 512
 
 springdoc:
   swagger-ui:

@@ -3,10 +3,7 @@ package faang.school.projectservice.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.FileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigInteger;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -28,7 +23,7 @@ public class S3Service {
     private String bucketName;
     private final ImageCompressionService imageCompressionService;
 
-    public Resource uploadFile(MultipartFile file, String folder) {
+    public FileData uploadFile(MultipartFile file, String folder) {
         byte[] compressedFileBytes = imageCompressionService.compressFile(file);
 
         String key = generateS3Key(folder, file.getOriginalFilename());
@@ -38,7 +33,7 @@ public class S3Service {
                 bucketName, key, new ByteArrayInputStream(compressedFileBytes), metadata);
         amazonS3.putObject(putObjectRequest);
 
-        return buildResource(file,key,compressedFileBytes.length);
+        return new FileData(key,compressedFileBytes.length);
     }
 
     public void deleteFile(String key) {
@@ -54,16 +49,5 @@ public class S3Service {
         metadata.setContentLength(contentLength);
         metadata.setContentType(contentType);
         return metadata;
-    }
-
-    private Resource buildResource(MultipartFile file, String key, long size) {
-        Resource resource = new Resource();
-        resource.setName(file.getOriginalFilename());
-        resource.setKey(key);
-        resource.setSize(BigInteger.valueOf(size));
-        resource.setAllowedRoles(List.of(TeamRole.MANAGER));
-        resource.setType(ResourceType.IMAGE);
-        resource.setStatus(ResourceStatus.ACTIVE);
-        return resource;
     }
 }

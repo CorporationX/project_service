@@ -3,7 +3,9 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.model.FileData;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -17,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigInteger;
+import java.util.List;
 
 
 @Service
@@ -38,7 +43,7 @@ public class ResourceService {
         TeamMember teamMember = validateTeamMember(teamId);
 
         String folder = getFolder(team);
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = uploadFile(file, folder);
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
         resource.setProject(team.getProject());
@@ -93,8 +98,24 @@ public class ResourceService {
         }
     }
 
+    private Resource uploadFile(MultipartFile file, String folder) {
+        FileData fileData = s3Service.uploadFile(file, folder);
+        return buildResource(file, fileData.getKey(), fileData.getLength());
+    }
+
     private TeamMember validateTeamMember(Long teamId) {
         Long userId = userContext.getUserId();
         return teamMemberValidate.validateTeamMemberByUserIdAndByTeamId(userId, teamId);
+    }
+
+    private Resource buildResource(MultipartFile file, String key, long size) {
+        Resource resource = new Resource();
+        resource.setName(file.getOriginalFilename());
+        resource.setKey(key);
+        resource.setSize(BigInteger.valueOf(size));
+        resource.setAllowedRoles(List.of(TeamRole.MANAGER));
+        resource.setType(ResourceType.IMAGE);
+        resource.setStatus(ResourceStatus.ACTIVE);
+        return resource;
     }
 }
