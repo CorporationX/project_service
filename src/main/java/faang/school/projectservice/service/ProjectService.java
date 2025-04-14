@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectViewEvent;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -9,11 +10,13 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +32,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
+
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public void createProject(Long userId, ProjectDto projectDto) {
         validateUserId(userId);
@@ -109,6 +114,11 @@ public class ProjectService {
             log.warn("Project with id {} not found", project.getId());
             throw new AccessDeniedException("Unauthorized access to project");
         }
+
+        ProjectViewEvent projectViewEvent = new ProjectViewEvent(projectId, userId, LocalDateTime.now());
+        projectViewEventPublisher.publish(projectViewEvent);
+        log.info("Project with id {} viewed by user with id {}", project.getId(), userId);
+
         return projectMapper.projectToProjectDto(project);
     }
 
