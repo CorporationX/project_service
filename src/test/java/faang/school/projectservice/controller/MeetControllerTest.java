@@ -1,32 +1,48 @@
 package faang.school.projectservice.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.MeetDto;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.service.MeetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest
+@ContextConfiguration(classes = {MeetController.class, UserContext.class})
 class MeetControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private UserContext userContext;
 
     @MockBean
     private MeetService meetService;
 
     private MeetDto meetDto;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -74,11 +90,12 @@ class MeetControllerTest {
     @Test
     void updateMeet_ShouldReturnUpdatedMeetDto() throws Exception {
         meetDto = MeetDto.builder().title("Updated Test Meet").build();
-        when(meetService.updateMeet(anyLong(), any(MeetDto.class))).thenReturn(meetDto);
+        when(userContext.getUserId()).thenReturn(1L);
+        when(meetService.updateMeet(1L, meetDto, 1L)).thenReturn(meetDto);
 
         mockMvc.perform(put("/meets/1")
-                        .contentType("application/json")
-                        .content("{\"title\":\"Updated Test Meet\",\"description\":\"Updated Description\",\"status\":\"PENDING\",\"creatorId\":1,\"projectId\":1}")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(meetDto))
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Test Meet"));
@@ -87,7 +104,8 @@ class MeetControllerTest {
     @Test
     void cancelMeet_ShouldReturnCancelledMeetDto() throws Exception {
         meetDto = MeetDto.builder().status(MeetStatus.CANCELLED).build();
-        when(meetService.cancelMeet(1L)).thenReturn(meetDto);
+        when(userContext.getUserId()).thenReturn(1L);
+        when(meetService.cancelMeet(1L, 1L)).thenReturn(meetDto);
 
         mockMvc.perform(patch("/meets/1/cancel"))
                 .andExpect(status().isOk())
@@ -96,7 +114,8 @@ class MeetControllerTest {
 
     @Test
     void deleteMeet_ShouldReturnNoContent() throws Exception {
-        doNothing().when(meetService).deleteMeet(1L);
+        when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(meetService).deleteMeet(1L, 1L);
 
         mockMvc.perform(delete("/meets/1"))
                 .andExpect(status().isNoContent());

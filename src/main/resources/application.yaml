@@ -24,6 +24,7 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        team-channel: team-channel
 
   profiles:
     active: local
@@ -56,7 +57,7 @@ server:
 
 logging:
   level:
-    root: info
+    root: debug
 
 calculations_messages_processing:
   enabled: true
