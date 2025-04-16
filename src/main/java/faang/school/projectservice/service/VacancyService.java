@@ -26,7 +26,7 @@ public class VacancyService {
 
     @Transactional
     public VacancyDto addCover(long vacancyId, MultipartFile cover) {
-        Vacancy vacancy = getandValidateVacancy(vacancyId);
+        Vacancy vacancy = getAndValidateVacancy(vacancyId);
 
         String key = String.format("%s/%d-%s", vacancy.getId() + vacancy.getName(),
                 System.currentTimeMillis(), cover.getOriginalFilename());
@@ -38,8 +38,9 @@ public class VacancyService {
                 compressImage(cover)
         );
 
-        s3Service.uploadFile(fileDto);
         vacancy.setCoverImageKey(key);
+        vacancyRepository.save(vacancy);
+        s3Service.uploadFile(fileDto);
 
         return VacancyDto.builder()
                 .vacancyId(vacancy.getId())
@@ -47,7 +48,7 @@ public class VacancyService {
                 .build();
     }
 
-    private Vacancy getandValidateVacancy(long vacancyId) {
+    private Vacancy getAndValidateVacancy(long vacancyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException("vacancy with id " + vacancyId + " not exists"));
 
@@ -57,7 +58,7 @@ public class VacancyService {
         return vacancy;
     }
 
-    public static byte[] compressImage(MultipartFile file) {
+    public byte[] compressImage(MultipartFile file) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try {

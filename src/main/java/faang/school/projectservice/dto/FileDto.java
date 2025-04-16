@@ -1,12 +1,18 @@
 package faang.school.projectservice.dto;
 
 import jakarta.validation.constraints.Max;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class FileDto {
     String originalFilename;
     String key;
