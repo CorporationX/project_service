@@ -1,10 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.resource.ResourceReadDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
+
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+
+import static faang.school.projectservice.model.ResourceType.IMAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -49,9 +54,8 @@ public class ProjectService {
     public ResourceReadDto uploadResourceToGallery(long projectId, MultipartFile file) {
         resourceValidator.validateResource(file);
 
-        Project project = getProject(projectId);
+        Project project = getProjectById(projectId);
 
-        //Путь с форматом "projects/123/my-cool-project"
         String folder = projectId + project.getName();
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
         BigInteger newStorageSize = project.getStorageSize().add(fileSize);
@@ -69,10 +73,29 @@ public class ProjectService {
         return resourceMapper.todo(resourceRepository.save(uploadedResource));
     }
 
-    private Project getProject(Long id) {
-        return projectRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Project with  id = " + id + " not found"));
+    public List<ResourceReadDto> getAllProjectResources(long projectId) {
+        Project project = getProjectById(projectId);
+        if (project.getGalleryFileKeys().isEmpty() && project.getResources().isEmpty()) {
+            throw new DataValidationException("The project gallery is empty");
+        }
+        return project.getResources().stream().map(resourceMapper::todo).toList();
+    }
+
+    @Transactional
+    public void deleteResourceFromGallery(long projectId, long resourceId) {
+        Project project = getProjectById(projectId);
+        Resource findingResource = project.getResources().stream()
+                .filter(resource -> resource.getId().equals(resourceId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Unable to delete: There is no such image in the project gallery"));
+        BigInteger storageSizeAfterDelete = project.getStorageSize().subtract(findingResource.getSize());
+        project.setStorageSize(storageSizeAfterDelete);
+        project.getGalleryFileKeys().remove(findingResource.getKey());
+
+        amazonS3Client.deleteFile(findingResource.getKey());
+        resourceRepository.deleteById(resourceId);
+        projectRepository.save(project);
     }
 
     private Resource uploadResourceToStorage(MultipartFile file, String folder) {
@@ -82,6 +105,7 @@ public class ProjectService {
                 .key(uploadedResourceKey)
                 .name(file.getName())
                 .size(BigInteger.valueOf(file.getSize()))
+                .type(IMAGE)
                 .status(ResourceStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
