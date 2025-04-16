@@ -52,6 +52,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+app:
   minio:
     endpoint: http://localhost:9000
     access-key: ${MINIO_ACCESS_KEY:user}
@@ -60,3 +62,12 @@ services:
       bucket:
         cover-bucket
       max-image-dimension: 512
+    presentations:
+      endpoint: http://localhost:9000
+      access-key: HZykibzYtPG1ABN2J073
+      secret-key: qjGfUbiitoZyWPNYS24G4EQKDsxCba9rK28DoqEj
+    bucket:
+      name: "corpbucket"
+  presentation:
+    fileExtension: ".pdf"
+    contentType: "application/pdf"
