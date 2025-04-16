@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -27,6 +28,7 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancy);
     }
 
+    @Transactional
     public String saveCoverImage(Long id, MultipartFile file) {
         Vacancy vacancy = findVacancy(id);
         FileData fileData = s3Service.uploadFile(file, getFolder(vacancy));
@@ -35,9 +37,11 @@ public class VacancyService {
         return vacancyWithImageKey.getCoverImageKey();
     }
 
+    @Transactional
     public void deleteCoverImageFromVacancy(Long vacancyId) {
         Vacancy vacancy = findVacancy(vacancyId);
         checkCreatorAndOwner(vacancy);
+        s3Service.deleteFile(vacancy.getCoverImageKey());
         vacancy.setCoverImageKey(null);
         vacancyRepository.save(vacancy);
     }
