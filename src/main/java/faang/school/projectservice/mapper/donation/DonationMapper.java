@@ -14,6 +14,7 @@ public interface DonationMapper {
     @Mapping(target = "paymentNumber", ignore = true)
     @Mapping(target = "donationTime", ignore = true)
     @Mapping(target = "campaign", ignore = true)
+    @Mapping(target = "userId", ignore = true)
     Donation toEntity(DonationCreateRequest donationDto);
 
     DonationResponse toResponse(Donation donation);

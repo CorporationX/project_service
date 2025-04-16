@@ -112,12 +112,11 @@ public class DonationServiceImplTest {
     @Test
     @DisplayName("createDonation - non-exist user ID")
     public void testCreateDonationWithNonExistUser() {
-        donationCreateRequest.setUserId(NON_EXIST_ID);
         when(userServiceClient.getUser(NON_EXIST_ID))
                 .thenThrow(FeignException.class);
 
         Exception exception = assertThrows(UserNotFoundException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(NON_EXIST_ID, donationCreateRequest, CAMPAIGN_ID));
 
         assertEquals(UserExceptionMessage.getNotFound(NON_EXIST_ID), exception.getMessage());
     }
@@ -125,12 +124,11 @@ public class DonationServiceImplTest {
     @Test
     @DisplayName("createDonation - non-exist campaign ID")
     public void testCreateDonationWithNonExistCampaign() {
-        donationCreateRequest.setCampaignId(NON_EXIST_ID);
         when(campaignService.findById(NON_EXIST_ID))
                 .thenThrow(new CampaignNotFoundException(CampaignExceptionMessage.getNotFound(NON_EXIST_ID)));
 
         Exception exception = assertThrows(CampaignNotFoundException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(USER_ID, donationCreateRequest, NON_EXIST_ID));
 
         assertEquals(CampaignExceptionMessage.getNotFound(NON_EXIST_ID), exception.getMessage());
     }
@@ -143,7 +141,7 @@ public class DonationServiceImplTest {
                 .thenReturn(campaign);
 
         Exception exception = assertThrows(CampaignCompletedException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(USER_ID, donationCreateRequest, CAMPAIGN_ID));
 
         assertEquals(CampaignExceptionMessage.getCompleted(CAMPAIGN_ID), exception.getMessage());
     }
@@ -156,7 +154,7 @@ public class DonationServiceImplTest {
                 .thenReturn(campaign);
 
         Exception exception = assertThrows(CampaignCanceledException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(USER_ID, donationCreateRequest, CAMPAIGN_ID));
 
         assertEquals(CampaignExceptionMessage.getCanceled(CAMPAIGN_ID), exception.getMessage());
     }
@@ -169,7 +167,7 @@ public class DonationServiceImplTest {
                 .thenReturn(campaign);
 
         Exception exception = assertThrows(ExceedDonationAmountException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(USER_ID, donationCreateRequest, CAMPAIGN_ID));
 
         assertEquals(DonationExceptionMessage.EXCEED_AMOUNT, exception.getMessage());
     }
@@ -187,7 +185,7 @@ public class DonationServiceImplTest {
                 .thenReturn(invalidPayment);
 
         Exception exception = assertThrows(PaymentFailedException.class,
-                () -> donationService.createDonation(donationCreateRequest));
+                () -> donationService.createDonation(USER_ID, donationCreateRequest, CAMPAIGN_ID));
 
         assertEquals(PaymentExceptionMessage.getFailed(PAYMENT_FAILS_MESSAGE), exception.getMessage());
     }
@@ -200,15 +198,15 @@ public class DonationServiceImplTest {
         when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
                 .thenReturn(createPaymentResponse());
 
-        donationService.createDonation(donationCreateRequest);
+        donationService.createDonation(USER_ID, donationCreateRequest, CAMPAIGN_ID);
 
         assertEquals(BigDecimal.ONE, campaign.getAmountRaised());
         verify(donationRepository, times(1)).save(captor.capture());
         Donation donation = captor.getValue();
         assertEquals(donationCreateRequest.getAmount(), donation.getAmount());
         assertEquals(donationCreateRequest.getCurrency(), donation.getCurrency());
-        assertEquals(donationCreateRequest.getUserId(), donation.getUserId());
-        assertEquals(donationCreateRequest.getCampaignId(),donation.getCampaign().getId());
+        assertEquals(USER_ID, donation.getUserId());
+        assertEquals(CAMPAIGN_ID,donation.getCampaign().getId());
     }
 
     @Test
@@ -295,9 +293,7 @@ public class DonationServiceImplTest {
     private void setUpDonationRequest() {
         donationCreateRequest = DonationCreateRequest.builder()
                 .amount(BigDecimal.ONE)
-                .campaignId(CAMPAIGN_ID)
                 .currency(Currency.USD)
-                .userId(USER_ID)
                 .build();
     }
 

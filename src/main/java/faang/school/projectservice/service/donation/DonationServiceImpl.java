@@ -54,11 +54,11 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     @Transactional
-    public DonationResponse createDonation(DonationCreateRequest donationCreateRequest) {
+    public DonationResponse createDonation(long userId, DonationCreateRequest donationCreateRequest, long campaignId) {
         //todo: метод валидации будет работать только после появления эндпоинта в UserService
-        validationUserId(donationCreateRequest.getUserId());
+        validationUserId(userId);
 
-        Campaign campaign = campaignService.findById(donationCreateRequest.getCampaignId());
+        Campaign campaign = campaignService.findById(campaignId);
         validationCampaignStatus(campaign);
 
         validationDonationAmount(donationCreateRequest, campaign);
@@ -82,6 +82,7 @@ public class DonationServiceImpl implements DonationService {
         donation.setPaymentNumber(paymentResponse.paymentNumber());
         donation.setDonationTime(LocalDateTime.now());
         donation.setCampaign(campaign);
+        donation.setUserId(userId);
 
         donationRepository.save(donation);
         log.info("Donation successfully persisted. Donation ID: {}", donation.getId());

@@ -14,31 +14,30 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/donations")
 @RequiredArgsConstructor
 public class DonationController {
 
     private final DonationService donationService;
 
-    @PostMapping("/campaigns/{campaignId}/donations")
+    @PostMapping("/campaigns/{campaignId}")
     public ResponseEntity<DonationResponse> createDonation(
             @Positive @PathVariable long campaignId,
             @Valid @RequestBody DonationCreateRequest donationCreateRequest,
             @Positive @RequestHeader("x-user-id") long userId
     ) {
-        donationCreateRequest.setCampaignId(campaignId);
-        donationCreateRequest.setUserId(userId);
-
-        DonationResponse response = donationService.createDonation(donationCreateRequest);
+        DonationResponse response = donationService.createDonation(userId, donationCreateRequest, campaignId);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/donations/{donationId}")
+    @GetMapping("/{donationId}")
     public ResponseEntity<DonationResponse> getDonation(
             @Positive @PathVariable long donationId,
             @Positive @RequestHeader("x-user-id") long userId
@@ -48,7 +47,7 @@ public class DonationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/donations")
+    @GetMapping
     public ResponseEntity<List<DonationResponse>> getDonations(
             @Valid SearchDonationDto searchDonationDto,
             @Positive @RequestHeader("x-user-id") long userId

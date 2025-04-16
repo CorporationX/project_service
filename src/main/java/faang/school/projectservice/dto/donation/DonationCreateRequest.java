@@ -16,10 +16,6 @@ public class DonationCreateRequest {
     @NotNull
     private BigDecimal amount;
 
-    private long campaignId;
-
     @NotNull
     private Currency currency;
-
-    private long userId;
 }
