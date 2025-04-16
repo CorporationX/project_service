@@ -35,7 +35,6 @@ public class ImageUtils {
                 String fileName = file.getName();
                 String originalFileName = file.getOriginalFilename();
 
-                // Возвращаем MultipartFile
                 return new MockMultipartFile(
                         fileName,
                         originalFileName != null ? originalFileName : (fileName + "." + format),
