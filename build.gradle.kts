@@ -39,9 +39,15 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
-    * MinIo
-    */
-    implementation("io.minio:minio:8.5.9")
+
+     * MinIO
+     */
+    implementation("io.minio:minio:8.4.6")
+
+    /**
+     * Apache PDFBox
+     */
+    implementation("org.apache.pdfbox:pdfbox:3.0.4")
 
     /**
      * Utils & Logging
