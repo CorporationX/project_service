@@ -50,14 +50,14 @@ public class MinioClientConfig {
         }
     }
 
-    public void initializeBucket(MinioClient client, String bucketName) {
+    public void initializeBucket(String bucketName) {
         try {
-            boolean found = client.bucketExists(BucketExistsArgs.builder()
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
                     .bucket(bucketName)
                     .build());
 
             if (!found) {
-                client.makeBucket(MakeBucketArgs.builder()
+                minioClient.makeBucket(MakeBucketArgs.builder()
                         .bucket(bucketName)
                         .build());
                 log.info("MinIO bucket created: {}", bucketName);

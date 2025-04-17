@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapKeyJoinColumn;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -126,11 +126,11 @@ public class Project {
 
     @ElementCollection
     @CollectionTable(name = "project_member_roles", joinColumns = @JoinColumn(name = "project_id"))
-    @MapKeyJoinColumn(name = "team_member_id")
+    @MapKeyColumn(name = "team_member_id")
     @Column(name = "roles")
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Map<TeamMember, Set<TeamRole>> memberRoles = new HashMap<>();
+    private Map<Long, Set<TeamRole>> memberRoles = new HashMap<>();
 
     @Column(name = "has_extended_storage", nullable = false)
     @Builder.Default

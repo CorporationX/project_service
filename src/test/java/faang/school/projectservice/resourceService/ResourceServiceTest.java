@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -81,7 +82,10 @@ public class ResourceServiceTest {
 
     @Test
     public void testUploadFileSuccessful() throws IOException {
-        project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
+        Map<Long, Set<TeamRole>> roles = new HashMap<>();
+        roles.put(member.getId(), Set.of(TeamRole.DEVELOPER));
+
+        project.setMemberRoles(roles);
 
         String expectedKey = String.format("project %d/random key", PROJECT_ID);
 
@@ -131,7 +135,7 @@ public class ResourceServiceTest {
     @Test
     public void testUploadFile_exceedsLimit() {
         project.setStorageSize(BASE_MAX_STORAGE_BYTES);
-        project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
+        project.setMemberRoles(Map.of(member.getId(), Set.of(TeamRole.DEVELOPER)));
 
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(teamMemberRepository.findById(USER_ID)).thenReturn(Optional.of(member));
@@ -145,7 +149,7 @@ public class ResourceServiceTest {
         member.setRoles(Set.of(TeamRole.DEVELOPER));
 
         project.setStorageSize(FILE_SIZE);
-        project.setMemberRoles(Map.of(member, Set.of(TeamRole.DEVELOPER)));
+        project.setMemberRoles(Map.of(member.getId(), Set.of(TeamRole.DEVELOPER)));
 
         Resource resource = new Resource();
         resource.setId(1L);
@@ -172,7 +176,7 @@ public class ResourceServiceTest {
         TeamMember manager = new TeamMember();
         manager.setId(USER_ID);
         manager.setRoles(Set.of(TeamRole.MANAGER));
-        project.setMemberRoles(Map.of(manager, Set.of(TeamRole.MANAGER)));
+        project.setMemberRoles(Map.of(manager.getId(), Set.of(TeamRole.MANAGER)));
 
         Resource resource = new Resource();
         resource.setId(1L);
@@ -210,7 +214,7 @@ public class ResourceServiceTest {
         other.setId(USER_ID);
         other.setRoles(Set.of(TeamRole.DEVELOPER));
 
-        project.setMemberRoles(Map.of(other, Set.of(TeamRole.DEVELOPER)));
+        project.setMemberRoles(Map.of(other.getId(), Set.of(TeamRole.DEVELOPER)));
 
         Resource resource = new Resource();
         resource.setId(1L);

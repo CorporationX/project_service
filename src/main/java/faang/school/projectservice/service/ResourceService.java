@@ -90,7 +90,7 @@ public class ResourceService {
     }
 
     private void validateMemberInProject(Project project, TeamMember member) {
-        if (!project.getMemberRoles().containsKey(member)) {
+        if (!project.getMemberRoles().containsKey(member.getId())) {
             throw new AccessToDeniedException(USER_NOT_MEMBER);
         }
     }
@@ -122,10 +122,18 @@ public class ResourceService {
     }
 
     private Resource buildResource(MultipartFile file, TeamMember member, Project project, String key) {
-        return Resource.builder().key(key).size(BigInteger.valueOf(file.getSize()))
-                .type(ResourceType.getResourceType(file.getContentType())).status(ResourceStatus.ACTIVE)
-                .createdBy(member).updatedBy(member).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
-                .project(project).allowedRoles(new HashSet<>(member.getRoles())).build();
+        return Resource.builder()
+                .key(key)
+                .size(BigInteger.valueOf(file.getSize()))
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .status(ResourceStatus.ACTIVE)
+                .createdBy(member)
+                .updatedBy(member)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .project(project)
+                .allowedRoles(new HashSet<>(member.getRoles()))
+                .build();
     }
 
     private void updateProjectStorage(Project project, BigInteger size) {
