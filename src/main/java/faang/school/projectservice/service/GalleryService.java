@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -29,10 +28,10 @@ public class GalleryService {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("File is too large");
         }
-        if(projectGalleryRepository.countByProjectId(projectId) >= MAX_FILE_COUNT) {
+        if (projectGalleryRepository.countByProjectId(projectId) >= MAX_FILE_COUNT) {
             throw new IllegalArgumentException("Max file count exceeded");
         }
-        String fileKey = file.getOriginalFilename()+"_"+ UUID.randomUUID().toString();
+        String fileKey = file.getOriginalFilename() + "_" + UUID.randomUUID().toString();
         minioService.uploadFile(file, fileKey);
 
         ProjectGallery savedFile = ProjectGallery.builder()
@@ -40,7 +39,7 @@ public class GalleryService {
                         .orElseThrow(() -> new IllegalArgumentException("Project not found")))
                 .fileKey(fileKey)
                 .build();
-        log.info("Saved file: {} \n With key : {}", file,fileKey);
+        log.info("Saved file: {} \n With key : {}", file, fileKey);
         return projectGalleryRepository.save(savedFile).getFileKey();
     }
 
