@@ -48,3 +48,13 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+team:
+  resource:
+    avatar:
+      maxSize: 5242880
+      width: 512
+      height: 512
+      supportedContentTypes:
+        - image/png
+        - image/jpeg

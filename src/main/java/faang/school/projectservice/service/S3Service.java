@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @RequiredArgsConstructor
 @Slf4j
 public class S3Service {
+
     private final S3Client s3Client;
 
     @Value("${services.s3.bucketName}")

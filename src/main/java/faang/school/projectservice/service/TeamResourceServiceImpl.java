@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.TeamResourceConfig;
 import faang.school.projectservice.dto.client.TeamResourceDto;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.exception.ResourceProcessingException;
@@ -18,21 +19,17 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class TeamResourceServiceImpl implements TeamResourceService {
-    private static final long MAX_AVATAR_SIZE = 5 * 1024 * 1024;
-    private static final int AVATAR_WIDTH = 512;
-    private static final int AVATAR_HEIGHT = 512;
-    private static final Set<String> SUPPORTED_CONTENT_TYPES = Set.of("image/png", "image/jpeg");
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final S3Service s3Service;
+    private final TeamResourceConfig teamResourceConfig;
 
     @Override
     @Transactional
@@ -104,13 +101,13 @@ public class TeamResourceServiceImpl implements TeamResourceService {
             throw new ResourceProcessingException("Uploaded file is null or empty");
         }
 
-        if (!SUPPORTED_CONTENT_TYPES.contains(file.getContentType())) {
+        if (!teamResourceConfig.getSupportedContentTypes().contains(file.getContentType())) {
             log.warn("Unsupported content type '{}' for team: {}", file.getContentType(), teamId);
             throw new ResourceProcessingException("Only PNG and JPEG images are supported.");
         }
 
-        if (file.getSize() > MAX_AVATAR_SIZE) {
-            log.warn("File size exceeds the 5 MB limit for team: {} (size: {})", teamId, file.getSize());
+        if (file.getSize() > teamResourceConfig.getMaxSize()) {
+            log.warn("File size exceeds the limit for team: {} (size: {})", teamId, file.getSize());
             throw new ResourceProcessingException("File size exceeds the 5 MB limit for team avatar.");
         }
     }
@@ -127,7 +124,7 @@ public class TeamResourceServiceImpl implements TeamResourceService {
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Thumbnails.of(file.getInputStream())
-                    .size(AVATAR_WIDTH, AVATAR_HEIGHT)
+                    .size(teamResourceConfig.getWidth(), teamResourceConfig.getHeight())
                     .outputFormat(format)
                     .toOutputStream(outputStream);
 

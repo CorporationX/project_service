@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.TeamResourceConfig;
 import faang.school.projectservice.dto.client.TeamResourceDto;
 import faang.school.projectservice.exception.NotFoundException;
 import faang.school.projectservice.exception.ResourceProcessingException;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +51,9 @@ public class TeamResourceServiceImplTest {
 
     @Mock
     private S3Service s3Service;
+
+    @Mock
+    private TeamResourceConfig teamResourceConfig;
 
     @InjectMocks
     private TeamResourceServiceImpl teamResourceService;
@@ -65,6 +71,11 @@ public class TeamResourceServiceImplTest {
 
     @Test
     void shouldUploadAvatarSuccessfully() throws Exception {
+        when(teamResourceConfig.getSupportedContentTypes()).thenReturn(Set.of("image/png", "image/jpeg"));
+        when(teamResourceConfig.getMaxSize()).thenReturn(5 * 1024 * 1024L);
+        when(teamResourceConfig.getWidth()).thenReturn(512);
+        when(teamResourceConfig.getHeight()).thenReturn(512);
+
         String filename = "avatar.png";
         String contentType = "image/png";
         long size = 1024L;
@@ -126,7 +137,9 @@ public class TeamResourceServiceImplTest {
     void shouldNotUploadAvatarWhenFileSizeExceedsLimit() {
         MultipartFile file = mock(MultipartFile.class);
         when(file.getContentType()).thenReturn("image/png");
-        when(file.getSize()).thenReturn(6 * 1024 * 1024L); // 6 MB
+        when(file.getSize()).thenReturn(6 * 1024 * 1024L);
+        when(teamResourceConfig.getSupportedContentTypes()).thenReturn(Set.of("image/png", "image/jpeg"));
+        when(teamResourceConfig.getMaxSize()).thenReturn(5 * 1024 * 1024L);
 
         ResourceProcessingException exception = assertThrows(ResourceProcessingException.class, () ->
                 teamResourceService.uploadAvatar(teamId, file));
@@ -139,6 +152,9 @@ public class TeamResourceServiceImplTest {
         MultipartFile file = new MockMultipartFile("avatar.png",
                 "avatar.png", "image/png", new byte[10]);
 
+        when(teamResourceConfig.getSupportedContentTypes()).thenReturn(Set.of("image/png", "image/jpeg"));
+        when(teamResourceConfig.getMaxSize()).thenReturn(5 * 1024 * 1024L);
+
         when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -149,6 +165,11 @@ public class TeamResourceServiceImplTest {
 
     @Test
     void shouldNotUploadAvatarWhenUploadToMinioFails() throws Exception {
+        when(teamResourceConfig.getSupportedContentTypes()).thenReturn(Set.of("image/png", "image/jpeg"));
+        when(teamResourceConfig.getMaxSize()).thenReturn(5 * 1024 * 1024L);
+        when(teamResourceConfig.getWidth()).thenReturn(512);
+        when(teamResourceConfig.getHeight()).thenReturn(512);
+
         BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         File tempFile = File.createTempFile("avatar", ".jpg");
         ImageIO.write(image, "jpg", tempFile);
@@ -235,4 +256,5 @@ public class TeamResourceServiceImplTest {
         verify(s3Service, never()).deleteImage(any());
     }
 }
+
 

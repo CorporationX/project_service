@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.TeamResourceDto;
 import faang.school.projectservice.service.TeamResourceService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,13 +21,13 @@ public class TeamResourceController {
     private final TeamResourceService teamResourceService;
 
     @PostMapping("/{teamId}/avatar")
-    public ResponseEntity<TeamResourceDto> uploadAvatar(@PathVariable Long teamId,
+    public ResponseEntity<TeamResourceDto> uploadAvatar(@PathVariable @Min(1) Long teamId,
                                                         @RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(teamResourceService.uploadAvatar(teamId, file));
     }
 
     @DeleteMapping("/{teamId}/avatar")
-    public ResponseEntity<Void> deleteAvatar(@PathVariable Long teamId, @RequestParam Long userId) {
+    public ResponseEntity<Void> deleteAvatar(@PathVariable @Min(1) Long teamId, @RequestParam @Min(1) Long userId) {
         teamResourceService.deleteAvatar(teamId, userId);
         return ResponseEntity.noContent().build();
     }
