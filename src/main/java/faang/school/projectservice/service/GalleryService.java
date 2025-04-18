@@ -31,7 +31,7 @@ public class GalleryService {
         if (projectGalleryRepository.countByProjectId(projectId) >= MAX_FILE_COUNT) {
             throw new IllegalArgumentException("Max file count exceeded");
         }
-        String fileKey = file.getOriginalFilename() + "_" + UUID.randomUUID().toString();
+        String fileKey = file.getOriginalFilename() + "_" + UUID.randomUUID();
         minioService.uploadFile(file, fileKey);
 
         ProjectGallery savedFile = ProjectGallery.builder()

@@ -4,7 +4,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +16,7 @@ public class MinioService {
 
     private final MinioClient minioClient;
 
-    @Value("${minio.bucket}")
+    @Value("{minio.bucket}")
     private String bucket;
 
     public String uploadFile(MultipartFile file, String fileName) {
@@ -30,6 +30,7 @@ public class MinioService {
                             .build()
             );
             return fileName;
+
         } catch (Exception e) {
             throw new RuntimeException("Ошибка загрузки файла в MinIO", e);
         }

@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.service.GalleryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,8 +22,7 @@ public class GalleryController {
     @PostMapping("/{projectId}")
     public String uploadImage(@PathVariable Long projectId,
                               @RequestParam("file") MultipartFile file) {
-        String key = galleryService.uploadImage(projectId, file);
-        return key;
+        return galleryService.uploadImage(projectId, file);
     }
 
     @DeleteMapping("/{projectId}/{fileKey}")
