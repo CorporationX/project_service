@@ -34,9 +34,10 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     /**
-     * Amazon S3
+     * Amazon S3 and Minio
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    implementation("io.minio:minio:8.5.7")
 
     /**
      * Utils & Logging
