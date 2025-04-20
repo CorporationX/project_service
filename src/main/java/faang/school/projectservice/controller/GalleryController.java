@@ -17,6 +17,7 @@ import java.util.List;
 @RequestMapping("/gallery")
 @RequiredArgsConstructor
 public class GalleryController {
+
     private final GalleryService galleryService;
 
     @PostMapping("/{projectId}")

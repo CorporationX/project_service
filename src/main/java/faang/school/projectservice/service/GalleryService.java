@@ -5,8 +5,10 @@ import faang.school.projectservice.repository.ProjectGalleryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class GalleryService {
+
     private final ProjectGalleryRepository projectGalleryRepository;
     private final MinioService minioService;
     private final ProjectService projectService;
@@ -24,6 +27,7 @@ public class GalleryService {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private static final int MAX_FILE_COUNT = 50;
 
+    @Transactional
     public String uploadImage(Long projectId, MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("File is too large");
@@ -38,6 +42,7 @@ public class GalleryService {
                 .project(projectService.findById(projectId)
                         .orElseThrow(() -> new IllegalArgumentException("Project not found")))
                 .fileKey(fileKey)
+                .createdAt(LocalDateTime.now())
                 .build();
         log.info("Saved file: {} \n With key : {}", file, fileKey);
         return projectGalleryRepository.save(savedFile).getFileKey();

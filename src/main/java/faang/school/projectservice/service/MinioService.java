@@ -16,7 +16,7 @@ public class MinioService {
 
     private final MinioClient minioClient;
 
-    @Value("{minio.bucket}")
+    @Value("${minio.bucketName}")
     private String bucket;
 
     public String uploadFile(MultipartFile file, String fileName) {
