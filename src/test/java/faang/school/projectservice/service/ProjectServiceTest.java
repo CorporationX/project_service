@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,10 +65,14 @@ public class ProjectServiceTest {
     @Mock
     private ProjectFilter projectStatusFilter;
 
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
+
     @BeforeEach
     public void setUp() {
         projectService = new ProjectService(projectRepository, projectMapper,
-                List.of(projectNameFilter, projectStatusFilter));
+                List.of(projectNameFilter, projectStatusFilter),
+                projectViewEventPublisher);
     }
 
     @Test
