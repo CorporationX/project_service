@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.team.TeamCreateDto;
 import faang.school.projectservice.service.TeamService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -29,5 +31,10 @@ public class TeamController {
     @DeleteMapping("/avatar/{id}")
     public void delete(@PathVariable Long id) {
         service.deleteAvatar(id, userContext.getUserId());
+    }
+
+    @PostMapping
+    public void addTeamOnProject(@Valid @RequestBody TeamCreateDto teamDto) {
+        service.addTeamOnProject(teamDto, userContext.getUserId());
     }
 }

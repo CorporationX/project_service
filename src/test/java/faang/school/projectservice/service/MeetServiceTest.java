@@ -94,7 +94,7 @@ class MeetServiceTest {
         when(meetRepository.save(any(Meet.class))).thenReturn(meet);
         when(meetMapper.toDto(meet)).thenReturn(meetDto);
 
-        var result = meetService.updateMeet(1L, meetDto);
+        var result = meetService.updateMeet(1L, meetDto, 1L);
 
         assertNotNull(result);
         assertEquals(meetDto, result);
@@ -107,7 +107,7 @@ class MeetServiceTest {
         when(meetRepository.save(any(Meet.class))).thenReturn(meet);
         when(meetMapper.toDto(meet)).thenReturn(meetDto);
 
-        var result = meetService.cancelMeet(1L);
+        var result = meetService.cancelMeet(1L, 1L);
 
         assertNotNull(result);
         assertEquals(MeetStatus.CANCELLED.name(), String.valueOf(result.status()));
@@ -115,9 +115,10 @@ class MeetServiceTest {
 
     @Test
     void deleteMeet_ShouldDeleteMeet() {
+        when(meetRepository.findById(1L)).thenReturn(Optional.of(meet));
         doNothing().when(meetRepository).deleteById(1L);
 
-        meetService.deleteMeet(1L);
+        meetService.deleteMeet(1L, 1L);
 
         verify(meetRepository, times(1)).deleteById(1L);
     }
