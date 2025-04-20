@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectGallery;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectGalleryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +63,10 @@ public class GalleryService {
     }
 
     public List<String> getKeyListByProjectId(Long projectId) {
+        Project project = projectService.findById(projectId).orElseThrow(() -> new NoSuchElementException("Project not found"));
+        if (project.getVisibility() != ProjectVisibility.PUBLIC) {
+            log.warn("Project visibility is not public");
+        }
         return projectGalleryRepository.findByProjectId(projectId).stream()
                 .map(ProjectGallery::getFileKey)
                 .collect(toList());
