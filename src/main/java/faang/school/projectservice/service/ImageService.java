@@ -41,6 +41,9 @@ public class ImageService {
     private long coverMaxFileSIze;
 
     public ResourceDto saveProjectCover(long projectId, MultipartFile multipartFile) {
+        if (multipartFile == null) {
+            throw new InvalidFileException(ExceptionMessage.FILE_NOT_SENT);
+        }
         checkCoverMaxSize(multipartFile.getSize());
 
         Project project = projectService.findById(projectId)
