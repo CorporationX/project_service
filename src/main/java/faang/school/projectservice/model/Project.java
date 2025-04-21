@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -29,7 +30,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "project")
@@ -119,4 +123,16 @@ public class Project {
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
     private List<String> galleryFileKeys;
+
+    @ElementCollection
+    @CollectionTable(name = "project_member_roles", joinColumns = @JoinColumn(name = "project_id"))
+    @MapKeyColumn(name = "team_member_id")
+    @Column(name = "roles")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Map<Long, Set<TeamRole>> memberRoles = new HashMap<>();
+
+    @Column(name = "has_extended_storage", nullable = false)
+    @Builder.Default
+    private boolean hasExtendedStorage = false;
 }

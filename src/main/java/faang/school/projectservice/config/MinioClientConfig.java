@@ -49,4 +49,24 @@ public class MinioClientConfig {
             throw new StorageException(ERROR_DURING_CREATION_BUCKET_WITH_NAME + bucketName);
         }
     }
+
+    public void initializeBucket(String bucketName) {
+        try {
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(bucketName)
+                    .build());
+
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder()
+                        .bucket(bucketName)
+                        .build());
+                log.info("MinIO bucket created: {}", bucketName);
+            } else {
+                log.info("MinIO bucket exists: {}", bucketName);
+            }
+        } catch (Exception e) {
+            log.error(ERROR_DURING_CREATION_BUCKET_WITH_NAME + bucketName, e);
+            throw new StorageException(ERROR_DURING_CREATION_BUCKET_WITH_NAME + bucketName);
+        }
+    }
 }
