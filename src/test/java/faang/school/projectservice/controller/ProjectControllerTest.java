@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
@@ -42,6 +43,9 @@ public class ProjectControllerTest {
     @Mock
     private ProjectService projectService;
 
+    @Mock
+    private UserContext userContext;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
@@ -81,10 +85,11 @@ public class ProjectControllerTest {
         List<ProjectDto> filteredProjects = projects.stream()
                 .filter(project -> project.status().equals(ProjectStatus.CREATED)).toList();
 
+        when(userContext.getUserId()).thenReturn(firstId);
         when(projectService.findProjectsByFilters(firstId, filter)).thenReturn(filteredProjects);
 
         mockMvc.perform(post("/projects/all-filtered")
-                        .param("userId", firstId.toString())
+                        .header("x-user-id", firstId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk())
@@ -97,20 +102,22 @@ public class ProjectControllerTest {
 
     @Test
     public void testPositiveGetAllProjects() throws Exception {
+        when(userContext.getUserId()).thenReturn(firstId);
         when(projectService.getAllProjects(firstId)).thenReturn(projects);
 
         mockMvc.perform(get("/projects/all")
-                        .param("userId", firstId.toString()))
+                        .header("x-user-id", firstId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
 
     @Test
     public void testPositiveGetProjectById() throws Exception {
+        when(userContext.getUserId()).thenReturn(firstId);
         when(projectService.getProjectById(firstId, firstId)).thenReturn(projects.get(0));
 
         mockMvc.perform(get("/projects/{projectId}", firstId)
-                        .param("userId", firstId.toString()))
+                        .header("x-user-id", firstId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(projects.get(0).id().intValue())))
                 .andExpect(jsonPath("$.name", is(projects.get(0).name())))
