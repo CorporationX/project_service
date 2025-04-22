@@ -30,7 +30,6 @@ import java.util.List;
 @Entity
 @Table(name = "internship")
 public class Internship {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

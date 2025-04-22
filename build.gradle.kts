@@ -9,6 +9,9 @@ version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
+    maven {
+        url = uri("https://packages.atlassian.com/maven/repository/public")
+    }
     mavenCentral()
 }
 
@@ -18,6 +21,7 @@ dependencies {
      */
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -66,6 +70,7 @@ dependencies {
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("io.projectreactor:reactor-test:3.5.0")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 
@@ -75,6 +80,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * Jira
+     **/
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.0")
+    implementation("io.atlassian.fugue:fugue:6.1.0")
 }
 
 tasks.withType<Test> {

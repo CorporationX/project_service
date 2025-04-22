@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class StageRoles {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
