@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.team.TeamCreateDto;
 import faang.school.projectservice.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +13,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {TeamController.class, TeamService.class})
@@ -27,6 +31,9 @@ public class TeamControllerTest {
     private UserContext userContext;
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     public void testPositiveUpload() throws Exception {
@@ -46,5 +53,25 @@ public class TeamControllerTest {
         mockMvc.perform(delete(REQUEST_URL, 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testPositiveAddTeamOnProject() throws Exception {
+        Long userId = 1L;
+        TeamCreateDto teamDto = createTeamDto();
+        when(userContext.getUserId()).thenReturn(userId);
+
+        mockMvc.perform(post("/teams")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(teamDto)))
+                .andExpect(status().isOk());
+
+        verify(teamService, times(1)).addTeamOnProject(teamDto, userId);
+    }
+
+    private TeamCreateDto createTeamDto() {
+        return TeamCreateDto.builder()
+                .projectId(1L)
+                .build();
     }
 }

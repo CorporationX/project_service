@@ -88,3 +88,10 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+tasks.test {
+    useJUnitPlatform()
+    if (System.getenv("CI") == "true") {
+        exclude("**/*IT*", "**/*IntegrationTest*")
+    }
+}

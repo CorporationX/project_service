@@ -25,6 +25,7 @@ spring:
         calculations_channel:
           name: calculations_channel
         fundRaised: fundRaised_topic
+        team-channel: team-channel
 
   profiles:
     active: local
@@ -57,7 +58,7 @@ server:
 
 logging:
   level:
-    root: info
+    root: debug
 
 calculations_messages_processing:
   enabled: true
