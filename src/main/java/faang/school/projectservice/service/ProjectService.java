@@ -84,9 +84,8 @@ public class ProjectService {
     @Transactional
     public void deleteResourceFromGallery(long projectId, long resourceId) {
         Project project = getProjectById(projectId);
-        Resource findingResource = project.getResources().stream()
-                .filter(resource -> resource.getId().equals(resourceId))
-                .findFirst()
+        Resource findingResource = resourceRepository
+                .findById(resourceId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Unable to delete: There is no such image in the project gallery"));
         BigInteger storageSizeAfterDelete = project.getStorageSize().subtract(findingResource.getSize());

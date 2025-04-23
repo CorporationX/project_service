@@ -4,8 +4,9 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.Data;
+import faang.school.projectservice.exception.FileStorageException;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cfg.beanvalidation.IntegrationException;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Service
-@Data
+@RequiredArgsConstructor
 @Slf4j
 public class AmazonS3Service {
 
@@ -31,15 +32,14 @@ public class AmazonS3Service {
     }
     public void deleteFile(String key) {
         if (!amazonS3.doesObjectExist(bucketName, key)) {
-            throw new EntityNotFoundException(String.format("File with the key %s was not found in the repository", key));
+            throw new FileStorageException(String.format("File with key '%s' not found in storage", key));
         }
-
         try {
             amazonS3.deleteObject(bucketName, key);
         } catch (SdkClientException exception) {
             String errorMessage = "Error when deleting a file from a storage";
             log.error(errorMessage, exception);
-            throw new IntegrationException(errorMessage);
+            throw new FileStorageException(errorMessage, exception);
         }
     }
 
@@ -52,7 +52,7 @@ public class AmazonS3Service {
             var request = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
             amazonS3.putObject(request);
         } catch (IOException | SdkClientException exception) {
-            String errorMessage = "Ошибка при отправке файла в хранилище";
+            String errorMessage = "Error sending file to storage";
             log.error(errorMessage, exception);
             throw new IntegrationException(errorMessage);
         }
