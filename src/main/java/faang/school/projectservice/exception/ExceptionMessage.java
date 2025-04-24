@@ -19,6 +19,8 @@ public enum ExceptionMessage {
     IMAGE_PROCESSING_READ("Image processing error while reading"),
     S3_UPLOAD("Failed to upload file to S3"),
     COVER_MAX_SIZE("The size of the cover for the project should not exceed %d megabytes."),
+    FILE_IS_LARGE("File is large. Max file size = %d megabytes."),
+    FILE_COUNT_LIMIT_EXCEEDED("File count limit exceeded. Limit = %d files."),
     ;
 
 

@@ -1,5 +1,9 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.CoverMaxSizeException;
+import faang.school.projectservice.exception.ExceptionMessage;
+import faang.school.projectservice.exception.FileLimitException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectGallery;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -32,17 +36,17 @@ public class GalleryService {
     @Transactional
     public String uploadImage(Long projectId, MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File is too large");
+            throw new CoverMaxSizeException(ExceptionMessage.FILE_IS_LARGE, toMegabytes(MAX_FILE_SIZE));
         }
         if (projectGalleryRepository.countByProjectId(projectId) >= MAX_FILE_COUNT) {
-            throw new IllegalArgumentException("Max file count exceeded");
+            throw new FileLimitException(ExceptionMessage.FILE_COUNT_LIMIT_EXCEEDED, MAX_FILE_COUNT);
         }
         String fileKey = file.getOriginalFilename() + "_" + UUID.randomUUID();
         minioService.uploadFile(file, fileKey);
 
         ProjectGallery savedFile = ProjectGallery.builder()
                 .project(projectService.findById(projectId)
-                        .orElseThrow(() -> new IllegalArgumentException("Project not found")))
+                        .orElseThrow(() -> new ProjectNotFoundException(ExceptionMessage.PROJECT_NOT_FOUND, projectId)))
                 .fileKey(fileKey)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -54,7 +58,7 @@ public class GalleryService {
         ProjectGallery entity = projectGalleryRepository.findByProjectId(projectId).stream()
                 .filter(g -> g.getFileKey().equals(fileKey))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("File not found"));
+                .orElseThrow(() -> new NoSuchElementException("File with name: " + fileKey + " not found"));
 
         minioService.deleteFile(fileKey);
         log.info("file with key : {} was deleted from minio", fileKey);
@@ -63,7 +67,8 @@ public class GalleryService {
     }
 
     public List<String> getKeyListByProjectId(Long projectId) {
-        Project project = projectService.findById(projectId).orElseThrow(() -> new NoSuchElementException("Project not found"));
+        Project project = projectService.findById(projectId).orElseThrow(() ->
+                new ProjectNotFoundException(ExceptionMessage.PROJECT_NOT_FOUND, projectId));
         if (project.getVisibility() != ProjectVisibility.PUBLIC) {
             log.warn("Project visibility is not public");
         }
@@ -72,4 +77,7 @@ public class GalleryService {
                 .collect(toList());
     }
 
+    private long toMegabytes(long bytes) {
+        return bytes / (1024 * 1024);
+    }
 }

@@ -26,9 +26,9 @@ public class GalleryController {
         return galleryService.uploadImage(projectId, file);
     }
 
-    @DeleteMapping("/{projectId}/{fileKey}")
+    @DeleteMapping("/{projectId}")
     public void deleteImage(@PathVariable Long projectId,
-                            @PathVariable String fileKey) {
+                            @RequestParam String fileKey) {
         galleryService.deleteImage(projectId, fileKey);
     }
 
