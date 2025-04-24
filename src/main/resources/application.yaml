@@ -71,9 +71,16 @@ services:
     isMocked: false
     region: us-east-1
 
+  minio:
+    endpoint: http://127.0.0.1:9000
+    accessKey: user
+    secretKey: password
+    bucketName: corpbucket
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080
@@ -81,9 +88,3 @@ services:
 app:
   scheduler:
     jira-token-cleanup: "0 */10 * * * *"
-
-minio:
-  endpoint: http://127.0.0.1:9000
-  accessKey: user
-  secretKey: password
-  bucketName: corpbucket
