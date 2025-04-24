@@ -21,6 +21,8 @@ public enum ExceptionMessage {
     COVER_MAX_SIZE("The size of the cover for the project should not exceed %d megabytes."),
     FILE_IS_LARGE("File is large. Max file size = %d megabytes."),
     FILE_COUNT_LIMIT_EXCEEDED("File count limit exceeded. Limit = %d files."),
+    MINIO_UPLOAD_EXCEPTION("Failed to upload file to Minio"),
+    MINIO_DELETE_EXCEPTION("Failed to delete file from Minio"),
     ;
 
 
