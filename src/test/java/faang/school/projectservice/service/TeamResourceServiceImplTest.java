@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.TeamResourceConfig;
 import faang.school.projectservice.dto.client.TeamResourceDto;
-import faang.school.projectservice.exception.NotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ResourceProcessingException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -157,7 +157,7 @@ public class TeamResourceServiceImplTest {
 
         when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 teamResourceService.uploadAvatar(teamId, file));
 
         assertEquals("Team with id 1 not found", exception.getMessage());
@@ -210,7 +210,7 @@ public class TeamResourceServiceImplTest {
     void shouldNotDeleteAvatarWhenTeamNotFound() {
         when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 teamResourceService.deleteAvatar(teamId, userId));
 
         assertEquals("Team with id 1 not found", exception.getMessage());
@@ -221,7 +221,7 @@ public class TeamResourceServiceImplTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 teamResourceService.deleteAvatar(teamId, userId));
 
         assertEquals("User is not a member of the team", exception.getMessage());

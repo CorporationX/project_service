@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.exception.ResourceProcessingException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,21 @@ public class S3Service {
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
+
+    @PostConstruct
+    public void ensureBucketExists() {
+        try {
+            s3Client.headBucket(b -> b.bucket(bucketName));
+        } catch (S3Exception e) {
+            if ("NoSuchBucket".equals(e.awsErrorDetails().errorCode())) {
+                log.info("Bucket '{}' does not exist. Creating...", bucketName);
+                s3Client.createBucket(b -> b.bucket(bucketName));
+            } else {
+                log.error("Error occurred while checking bucket existence: ", e);
+                throw new ResourceProcessingException("Failed to check or create S3 bucket", e);
+            }
+        }
+    }
 
     public void uploadImage(byte[] imageBytes, String key, String contentType) {
         try {

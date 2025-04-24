@@ -1,6 +1,6 @@
 package faang.school.projectservice.exception.handler;
 
-import faang.school.projectservice.exception.NotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ResourceProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,9 +19,9 @@ public class TeamResourceControllerExceptionHandler {
         return e.getMessage();
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFoundException(NotFoundException e) {
+    public String handleNotFoundException(EntityNotFoundException e) {
         log.error("Resource not found: {}", e.getMessage(), e);
         return e.getMessage();
     }

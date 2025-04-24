@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.TeamResourceConfig;
 import faang.school.projectservice.dto.client.TeamResourceDto;
-import faang.school.projectservice.exception.NotFoundException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ResourceProcessingException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -39,29 +39,25 @@ public class TeamResourceServiceImpl implements TeamResourceService {
         validateAvatarFile(file, teamId);
 
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundException("Team with id " + teamId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Team with id " + teamId + " not found"));
 
-        try {
-            byte[] resizedImageData = resizeAndFormatImage(file);
-            String avatarKey = String.format("%s_%d", UUID.randomUUID(), System.currentTimeMillis());
+        String oldAvatarKey = team.getAvatarKey();
 
-            if (team.getAvatarKey() != null) {
-                s3Service.deleteImage(team.getAvatarKey());
-                log.info("Deleted previous avatar for team: {}", teamId);
-            }
+        byte[] resizedImageData = resizeAndFormatImage(file);
+        String avatarKey = UUID.randomUUID().toString();
 
-            s3Service.uploadImage(resizedImageData, avatarKey, file.getContentType());
-            team.setAvatarKey(avatarKey);
-            teamRepository.save(team);
+        s3Service.uploadImage(resizedImageData, avatarKey, file.getContentType());
+        team.setAvatarKey(avatarKey);
+        teamRepository.save(team);
 
-            log.info("Successfully uploaded new avatar for team: {}", teamId);
-
-            return new TeamResourceDto(avatarKey, file.getContentType(), file.getSize(), LocalDateTime.now());
-
-        } catch (Exception e) {
-            log.error("Failed to upload avatar for team: {}", teamId, e);
-            throw new ResourceProcessingException("Failed to upload avatar for team with id: " + teamId, e);
+        if (oldAvatarKey != null) {
+            s3Service.deleteImage(oldAvatarKey);
+            log.info("Deleted previous avatar for team: {}", teamId);
         }
+
+        log.info("Successfully uploaded new avatar for team: {}", teamId);
+
+        return new TeamResourceDto(avatarKey, file.getContentType(), file.getSize(), LocalDateTime.now());
     }
 
     @Override
@@ -70,10 +66,10 @@ public class TeamResourceServiceImpl implements TeamResourceService {
         log.info("Deleting avatar for team: {}", teamId);
 
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundException("Team with id " + teamId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Team with id " + teamId + " not found"));
 
         TeamMember teamMember = teamMemberRepository.findByTeamIdAndUserId(teamId, userId)
-                .orElseThrow(() -> new NotFoundException("User is not a member of the team"));
+                .orElseThrow(() -> new EntityNotFoundException("User is not a member of the team"));
 
         if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
             log.warn("User {} is not authorized to delete avatar for team: {}", userId, teamId);
@@ -81,19 +77,15 @@ public class TeamResourceServiceImpl implements TeamResourceService {
         }
 
         if (team.getAvatarKey() != null) {
-            try {
-                s3Service.deleteImage(team.getAvatarKey());
-                log.info("Deleted avatar for team: {}", teamId);
-            } catch (Exception e) {
-                log.error("Failed to delete avatar for team: {}", teamId, e);
-                throw new ResourceProcessingException("Error deleting avatar for team with id: " + teamId, e);
-            }
+            s3Service.deleteImage(team.getAvatarKey());
+            log.info("Deleted avatar for team: {}", teamId);
         }
 
         team.setAvatarKey(null);
         teamRepository.save(team);
         log.info("Deleted avatar key for team: {}", teamId);
     }
+
 
     private void validateAvatarFile(MultipartFile file, Long teamId) {
         if (file == null || file.isEmpty()) {
@@ -112,11 +104,13 @@ public class TeamResourceServiceImpl implements TeamResourceService {
         }
     }
 
-    private byte[] resizeAndFormatImage(MultipartFile file) throws IOException {
+    private byte[] resizeAndFormatImage(MultipartFile file) {
         log.info("Resizing and formatting image: {}", file.getOriginalFilename());
 
         String contentType = file.getContentType();
+
         if (contentType == null) {
+            log.error("Missing content type for file: {}", file.getOriginalFilename());
             throw new ResourceProcessingException("Missing content type for file: " + file.getOriginalFilename());
         }
 
@@ -129,6 +123,10 @@ public class TeamResourceServiceImpl implements TeamResourceService {
                     .toOutputStream(outputStream);
 
             return outputStream.toByteArray();
+        } catch (IOException e) {
+            log.error("Error occurred while resizing and formatting the image: {}.", file.getOriginalFilename(), e);
+            throw new ResourceProcessingException("Error occurred while resizing and formatting the image: "
+                    + file.getOriginalFilename(), e);
         }
     }
 }
