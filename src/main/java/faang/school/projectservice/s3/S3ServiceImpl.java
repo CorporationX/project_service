@@ -10,6 +10,7 @@ import faang.school.projectservice.contants.ErrorMessage;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,16 @@ public class S3ServiceImpl implements S3Service {
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
+
+    @PostConstruct
+    public void init() {
+        if (!s3Client.doesBucketExistV2(bucketName)) {
+            log.info("S3 bucket '{}' not found. Creating...", bucketName);
+            s3Client.createBucket(bucketName);
+        } else {
+            log.info("S3 bucket '{}' already exists.", bucketName);
+        }
+    }
 
     @Override
     public Resource uploadFile(MultipartFile file, String folder) {

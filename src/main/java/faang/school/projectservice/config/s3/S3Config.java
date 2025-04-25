@@ -1,4 +1,4 @@
-package faang.school.projectservice.s3;
+package faang.school.projectservice.config.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;

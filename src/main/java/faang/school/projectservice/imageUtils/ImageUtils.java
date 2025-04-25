@@ -1,10 +1,12 @@
 package faang.school.projectservice.imageUtils;
 
 import faang.school.projectservice.contants.ErrorMessage;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import net.coobird.thumbnailator.Thumbnails;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -15,8 +17,21 @@ import org.springframework.mock.web.MockMultipartFile;
 @Slf4j
 @Component
 public class ImageUtils {
-    private static final int MAX_HEIGHT = 512;
-    private static final int MAX_WIDTH = 512;
+    @Value("${app.image.max-height}")
+    private int maxHeightValue;
+
+    @Value("${app.image.max-width}")
+    private int maxWidthValue;
+
+    public static int MAX_HEIGHT;
+    public static int MAX_WIDTH;
+
+    @PostConstruct
+    private void init() {
+        MAX_HEIGHT = maxHeightValue;
+        MAX_WIDTH = maxWidthValue;
+    }
+
 
     public static MultipartFile compressImage(MultipartFile file) {
         try {
