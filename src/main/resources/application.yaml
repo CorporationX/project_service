@@ -26,6 +26,7 @@ spring:
           name: calculations_channel
         project_view_channel:
           name: project_view_channel
+        fundRaised: fundRaised_topic
         team-channel: team-channel
 
   profiles:
