@@ -36,13 +36,14 @@ public class AvatarService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final S3ServiceImpl s3Service;
+    private final ImageUtils imageUtils;
 
 
     public void addAvatar(Long teamId, MultipartFile file) {
         validateFile(file);
         Team team = getTeam(teamId);
 
-        MultipartFile compressedFile = ImageUtils.compressImage(file);
+        MultipartFile compressedFile = imageUtils.compressImage(file);
         String folder = String.format("team-%d", team.getId());
         Resource resource = s3Service.uploadFile(compressedFile, folder);
         resource.setProject(team.getProject());

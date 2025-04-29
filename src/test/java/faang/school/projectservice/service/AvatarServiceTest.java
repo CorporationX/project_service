@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import faang.school.projectservice.exception.FileSizeLimitException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.UnsupportedFileTypeException;
+import faang.school.projectservice.imageUtils.ImageUtils;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -28,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -53,6 +55,8 @@ class AvatarServiceTest {
     private TeamMemberRepository teamMemberRepository;
     @Mock
     private S3ServiceImpl s3Service;
+    @Mock
+    private ImageUtils imageUtils;
 
     private Team team;
     private long teamId;
@@ -90,6 +94,8 @@ class AvatarServiceTest {
 
         team.setId(teamId);
         resource.setKey(avatarKey);
+        ReflectionTestUtils.setField(imageUtils, "maxHeightValue", 512);
+        ReflectionTestUtils.setField(imageUtils, "maxWidthValue", 512);
     }
     //Positive
     @Test

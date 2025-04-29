@@ -1,7 +1,6 @@
 package faang.school.projectservice.imageUtils;
 
 import faang.school.projectservice.contants.ErrorMessage;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,20 +22,10 @@ public class ImageUtils {
     @Value("${app.image.max-width}")
     private int maxWidthValue;
 
-    public static int MAX_HEIGHT;
-    public static int MAX_WIDTH;
-
-    @PostConstruct
-    private void init() {
-        MAX_HEIGHT = maxHeightValue;
-        MAX_WIDTH = maxWidthValue;
-    }
-
-
-    public static MultipartFile compressImage(MultipartFile file) {
+    public MultipartFile compressImage(MultipartFile file) {
         try {
             BufferedImage compressedImage = Thumbnails.of(file.getInputStream())
-                    .size(MAX_HEIGHT, MAX_WIDTH)
+                    .size(maxHeightValue, maxWidthValue)
                     .asBufferedImage();
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 String originalContentType = file.getContentType();
