@@ -1,3 +1,8 @@
+app:
+  image:
+    max-height: 512
+    max-width: 512
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -46,6 +51,7 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
   payment-service:
     host: http://localhost
     port: 9080

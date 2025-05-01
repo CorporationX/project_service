@@ -59,6 +59,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("net.coobird:thumbnailator:0.4.14");
 
     /**
      * Thumbnailator
@@ -69,6 +70,7 @@ dependencies {
      * Test containers
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
+    implementation("org.springframework:spring-test:5.3.23")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("io.projectreactor:reactor-test:3.5.0")
     testImplementation("org.testcontainers:postgresql")
