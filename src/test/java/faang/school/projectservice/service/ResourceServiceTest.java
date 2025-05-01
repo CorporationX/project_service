@@ -4,8 +4,11 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.config.multipartfile.CustomMultipartFile;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.mapper.ResourceMapper;
+import faang.school.projectservice.model.FileData;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -22,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +44,7 @@ public class ResourceServiceTest {
     private static final Long USER_ID = 2L;
     private static final Long TEAM_MEMBER_ID = 3L;
     private static final Long RESOURCE_ID = 4L;
+    private static final Integer RESOURCE_SIZE = 10000;
     private static final String TEAM_NOT_FOUND = "Team not found";
     private static final String BAN_UPLOADING = "User can not upload avatar for team";
     private static final String AVATAR_NOT_SET = "Team avatar not set";
@@ -64,9 +69,10 @@ public class ResourceServiceTest {
 
     @BeforeEach
     public void setUp() {
+        Project project = new Project();
         team = new Team();
         team.setId(TEAM_ID);
-        team.setProject(new Project());
+        team.setProject(project);
 
         teamMember = new TeamMember();
         teamMember.setId(TEAM_MEMBER_ID);
@@ -75,8 +81,16 @@ public class ResourceServiceTest {
         teamMember.setTeam(team);
 
         resource = new Resource();
-        resource.setId(RESOURCE_ID);
-        resource.setName("file");
+        resource.setName("file.jpg");
+        resource.setSize(BigInteger.valueOf(RESOURCE_SIZE));
+        resource.setAllowedRoles(List.of(TeamRole.MANAGER));
+        resource.setType(ResourceType.IMAGE);
+        resource.setStatus(ResourceStatus.ACTIVE);
+
+
+        resource.setCreatedBy(teamMember);
+        resource.setUpdatedBy(teamMember);
+        resource.setProject(project);
 
         resourceDto = ResourceDto.builder()
                 .id(RESOURCE_ID)
@@ -129,7 +143,12 @@ public class ResourceServiceTest {
     public void testUploadFileSuccessful() {
         mockTeamValidation();
         mockTeamMemberValidation(TeamRole.MANAGER);
-        when(s3Service.uploadFile(any(), any())).thenReturn(resource);
+        when(s3Service.uploadFile(any(), any())).thenReturn(
+                new FileData(
+                        resource.getKey(),
+                        RESOURCE_SIZE
+                )
+        );
         when(resourceMapper.toResource(resource)).thenReturn(resourceDto);
 
         ResourceDto result = resourceService.uploadAvatarForTeam(TEAM_ID, mockFile);
