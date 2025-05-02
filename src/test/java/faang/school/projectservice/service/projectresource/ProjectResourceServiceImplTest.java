@@ -2,6 +2,7 @@ package faang.school.projectservice.service.projectresource;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.config.resource.ProjectStorageProperties;
 import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ResourceHandlingException;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -59,6 +61,8 @@ class ProjectResourceServiceImplTest {
     private AmazonS3 amazonS3;
     @Mock
     private TikaService tikaService;
+    @Spy
+    private ProjectStorageProperties properties;
 
     @InjectMocks
     private ProjectResourceServiceImpl projectResourceService;
@@ -107,6 +111,8 @@ class ProjectResourceServiceImplTest {
         doNothing().when(s3Service).uploadFile(any(), any());
         when(resourceRepository.save(any())).thenReturn(resource);
         when(tikaService.detectMimeType(any(MultipartFile.class))).thenReturn("text/plain");
+        when(properties.getMaxSize()).thenReturn(1000L);
+
         ResourceFileDto expectedDto = ResourceFileDto.builder()
                 .id(1L)
                 .name("test.txt")
@@ -114,7 +120,6 @@ class ProjectResourceServiceImplTest {
                 .projectId(1L)
                 .build();
         when(resourceMapper.toDto(any())).thenReturn(expectedDto);
-        ReflectionTestUtils.setField(projectResourceService, "maxStorageSize", 1000L);
 
         ResourceFileDto result = projectResourceService.uploadFile(1L, file);
 
@@ -129,10 +134,10 @@ class ProjectResourceServiceImplTest {
     void testUploadFileStorageExceeded() throws IOException {
         project.setStorageSize(BigInteger.valueOf(1000));
         project.setMaxStorageSize(BigInteger.valueOf(1000));
+
         when(projectService.getProjectById(anyLong())).thenReturn(project);
         when(teamMemberService.getCurrentTeamMember(anyLong())).thenReturn(teamMember);
-
-        ReflectionTestUtils.setField(projectResourceService, "maxStorageSize", 1000L);
+        when(properties.getMaxSize()).thenReturn(1000L);
 
         assertThrows(StorageSizeExceededException.class,
                 () -> projectResourceService.uploadFile(1L, file));

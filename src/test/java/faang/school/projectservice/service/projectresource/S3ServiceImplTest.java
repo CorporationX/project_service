@@ -3,12 +3,14 @@ package faang.school.projectservice.service.projectresource;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.config.resource.AmazonS3Properties;
 import faang.school.projectservice.service.tika.TikaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -29,6 +31,9 @@ class S3ServiceImplTest {
 
     @Mock
     private TikaService tikaService;
+
+    @Spy
+    private AmazonS3Properties properties;
 
     @InjectMocks
     private S3ServiceImpl s3Service;
@@ -59,8 +64,10 @@ class S3ServiceImplTest {
         String bucketName = "test-bucket";
         String fileKey = "test-key";
 
-        ReflectionTestUtils.setField(s3Service, "bucketName", bucketName);
-        s3Service.deleteFile(fileKey);
+        AmazonS3Properties mockProperties = new AmazonS3Properties();
+        mockProperties.setBucketName(bucketName);
+        S3ServiceImpl s3ServiceWithProperties = new S3ServiceImpl(amazonS3, tikaService, mockProperties);
+        s3ServiceWithProperties.deleteFile(fileKey);
 
         verify(amazonS3, times(1)).deleteObject(bucketName, fileKey);
     }
@@ -69,12 +76,16 @@ class S3ServiceImplTest {
     void testDownloadFileSuccess() {
         String bucketName = "test-bucket";
         String fileKey = "test-key";
-        ReflectionTestUtils.setField(s3Service, "bucketName", bucketName);
+
+        AmazonS3Properties mockProperties = mock(AmazonS3Properties.class);
+        when(mockProperties.getBucketName()).thenReturn(bucketName);
+
+        S3ServiceImpl s3ServiceWithMockedProperties = new S3ServiceImpl(amazonS3, tikaService, mockProperties);
         S3Object mockS3Object = new S3Object();
         mockS3Object.setObjectContent(new ByteArrayInputStream("Test".getBytes()));
         when(amazonS3.getObject(eq(bucketName), eq(fileKey))).thenReturn(mockS3Object);
 
-        S3Object result = s3Service.downloadFile(fileKey);
+        S3Object result = s3ServiceWithMockedProperties.downloadFile(fileKey);
 
         assertNotNull(result);
         verify(amazonS3, times(1)).getObject(bucketName, fileKey);

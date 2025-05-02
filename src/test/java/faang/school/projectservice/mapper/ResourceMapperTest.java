@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ResourceMapperTest {
 
     @Spy
-    private ResourceMapper resourceMapper = new ResourceMapperImpl();
+    private ResourceMapperImpl resourceMapper = new ResourceMapperImpl();
 
     @Test
     void testToDto() {
