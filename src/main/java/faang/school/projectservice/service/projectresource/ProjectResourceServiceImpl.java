@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.projectresource;
 
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.config.resource.AmazonS3Properties;
 import faang.school.projectservice.config.resource.ProjectStorageProperties;
 import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -21,7 +20,6 @@ import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.service.tika.TikaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
