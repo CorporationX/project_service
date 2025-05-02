@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.projectresource;
 
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.config.resource.AmazonS3Properties;
+import faang.school.projectservice.config.resource.ProjectStorageProperties;
 import faang.school.projectservice.dto.resource.ResourceFileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ResourceHandlingException;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,15 +47,10 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     private final S3Service s3Service;
     private final ResourceMapper resourceMapper;
     private final TikaService tikaService;
-
-    @Value("${amazonS3.bucket-name}")
-    private String bucketName;
-
-    @Value("${project.storage.max-size}")
-    private Long maxStorageSize;
+    private final ProjectStorageProperties projectStorageProperties;
 
     @Override
-    @Async("fileUploadTaskExecutor")
+    @Transactional
     public ResourceFileDto uploadFile(Long projectId, MultipartFile file) throws IOException {
         Project project = projectService.getProjectById(projectId);
         TeamMember currentMember = teamMemberService.getCurrentTeamMember(projectId);
@@ -76,7 +74,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
     }
 
     @Override
-    @Async("fileUploadTaskExecutor")
+    @Transactional
     public void deleteFile(Long resourceId) throws AccessDeniedException, ResourceHandlingException {
         Resource resource = findResourceById(resourceId);
         TeamMember currentMember = teamMemberService.getCurrentTeamMember(resource.getProject().getId());
@@ -99,7 +97,7 @@ public class ProjectResourceServiceImpl implements ProjectResourceService {
 
     private void validateStorageLimit(Project project, long fileSize) {
         BigInteger newSize = project.getStorageSize().add(BigInteger.valueOf(fileSize));
-        if (newSize.compareTo(BigInteger.valueOf(maxStorageSize)) > 0) {
+        if (newSize.compareTo(BigInteger.valueOf(projectStorageProperties.getMaxSize())) > 0) {
             throw new StorageSizeExceededException("Storage limit exceeded");
         }
     }
