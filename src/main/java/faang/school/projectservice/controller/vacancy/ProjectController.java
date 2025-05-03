@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/projects/{projectId}")
 
     ProjectDto getProject(@PathVariable long projectId) {
         return projectService.getProject(projectId);
