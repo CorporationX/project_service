@@ -101,7 +101,8 @@ public class GalleryServiceTest {
 
         CoverMaxSizeException exception = assertThrows(CoverMaxSizeException.class, () ->
                 galleryService.uploadImage(projectId, multipartFile));
-        assertEquals(ExceptionMessage.FILE_IS_LARGE, exception.getMessage());
+        assertEquals(String.format(ExceptionMessage.FILE_IS_LARGE.getMessage(), 5),
+                exception.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -111,7 +112,8 @@ public class GalleryServiceTest {
 
         FileLimitException exception = assertThrows(FileLimitException.class, () ->
                 galleryService.uploadImage(projectId, multipartFile));
-        assertEquals(ExceptionMessage.FILE_COUNT_LIMIT_EXCEEDED, exception.getMessage());
+        assertEquals(String.format(ExceptionMessage.FILE_COUNT_LIMIT_EXCEEDED.getMessage(),50),
+                exception.getMessage());
     }
 
     @Test
