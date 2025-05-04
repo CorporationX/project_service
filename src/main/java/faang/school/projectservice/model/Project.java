@@ -114,11 +114,6 @@ public class Project {
     @Column(name = "presentation_generated_at")
     private LocalDateTime presentationGeneratedAt;
 
-    //@ElementCollection
-    //@CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
-    //@Column(name = "file_key", nullable = false)
-    //private List<String> galleryFileKeys;
-
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectGallery> gallery = new ArrayList<>();
 
