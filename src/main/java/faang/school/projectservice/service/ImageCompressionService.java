@@ -17,7 +17,7 @@ import java.io.InputStream;
 @Slf4j
 public class ImageCompressionService {
 
-    @Value("${spring.avatar.max-image-size}")
+    @Value("${spring.servlet.avatar.max-image-size}")
     private int maxImageSize;
 
     public byte[] compressFile(MultipartFile file) {

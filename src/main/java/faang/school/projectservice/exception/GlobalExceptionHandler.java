@@ -14,7 +14,6 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,10 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return buildErrorResponse(message, HttpStatus.BAD_REQUEST, "Validation Failed");
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Validation Failed");
     }
 
     @ExceptionHandler(DataValidationException.class)
@@ -52,9 +48,29 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.CONFLICT, "DuplicateTitleException");
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Data Validation Failed");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+    }
+
+    @ExceptionHandler(StorageSizeExceededException.class)
+    public ResponseEntity<Object> handleStorageSizeExceededException(StorageSizeExceededException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Storage Size Exceeded");
+    }
+
+    @ExceptionHandler(ResourceHandlingException.class)
+    public ResponseEntity<Object> handleResourceHandlingException(ResourceHandlingException ex) {
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Resource Handling Error");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "Access Denied");
     }
 
     @ExceptionHandler(TaskNotFoundException.class)
@@ -62,38 +78,29 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, "Not Found Error");
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
-        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, "Access Denied Error");
-    }
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException ex) {
-        return ResponseEntity.badRequest()
-                .body("The size of the uploaded file exceeds the allowed limit %d");
+    public ResponseEntity<Object> handleMaxSizeException(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<String> handleIOException(IOException ex) {
+    public ResponseEntity<Object> handleIOException(IOException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(ImageProcessingException.class)
-    public ResponseEntity<Map<String, String>> handleImageProcessingException(ImageProcessingException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Image processing failed");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<String> handleImageProcessingException(ImageProcessingException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     private ResponseEntity<Object> buildErrorResponse(Exception ex, HttpStatus status, String error) {
