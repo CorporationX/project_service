@@ -164,4 +164,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    @ExceptionHandler(FileLimitException.class)
+    public ResponseEntity<String> handleFileLimitException(FileLimitException ex) {
+        log.error("FileLimitException occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 }
