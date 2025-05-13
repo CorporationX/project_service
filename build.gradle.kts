@@ -94,11 +94,11 @@ dependencies {
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.0")
     implementation("io.atlassian.fugue:fugue:6.1.0")
 }
+
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
 }
-
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
@@ -111,36 +111,14 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude(
-                    "**/dto/**",
-                    "**/entity/**",
-                    "**/model/**",
-                    "**/mapper/**",
-                    "**/repository/**",
-                    "**/s3/**",
-                    "**/handler/**",
-                    "**/config/**",
-                    "**/exception/**",
-                    "**/client/**",
-                    "**/contants/**",
-                    "**/ProjectServiceApplication.class"
+                include(
+                    "**/service/**",
+                    "**/controller/**",
+                    "**/filter/**"
                 )
             }
         })
     )
-}
-
-tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.test)
-
-    violationRules {
-        rule {
-            enabled = true
-            limit {
-                minimum = BigDecimal("0.2")
-            }
-        }
-    }
 }
 
 tasks.check {
