@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [ "feature-BJS2-77190-pipeline" ]
   pull_request:
     branches: [ "feature-BJS2-77190-pipeline" ]
 
