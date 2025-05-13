@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -13,6 +14,10 @@ repositories {
         url = uri("https://packages.atlassian.com/maven/repository/public")
     }
     mavenCentral()
+}
+
+jacoco {
+    toolVersion = "0.8.11"
 }
 
 dependencies {
@@ -88,6 +93,36 @@ dependencies {
      **/
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.0")
     implementation("io.atlassian.fugue:fugue:6.1.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                include(
+                    "**/service/**",
+                    "**/controller/**",
+                    "**/filter/**"
+                )
+            }
+        })
+    )
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 tasks.withType<Test> {
