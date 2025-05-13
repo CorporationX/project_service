@@ -11,4 +11,9 @@ public class TestClass {
     public void failTest() {
         assertTrue(true);
     }
+
+    @Test
+    public void failTestSuf() {
+        assertTrue(false);
+    }
 }
