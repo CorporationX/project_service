@@ -21,10 +21,3 @@ jobs:
       - name: Build with Gradle
         run: gradle clean test
 
-      - name: Archive Rest Results
-        uses: actions/upload-artifact@v3
-        if: success() || failure()
-        with:
-          name: test-results
-          path: GradleReports/emailable-report.html
-
