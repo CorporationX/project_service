@@ -1,4 +1,4 @@
-name: Java CI for Chimera10
+name: CI
 
 on:
   push:
