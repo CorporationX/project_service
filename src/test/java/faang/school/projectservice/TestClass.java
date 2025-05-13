@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 public class TestClass {
 
     @Test
-    public void failTest(){
+    public void failTest() {
         fail();
     }
 }
