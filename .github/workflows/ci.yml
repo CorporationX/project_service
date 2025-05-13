@@ -1,9 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - chimera-master-stream10
+on: [push]
 
 jobs:
   test:
