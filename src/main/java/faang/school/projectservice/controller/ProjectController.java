@@ -10,7 +10,6 @@ import java.util.List;
 public class ProjectController {
 
     private ProjectServiceImpl projectService;
-    private
 
     public ProjectDto create (ProjectDto projectDto){
 // todo: валидация
@@ -22,8 +21,8 @@ public class ProjectController {
         return projectService.update(userId, projectDto);
     }
 
-    public List<ProjectDto> getFilteredProjects(ProjectDto dto){
+    public List<ProjectDto> getFilteredProjects(long userId, ProjectDto dto){
         // todo: валидация
-        return  projectService.getFilteredProjects(dto);
+        return  projectService.getFilteredProjects(userId, dto);
     }
 }

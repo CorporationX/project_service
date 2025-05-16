@@ -11,5 +11,5 @@ public interface ProjectService {
 
     ProjectDto update(long userId, ProjectDto projectDto);
 
-    List<ProjectDto> getFilteredProjects(ProjectDto dto);
+    List<ProjectDto> getFilteredProjects(long userId, ProjectDto dto);
 }

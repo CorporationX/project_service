@@ -1,12 +1,13 @@
 package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.model.Project;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface ProjectFilter {
 
     boolean isApplicable (ProjectDto dto);
 
-    List<ProjectDto> apply(ProjectDto dto);
+    Stream<Project> apply(Stream<Project> projects, ProjectDto dto);
 }
