@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -51,10 +52,23 @@ public class ProjectServiceImpl implements ProjectService {
         if (userId != existingProject.getOwnerId()) {
             throw new DataValidationException("Projects can be changed only be theirs owners");
         }
-        Project newProject = projectMapper.toProjectEntity(newProjectDto);
-        newProject.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(newProject);
-        return projectMapper.toProjectDto(newProject);
+
+        Arrays.stream(ProjectDto.class.getDeclaredFields())
+                .forEach(field -> {
+                    field.setAccessible(true);
+                    try {
+                        Object newValue = field.get(newProjectDto);
+                        if (newValue != null) {
+                            field.set(existingProject, newValue);
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException("Error updating project field");
+                    }
+                });
+
+        existingProject.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(existingProject);
+        return projectMapper.toProjectDto(existingProject);
     }
 
     @Override
