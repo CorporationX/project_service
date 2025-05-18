@@ -12,6 +12,7 @@ import faang.school.projectservice.service.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -31,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .name(projectName)
                 .build();
 
-        if(!getFilteredProjects(userId, projectDtoForValidation).isEmpty()){
+        if (!getFilteredProjects(userId, projectDtoForValidation).isEmpty()) {
             throw new DataValidationException(String
                     .format("User with id = %d already has a project named %s", userId, projectName));
         }
@@ -43,13 +44,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto update(long userId, ProjectDto projectDto) {
-/*        todo:
-
-        Должна быть возможность изменять статус проекта, описание проекта.
-                При этом для аудита необходимо проставлять TIMESTAMP на каждое последние изменение проекта.
- */
-        return null;
+    public ProjectDto update(long userId, ProjectDto newProjectDto) {
+        long projectId = newProjectDto.getId();
+        Project existingProject = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("No project with this id has been found"));
+        if (userId != existingProject.getOwnerId()) {
+            throw new DataValidationException("Projects can be changed only be theirs owners");
+        }
+        Project newProject = projectMapper.toProjectEntity(newProjectDto);
+        newProject.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(newProject);
+        return projectMapper.toProjectDto(newProject);
     }
 
     @Override
