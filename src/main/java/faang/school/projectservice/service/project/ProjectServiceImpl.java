@@ -112,8 +112,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isMemberOfPrivateProject(long userId, Project project) {
-        return project.getTeams().stream()
+        return (project.getOwnerId() == userId
+                || project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getId() == userId);
+                .anyMatch(teamMember -> teamMember.getId() == userId));
     }
 }
