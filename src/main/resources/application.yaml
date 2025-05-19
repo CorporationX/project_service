@@ -28,9 +28,17 @@ spring:
     redis:
       port: 6379
       host: localhost
+      jedis:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+          max-wait: 2000
       channels:
         calculations_channel:
           name: calculations_channel
+        team_channel:
+          name: team_channel
 
 springdoc:
   swagger-ui:
