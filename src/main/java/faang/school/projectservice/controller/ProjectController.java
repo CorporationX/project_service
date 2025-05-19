@@ -2,15 +2,18 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
+import lombok.Data;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
+@Data
 @Controller
 public class ProjectController {
 
-    private ProjectServiceImpl projectService;
+    private final ProjectServiceImpl projectService;
 
     public ProjectDto create(long userId, ProjectDto projectDto) {
         projectDto = validate(userId, projectDto);
@@ -41,6 +44,9 @@ public class ProjectController {
         }
         if (projectDto.getOwnerId() == null) {
             projectDto.setOwnerId(userId);
+        }
+        if (projectDto.getVisibility() == null) {
+            projectDto.setVisibility(ProjectVisibility.PUBLIC);
         }
         return projectDto;
     }

@@ -10,19 +10,22 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Data
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    private List<ProjectFilter> filters;
-    private ProjectRepository projectRepository;
-    private ProjectMapper projectMapper;
+    private final List<ProjectFilter> filters;
+    private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
 
     @Override
     public ProjectDto create(long userId, ProjectDto projectDto) {
@@ -33,9 +36,14 @@ public class ProjectServiceImpl implements ProjectService {
                 .name(projectName)
                 .build();
 
-        if (!getFilteredProjects(userId, projectDtoForValidation).isEmpty()) {
-            throw new DataValidationException(String
-                    .format("User with id = %d already has a project named %s", userId, projectName));
+        List<ProjectDto> sameNamedProjects = getFilteredProjects(userId, projectDtoForValidation);
+        if (!sameNamedProjects.isEmpty()) {
+            if (sameNamedProjects.stream()
+                    .noneMatch(sameNamedProject ->
+                            sameNamedProject.getStatus().equals(ProjectStatus.CANCELLED))) {
+                throw new DataValidationException
+                        (String.format("User with id = %d already has a project named %s", userId, projectName));
+            }
         }
 
         Project project = projectMapper.toProjectEntity(projectDto);
@@ -54,15 +62,20 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         Arrays.stream(ProjectDto.class.getDeclaredFields())
+                .filter(field -> !field.getName().equals("id"))
                 .forEach(field -> {
                     field.setAccessible(true);
                     try {
                         Object newValue = field.get(newProjectDto);
                         if (newValue != null) {
-                            field.set(existingProject, newValue);
+                            Field existingField = Project.class.getDeclaredField(field.getName());
+                            if (existingField.getType().isAssignableFrom(newValue.getClass())) {
+                                existingField.setAccessible(true);
+                                existingField.set(existingProject, newValue);
+                            }
                         }
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Error updating project field");
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw new RuntimeException("Error updating project field", e);
                     }
                 });
 
@@ -113,7 +126,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean isMemberOfPrivateProject(long userId, Project project) {
         return (project.getOwnerId() == userId
-                || project.getTeams().stream()
+                || Stream.ofNullable(project.getTeams()).flatMap(List::stream)
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getId() == userId));
     }
