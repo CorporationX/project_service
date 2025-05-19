@@ -74,6 +74,21 @@ class VacancyControllerTest {
     }
 
     @Test
+    void testUploadCover1() throws Exception {
+        MockMultipartFile emptyFile = new MockMultipartFile(
+                "file",
+                "emptyFile.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                new byte[0]
+        );
+
+        mockMvc.perform(multipart("/vacancy/1/cover")
+                        .file(emptyFile))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+    }
+
+    @Test
     void testDeleteCoverImageFromVacancy() throws Exception {
         doNothing().when(vacancyService).deleteCoverImageFromVacancy(1L);
 
