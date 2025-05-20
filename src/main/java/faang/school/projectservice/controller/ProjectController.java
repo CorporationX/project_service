@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-// import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
-// import org.springframework.http.HttpStatus;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -30,7 +27,6 @@ public class ProjectController {
 
     @PostMapping
     @ResponseBody
-    // @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
         validate(projectDto);
         return projectService.create(projectDto);
@@ -39,6 +35,9 @@ public class ProjectController {
     @PatchMapping("/{id}")
     @ResponseBody
     public ProjectDto update(@PathVariable long id, @RequestBody ProjectDto projectDto) {
+        if (id != projectDto.getId()) {
+            throw new IllegalArgumentException("Project id does not match.");
+        }
         return projectService.update(projectDto);
     }
 

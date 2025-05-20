@@ -17,7 +17,7 @@ public class ProjectStatusFilter implements ProjectFilter {
 
     @Override
     public Stream<ProjectDto> apply(Stream<ProjectDto> projects, ProjectFilterDto filterDto) {
-        return projects.filter(project -> project.getStatus().equals(filterDto.getStatus()));
+        return projects.filter(project -> filterDto.getStatus().equals(project.getStatus()));
     }
 
 }

@@ -22,6 +22,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
@@ -30,6 +31,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ProjectServiceImpl;
 
@@ -47,6 +49,12 @@ public class ProjectServiceImplTest {
     @Mock
     private ProjectFilter mockFilter2;
 
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+
+    @Mock
+    private UserContext userContext;
+
     @Captor
     private ArgumentCaptor<Project> captor;
 
@@ -54,12 +62,15 @@ public class ProjectServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        projectService = new ProjectServiceImpl(
-                projectRepository,
-                projectMapper,
-                List.of(mockFilter1, mockFilter2));
+        projectService = new ProjectServiceImpl (
+            projectRepository,
+            teamMemberRepository,
+            projectMapper,
+            List.of(mockFilter1, mockFilter2),
+            userContext
+        );
     }
-    
+
     @Test
     public void testCreate_whenProjectDtoIsPartiallyEmpty_thenFieldsAreAssigned() {
         ProjectDto projectDto = ProjectDto.builder()
@@ -109,6 +120,7 @@ public class ProjectServiceImplTest {
         Project baseProject = Project.builder()
             .id(1L)
             .name("Base Name")
+            .ownerId(1L)
             .description("Description")
             .status(ProjectStatus.CREATED)
             .build();
@@ -117,7 +129,8 @@ public class ProjectServiceImplTest {
             .status(ProjectStatus.IN_PROGRESS)
             .build();
         when(projectRepository.findById(any())).thenReturn(Optional.of(baseProject));
-
+        when(userContext.getUserId()).thenReturn(1L);
+        
         projectService.update(updatedProject);
 
         verify(projectRepository, times(1)).findById(any());
