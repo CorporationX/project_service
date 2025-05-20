@@ -27,18 +27,24 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceImplTest {
 
-    @Mock VacancyRepository vacancyRepository;
-    @Mock ProjectRepository projectRepository;
-    @Mock TeamMemberRepository memberRepo;
-    @Mock UserContext userContext;
+    @Mock
+    VacancyRepository vacancyRepository;
+    @Mock
+    ProjectRepository projectRepository;
+    @Mock
+    TeamMemberRepository memberRepo;
+    @Mock
+    UserContext userContext;
 
-    @Spy VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
+    @Spy
+    VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
 
-    @InjectMocks VacancyServiceImpl service;
+    @InjectMocks
+    VacancyServiceImpl service;
 
     private final long PROJECT_ID = 1L;
-    private final long USER_ID    = 42L;
-    private final long VAC_ID     = 99L;
+    private final long USER_ID = 42L;
+    private final long VAC_ID = 99L;
 
     private Project project;
     private TeamMember ownerMember;
@@ -127,7 +133,7 @@ class VacancyServiceImplTest {
     void updateVacancy_wrongProjectId_throws() {
         Vacancy otherProjectVac = new Vacancy();
         otherProjectVac.setId(VAC_ID);
-        otherProjectVac.setProject(new Project(){{
+        otherProjectVac.setProject(new Project() {{
             setId(PROJECT_ID + 1);
         }});
         when(userContext.getUserId()).thenReturn(USER_ID);
@@ -146,8 +152,16 @@ class VacancyServiceImplTest {
         v.setProject(project);
         v.setCount(3);
         v.setCandidates(List.of(
-                new Candidate(){ { setCandidateStatus(CandidateStatus.ACCEPTED); } },
-                new Candidate(){ { setCandidateStatus(CandidateStatus.WAITING_RESPONSE ); } }
+                new Candidate() {
+                    {
+                        setCandidateStatus(CandidateStatus.ACCEPTED);
+                    }
+                },
+                new Candidate() {
+                    {
+                        setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
+                    }
+                }
         ));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
@@ -175,7 +189,11 @@ class VacancyServiceImplTest {
     void getVacancyById_wrongProjectId_throws() {
         Vacancy v = vacancyMapper.toEntity(dto);
         v.setId(VAC_ID);
-        v.setProject(new Project(){ { setId(PROJECT_ID + 1); }});
+        v.setProject(new Project() {
+            {
+                setId(PROJECT_ID + 1);
+            }
+        });
 
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(v));
 
