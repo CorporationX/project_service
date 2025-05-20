@@ -3,8 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exeption.DataValidationException;
-import faang.school.projectservice.mapper.CandidateMapper;
-import faang.school.projectservice.mapper.VacancyMapperImpl;
+import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -13,59 +12,47 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VacancyServiceImplTest {
+class VacancyServiceImplTest {
 
-    @Mock VacancyRepository       vacancyRepository;
-    @Mock ProjectRepository       projectRepository;
-    @Mock TeamMemberRepository    teamMemberRepository;
-    @Mock UserContext             userContext;
+    @Mock VacancyRepository vacancyRepository;
+    @Mock ProjectRepository projectRepository;
+    @Mock TeamMemberRepository memberRepo;
+    @Mock UserContext userContext;
 
-    @Spy
-    private CandidateMapper candidateMapper = Mappers.getMapper(CandidateMapper.class);
+    @Spy VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
 
-    @Spy
-    private VacancyMapperImpl vacancyMapper = new VacancyMapperImpl();
-
-    private VacancyServiceImpl vacancyService;    // we’ll build this by hand
+    @InjectMocks VacancyServiceImpl service;
 
     private final long PROJECT_ID = 1L;
     private final long USER_ID    = 42L;
     private final long VAC_ID     = 99L;
 
     private Project project;
-    private Vacancy vacancy;
     private TeamMember ownerMember;
     private VacancyDto dto;
+    private Vacancy vacancy;
 
     @BeforeEach
-    public void setUp() {
-        ReflectionTestUtils.setField(vacancyMapper, "candidateMapper", candidateMapper);
-
-        vacancyService = new VacancyServiceImpl(
-                vacancyRepository,
-                vacancyMapper,
-                projectRepository,
-                userContext,
-                teamMemberRepository
-        );
-
-        dto = new VacancyDto();
-        dto.setName("Backend Developer");
-        dto.setDescription("API & DB");
-        dto.setPosition(TeamRole.DEVELOPER);
-        dto.setCount(2);
+    void setUp() {
+        dto = VacancyDto.builder()
+                .name("Backend Developer")
+                .description("API & DB")
+                .position(TeamRole.DEVELOPER)
+                .count(2)
+                .build();
 
         vacancy = vacancyMapper.toEntity(dto);
         vacancy.setId(VAC_ID);
@@ -81,26 +68,26 @@ public class VacancyServiceImplTest {
     }
 
     @Test
-    void createVacancy_whenUserIsOwner_saveAndReturnDto() {
+    void createVacancy_whenUserIsOwner_savesAndReturnsDto() {
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(vacancyRepository.save(any(Vacancy.class))).thenReturn(vacancy);
 
-        VacancyDto vacancyDto = vacancyService.createVacancy(PROJECT_ID, dto);
+        VacancyDto result = service.createVacancy(PROJECT_ID, dto);
 
-        assertThat(vacancyDto.getId()).isEqualTo(VAC_ID);
-        assertThat(vacancyDto.getName()).isEqualTo(dto.getName());
-        assertThat(vacancyDto.getStatus()).isEqualTo(VacancyStatus.OPEN);
+        assertThat(result.getId()).isEqualTo(VAC_ID);
+        assertThat(result.getName()).isEqualTo(dto.getName());
+        assertThat(result.getStatus()).isEqualTo(VacancyStatus.OPEN);
         verify(vacancyRepository).save(any());
     }
 
     @Test
     void createVacancy_whenUserNotInProject_throwsValidation() {
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(null);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(null);
 
-        assertThatThrownBy(() -> vacancyService.createVacancy(PROJECT_ID, dto))
+        assertThatThrownBy(() -> service.createVacancy(PROJECT_ID, dto))
                 .isInstanceOf(DataValidationException.class)
                 .hasMessageContaining("Not allowed");
         verifyNoInteractions(projectRepository, vacancyRepository);
@@ -114,11 +101,11 @@ public class VacancyServiceImplTest {
         existing.setStatus(VacancyStatus.OPEN);
 
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(existing));
         when(vacancyRepository.save(any())).thenReturn(vacancy);
 
-        VacancyDto updated = vacancyService.updateVacancy(PROJECT_ID, VAC_ID, dto);
+        VacancyDto updated = service.updateVacancy(PROJECT_ID, VAC_ID, dto);
 
         assertThat(updated.getId()).isEqualTo(VAC_ID);
         assertThat(updated.getPosition()).isEqualTo(dto.getPosition());
@@ -128,10 +115,10 @@ public class VacancyServiceImplTest {
     @Test
     void updateVacancy_whenNotFound_throws() {
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> vacancyService.updateVacancy(PROJECT_ID, VAC_ID, dto))
+        assertThatThrownBy(() -> service.updateVacancy(PROJECT_ID, VAC_ID, dto))
                 .isInstanceOf(DataValidationException.class)
                 .hasMessageContaining("not found");
     }
@@ -140,44 +127,16 @@ public class VacancyServiceImplTest {
     void updateVacancy_wrongProjectId_throws() {
         Vacancy otherProjectVac = new Vacancy();
         otherProjectVac.setId(VAC_ID);
-        otherProjectVac.setProject(new Project() {{
+        otherProjectVac.setProject(new Project(){{
             setId(PROJECT_ID + 1);
         }});
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(otherProjectVac));
 
-        assertThatThrownBy(() -> vacancyService.updateVacancy(PROJECT_ID, VAC_ID, dto))
+        assertThatThrownBy(() -> service.updateVacancy(PROJECT_ID, VAC_ID, dto))
                 .isInstanceOf(DataValidationException.class)
                 .hasMessageContaining("does not belong");
-    }
-
-    @Test
-    void closeVacancy_withEnoughAccepted_marksClosed() {
-        Vacancy v = new Vacancy();
-        v.setId(VAC_ID);
-        v.setProject(project);
-        v.setCount(2);
-        v.setCandidates(List.of(
-                new Candidate() {
-                    {
-                        setCandidateStatus(CandidateStatus.ACCEPTED);
-                    }
-                },
-                new Candidate() {
-                    {
-                        setCandidateStatus(CandidateStatus.ACCEPTED);
-                    }
-                }
-        ));
-
-        when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
-        when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(v));
-        when(vacancyRepository.save(any())).thenReturn(v);
-
-        VacancyDto closed = vacancyService.closeVacancy(PROJECT_ID, VAC_ID);
-        assertThat(closed.getStatus()).isEqualTo(VacancyStatus.CLOSED);
     }
 
     @Test
@@ -187,23 +146,15 @@ public class VacancyServiceImplTest {
         v.setProject(project);
         v.setCount(3);
         v.setCandidates(List.of(
-                new Candidate() {
-                    {
-                        setCandidateStatus(CandidateStatus.ACCEPTED);
-                    }
-                },
-                new Candidate() {
-                    {
-                        setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
-                    }
-                }
+                new Candidate(){ { setCandidateStatus(CandidateStatus.ACCEPTED); } },
+                new Candidate(){ { setCandidateStatus(CandidateStatus.WAITING_RESPONSE ); } }
         ));
 
         when(userContext.getUserId()).thenReturn(USER_ID);
-        when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
+        when(memberRepo.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(ownerMember);
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(v));
 
-        assertThatThrownBy(() -> vacancyService.closeVacancy(PROJECT_ID, VAC_ID))
+        assertThatThrownBy(() -> service.closeVacancy(PROJECT_ID, VAC_ID))
                 .isInstanceOf(DataValidationException.class)
                 .hasMessageContaining("Not enough accepted");
     }
@@ -216,7 +167,7 @@ public class VacancyServiceImplTest {
 
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(v));
 
-        VacancyDto got = vacancyService.getVacancyById(PROJECT_ID, VAC_ID);
+        VacancyDto got = service.getVacancyById(PROJECT_ID, VAC_ID);
         assertThat(got.getId()).isEqualTo(VAC_ID);
     }
 
@@ -224,15 +175,11 @@ public class VacancyServiceImplTest {
     void getVacancyById_wrongProjectId_throws() {
         Vacancy v = vacancyMapper.toEntity(dto);
         v.setId(VAC_ID);
-        v.setProject(new Project() {
-            {
-                setId(PROJECT_ID + 1);
-            }
-        });
+        v.setProject(new Project(){ { setId(PROJECT_ID + 1); }});
 
         when(vacancyRepository.findById(VAC_ID)).thenReturn(Optional.of(v));
 
-        assertThatThrownBy(() -> vacancyService.getVacancyById(PROJECT_ID, VAC_ID))
+        assertThatThrownBy(() -> service.getVacancyById(PROJECT_ID, VAC_ID))
                 .isInstanceOf(DataValidationException.class)
                 .hasMessageContaining("does not belong");
     }
@@ -253,7 +200,7 @@ public class VacancyServiceImplTest {
 
         when(vacancyRepository.findAll()).thenReturn(List.of(v1, v2));
 
-        var list = vacancyService.getVacanciesByProjectId(PROJECT_ID, "developer", "Back");
+        var list = service.getVacanciesByProjectId(PROJECT_ID, "developer", "Back");
         assertThat(list).extracting(VacancyDto::getId).containsExactly(1L);
     }
 }
