@@ -41,17 +41,6 @@ public class VacancyServiceImpl implements VacancyService {
         }
     }
 
-    /*public void checkOwnerOrManager(long projectId) {
-        long userId = userContext.getUserId();
-        TeamMember teamMember = memberRepo.findByUserIdAndProjectId(userId, projectId);
-        if (teamMember == null ||
-                teamMember.getRoles().stream()
-                        .noneMatch(role -> role == TeamRole.OWNER || role == TeamRole.MANAGER)) {
-            throw new DataValidationException(
-                    "Not allowed to perform this operation, only for owner and project manager");
-        }
-    }*/
-
     private Vacancy loadVacancy(long vacancyId) {
         return vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new DataValidationException("Vacancy id " + vacancyId + " not found"));

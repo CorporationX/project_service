@@ -77,7 +77,6 @@ public class VacancyServiceImplTest {
         ownerMember = new TeamMember();
         ownerMember.setId(5L);
         ownerMember.setUserId(USER_ID);
-        //ownerMember.setRoles(List.of(TeamRole.DEVELOPER));
         ownerMember.setRoles(List.of(TeamRole.OWNER));
     }
 
@@ -195,7 +194,7 @@ public class VacancyServiceImplTest {
                 },
                 new Candidate() {
                     {
-                        setCandidateStatus(CandidateStatus.PENDING);
+                        setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
                     }
                 }
         ));
