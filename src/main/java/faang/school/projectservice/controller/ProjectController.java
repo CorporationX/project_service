@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,20 +19,18 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/project")
+@RequestMapping("/api/v1/project")
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    @ResponseBody
     public ProjectDto create(@RequestBody ProjectDto projectDto) {
         validate(projectDto);
         return projectService.create(projectDto);
     }
 
     @PatchMapping("/{id}")
-    @ResponseBody
     public ProjectDto update(@PathVariable long id, @RequestBody ProjectDto projectDto) {
         if (id != projectDto.getId()) {
             throw new IllegalArgumentException("Project id does not match.");

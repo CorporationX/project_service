@@ -17,9 +17,7 @@ import faang.school.projectservice.model.Project;
 public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);
     ProjectDto toDto(Project project);
-
     void update(@MappingTarget Project project, ProjectDto projectDto);
-
     List<Project> toEntities(List<ProjectDto> dtos);
     List<ProjectDto> toDtos(List<Project> projects);
 }
