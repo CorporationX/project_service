@@ -50,3 +50,11 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+### IDX ###
+.idx/
+docker-compose.yaml
+javabc-db.session.sql
+
+### VSCode ###
+.vscode
