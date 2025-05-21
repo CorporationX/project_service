@@ -1,9 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.exception.NotFoundException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto getProjectById(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Проект не найден: " + id));
-        return projectMapper.toProjectDto(project);
+        return projectRepository.findById(id)
+                .map(projectMapper::toProjectDto)
+                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден: " + id));
     }
 
     @Override

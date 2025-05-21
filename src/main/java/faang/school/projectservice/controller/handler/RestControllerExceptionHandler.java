@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.handler;
 
-import faang.school.projectservice.exception.NotFoundException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class RestControllerExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException e) {
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ProjectNotFoundException e) {
         log.warn("Not found: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
