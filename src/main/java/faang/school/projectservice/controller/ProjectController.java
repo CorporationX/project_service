@@ -16,17 +16,22 @@ public class ProjectController {
     private final ProjectServiceImpl projectService;
 
     public ProjectDto create(long userId, ProjectDto projectDto) {
-        projectDto = validate(userId, projectDto);
-        return projectService.create(userId, projectDto);
+        ProjectDto validatedDto = validate(userId, projectDto);
+        return projectService.create(userId, validatedDto);
     }
 
     public ProjectDto update(long userId, ProjectDto projectDto) {
-        projectDto = validate(userId, projectDto);
+        if (projectDto.getId() == null){
+            throw new DataValidationException("Project for updating should be found bu ID. Fill in this field.");
+        }
         return projectService.update(userId, projectDto);
     }
 
     public List<ProjectDto> getFilteredProjects(long userId, ProjectDto projectDto) {
-        projectDto = validate(userId, projectDto);
+        ProjectDto emptyDto = ProjectDto.builder().build();
+        if (projectDto.equals(emptyDto)){
+            return projectService.getAllProjects(userId);
+        }
         return projectService.getFilteredProjects(userId, projectDto);
     }
 
