@@ -112,3 +112,23 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.jacocoTestReport {
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude(
+                "**/mapper/**",                         //Исключить mapper
+                "**/entity/**",                         //Исключить пакет с сущностями
+                "**/client/**",                         //Исключить пакет client
+                "**/config/**",                         //Исключить пакет config
+                "**/dto/**",                            //Исключить пакет с dto
+                "**/model/**",                          //Исключить пакет model
+                "**/controller/**",                     //Исключить контроллеры
+                "**/repository/**",                     //Исключить репозитории
+                "**/**Test.class",                      //Исключить тесты
+                "**/ProjectServiceApplication.class",   //Исключить класс с main
+                "**/**Impl.class",                      //Исключить Impl классы
+            )
+        }
+    }))
+
+}
