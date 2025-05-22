@@ -43,7 +43,7 @@ public class VacancyController {
         );
     }
 
-    @PostMapping("/{vacancyId}/close")
+    @PutMapping("/{vacancyId}/close")
     public ResponseEntity<VacancyDto> closeVacancy(
             @PathVariable long projectId,
             @PathVariable long vacancyId) {

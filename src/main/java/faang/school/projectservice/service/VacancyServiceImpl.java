@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -12,6 +13,10 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.filter.NameFilter;
+import faang.school.projectservice.service.filter.PositionFilter;
+import faang.school.projectservice.service.filter.ProjectFilter;
+import faang.school.projectservice.service.filter.VacancyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,12 +48,25 @@ public class VacancyServiceImpl implements VacancyService {
 
     private Vacancy loadVacancy(long vacancyId) {
         return vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new DataValidationException("Vacancy id " + vacancyId + " not found"));
+                .orElseThrow(() -> new DataValidationException(
+                        String.format("Vacancy id %d not found", vacancyId)));
     }
 
     private void validateVacancyOwnership(Vacancy vacancy, long projectId) {
         if (!vacancy.getProject().getId().equals(projectId)) {
-            throw new DataValidationException("Vacancy project id " + projectId + " does not belong to this project");
+            throw new DataValidationException(
+                    String.format("Vacancy project id %d does not belong to this project", projectId));
+        }
+    }
+
+    private void validateCandidatesNotProjectMembers(List<CandidateDto> candidates, long projectId) {
+        for (CandidateDto candidate : candidates) {
+            TeamMember member = memberRepo.findByUserIdAndProjectId(candidate.getUserId(), projectId);
+            if (member != null) {
+                throw new DataValidationException(
+                        String.format("User %d already in project %d", candidate.getUserId(), projectId)
+                );
+            }
         }
     }
 
@@ -69,12 +87,18 @@ public class VacancyServiceImpl implements VacancyService {
         checkOwnerOrManager(projectId);
         Vacancy existingVacancy = loadVacancy(vacancyId);
         validateVacancyOwnership(existingVacancy, projectId);
-        Vacancy vacancyToUpdate = vacancyMapper.toEntity(vacancyDto);
-        vacancyToUpdate.setProject(existingVacancy.getProject());
-        vacancyToUpdate.setId(existingVacancy.getId());
-        vacancyToUpdate.setStatus(existingVacancy.getStatus());
-        Vacancy savedVacancy = vacancyRepository.save(vacancyToUpdate);
-        return vacancyMapper.toDto(savedVacancy);
+
+        List<CandidateDto> newCandidates = vacancyDto.getCandidates();
+        if (newCandidates != null && !newCandidates.isEmpty()) {
+            validateCandidatesNotProjectMembers(newCandidates, projectId);
+        }
+
+        existingVacancy.setName(vacancyDto.getName());
+        existingVacancy.setDescription(vacancyDto.getDescription());
+        existingVacancy.setPosition(vacancyDto.getPosition());
+        existingVacancy.setCount(vacancyDto.getCount());
+        Vacancy updated = vacancyRepository.save(existingVacancy);
+        return vacancyMapper.toDto(updated);
     }
 
     @Override
@@ -101,10 +125,19 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public List<VacancyDto> getVacanciesByProjectId(long projectId, String positionFilter, String nameFilter) {
+        List<VacancyFilter> filters = List.of(
+                new ProjectFilter(projectId),
+                new PositionFilter(positionFilter),
+                new NameFilter(nameFilter)
+        );
+
         return vacancyRepository.findAll().stream()
-                .filter(vacancy -> vacancy.getProject().getId().equals(projectId))
-                .filter(vacancy -> positionFilter == null || vacancy.getPosition().name().equalsIgnoreCase(positionFilter))
-                .filter(vacancy -> nameFilter == null || vacancy.getName().contains(nameFilter))
+                .filter(vacancy -> {
+                    for (VacancyFilter filter : filters) {
+                        if (!filter.test(vacancy)) return false;
+                    }
+                    return true;
+                })
                 .map(vacancyMapper::toDto)
                 .toList();
     }

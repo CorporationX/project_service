@@ -4,12 +4,10 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", uses = CandidateMapper.class)
+@Mapper(componentModel = "spring", uses = CandidateMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
-
-    VacancyMapper INSTANCE = Mappers.getMapper(VacancyMapper.class);
 
     @Mapping(source = "vacancy.candidates", target = "candidates")
     VacancyDto toDto(Vacancy vacancy);
