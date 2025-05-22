@@ -2,25 +2,30 @@ package faang.school.projectservice.publisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import faang.school.projectservice.dto.team.TeamEvent;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class TeamPublisher implements MessagePublisher<TeamEvent> {
 
-    private static final Logger log = LoggerFactory.getLogger(TeamPublisher.class);
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("${spring.data.redis.channels.team-channel.name}")
-    private String teamChannel;
+    private final String teamChannel;
     private final ObjectMapper objectMapper;
+
+    public TeamPublisher(
+            RedisTemplate<String, Object> redisTemplate,
+            @Value("${spring.data.redis.channels.team-channel.name}") String teamChannel, ObjectMapper objectMapper) {
+        this.redisTemplate = redisTemplate;
+        this.teamChannel = teamChannel;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public void publish(TeamEvent event){

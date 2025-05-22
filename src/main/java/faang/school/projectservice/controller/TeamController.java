@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import faang.school.projectservice.dto.team.CreateTeamDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.service.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public TeamDto create(@RequestBody TeamDto teamDto) throws JsonProcessingException {
+    public CreateTeamDto create(@RequestBody TeamDto teamDto) throws JsonProcessingException {
         return teamService.create(teamDto);
     }
 }

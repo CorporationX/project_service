@@ -15,7 +15,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String redisHost;
     @Value("${spring.data.redis.port}")
-    private int redisPort;
+    private Integer redisPort;
     @Value("${spring.data.redis.channels.team_channel.name}")
     private String channelForTeamEvent;
 
