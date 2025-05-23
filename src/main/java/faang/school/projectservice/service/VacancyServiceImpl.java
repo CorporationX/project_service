@@ -13,14 +13,12 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.filter.NameFilter;
-import faang.school.projectservice.service.filter.PositionFilter;
-import faang.school.projectservice.service.filter.ProjectFilter;
 import faang.school.projectservice.service.filter.VacancyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +28,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
     private final TeamMemberRepository memberRepo;
+    private final List<VacancyFilter> filterList;
 
     public void checkOwnerOrManager(long projectId) {
         long userId = userContext.getUserId();
@@ -93,10 +92,7 @@ public class VacancyServiceImpl implements VacancyService {
             validateCandidatesNotProjectMembers(newCandidates, projectId);
         }
 
-        existingVacancy.setName(vacancyDto.getName());
-        existingVacancy.setDescription(vacancyDto.getDescription());
-        existingVacancy.setPosition(vacancyDto.getPosition());
-        existingVacancy.setCount(vacancyDto.getCount());
+        vacancyMapper.updateVacancy(existingVacancy, vacancyDto);
         Vacancy updated = vacancyRepository.save(existingVacancy);
         return vacancyMapper.toDto(updated);
     }
@@ -125,20 +121,20 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public List<VacancyDto> getVacanciesByProjectId(long projectId, String positionFilter, String nameFilter) {
-        List<VacancyFilter> filters = List.of(
-                new ProjectFilter(projectId),
-                new PositionFilter(positionFilter),
-                new NameFilter(nameFilter)
-        );
+        Stream<Vacancy> vacancyStream = vacancyRepository.findAll().stream()
+                .filter(vacancy -> vacancy.getProject().getId().equals(projectId));
 
-        return vacancyRepository.findAll().stream()
-                .filter(vacancy -> {
-                    for (VacancyFilter filter : filters) {
-                        if (!filter.test(vacancy)) return false;
-                    }
-                    return true;
-                })
+        if (filterList != null) {
+            for (VacancyFilter filter : filterList) {
+                if (filter.isApplicable(positionFilter, nameFilter)) {
+                    vacancyStream = filter.apply(vacancyStream, positionFilter, nameFilter);
+                }
+            }
+        }
+
+        return vacancyStream
                 .map(vacancyMapper::toDto)
                 .toList();
     }
 }
+

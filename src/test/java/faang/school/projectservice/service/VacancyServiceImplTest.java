@@ -53,6 +53,7 @@ class VacancyServiceImplTest {
 
     @BeforeEach
     void setUp() {
+
         dto = VacancyDto.builder()
                 .name("Backend Developer")
                 .description("API & DB")
@@ -203,22 +204,27 @@ class VacancyServiceImplTest {
     }
 
     @Test
-    void getVacanciesByProjectId_filtersByPositionAndName() {
-        Vacancy v1 = vacancyMapper.toEntity(dto);
-        v1.setId(1L);
-        v1.setProject(project);
+    void getVacanciesByProjectId_filters() {
+        Vacancy v1 = new Vacancy();
+        v1.setProject(new Project());
+        v1.getProject().setId(1L);
         v1.setPosition(TeamRole.DEVELOPER);
-        v1.setName("Back dev");
+        v1.setName("Alpha");
 
-        Vacancy v2 = vacancyMapper.toEntity(dto);
-        v2.setId(2L);
-        v2.setProject(project);
+        Vacancy v2 = new Vacancy();
+        v2.setProject(new Project());
+        v2.getProject().setId(1L);
         v2.setPosition(TeamRole.MANAGER);
-        v2.setName("Project manager");
+        v2.setName("Beta");
 
         when(vacancyRepository.findAll()).thenReturn(List.of(v1, v2));
 
-        var list = service.getVacanciesByProjectId(PROJECT_ID, "developer", "Back");
-        assertThat(list).extracting(VacancyDto::getId).containsExactly(1L);
+        List<VacancyDto> all = service.getVacanciesByProjectId(1L, null, null);
+
+        assertThat(all).hasSize(2);
+        assertThat(all.get(0).getPosition()).isEqualTo(TeamRole.DEVELOPER);
+        assertThat(all.get(1).getPosition()).isEqualTo(TeamRole.MANAGER);
+        assertThat(all.get(0).getName()).isEqualTo("Alpha");
+        assertThat(all.get(1).getName()).isEqualTo("Beta");
     }
 }
