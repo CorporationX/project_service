@@ -7,12 +7,11 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProjectDto {
-    private Long id;
+public class ProjectFilterDto {
+
     private String name;
-    private String description;
+    private String descriptionPattern;
     private Long ownerId;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-    private Long newOwnerId;
 }

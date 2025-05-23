@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
@@ -27,16 +28,13 @@ public class ProjectController {
         return projectService.update(userId, projectDto);
     }
 
-    public List<ProjectDto> getFilteredProjects(long userId, ProjectDto projectDto) {
-        ProjectDto emptyDto = ProjectDto.builder().build();
-        if (projectDto.equals(emptyDto)){
-            return projectService.getAllProjects(userId);
-        }
+    public List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto projectDto) {
         return projectService.getFilteredProjects(userId, projectDto);
     }
 
     public List<ProjectDto> getAllProjects(long userId) {
-        return projectService.getAllProjects(userId);
+        ProjectFilterDto emptyDto = ProjectFilterDto.builder().build();
+        return projectService.getFilteredProjects(userId, emptyDto);
     }
 
     public ProjectDto getProjectById (long userId, long projectId){
