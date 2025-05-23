@@ -42,6 +42,9 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew test -x testClasses --no-daemon --continue
 
+      - name: Verify Test Coverage
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon --continue
+
 #      - name: Verify Test Coverage
 #        run: ./gradlew jacocoTestCoverageVerification --no-daemon
 
