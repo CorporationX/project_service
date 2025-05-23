@@ -21,11 +21,11 @@ public class ProjectController {
         return projectService.create(userId, validatedDto);
     }
 
-    public ProjectDto update(long userId, ProjectDto projectDto) {
-        if (projectDto.getId() == null){
-            throw new DataValidationException("Project for updating should be found bu ID. Fill in this field.");
+    public ProjectDto update(long projectId, ProjectDto projectDto) {
+        if (projectDto.getOwnerId() == null) {
+            throw new DataValidationException("Project for updating should be found have ownerID. Fill in this field.");
         }
-        return projectService.update(userId, projectDto);
+        return projectService.update(projectId, projectDto);
     }
 
     public List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto projectDto) {
@@ -37,19 +37,19 @@ public class ProjectController {
         return projectService.getFilteredProjects(userId, emptyDto);
     }
 
-    public ProjectDto getProjectById (long userId, long projectId){
+    public ProjectDto getProjectById(long userId, long projectId) {
         return projectService.getProjectById(userId, projectId);
     }
 
-    private ProjectDto validate(long userId, ProjectDto projectDto){
-        if (projectDto.getName() == null || projectDto.getDescription() == null) {
+    private ProjectDto validate(long userId, ProjectDto projectDto) {
+        if (projectDto.getName() == null
+                || projectDto.getDescription() == null
+                || projectDto.getName().isBlank()
+                || projectDto.getDescription().isBlank()) {
             throw new DataValidationException("Every project should have a name and a description");
         }
         if (projectDto.getOwnerId() == null) {
             projectDto.setOwnerId(userId);
-        }
-        if (projectDto.getVisibility() == null) {
-            projectDto.setVisibility(ProjectVisibility.PUBLIC);
         }
         return projectDto;
     }

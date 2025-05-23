@@ -9,11 +9,9 @@ public interface ProjectService {
 
     ProjectDto create(ProjectDto projectDto);
 
-    ProjectDto update(ProjectDto projectDto);
+    ProjectDto update(long projectId, ProjectDto projectDto);
 
-    List<ProjectDto> getFilteredProjects(ProjectFilterDto dto);
-
-    List<ProjectDto> getAllProjects(long userId);
+    List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto dto);
 
     ProjectDto getProjectById(long userId, long projectId);
 }

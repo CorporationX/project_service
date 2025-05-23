@@ -32,8 +32,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDto create(ProjectDto projectDto) {
         validateTitleUniqueness(projectDto);
-        Project project = projectMapper.toProjectEntity(projectDto);
-        project.setStatus(ProjectStatus.CREATED);
+        ProjectDto completedDto = setDefaultCreationFields(projectDto);
+        Project project = projectMapper.toProjectEntity(completedDto);
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
@@ -65,7 +65,6 @@ public class ProjectServiceImpl implements ProjectService {
                     }
                     return true;
                 });
-
         for (ProjectFilter filter : filters) {
             if (filter.isApplicable(dto)) {
                 projects = filter.apply(projects, dto);
@@ -75,12 +74,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projects
                 .map(projectMapper::toProjectDto)
                 .toList();
-    }
-
-    @Override
-    public List<ProjectDto> getAllProjects(long userId) {
-        ProjectDto dto = ProjectDto.builder().build();
-        return getFilteredProjects(userId, dto);
     }
 
     @Override
@@ -105,11 +98,11 @@ public class ProjectServiceImpl implements ProjectService {
     private void validateTitleUniqueness(ProjectDto projectDto) {
         String projectName = projectDto.getName();
         long projectOwnerId = projectDto.getOwnerId();
-        ProjectDto projectDtoForValidation = ProjectDto.builder()
+        ProjectFilterDto dtoForValidation = ProjectFilterDto.builder()
                 .ownerId(projectOwnerId)
                 .name(projectName)
                 .build();
-        List<ProjectDto> sameNamedProjects = getFilteredProjects(projectOwnerId, projectDtoForValidation);
+        List<ProjectDto> sameNamedProjects = getFilteredProjects(projectOwnerId, dtoForValidation);
         if (!sameNamedProjects.isEmpty()) {
             if (sameNamedProjects.stream()
                     .noneMatch(sameNamedProject ->
@@ -118,5 +111,13 @@ public class ProjectServiceImpl implements ProjectService {
                         (String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
             }
         }
+    }
+
+    private ProjectDto setDefaultCreationFields(ProjectDto dto){
+        if (dto.getVisibility() == null) {
+            dto.setVisibility(ProjectVisibility.PUBLIC);
+        }
+        dto.setStatus(ProjectStatus.CREATED);
+        return dto;
     }
 }
