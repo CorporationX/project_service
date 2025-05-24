@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.filter.projecfilters.TestProjectNameFilter;
@@ -54,6 +55,7 @@ class ProjectServiceImplTest {
 
     private List<ProjectFilter> filters;
     private ProjectDto projectDto;
+    private ProjectFilterDto filterDto;
     private long user1Id = 1L;
     private long user2Id = 2L;
     private long project1Id = 111L;
@@ -70,6 +72,7 @@ class ProjectServiceImplTest {
                 (List.of(visibilityFilter, statusFilter, nameFilter),
                         projectRepository, projectMapper);
         projectDto = ProjectDto.builder().build();
+        filterDto = ProjectFilterDto.builder().build();
         project1 = Project.builder()
                 .id(project1Id)
                 .visibility(ProjectVisibility.PRIVATE)
@@ -89,10 +92,10 @@ class ProjectServiceImplTest {
     @Test
     public void testGetFilteredProject_AllPrivet_ByMembership() {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
-        projectDto.setVisibility(ProjectVisibility.PRIVATE);
+        filterDto.setVisibility(ProjectVisibility.PRIVATE);
 
-        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, projectDto);
-        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, projectDto);
+        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, filterDto);
+        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, filterDto);
 
         assertEquals(0, result1.size());
         assertEquals(2, result2.size());
@@ -103,10 +106,10 @@ class ProjectServiceImplTest {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
         project1.setStatus(ProjectStatus.CREATED);
         project2.setStatus(ProjectStatus.CREATED);
-        projectDto.setStatus(ProjectStatus.CREATED);
+        filterDto.setStatus(ProjectStatus.CREATED);
 
-        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, projectDto);
-        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, projectDto);
+        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, filterDto);
+        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, filterDto);
 
         assertEquals(0, result1.size());
         assertEquals(2, result2.size());
@@ -122,11 +125,11 @@ class ProjectServiceImplTest {
         project3.setName("Forge");
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
 
-        projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setName("Bakery");
+        filterDto.setStatus(ProjectStatus.CREATED);
+        filterDto.setName("Bakery");
 
-        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, projectDto);
-        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, projectDto);
+        List<ProjectDto> result1 = service.getFilteredProjects(user1Id, filterDto);
+        List<ProjectDto> result2 = service.getFilteredProjects(user2Id, filterDto);
 
         assertEquals(0, result1.size());
         assertEquals(1, result2.size());
@@ -141,7 +144,7 @@ class ProjectServiceImplTest {
         projectDto.setOwnerId(user2Id);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
-                service.create(user2Id, projectDto));
+                service.create(projectDto));
 
         assertEquals(String.format
                         ("User with id = %d already has a project named %s", user2Id,
@@ -157,7 +160,7 @@ class ProjectServiceImplTest {
         projectDto.setName("Bakery");
         projectDto.setOwnerId(user2Id);
 
-        service.create(user2Id, projectDto);
+        service.create(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         assertEquals(project1.getName(), projectCaptor.getValue().getName());
@@ -171,7 +174,7 @@ class ProjectServiceImplTest {
         projectDto.setName("Bakery");
         projectDto.setOwnerId(user2Id);
 
-        service.create(user2Id, projectDto);
+        service.create(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         assertEquals(projectDto.getName(), projectCaptor.getValue().getName());
@@ -186,7 +189,7 @@ class ProjectServiceImplTest {
         when(projectRepository.findById(nonExistentProjectId)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.update(user1Id, projectDto));
+                () -> service.update(projectDto));
 
         assertEquals("No project with this id has been found", exception.getMessage());
     }
@@ -197,7 +200,7 @@ class ProjectServiceImplTest {
         projectDto.setId(project1Id);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> service.update(user1Id, projectDto));
+                () -> service.update(projectDto));
 
         assertEquals("Projects can be changed only be theirs owners", exception.getMessage());
     }
@@ -205,22 +208,24 @@ class ProjectServiceImplTest {
     @Test
     public void testUpdate_OnlyOneField() {
         projectDto.setId(project1Id);
-        project1.setDescription("bla-bla-bla");
+        projectDto.setOwnerId(user2Id);
+        projectDto.setDescription("bla-bla-bla");
+        project1.setDescription("bla");
         when(projectRepository.findById(project1Id)).thenReturn(Optional.of(project1));
 
-        service.update(user2Id, projectDto);
+        service.update(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project project = projectCaptor.getValue();
 
         assertNotNull(project.getUpdatedAt());
         assertEquals("bla-bla-bla", project.getDescription());
-        assertEquals(ProjectVisibility.PRIVATE, project.getVisibility());
     }
 
     @Test
     public void testUpdate_ManyFields() {
         projectDto.setId(project1Id);
+        projectDto.setOwnerId(user2Id);
         projectDto.setName("Bakery");
         projectDto.setDescription("bla");
         projectDto.setStatus(ProjectStatus.ON_HOLD);
@@ -231,7 +236,7 @@ class ProjectServiceImplTest {
         project1.setStatus(ProjectStatus.CREATED);
         when(projectRepository.findById(project1Id)).thenReturn(Optional.of(project1));
 
-        ProjectDto updated = service.update(user2Id, projectDto);
+        ProjectDto updated = service.update(projectDto);
 
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project project = projectCaptor.getValue();
@@ -243,17 +248,6 @@ class ProjectServiceImplTest {
         assertEquals(projectDto.getStatus(), project.getStatus());
 
         assertEquals(projectDto1, updated);
-    }
-
-    @Test
-    public void testGetAllProjects(){
-        when(projectRepository.findAll()).thenReturn(List.of(project1, project2, project3));
-
-        List<ProjectDto> projectsForNotHavingPrivet = service.getAllProjects(user1Id);
-        List<ProjectDto> projectsForHavingPrivet = service.getAllProjects(user2Id);
-
-        assertEquals(0, projectsForNotHavingPrivet.size());
-        assertEquals(3, projectsForHavingPrivet.size());
     }
 
     @Test

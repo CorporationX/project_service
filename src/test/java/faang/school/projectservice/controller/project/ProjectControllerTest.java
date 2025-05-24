@@ -1,7 +1,8 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.controller.ProjectController;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -22,7 +23,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,18 +40,36 @@ class ProjectControllerTest {
     private ProjectController controller;
 
     @Captor
-    ArgumentCaptor<ProjectDto> captor;
+    ArgumentCaptor<ProjectDto> projectCaptor;
+
+    @Captor
+    ArgumentCaptor<ProjectFilterDto> filterDtoCaptor;
 
     private ProjectDto projectDto;
     private long userId = 1L;
+    private long projectId = 22L;
+    private ProjectFilterDto filterDto;
 
     @BeforeEach
     public void setUp() {
         projectDto = ProjectDto.builder().build();
+        filterDto = ProjectFilterDto.builder().build();
     }
 
     @Test
     public void testValidation_HaveNoName_InCreate() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> controller.create(userId, projectDto));
+
+        assertEquals("Every project should have a name and a description", exception.getMessage());
+    }
+
+    @Test
+    public void testValidation_EmptyDescription_InCreate() {
+        projectDto = ProjectDto.builder()
+                .name("Bakery")
+                .description(" ")
+                .build();
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> controller.create(userId, projectDto));
 
@@ -64,7 +82,7 @@ class ProjectControllerTest {
         projectDto.setDescription("bla-bla");
         projectDto.setOwnerId(userId);
         projectDto.setVisibility(ProjectVisibility.PRIVATE);
-        when(projectService.create(eq(userId), any(ProjectDto.class))).thenReturn(projectDto);
+        when(projectService.create(any(ProjectDto.class))).thenReturn(projectDto);
 
         ProjectDto dto = controller.create(userId, projectDto);
 
@@ -77,8 +95,8 @@ class ProjectControllerTest {
         projectDto.setDescription("bla-bla");
 
         controller.create(userId, projectDto);
-        verify(projectService, times(1)).create(eq(userId), captor.capture());
-        ProjectDto dto = captor.getValue();
+        verify(projectService, times(1)).create(projectCaptor.capture());
+        ProjectDto dto = projectCaptor.getValue();
 
         ProjectDto projectDto1 = ProjectDto.builder()
                 .name("Bakery")
@@ -93,51 +111,62 @@ class ProjectControllerTest {
     @Test
     public void testUpdate_DtoWithoutId() {
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
-                controller.update(userId, projectDto));
+                controller.update(projectDto));
 
-        assertEquals("Project for updating should be found bu ID. Fill in this field.",
+        assertEquals("Project for updating should be found by ID. Fill in this field.",
+                exception.getMessage());
+    }
+
+    @Test
+    public void testUpdate_DtoWithoutOwnerId() {
+        projectDto.setId(projectId);
+        DataValidationException exception = assertThrows(DataValidationException.class, () ->
+                controller.update(projectDto));
+
+        assertEquals("Project for updating should be found by ID. Fill in this field.",
                 exception.getMessage());
     }
 
     @Test
     public void testUpdate_RightDto() {
-        projectDto.setId(1L);
-        when(projectService.update(userId, projectDto)).thenReturn(projectDto);
+        projectDto.setId(projectId);
+        projectDto.setOwnerId(userId);
+        when(projectService.update(projectDto)).thenReturn(projectDto);
 
-        ProjectDto updated = controller.update(userId, projectDto);
+        ProjectDto updated = controller.update(projectDto);
 
         assertEquals(projectDto, updated);
     }
 
     @Test
     void testGetFilteredProjects_EmptyDto() {
-        controller.getFilteredProjects(userId, projectDto);
+        when(projectService.getFilteredProjects(userId, filterDto)).thenReturn(List.of(projectDto));
 
-        verify(projectService, times(1)).getAllProjects(userId);
+        List<ProjectDto> filteredProjects = controller.getFilteredProjects(userId, filterDto);
+        assertEquals(List.of(projectDto), filteredProjects);
     }
 
     @Test
     void testGetFilteredProjects_CompletedDto() {
-        projectDto.setName("Bakery");
-        when(projectService.getFilteredProjects(userId, projectDto)).thenReturn(List.of(projectDto));
+        filterDto.setName("Bakery");
+        when(projectService.getFilteredProjects(userId, filterDto)).thenReturn(List.of(projectDto));
 
-        List<ProjectDto> filteredProjects = controller.getFilteredProjects(userId, projectDto);
+        List<ProjectDto> filteredProjects = controller.getFilteredProjects(userId, filterDto);
 
         assertEquals(List.of(projectDto), filteredProjects);
     }
 
     @Test
     void testGetAllProjects() {
-        when(projectService.getAllProjects(userId)).thenReturn(List.of(projectDto));
+        controller.getAllProjects(userId);
 
-        List<ProjectDto> allProjects = controller.getAllProjects(userId);
-
-        assertEquals(List.of(projectDto), allProjects);
+        verify(projectService, times(1))
+                .getFilteredProjects(userId, filterDtoCaptor.capture());
+        assertEquals(filterDto, filterDtoCaptor.getValue());
     }
 
     @Test
     void testGetProjectById() {
-        long projectId = 22L;
         projectDto.setId(projectId);
         when(projectService.getProjectById(userId, projectId)).thenReturn(projectDto);
 

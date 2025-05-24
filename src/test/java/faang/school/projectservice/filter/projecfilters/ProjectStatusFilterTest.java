@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.projecfilters;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Test;
@@ -16,19 +16,19 @@ class ProjectStatusFilterTest {
 
     @Test
     void testIsApplicableFalse() {
-        boolean result = statusFilter.isApplicable(ProjectDto.builder().build());
+        boolean result = statusFilter.isApplicable(ProjectFilterDto.builder().build());
         assertFalse(result);
     }
 
     @Test
     void testIsApplicableTrue() {
-        boolean result = statusFilter.isApplicable(ProjectDto.builder().status(ProjectStatus.CREATED).build());
+        boolean result = statusFilter.isApplicable(ProjectFilterDto.builder().status(ProjectStatus.CREATED).build());
         assertTrue(result);
     }
 
     @Test
     void testApplyMatchesExist() {
-        ProjectDto dto = ProjectDto.builder().status(ProjectStatus.COMPLETED).build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().status(ProjectStatus.COMPLETED).build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).status(ProjectStatus.CREATED).build(),
                 Project.builder().id(2L).status(ProjectStatus.COMPLETED).build(),
@@ -43,7 +43,7 @@ class ProjectStatusFilterTest {
 
     @Test
     void testApplyNoMatches(){
-        ProjectDto dto = ProjectDto.builder().status(ProjectStatus.COMPLETED).build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().status(ProjectStatus.COMPLETED).build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).status(ProjectStatus.CREATED).build(),
                 Project.builder().id(2L).status(ProjectStatus.ON_HOLD).build(),

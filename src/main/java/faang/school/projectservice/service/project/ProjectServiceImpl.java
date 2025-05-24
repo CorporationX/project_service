@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -14,9 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -38,8 +36,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto update(long projectId, ProjectDto changingProjectDto) {
-        Project existingProject = projectRepository.findById(projectId)
+    public ProjectDto update(ProjectDto changingProjectDto) {
+        Project existingProject = projectRepository.findById(changingProjectDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("No project with this id has been found"));
         Long ownerId = existingProject.getOwnerId();
         if (!Objects.equals(ownerId, changingProjectDto.getOwnerId())) {

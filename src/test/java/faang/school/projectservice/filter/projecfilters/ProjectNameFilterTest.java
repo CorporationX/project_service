@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.projecfilters;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 
@@ -15,25 +15,25 @@ class ProjectNameFilterTest {
 
     @Test
     void testIsApplicableFalse() {
-        boolean result = nameFilter.isApplicable(ProjectDto.builder().build());
+        boolean result = nameFilter.isApplicable(ProjectFilterDto.builder().build());
         assertFalse(result);
     }
 
     @Test
     void testIsApplicableTrue() {
-        boolean result = nameFilter.isApplicable(ProjectDto.builder().name("Project").build());
+        boolean result = nameFilter.isApplicable(ProjectFilterDto.builder().name("Project").build());
         assertTrue(result);
     }
 
     @Test
     void testIsApplicableEmptyName() {
-        boolean result = nameFilter.isApplicable(ProjectDto.builder().name("  ").build());
+        boolean result = nameFilter.isApplicable(ProjectFilterDto.builder().name("  ").build());
         assertFalse(result);
     }
 
     @Test
     void testApplyMatchesExist() {
-        ProjectDto dto = ProjectDto.builder().name("Bakery").build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().name("Bakery").build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).name("BakerY").build(),
                 Project.builder().id(2L).name("Laundry").build(),
@@ -48,7 +48,7 @@ class ProjectNameFilterTest {
 
     @Test
     void testApplyNoMatches(){
-        ProjectDto dto = ProjectDto.builder().name("Bakery").build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().name("Bakery").build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).name("forge").build(),
                 Project.builder().id(2L).name("Laundry").build(),

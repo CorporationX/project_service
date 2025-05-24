@@ -1,8 +1,7 @@
 package faang.school.projectservice.filter.projecfilters;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.Test;
 
@@ -17,19 +16,19 @@ class ProjectVisibilityFilterTest {
 
     @Test
     void testIsApplicableFalse() {
-        boolean result = visibilityFilter.isApplicable(ProjectDto.builder().build());
+        boolean result = visibilityFilter.isApplicable(ProjectFilterDto.builder().build());
         assertFalse(result);
     }
 
     @Test
     void testIsApplicableTrue() {
-        boolean result = visibilityFilter.isApplicable(ProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build());
+        boolean result = visibilityFilter.isApplicable(ProjectFilterDto.builder().visibility(ProjectVisibility.PUBLIC).build());
         assertTrue(result);
     }
 
     @Test
     void testApplyMatchesExist() {
-        ProjectDto dto = ProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().visibility(ProjectVisibility.PUBLIC).build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build(),
                 Project.builder().id(2L).visibility(ProjectVisibility.PRIVATE).build(),
@@ -43,7 +42,7 @@ class ProjectVisibilityFilterTest {
 
     @Test
     void testApplyNoMatches(){
-        ProjectDto dto = ProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
+        ProjectFilterDto dto = ProjectFilterDto.builder().visibility(ProjectVisibility.PRIVATE).build();
         Stream<Project> projects = Stream.of(
                 Project.builder().id(1L).visibility(ProjectVisibility.PUBLIC).build(),
                 Project.builder().id(2L).visibility(ProjectVisibility.PUBLIC).build(),
