@@ -54,7 +54,7 @@ public class ProjectController {
         return projectService.getById(projectId);
     }
 
-    @PostMapping
+    @PostMapping("/projects")
     public List<ProjectDto> getProjectsByIds(@RequestBody List<Long> ids) {
         return projectService.getProjectsByIds(ids);
     }

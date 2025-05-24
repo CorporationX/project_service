@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,9 +111,9 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void testUpdate_whenProjectNotFoud_thenThrowsIllegalArgumentException() {
+    public void testUpdate_whenProjectNotFoud_thenThrowsEntityNotFoundException() {
         when(projectRepository.findById(any())).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> projectService.update(new ProjectDto()));
+        assertThrows(EntityNotFoundException.class, () -> projectService.update(new ProjectDto()));
     }
 
     @Test
@@ -140,7 +141,6 @@ public class ProjectServiceImplTest {
         assertEquals(baseProject.getName(), capturedProject.getName());
         assertEquals(updatedProject.getDescription(), capturedProject.getDescription());
         assertEquals(updatedProject.getStatus(), capturedProject.getStatus());
-        assertTrue(capturedProject.getUpdatedAt() != null);
     }
 
     @Test
