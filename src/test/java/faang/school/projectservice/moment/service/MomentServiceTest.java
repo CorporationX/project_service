@@ -25,6 +25,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -206,7 +208,7 @@ public class MomentServiceTest {
 
     @Test
     public void testUpdateMoment_associations() {
-        entity.setProjects(Collections.singletonList(mainProject));
+        entity.setProjects(Collections.singletonList(mainProject)); // проект с ID=1
         entity.setUserIds(Collections.singletonList(100L));
         when(momentRepositoryAdapter.getMomentById(5L)).thenReturn(entity);
 
@@ -215,43 +217,36 @@ public class MomentServiceTest {
 
         Team t1 = new Team();
         t1.setProject(mainProject);
-
         TeamMember m1 = new TeamMember();
         m1.setUserId(300L);
-
         t1.setTeamMembers(Collections.singletonList(m1));
 
-        when(teamRepositoryAdapter.getTeamsByProjectId(1L))
+        when(teamRepositoryAdapter.getTeamsByProjectIds(anyCollection()))
                 .thenReturn(Collections.singletonList(t1));
-        when(teamRepositoryAdapter.getTeamsByProjectId(2L))
-                .thenReturn(Collections.emptyList());
 
-        Project p3 = new Project();
-        p3.setId(3L);
 
-        Team t3 = new Team();
-        t3.setProject(p3);
-
+        Project p3 = new Project(); p3.setId(3L);
+        Team t3 = new Team(); t3.setProject(p3);
         TeamMember m2 = new TeamMember();
+        m2.setUserId(200L);
         m2.setTeam(t3);
 
-        when(teamMemberRepoAdapter.getAllTeamMembersByUserId(anyLong()))
+        when(teamMemberRepoAdapter.getTeamMembersByUserIds(anyCollection()))
                 .thenAnswer(inv -> {
-                    Long uid = inv.getArgument(0);
-                    return uid.equals(200L)
-                            ? Collections.singletonList(m2)
-                            : Collections.emptyList();
+                    Collection<Long> uids = inv.getArgument(0);
+                    if (uids.contains(200L)) {
+                        return Collections.singletonList(m2);
+                    }
+                    return Collections.emptyList();
                 });
 
-        when(projectRepositoryAdapter.getAllProjectsById(Arrays.asList(1L, 2L, 3L)))
+        when(projectRepositoryAdapter.getAllProjectsById(anyList()))
                 .thenReturn(Arrays.asList(mainProject, partnerProject, p3));
 
         when(momentRepositoryAdapter.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(momentMapper.toDto(any())).thenReturn(outputDto);
 
-
         MomentDto result = momentService.updateMoment(5L, inputDto);
-
 
         ArgumentCaptor<Moment> captor = ArgumentCaptor.forClass(Moment.class);
         verify(momentRepositoryAdapter).save(captor.capture());
@@ -262,24 +257,27 @@ public class MomentServiceTest {
         assertThat(saved.getUserIds())
                 .containsExactlyInAnyOrder(100L, 200L, 300L);
         assertThat(result).isEqualTo(outputDto);
+
+        verify(teamRepositoryAdapter).getTeamsByProjectIds(anyCollection());
+        verify(teamMemberRepoAdapter).getTeamMembersByUserIds(anyCollection());
+        verify(projectRepositoryAdapter).getAllProjectsById(anyList());
     }
 
     @Test
     public void testUpdateMoment_noDtoChanges() {
         entity.setProjects(Collections.singletonList(mainProject));
         entity.setUserIds(Collections.singletonList(100L));
+
         when(momentRepositoryAdapter.getMomentById(5L)).thenReturn(entity);
 
         inputDto.setProjectIds(null);
         inputDto.setUserIds(null);
 
-
-        when(teamRepositoryAdapter.getTeamsByProjectId(anyLong()))
+        when(teamRepositoryAdapter.getTeamsByProjectIds(anyCollection()))
                 .thenReturn(Collections.emptyList());
-        when(teamMemberRepoAdapter.getAllTeamMembersByUserId(anyLong()))
+        when(teamMemberRepoAdapter.getTeamMembersByUserIds(anyCollection()))
                 .thenReturn(Collections.emptyList());
-        when(projectRepositoryAdapter.getAllProjectsById(
-                Collections.singletonList(1L)))
+        when(projectRepositoryAdapter.getAllProjectsById(anyList()))
                 .thenReturn(Collections.singletonList(mainProject));
 
         when(momentRepositoryAdapter.save(any()))
@@ -292,6 +290,10 @@ public class MomentServiceTest {
         assertThat(entity.getProjects()).containsExactly(mainProject);
         assertThat(entity.getUserIds()).containsExactly(100L);
         assertThat(out).isEqualTo(outputDto);
+
+        verify(teamRepositoryAdapter).getTeamsByProjectIds(anyCollection());
+        verify(teamMemberRepoAdapter).getTeamMembersByUserIds(anyCollection());
+        verify(projectRepositoryAdapter).getAllProjectsById(anyList());
     }
 
     @Test
