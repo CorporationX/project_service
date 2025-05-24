@@ -11,6 +11,7 @@ import faang.school.projectservice.repository.adapter.moment.MomentRepositoryAda
 import faang.school.projectservice.repository.adapter.project.ProjectRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.team.TeamRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -31,6 +33,7 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
 
+    @Transactional
     public MomentDto createMoment(MomentDto momentDto) {
 
         Project mainProject = projectRepositoryAdapter.getProjectById(momentDto.getProjectId());
@@ -55,6 +58,7 @@ public class MomentService {
         return momentMapper.toDto(momentRepositoryAdapter.save(moment));
     }
 
+    @Transactional
     public MomentDto updateMoment(Long id, MomentDto momentDto) {
         Moment moment = momentRepositoryAdapter.getMomentById(id);
 
@@ -68,12 +72,13 @@ public class MomentService {
         return momentMapper.toDto(momentRepositoryAdapter.save(moment));
     }
 
-    private void updateMomentAssociations(Moment moment, MomentDto momentDto) {
-        Set<Long> projectIds = new LinkedHashSet<>();
-        moment.getProjects().forEach(project -> projectIds.add(project.getId()));
+    private void updateMomentAssociations(Moment moment, MomentDto dto) {
+        Set<Long> projectIds = moment.getProjects().stream()
+                .map(Project::getId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        if (momentDto.getProjectIds() != null) {
-            projectIds.addAll(momentDto.getProjectIds());
+        if (dto.getProjectIds() != null) {
+            projectIds.addAll(dto.getProjectIds());
         }
 
         Set<Long> userIds = new LinkedHashSet<>();
@@ -81,22 +86,24 @@ public class MomentService {
         if (moment.getUserIds() != null) {
             userIds.addAll(moment.getUserIds());
         }
-        if (momentDto.getUserIds() != null) {
-            userIds.addAll(momentDto.getUserIds());
+        if (dto.getUserIds() != null) {
+            userIds.addAll(dto.getUserIds());
         }
 
-        for (Long projectId : projectIds) {
-            List<Team> teams = teamRepositoryAdapter.getTeamsByProjectId(projectId);
-            teams.forEach(team -> team.getTeamMembers()
-                    .forEach(tm -> userIds.add(tm.getUserId())));
-        }
+        List<Team> allTeams = teamRepositoryAdapter.getTeamsByProjectIds(projectIds);
+        allTeams.forEach(team ->
+                team.getTeamMembers()
+                        .forEach(tm -> userIds.add(tm.getUserId()))
+        );
 
-        for (Long userId : userIds) {
-            List<TeamMember> teamMembers = teamMemberRepoAdapter.getAllTeamMembersByUserId(userId);
-            teamMembers.forEach(tm -> projectIds.add(tm.getTeam().getProject().getId()));
-        }
+        List<TeamMember> allMembers = teamMemberRepoAdapter.getTeamMembersByUserIds(userIds);
+        allMembers.forEach(tm ->
+                projectIds.add(tm.getTeam().getProject().getId())
+        );
 
-        List<Project> projects = projectRepositoryAdapter.getAllProjectsById(new ArrayList<>(projectIds));
+        List<Project> projects = projectRepositoryAdapter
+                .getAllProjectsById(new ArrayList<>(projectIds));
+
         moment.setProjects(projects);
         moment.setUserIds(new ArrayList<>(userIds));
     }
