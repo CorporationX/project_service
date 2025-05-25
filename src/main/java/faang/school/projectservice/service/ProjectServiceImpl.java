@@ -2,11 +2,13 @@ package faang.school.projectservice.service;
 
 import java.util.List;
 
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
+
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectMapper projectMapper;
@@ -42,7 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
 
-        return projectMapper.toDto(savedProject); 
+        return projectMapper.toDto(savedProject);
     }
 
     @Override
@@ -61,7 +64,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectMapper.update(project, projectDto);
         project = projectRepository.save(project);
 
-        return projectMapper.toDto(project); 
+        return projectMapper.toDto(project);
     }
 
     @Override
@@ -87,13 +90,22 @@ public class ProjectServiceImpl implements ProjectService {
 
         projectDtos = filterByPrivacy(projectDtos);
 
-        return projectDtos; 
+        return projectDtos;
     }
 
     @Override
     public ProjectDto getById(long projectId) {
-        Project project = projectRepository.getReferenceById(projectId);
-        return projectMapper.toDto(project);
+        return projectRepository.findById(projectId)
+                .map(projectMapper::toDto)
+                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден: " + projectId));
+    }
+
+    @Override
+    public List<ProjectDto> getProjectsByIds(List<Long> ids) {
+        return projectRepository.findAllById(ids)
+                .stream()
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     private List<ProjectDto> filterByPrivacy(List<ProjectDto> projectDtos) {

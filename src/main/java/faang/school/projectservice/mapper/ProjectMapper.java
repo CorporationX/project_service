@@ -12,7 +12,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, 
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     Project toEntity(ProjectDto projectDto);

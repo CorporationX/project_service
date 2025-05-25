@@ -11,4 +11,5 @@ public interface ProjectService {
     public List<ProjectDto> getAll(ProjectFilterDto filter);
     public List<ProjectDto> getAll();
     public ProjectDto getById(long projectId);
+    List<ProjectDto> getProjectsByIds(List<Long> ids);
 }

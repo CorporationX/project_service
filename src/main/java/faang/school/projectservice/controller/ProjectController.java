@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/project")
 @RequiredArgsConstructor
 public class ProjectController {
+
     private final ProjectService projectService;
 
     @PostMapping
@@ -40,17 +41,22 @@ public class ProjectController {
 
     @GetMapping("/all/filtered")
     public List<ProjectDto> getAll(@ModelAttribute ProjectFilterDto filter) {
-        return projectService.getAll(filter); 
+        return projectService.getAll(filter);
     }
 
     @GetMapping("/all")
     public List<ProjectDto> getAll() {
-        return projectService.getAll(); 
+        return projectService.getAll();
     }
 
     @GetMapping("/{projectId}")
     public ProjectDto getById(@PathVariable long projectId) {
-        return projectService.getById(projectId); 
+        return projectService.getById(projectId);
+    }
+
+    @PostMapping("/projects")
+    public List<ProjectDto> getProjectsByIds(@RequestBody List<Long> ids) {
+        return projectService.getProjectsByIds(ids);
     }
 
     private void validate(ProjectDto projectDto) {
