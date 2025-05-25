@@ -30,7 +30,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto create(ProjectDto projectDto) {
         if (projectRepository.existsByOwnerIdAndName(userContext.getUserId(), projectDto.getName())) {
             throw new IllegalArgumentException(
-                String.format("User {} already has a project with name {}.", userContext.getUserId(), projectDto.getName())
+                String.format("User %d already has a project with name %s.", userContext.getUserId(), projectDto.getName())
             );
         }
 
@@ -38,6 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectDto.setVisibility(ProjectVisibility.PRIVATE);
         }
         projectDto.setStatus(ProjectStatus.CREATED);
+        projectDto.setOwnerId(userContext.getUserId());
 
         Project savedProject = projectRepository.save(projectMapper.toEntity(projectDto));
 
@@ -48,12 +49,12 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto update(ProjectDto projectDto) {
         Project project = projectRepository.findById(projectDto.getId())
             .orElseThrow(() -> new EntityNotFoundException(
-                String.format("Project {} not found.", projectDto.getId())
+                String.format("Project %d not found.", projectDto.getId())
             ));
 
         if (project.getOwnerId() != userContext.getUserId()) {
             throw new IllegalArgumentException(
-                String.format("You are not the owner of {} project", projectDto.getId())
+                String.format("You are not the owner of project %d.", projectDto.getId())
             );
         }
 

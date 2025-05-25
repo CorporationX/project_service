@@ -33,7 +33,7 @@ public class ProjectController {
     @PatchMapping("/{id}")
     public ProjectDto update(@PathVariable long id, @RequestBody ProjectDto projectDto) {
         if (id != projectDto.getId()) {
-            throw new IllegalArgumentException("Project id does not match.");
+            throw new IllegalArgumentException("Project ids does not match.");
         }
         return projectService.update(projectDto);
     }
@@ -48,7 +48,7 @@ public class ProjectController {
         return projectService.getAll(); 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{projectId}")
     public ProjectDto getById(@PathVariable long projectId) {
         return projectService.getById(projectId); 
     }
