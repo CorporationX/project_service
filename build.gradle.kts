@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm")
+    id("jacoco")
     id("checkstyle")
 }
 
@@ -69,9 +70,12 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification) // Add Jacoco to tests
 }
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+val test by tasks.getting(Test::class) {
+    testLogging.showStandardStreams = true
+}
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
@@ -95,9 +99,54 @@ tasks.checkstyleMain {
     classpath = files()
 }
 
-
 tasks.checkstyleTest {
     source = fileTree("${project.rootDir}/src/test")
     include("**/*.java")
     classpath = files()
+}
+
+val jacocoExclude = listOf(
+    "faang/school/projectservice/ProjectServiceApplication*",
+    "faang/school/projectservice/client/Feign*",
+    "**/config/**",
+    "**/model/**",
+    "**/dto/**",
+    "**/mapper/**"
+)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it) {
+            exclude(jacocoExclude)
+        }
+    }))
+}
+
+val jacocoClassExclude = listOf(
+    "faang.school.projectservice.ProjectServiceApplication",
+    "faang.school.projectservice.client.Feign*",
+    "faang.school.projectservice.config.*",
+    "faang.school.projectservice.model.*",
+    "faang.school.projectservice.mapper.*",
+    "faang.school.projectservice.dto.*"
+)
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+
+        rule {
+            element = "CLASS"
+            excludes = jacocoClassExclude
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.0".toBigDecimal()
+            }
+        }
+    }
 }
