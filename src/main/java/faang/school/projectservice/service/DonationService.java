@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.donation;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
@@ -9,7 +9,7 @@ public interface DonationService {
 
     DonationDto sendDonation(DonationDto donationDto);
 
-    DonationDto getDonationById(long donationId);
+    DonationDto getDonationByIdAndUserId(long donationId, long userId);
 
     List<DonationDto> getAllDonationsByUserId(long userId, DonationFilterDto donationFilterDto);
 }

@@ -5,15 +5,17 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
-import faang.school.projectservice.filter.donation.DonationFilterStrategy;
+import faang.school.projectservice.filter.DonationFilterStrategy;
 import faang.school.projectservice.mapper.donation.DonationMapper;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
+import faang.school.projectservice.service.DonationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -36,16 +38,20 @@ public class DonationServiceImpl implements DonationService {
                 donation.getCurrency(),
                 donation.getCurrency()
         );
-        paymentServiceClient.sendPayment(paymentRequest);
+
+        if (!Objects.equals(paymentServiceClient.sendPayment(paymentRequest).status(), "SUCCESS")) {
+            throw new IllegalArgumentException("Payment hasn't gone through");
+        }
+
         donation = donationRepository.save(donation);
 
         return donationMapper.toDto(donation);
     }
 
     @Override
-    public DonationDto getDonationById(long donationId) {
-        Donation donation = donationRepository.findById(donationId).orElseThrow(
-                () -> new EntityNotFoundException("Donation with Id (%s) was not found".formatted(donationId))
+    public DonationDto getDonationByIdAndUserId(long donationId, long userId) {
+        Donation donation = donationRepository.findByIdAndUserId(donationId, userId).orElseThrow(
+                () -> new EntityNotFoundException("Either donation with Id (%s) or user with Id (%s) were not found".formatted(donationId, userId))
         );
 
         return donationMapper.toDto(donation);
@@ -56,13 +62,9 @@ public class DonationServiceImpl implements DonationService {
         userServiceClient.getUser(userId);
 
         List<Donation> donations = donationRepository.findAllByUserId(userId);
-
-        if (donations.isEmpty()) {
-            return List.of();
-        }
+        if (donations.isEmpty()) return List.of();
 
         Stream<Donation> donationStream = donations.stream();
-
         for (DonationFilterStrategy filter : donationFilterStrategies) {
             if (filter.isApplicable(donationFilterDto)) {
                 donationStream = filter.apply(donationStream, donationFilterDto);

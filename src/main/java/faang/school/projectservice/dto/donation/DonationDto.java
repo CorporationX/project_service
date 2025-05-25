@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.donation;
 
 import faang.school.projectservice.dto.client.Currency;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +15,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DonationDto {
+    @NotNull
     public Long paymentNumber;
+    @NotNull
     public BigDecimal amount;
-    public LocalDateTime donationTime;
+    @NotNull
     public Long campaignId;
+    @NotNull
     public Currency currency;
+    @NotNull
     public Long userId;
+
+    public LocalDateTime donationTime;
 }

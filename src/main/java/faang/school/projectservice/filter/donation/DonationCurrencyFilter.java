@@ -1,12 +1,14 @@
-package faang.school.projectservice.filter.donation.filters;
+package faang.school.projectservice.filter.donation;
 
 import faang.school.projectservice.dto.donation.DonationFilterDto;
-import faang.school.projectservice.filter.donation.DonationFilterStrategy;
+import faang.school.projectservice.filter.DonationFilterStrategy;
 import faang.school.projectservice.model.Donation;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Component
 public class DonationCurrencyFilter implements DonationFilterStrategy {
 
     @Override

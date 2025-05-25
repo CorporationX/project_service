@@ -3,10 +3,12 @@ package faang.school.projectservice.service.donation;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.Currency;
+import faang.school.projectservice.dto.client.PaymentRequest;
+import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
-import faang.school.projectservice.filter.donation.DonationFilterStrategy;
+import faang.school.projectservice.filter.DonationFilterStrategy;
 import faang.school.projectservice.mapper.donation.DonationMapperImpl;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
@@ -55,6 +57,9 @@ public class DonationServiceImplTest {
     long userId = 1L;
     List<Donation> donations;
     LocalDateTime now = LocalDateTime.now();
+    PaymentRequest request;
+    PaymentResponse wrongResponse;
+    PaymentResponse successfulResponse;
 
     @BeforeEach
     public void setUp() {
@@ -70,9 +75,11 @@ public class DonationServiceImplTest {
         );
 
         donationDto = DonationDto.builder()
-                .userId(1L)
-                .paymentNumber(3L)
-                .amount(new BigDecimal(1))
+                .userId(userId)
+                .paymentNumber(2L)
+                .amount(new BigDecimal(3))
+                .campaignId(4L)
+                .currency(Currency.EUR)
                 .build();
 
         donationFilterDto = DonationFilterDto.builder()
@@ -83,15 +90,68 @@ public class DonationServiceImplTest {
                 .build();
 
         donations = List.of(
-                Donation.builder().id(1L).amount(new BigDecimal(1)).currency(Currency.EUR).donationTime(now.plus(Period.ofMonths(1))).build(),
-                Donation.builder().id(2L).amount(new BigDecimal(2)).currency(Currency.EUR).donationTime(now).build(),
-                Donation.builder().id(3L).amount(new BigDecimal(3)).currency(Currency.USD).donationTime(now.minus(Period.ofMonths(1))).build()
+                Donation.builder()
+                        .id(donationId)
+                        .amount(new BigDecimal(1))
+                        .currency(Currency.EUR)
+                        .donationTime(now.plus(Period.ofMonths(1)))
+                        .build(),
+                Donation.builder()
+                        .id(donationId + 1)
+                        .amount(new BigDecimal(2))
+                        .currency(Currency.EUR)
+                        .donationTime(now)
+                        .build(),
+                Donation.builder()
+                        .id(donationId + 2)
+                        .amount(new BigDecimal(3))
+                        .currency(Currency.USD)
+                        .donationTime(now.minus(Period.ofMonths(1)))
+                        .build()
         );
+
+        request = new PaymentRequest(
+                donationDto.getPaymentNumber(),
+                donationDto.getAmount(),
+                donationDto.getCurrency(),
+                donationDto.getCurrency()
+        );
+
+        wrongResponse = new PaymentResponse(
+                "WRONG",
+                1,
+                request.paymentNumber(),
+                request.amount(),
+                request.paymentCurrency(),
+                request.targetCurrency(),
+                "message"
+        );
+
+        successfulResponse = new PaymentResponse(
+                "SUCCESS",
+                1,
+                request.paymentNumber(),
+                request.amount(),
+                request.paymentCurrency(),
+                request.targetCurrency(),
+                "message"
+        );
+    }
+
+    @Test
+    public void testSendDonation_BadPaymentResponse() {
+        when(paymentServiceClient.sendPayment(request))
+                .thenReturn(wrongResponse);
+
+        assertThrows(IllegalArgumentException.class, () -> donationService.sendDonation(donationDto));
     }
 
     @Test
     public void testSendDonation_ReturnDonationDto() {
         Donation donationEntity = donationMapper.toEntity(donationDto);
+
+        when(paymentServiceClient.sendPayment(request))
+                .thenReturn(successfulResponse);
 
         // Вот это
         when(donationRepository.save(donationEntity)).thenReturn(donationEntity);
@@ -108,22 +168,23 @@ public class DonationServiceImplTest {
     }
 
     @Test
-    public void testGetDonationById_ThrowsDonationWasNotFound() {
-        when(donationRepository.findById(donationId)).thenReturn(Optional.empty());
+    public void testGetDonationByIdAndUserId_ThrowsDonationWasNotFound() {
+        when(donationRepository.findByIdAndUserId(donationId, userId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> donationService.getDonationById(donationId));
-
-        assertEquals("Donation with Id (%s) was not found".formatted(donationId), exception.getMessage());
+        assertThrows(EntityNotFoundException.class, () -> donationService.getDonationByIdAndUserId(donationId, userId));
     }
 
     @Test
-    public void testGetDonationById_ReturnsDonationDto() {
+    public void testGetDonationByIdAndUserId_ReturnsDonationDto() {
         Donation entity = donationMapper.toEntity(donationDto);
 
-        when(donationRepository.findById(donationId)).thenReturn(Optional.of(entity));
+        when(donationRepository.findByIdAndUserId(donationId, userId)).thenReturn(Optional.of(entity));
 
-        assertEquals(donationDto, donationService.getDonationById(donationId));
+        // В изначальном ДТО есть ид компании.
+        // При превращении в энтити ид теряется, тк меняется на сущность компании равную налл
+        // При обратном превращении в ДТО сущность пытается превратиться в ид, но тк налл поле остается пустым.
+        donationDto.setCampaignId(null);
+        assertEquals(donationDto, donationService.getDonationByIdAndUserId(donationId, userId));
     }
 
     @Test
