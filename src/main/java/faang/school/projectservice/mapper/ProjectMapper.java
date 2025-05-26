@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,7 +16,7 @@ public interface ProjectMapper {
     @Mapping(target = "childrenIds", source = "children", qualifiedByName = "projectsToIds")
     ProjectDto toDto(Project project);
 
-    @Mapping(target = "parentProject", source = "parenProjectId", qualifiedByName = "idToProject")
+    @Mapping(target = "parentProject", source = "parentProjectId", qualifiedByName = "idToProject")
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "tasks", ignore = true)
     @Mapping(target = "resources", ignore = true)
