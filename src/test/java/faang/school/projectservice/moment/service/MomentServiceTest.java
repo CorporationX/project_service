@@ -11,7 +11,7 @@ import faang.school.projectservice.repository.adapter.moment.MomentRepositoryAda
 import faang.school.projectservice.repository.adapter.project.ProjectRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.team.TeamRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
-import faang.school.projectservice.service.MomentService;
+import faang.school.projectservice.service.moment.MomentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

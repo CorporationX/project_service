@@ -1,14 +1,16 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.adapter.moment.MomentRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.project.ProjectRepositoryAdapter;
+import faang.school.projectservice.repository.adapter.resources.ResourceRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.team.TeamRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import jakarta.transaction.Transactional;
@@ -30,6 +32,7 @@ public class MomentService {
     private final ProjectRepositoryAdapter projectRepositoryAdapter;
     private final TeamRepositoryAdapter teamRepositoryAdapter;
     private final TeamMemberRepoAdapter teamMemberRepoAdapter;
+    private final ResourceRepositoryAdapter resourceRepositoryAdapter;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
 
@@ -54,6 +57,11 @@ public class MomentService {
 
         Moment moment = momentMapper.toEntity(momentDto);
         moment.setProjects(projects);
+
+        if (momentDto.getResourceIds() != null && !momentDto.getResourceIds().isEmpty()) {
+                 List<Resource> resources = resourceRepositoryAdapter.getAllResourcesById(momentDto.getResourceIds());
+                 moment.setResource(resources);
+        }
 
         return momentMapper.toDto(momentRepositoryAdapter.save(moment));
     }
