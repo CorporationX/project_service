@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface StageDtoMapper {
     List<StageDto> ToStageDtoList(List<Stage> stageList);
 

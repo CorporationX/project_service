@@ -158,5 +158,4 @@ public class StageServiceImpl implements StageService {
                 .filter(entry -> entry.getValue() > 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
-
 }

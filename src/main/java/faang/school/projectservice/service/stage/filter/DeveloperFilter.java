@@ -4,9 +4,9 @@ import faang.school.projectservice.model.TeamRole;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeveloperFilter implements RoleFilter{
+public class DeveloperFilter implements RoleFilter {
     @Override
     public boolean filter(TeamRole role) {
-        return role==TeamRole.DEVELOPER;
+        return role == TeamRole.DEVELOPER;
     }
 }

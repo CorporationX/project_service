@@ -15,12 +15,12 @@ import java.util.List;
 @Data
 @Builder
 public class StageDto {
-    @NotNull (message = "Id cannot be null")
-    @Min(value = 0,message = "Id must be > 0")
+    @NotNull(message = "Id cannot be null")
+    @Min(value = 0, message = "Id must be > 0")
     private Long stageId;
-    @NotBlank (message = "Stage name must not be empty")
+    @NotBlank(message = "Stage name must not be empty")
     private String stageName;
-    @NotNull (message = "There must be a project for the stage")
+    @NotNull(message = "There must be a project for the stage")
     private Project project;
     private List<StageRoles> stageRoles;
     private List<TeamMember> executors;

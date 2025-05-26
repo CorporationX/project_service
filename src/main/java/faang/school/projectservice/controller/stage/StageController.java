@@ -2,8 +2,6 @@ package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDTO;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.stage.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -52,8 +49,8 @@ public class StageController {
     }
 
     @GetMapping("/filter")
-    public List <StageDto> findAllWithFilter(@RequestBody TeamRoleTaskStatusDTO teamRoleTaskStatusDTO) {
-        return stageService.getStagesWithFilters(teamRoleTaskStatusDTO.getTeamRole(),teamRoleTaskStatusDTO.getTaskStatus());
+    public List<StageDto> findAllWithFilter(@RequestBody TeamRoleTaskStatusDTO teamRoleTaskStatusDTO) {
+        return stageService.getStagesWithFilters(teamRoleTaskStatusDTO.getTeamRole(), teamRoleTaskStatusDTO.getTaskStatus());
     }
 
 }

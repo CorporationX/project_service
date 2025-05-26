@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
 public class DesignerFilter implements RoleFilter {
     @Override
     public boolean filter(TeamRole role) {
-        return role==TeamRole.DESIGNER;
+        return role == TeamRole.DESIGNER;
     }
 }
