@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDTO;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.stage.StageService;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/stages")
+@RequestMapping("/api/v1/stages")
 @RequiredArgsConstructor
 public class StageController {
 
@@ -35,24 +36,24 @@ public class StageController {
         return stageService.findAllStages(id);
     }
 
-    @PutMapping ("/")
+    @PutMapping
     public void update(@RequestBody @Valid StageDto stageDto) {
         stageService.updateStage(stageDto);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id, @RequestBody @Valid StageDto stageDto) {
+    public void deleteStageOfProject(@PathVariable long id, @RequestBody @Valid StageDto stageDto) {
         stageService.deleteStage(id, stageDto);
     }
 
-    @PostMapping("/")
-    public void save(@RequestBody @Valid StageDto stageDto) {
+    @PostMapping
+    public void saveStage(@RequestBody @Valid StageDto stageDto) {
         stageService.save(stageDto);
     }
 
     @GetMapping("/filter")
-    public List <StageDto> findAllWithFilter(@RequestBody TeamRole teamRole, @RequestBody TaskStatus taskStatus) {
-        return stageService.getStagesWithFilters(teamRole,taskStatus);
+    public List <StageDto> findAllWithFilter(@RequestBody TeamRoleTaskStatusDTO teamRoleTaskStatusDTO) {
+        return stageService.getStagesWithFilters(teamRoleTaskStatusDTO.getTeamRole(),teamRoleTaskStatusDTO.getTaskStatus());
     }
 
 }

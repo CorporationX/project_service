@@ -8,11 +8,11 @@ import java.util.List;
 
 @Mapper
 public interface StageDtoMapper {
-    List<StageDto> stageListToStageDtoList(List<Stage> stageList);
+    List<StageDto> ToStageDtoList(List<Stage> stageList);
 
-    List<Stage> stageDtoListToStageList(List<StageDto> stageList);
+    List<Stage> ToStageList(List<StageDto> stageList);
 
-    StageDto stageToStageDTO(Stage stage);
+    StageDto ToStageDto(Stage stage);
 
-    Stage stageDtoToStage(StageDto stageDto);
+    Stage ToStage(StageDto stageDto);
 }

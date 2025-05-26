@@ -2,6 +2,7 @@ package faang.school.projectservice.stage.controller;
 
 import faang.school.projectservice.controller.stage.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDTO;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.stage.StageService;
@@ -60,21 +61,21 @@ public class StageControllerTest {
 
     @Test
     void testDeleteStage() {
-        stageController.delete(ID, stageDto);
+        stageController.deleteStageOfProject(ID, stageDto);
         verify(stageService).deleteStage(ID, stageDto);
     }
 
     @Test
     void testSaveStage() {
-        stageController.save(stageDto);
+        stageController.saveStage(stageDto);
         verify(stageService).save(stageDto);
     }
-
 
     @Test
     void testFindAllWithFilter() {
         TeamRole teamRole = TeamRole.DEVELOPER;
         TaskStatus taskStatus = TaskStatus.IN_PROGRESS;
+        TeamRoleTaskStatusDTO dto = TeamRoleTaskStatusDTO.builder().taskStatus(taskStatus).teamRole(teamRole).build();
         List<StageDto> expected = List.of(
                 stageDto,
                 StageDto.builder().stageId(ID).build()
@@ -82,11 +83,9 @@ public class StageControllerTest {
 
         when(stageService.getStagesWithFilters(teamRole, taskStatus)).thenReturn(expected);
 
-        List<StageDto> result = stageController.findAllWithFilter(teamRole, taskStatus);
+        List<StageDto> result = stageController.findAllWithFilter(dto);
 
         assertEquals(expected, result);
         verify(stageService).getStagesWithFilters(teamRole, taskStatus);
     }
-
-
 }

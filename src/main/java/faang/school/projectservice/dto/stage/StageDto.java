@@ -16,10 +16,8 @@ import java.util.List;
 @Builder
 public class StageDto {
     @NotNull (message = "Id cannot be null")
-    @NotBlank(message = "Id cannot be empty")
     @Min(value = 0,message = "Id must be > 0")
     private Long stageId;
-    @NotNull (message = "Stage must have a name")
     @NotBlank (message = "Stage name must not be empty")
     private String stageName;
     @NotNull (message = "There must be a project for the stage")
