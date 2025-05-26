@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.excepcion.DataValidationException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
