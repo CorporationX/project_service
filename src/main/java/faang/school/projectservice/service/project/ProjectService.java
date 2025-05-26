@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 
 import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
@@ -67,7 +67,7 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getProjectsByName(String name) {
-        if(name == null || name.isEmpty()) {
+        if (name == null || name.isEmpty()) {
             throw new DataValidationException("Name cannot be empty");
         }
         long currentUserId = userContext.getUserId();
@@ -80,7 +80,7 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getProjectsByStatus(ProjectStatus status) {
-        if (status == null){
+        if (status == null) {
             throw new DataValidationException("Status cannot be null");
         }
         long currentUserId = userContext.getUserId();
@@ -100,5 +100,11 @@ public class ProjectService {
     public ProjectDto getProjectById(long projectId) {
         Project project = projectRepositoryAdapter.projectFromRepository(projectRepository, projectId);
         return projectMapper.toDto(project);
+    }
+
+    public void checkProjectExists(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new IllegalArgumentException("Project does not exist");
+        }
     }
 }
