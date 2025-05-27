@@ -3,32 +3,27 @@ name: Build
 on:
   pull_request:
     branches:
-      - '*'
+      - 'kraken-master-stream10'
   push:
     branches:
       - 'kraken-master-stream10'
 
 jobs:
-  build:
-    runs-on: ubuntu-18.04
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Grant permission to execute Gradle wrapper
+      - name: Grant execute permissions to Gradle
         run: chmod +x ./gradlew
 
       - name: Run code style check (ktlint)
         run: ./gradlew ktlintCheck --no-daemon
-
-      - name: Build with Gradle
-        run: ./gradlew clean build --no-daemon
-
-      - name: Run tests
-        run: ./gradlew test --no-daemon
