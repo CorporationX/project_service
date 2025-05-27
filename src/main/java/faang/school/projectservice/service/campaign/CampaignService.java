@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
 import faang.school.projectservice.mapper.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
@@ -10,10 +11,10 @@ import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapt
 import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignService {
     private final CampaignRepoAdapter campaignRepoAdapter;
     private final ProjectRepoAdapter projectRepoAdapter;
@@ -31,21 +33,11 @@ public class CampaignService {
     public CampaignDto createCampaign(CampaignDto campaignDto, Long userId) {
         Project project = projectRepoAdapter.getProjectById(campaignDto.getProjectId());
 
-        boolean isManager = teamMemberRepoAdapter.getByUserId(userId).stream()
-                .filter(teamMember ->
-                        teamMember.getTeam().getProject().getId().equals(project.getId()))
-                .flatMap(teamMember -> teamMember.getRoles().stream())
-                .anyMatch(teamRole -> teamRole.name().equals("MANAGER"));
-
-        if (!project.getOwnerId().equals(userId) && !isManager) {
-            throw new IllegalArgumentException("User not allowed to create campaign");
-        }
-
+        validateUserProjectPermissions(userId, project);
         Campaign campaign = campaignMapper.toEntity(campaignDto);
         campaign.setProject(project);
         campaign.setStatus(campaignDto.getStatus() != null ?
-                campaignDto.getStatus() : campaign.getStatus());
-        campaign.setCreatedAt(LocalDateTime.now());
+                campaignDto.getStatus() : CampaignStatus.ACTIVE);
         campaign.setCreatedBy(userId);
         campaign.setAmountRaised(campaignDto.getAmountRaised() != null ?
                 campaignDto.getAmountRaised() : BigDecimal.ZERO);
@@ -53,8 +45,26 @@ public class CampaignService {
         return campaignMapper.toDto(campaignRepoAdapter.save(campaign));
     }
 
+    private void validateUserProjectPermissions(Long userId, Project project) {
+        boolean isManager = teamMemberRepoAdapter.getByUserId(userId).stream()
+                .filter(teamMember ->
+                        teamMember.getTeam().getProject().getId().equals(project.getId()))
+                .flatMap(teamMember -> teamMember.getRoles().stream())
+                .anyMatch(teamRole -> teamRole.name().equals("MANAGER"));
+
+        if (!project.getOwnerId().equals(userId) && !isManager) {
+            String errorMessage =
+                    String.format("User %d is not allowed to perform this operation on project %d." +
+                            " Reason: Not project owner and not a manager.", userId, project.getId());
+            log.warn(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
     public CampaignDto updateCampaign(Long campaignId, CampaignDto campaignDto, Long userId) {
         Campaign existing = campaignRepoAdapter.getCampaignById(campaignId);
+
+        validateUserProjectPermissions(userId, existing.getProject());
 
         if (!existing.getCreatedBy().equals(campaignDto.getCreatedBy())) {
             throw new IllegalArgumentException("Cannot change author");
@@ -69,7 +79,6 @@ public class CampaignService {
         Optional.ofNullable(campaignDto.getStatus())
                 .ifPresent(existing::setStatus);
 
-        existing.setUpdatedAt(LocalDateTime.now());
         existing.setUpdatedBy(userId);
 
         return campaignMapper.toDto(campaignRepoAdapter.save(existing));
@@ -84,7 +93,6 @@ public class CampaignService {
         }
 
         existing.setStatus(CampaignStatus.CANCELED);
-        existing.setUpdatedAt(LocalDateTime.now());
         existing.setUpdatedBy(userId);
 
         return campaignMapper.toDto(campaignRepoAdapter.save(existing));
@@ -96,19 +104,19 @@ public class CampaignService {
         return campaignMapper.toDto(existing);
     }
 
-    public List<CampaignDto> getCampaignDtoWithFilters(CampaignDto campaignDto) {
+    public List<CampaignDto> getCampaignDtoWithFilters(CampaignFilterDto campaignFilterDto) {
         Stream<Campaign> filteredCampaign = campaignRepoAdapter.getAll().stream();
 
         for (CampaignFilter campaignFilter : filters) {
-            if (campaignFilter.isApplicable(campaignDto)) {
-                filteredCampaign = campaignFilter.apply(filteredCampaign, campaignDto);
+            if (campaignFilter.isApplicable(campaignFilterDto)) {
+                filteredCampaign = campaignFilter.apply(filteredCampaign, campaignFilterDto);
             }
         }
 
         return filteredCampaign
                 .map(campaignMapper::toDto)
                 .sorted(Comparator.comparing(CampaignDto::getCreatedAt)
-                .reversed())
+                        .reversed())
                 .toList();
     }
 }

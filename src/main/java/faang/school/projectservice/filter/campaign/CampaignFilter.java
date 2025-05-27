@@ -1,13 +1,12 @@
 package faang.school.projectservice.filter.campaign;
 
-import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.model.Campaign;
-
-import java.util.stream.Stream;
+import org.springframework.data.jpa.domain.Specification;
 
 public interface CampaignFilter {
 
-    boolean isApplicable(CampaignDto campaignDto);
+    boolean isApplicable(CampaignFilterDto campaignFilterDto);
 
-    Stream<Campaign> apply(Stream<Campaign> campaigns, CampaignDto campaignDto);
+    Specification<Campaign> apply(CampaignFilterDto campaignFilterDto);
 }
