@@ -1,7 +1,9 @@
 package faang.school.projectservice.filter.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
+import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.model.Campaign;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
@@ -9,14 +11,13 @@ import java.util.stream.Stream;
 @Component
 public class CampaignByCreatorFilter implements CampaignFilter {
     @Override
-    public boolean isApplicable(CampaignDto campaignDto) {
-        return campaignDto.getCreatedBy() != null;
+    public boolean isApplicable(CampaignFilterDto campaignFilterDto) {
+        return campaignFilterDto.getCreatedBy() != null;
     }
 
     @Override
-    public Stream<Campaign> apply(Stream<Campaign> campaigns, CampaignDto campaignDto) {
-        Long creatorId = campaignDto.getCreatedBy();
-        return campaigns
-                .filter(campaign -> campaign.getCreatedBy().equals(creatorId));
+    public Specification<Campaign> apply(CampaignFilterDto campaignFilterDto) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("createdBy"), campaignFilterDto.getCreatedBy());
     }
 }

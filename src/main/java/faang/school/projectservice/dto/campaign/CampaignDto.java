@@ -18,7 +18,6 @@ public class CampaignDto {
     @NotNull(message = "Campaign ID is required")
     private Long id;
 
-    @NotNull(message = "Title cannot be null")
     @NotBlank(message = "Title cannot be blank")
     @Size(max = 128, message = "Title must be at most 128 characters")
     private String title;
@@ -41,7 +40,4 @@ public class CampaignDto {
     private Long createdBy;
     private LocalDateTime updatedAt;
     private Long updatedBy;
-
-    private LocalDateTime createdFrom;
-    private LocalDateTime createdTo;
 }
