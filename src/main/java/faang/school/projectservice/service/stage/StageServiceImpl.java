@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.mapper.StageDtoMapper;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.mapper.StageDtoMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TaskStatus;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,24 +33,28 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public StageDto findById(Long id) {
-        Stage stage = stageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Stage not found"));
-        return stageDtoMapper.ToStageDto(stage);
+        Stage stage = stageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Stage with id=%d not found", id)));
+        return stageDtoMapper.toStageDto(stage);
     }
 
+    @Override
     public List<StageDto> findAllStages(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException("Project not found")
+                () -> new EntityNotFoundException(String.format("Project not found with id=%d", projectId))
         );
         validateProjectOnHoldOrCancelled(project.getStatus());
-        return stageDtoMapper.ToStageDtoList(project.getStages());
+        return stageDtoMapper.toStageDtoList(project.getStages());
     }
 
+    @Override
     @Transactional
     public void updateStage(StageDto stageDto) {
         ProjectStatus projectStatus = stageDto.getProject().getStatus();
         validateProjectOnHoldOrCancelled(projectStatus);
         Stage stage = stageRepository.findById(stageDto.getStageId())
-                .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
+                .orElseThrow(() ->
+                        new EntityNotFoundException(String.format("Stage with id=%d not found", stageDto.getStageId())));
         stage.setStageName(stageDto.getStageName());
 
         Map<TeamRole, Integer> neededCounts = getTeamRoleIntegerMap(stageDto, stage);
@@ -65,20 +68,23 @@ public class StageServiceImpl implements StageService {
         stageRepository.save(stage);
     }
 
+    @Override
     @Transactional
     public void deleteStage(Long id, StageDto stageDto) {
-        Stage stage = stageRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Stage not found"));
+        Stage stage = stageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Stage with id=%d not found", id)));
         if (stageDto == null) {
             stage.getTasks().clear();
         } else {
             validateProjectOnHoldOrCancelled(stageDto.getProject().getStatus());
             stageDto.getTasks().addAll(stage.getTasks());
-            stageRepository.save(stageDtoMapper.ToStage(stageDto));
+            stageRepository.save(stageDtoMapper.toStage(stageDto));
             stageRepository.delete(stage);
         }
     }
 
-    public List <StageDto> getStagesWithFilters(TeamRole teamRole, TaskStatus taskStatus) {
+    @Override
+    public List<StageDto> getStagesWithFilters(TeamRole teamRole, TaskStatus taskStatus) {
         List<Stage> resultList = stageRepository.findAll().stream()
                 .filter(stage -> stage.getTasks().stream()
                         .anyMatch(task -> task.getStatus() == taskStatus))
@@ -86,14 +92,15 @@ public class StageServiceImpl implements StageService {
                         .anyMatch(stageRole -> stageRole.getTeamRole() == teamRole))
                 .toList();
         System.out.println("size " + resultList.size());
-        return stageDtoMapper.ToStageDtoList(resultList);
+        return stageDtoMapper.toStageDtoList(resultList);
     }
 
+    @Override
     @Transactional
     public void save(StageDto stageDto) {
         ProjectStatus projectStatus = stageDto.getProject().getStatus();
         validateProjectOnHoldOrCancelled(projectStatus);
-        stageRepository.save(stageDtoMapper.ToStage(stageDto));
+        stageRepository.save(stageDtoMapper.toStage(stageDto));
 
     }
 
@@ -144,7 +151,7 @@ public class StageServiceImpl implements StageService {
         }
     }
 
-    private  Map<TeamRole, Integer> getTeamRoleIntegerMap(StageDto stageDto, Stage stage) {
+    private Map<TeamRole, Integer> getTeamRoleIntegerMap(StageDto stageDto, Stage stage) {
         Map<TeamRole, Integer> stageRoleCounts = stage.getStageRoles().stream().
                 collect(Collectors.toMap(StageRoles::getTeamRole, StageRoles::getCount));
         Map<TeamRole, Integer> stageDtoCount = stageDto.getStageRoles().stream().

@@ -1,7 +1,7 @@
 package faang.school.projectservice.stage.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.mapper.StageDtoMapper;
+import faang.school.projectservice.dto.mapper.StageDtoMapper;
 import faang.school.projectservice.dto.stage.mapper.StageDtoMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -81,7 +81,7 @@ public class StageServiceTest {
     @Test
     void testFindById_WhenStageExists() {
         when(stageRepository.findById(1L)).thenReturn(Optional.ofNullable(stage));
-        StageDto expectedDto = stageDtoMapper.ToStageDto(stage);
+        StageDto expectedDto = stageDtoMapper.toStageDto(stage);
         StageDto actualDto = stageService.findById(1L);
         Assertions.assertEquals(expectedDto, actualDto);
     }
@@ -94,7 +94,7 @@ public class StageServiceTest {
 
     @Test
     void testFindAllStages_WhenProjectExists() {
-        List<StageDto> expected = stageDtoMapper.ToStageDtoList(stages);
+        List<StageDto> expected = stageDtoMapper.toStageDtoList(stages);
         Project project = Project.builder().id(1L).status(ProjectStatus.IN_PROGRESS).stages(stages).build();
         when(projectRepository.findById(1L)).thenReturn(Optional.ofNullable(project));
         Assertions.assertEquals(expected, stageService.findAllStages(1L));
@@ -271,7 +271,7 @@ public class StageServiceTest {
 
         when(stageRepository.findAll()).thenReturn(List.of(stage1, stage2));
 
-        System.out.println(stageDtoMapper.ToStageDto(stage1));
+        System.out.println(stageDtoMapper.toStageDto(stage1));
 
         List<StageDto> result = stageService.getStagesWithFilters(TeamRole.DESIGNER, TaskStatus.IN_PROGRESS);
 

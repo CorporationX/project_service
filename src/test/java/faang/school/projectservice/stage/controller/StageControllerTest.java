@@ -2,7 +2,7 @@ package faang.school.projectservice.stage.controller;
 
 import faang.school.projectservice.controller.stage.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDTO;
+import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDto;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.stage.StageService;
@@ -75,7 +75,7 @@ public class StageControllerTest {
     void testFindAllWithFilter() {
         TeamRole teamRole = TeamRole.DEVELOPER;
         TaskStatus taskStatus = TaskStatus.IN_PROGRESS;
-        TeamRoleTaskStatusDTO dto = TeamRoleTaskStatusDTO.builder().taskStatus(taskStatus).teamRole(teamRole).build();
+        TeamRoleTaskStatusDto dto = new TeamRoleTaskStatusDto(teamRole, taskStatus);
         List<StageDto> expected = List.of(
                 stageDto,
                 StageDto.builder().stageId(ID).build()

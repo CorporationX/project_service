@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDTO;
+import faang.school.projectservice.dto.stage.TeamRoleTaskStatusDto;
 import faang.school.projectservice.service.stage.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class StageController {
     }
 
     @GetMapping("/filter")
-    public List<StageDto> findAllWithFilter(@RequestBody TeamRoleTaskStatusDTO teamRoleTaskStatusDTO) {
+    public List<StageDto> findAllWithFilter(@RequestBody TeamRoleTaskStatusDto teamRoleTaskStatusDTO) {
         return stageService.getStagesWithFilters(teamRoleTaskStatusDTO.getTeamRole(), teamRoleTaskStatusDTO.getTaskStatus());
     }
 

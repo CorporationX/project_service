@@ -7,15 +7,15 @@ import faang.school.projectservice.model.TeamRole;
 import java.util.List;
 
 public interface StageService {
-    public StageDto findById(Long id);
+     StageDto findById(Long id);
 
-    public List<StageDto> findAllStages(Long projectId);
+     List<StageDto> findAllStages(Long projectId);
 
-    public void updateStage(StageDto stageDto);
+     void updateStage(StageDto stageDto);
 
-    public void deleteStage(Long id, StageDto stageDto);
+     void deleteStage(Long id, StageDto stageDto);
 
-    public List<StageDto> getStagesWithFilters(TeamRole teamRole, TaskStatus taskStatus);
+     List<StageDto> getStagesWithFilters(TeamRole teamRole, TaskStatus taskStatus);
 
-    public void save(StageDto stageDto);
+     void save(StageDto stageDto);
 }

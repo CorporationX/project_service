@@ -1,12 +1,12 @@
-package faang.school.projectservice.service.stage.filter;
+package faang.school.projectservice.filter.stage;
 
 import faang.school.projectservice.model.TeamRole;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnalystFilter implements RoleFilter {
+public class DeveloperFilter implements RoleFilter {
     @Override
     public boolean filter(TeamRole role) {
-        return role == TeamRole.ANALYST;
+        return role == TeamRole.DEVELOPER;
     }
 }

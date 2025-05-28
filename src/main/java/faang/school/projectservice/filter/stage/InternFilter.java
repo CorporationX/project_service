@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.stage.filter;
+package faang.school.projectservice.filter.stage;
 
 import faang.school.projectservice.model.TeamRole;
 import org.springframework.stereotype.Component;
