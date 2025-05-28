@@ -100,17 +100,13 @@ public class VacancyServiceImpl implements VacancyService {
         Stream<Vacancy> vacancyStream = vacancyRepository.findAll().stream()
                 .filter(vacancy -> vacancy.getProject().getId().equals(projectId));
 
-        if (filterList != null) {
-            for (VacancyFilter filter : filterList) {
-                if (filter.isApplicable(positionFilter, nameFilter)) {
-                    vacancyStream = filter.apply(vacancyStream, positionFilter, nameFilter);
-                }
+        for (VacancyFilter filter : filterList) {
+            if (filter.isApplicable(positionFilter, nameFilter)) {
+                vacancyStream = filter.apply(vacancyStream, positionFilter, nameFilter);
             }
         }
 
-        return vacancyStream
-                .map(vacancyMapper::toDto)
-                .toList();
+        return vacancyStream.map(vacancyMapper::toDto).toList();
     }
 
     private void checkOwnerOrManager(long projectId) {
