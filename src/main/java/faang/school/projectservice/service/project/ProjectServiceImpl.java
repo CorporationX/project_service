@@ -1,7 +1,10 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.project.ProjectForUpdateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectForCreationDto;
+import faang.school.projectservice.dto.project.ProjectOutputDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -11,41 +14,41 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-@Data
+@RequiredArgsConstructor
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final UserContext userContext;
 
     @Override
-    public ProjectDto create(ProjectDto projectDto) {
+    public ProjectOutputDto create(ProjectForCreationDto projectDto) {
         validateTitleUniqueness(projectDto);
-        ProjectDto completedDto = setDefaultCreationFields(projectDto);
+        ProjectForCreationDto completedDto = setDefaultCreationFields(projectDto);
         Project project = projectMapper.toProjectEntity(completedDto);
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
     @Override
-    public ProjectDto update(ProjectDto changingProjectDto) {
-        Project existingProject = projectRepository.findById(changingProjectDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("No project with this id has been found"));
+    public ProjectOutputDto update(ProjectForUpdateDto changingProjectDto) {
+        Long projectId = changingProjectDto.getId();
+        Project existingProject = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException
+                        ("No project with id %d has been found".formatted(projectId)));
         Long ownerId = existingProject.getOwnerId();
-        if (!Objects.equals(ownerId, changingProjectDto.getOwnerId())) {
+        long userId = userContext.getUserId();
+        if (ownerId != userId) {
             throw new DataValidationException("Projects can be changed only be theirs owners");
-        }
-        if (null != changingProjectDto.getNewOwnerId()){
-            changingProjectDto.setOwnerId(changingProjectDto.getNewOwnerId());
-            changingProjectDto.setNewOwnerId(null);
         }
         projectMapper.update(changingProjectDto, existingProject);
         existingProject.setUpdatedAt(LocalDateTime.now());
@@ -54,12 +57,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto dto) {
+    public List<ProjectOutputDto> getFilteredProjects(ProjectFilterDto dto) {
         Stream<Project> projects = projectRepository.findAll().stream();
         projects = projects
                 .filter(project -> {
-                    if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
-                        return isMemberOfPrivateProject(userId, project);
+                    if (project.getVisibility() == ProjectVisibility.PRIVATE) {
+                        return isMemberOfPrivateProject(project);
                     }
                     return true;
                 });
@@ -68,50 +71,46 @@ public class ProjectServiceImpl implements ProjectService {
                 projects = filter.apply(projects, dto);
             }
         }
-
-        return projects
-                .map(projectMapper::toProjectDto)
-                .toList();
+        return projects.map(projectMapper::toProjectDto).toList();
     }
 
     @Override
-    public ProjectDto getProjectById(long userId, long projectId) {
+    public ProjectOutputDto getProjectById(long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("No project with this id has been found"));
         if (project.getVisibility() == ProjectVisibility.PRIVATE) {
-            if (!isMemberOfPrivateProject(userId, project)) {
+            if (!isMemberOfPrivateProject(project)) {
                 throw new DataValidationException("All privet projects are visible only for members");
             }
         }
         return projectMapper.toProjectDto(project);
     }
 
-    private boolean isMemberOfPrivateProject(long userId, Project project) {
-        return (project.getOwnerId() == userId
-                || Stream.ofNullable(project.getTeams()).flatMap(List::stream)
+    private boolean isMemberOfPrivateProject(Project project) {
+        long userId = userContext.getUserId();
+        boolean isTeamMember = Stream.ofNullable(project.getTeams()).flatMap(List::stream)
                 .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getId() == userId));
+                .anyMatch(teamMember -> teamMember.getId() == userId);
+        return (project.getOwnerId() == userId || isTeamMember);
     }
 
-    private void validateTitleUniqueness(ProjectDto projectDto) {
+    private void validateTitleUniqueness(ProjectForCreationDto projectDto) {
+        long projectOwnerId = userContext.getUserId();
         String projectName = projectDto.getName();
-        long projectOwnerId = projectDto.getOwnerId();
-        ProjectFilterDto dtoForValidation = ProjectFilterDto.builder()
-                .ownerId(projectOwnerId)
-                .name(projectName)
-                .build();
-        List<ProjectDto> sameNamedProjects = getFilteredProjects(projectOwnerId, dtoForValidation);
-        if (!sameNamedProjects.isEmpty()) {
-            if (sameNamedProjects.stream()
-                    .noneMatch(sameNamedProject ->
-                            sameNamedProject.getStatus().equals(ProjectStatus.CANCELLED))) {
-                throw new DataValidationException
-                        (String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
+        Optional<List<Project>> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
+        if (sameNamedProjects.isPresent()) {
+            if (sameNamedProjects.get().stream()
+                    .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
+                throw new DataValidationException(
+                        String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
             }
         }
     }
 
-    private ProjectDto setDefaultCreationFields(ProjectDto dto){
+    private ProjectForCreationDto setDefaultCreationFields(ProjectForCreationDto dto) {
+        if (dto.getOwnerId() == null) {
+            dto.setOwnerId(userContext.getUserId());
+        }
         if (dto.getVisibility() == null) {
             dto.setVisibility(ProjectVisibility.PUBLIC);
         }

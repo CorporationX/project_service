@@ -1,21 +1,22 @@
-package faang.school.projectservice.filter.projecfilters;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-public class TestProjectStatusFilter implements ProjectFilter {
+@Component
+public class ProjectOwnerIdFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto dto) {
-        return dto.getStatus() != null;
+        return dto.getOwnerId() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto dto) {
-        return projects.filter(project ->
-                project.getStatus() == ProjectStatus.CREATED);
+        return projects.filter(project -> project.getOwnerId().equals(dto.getOwnerId()));
     }
+
 }

@@ -1,22 +1,21 @@
-package faang.school.projectservice.filter.projecfilters;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
-import org.springframework.stereotype.Component;
+import faang.school.projectservice.model.ProjectStatus;
 
 import java.util.stream.Stream;
 
-@Component
-public class ProjectDescriptionFilter implements ProjectFilter {
+public class TestProjectStatusFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto dto) {
-        return dto.getDescriptionPattern() != null;
+        return dto.getStatus() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto dto) {
-        return projects
-                .filter(project -> project.getDescription().toLowerCase().contains(dto.getDescriptionPattern()));
+        return projects.filter(project ->
+                project.getStatus() == ProjectStatus.CREATED);
     }
 }

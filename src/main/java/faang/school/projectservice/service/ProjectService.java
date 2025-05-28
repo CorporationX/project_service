@@ -1,17 +1,19 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectForUpdateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectForCreationDto;
+import faang.school.projectservice.dto.project.ProjectOutputDto;
 
 import java.util.List;
 
 public interface ProjectService {
 
-    ProjectDto create(ProjectDto projectDto);
+    ProjectOutputDto create(ProjectForCreationDto projectDto);
 
-    ProjectDto update(ProjectDto projectDto);
+    ProjectOutputDto update(ProjectForUpdateDto projectDto);
 
-    List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto dto);
+    List<ProjectOutputDto> getFilteredProjects(ProjectFilterDto dto);
 
-    ProjectDto getProjectById(long userId, long projectId);
+    ProjectOutputDto getProjectById(long projectId);
 }

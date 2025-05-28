@@ -1,62 +1,54 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectForUpdateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.service.project.ProjectServiceImpl;
-import lombok.Data;
-import org.springframework.stereotype.Controller;
+import faang.school.projectservice.dto.project.ProjectForCreationDto;
+import faang.school.projectservice.dto.project.ProjectOutputDto;
+import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Data
-@Controller
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
 
-    private final ProjectServiceImpl projectService;
+    private final ProjectService projectService;
 
-    public ProjectDto create(long userId, ProjectDto projectDto) {
-        ProjectDto validatedDto = validateCreation(userId, projectDto);
-        return projectService.create(validatedDto);
+    @PostMapping
+    public ProjectOutputDto create(@Valid @RequestBody ProjectForCreationDto projectDto) {
+        return projectService.create(projectDto);
     }
 
-    public ProjectDto update(ProjectDto projectDto) {
-        validateUpdate(projectDto);
+    @PutMapping
+    public ProjectOutputDto update(@Valid @RequestBody ProjectForUpdateDto projectDto) {
         return projectService.update(projectDto);
     }
 
-    public List<ProjectDto> getFilteredProjects(long userId, ProjectFilterDto projectDto) {
-        return projectService.getFilteredProjects(userId, projectDto);
+    @GetMapping("/filtered")
+    public List<ProjectOutputDto> getFilteredProjects(@Valid @RequestBody ProjectFilterDto projectDto) {
+        return projectService.getFilteredProjects(projectDto);
     }
 
-    public List<ProjectDto> getAllProjects(long userId) {
+    @GetMapping("/all")
+    public List<ProjectOutputDto> getAllProjects() {
         ProjectFilterDto emptyDto = ProjectFilterDto.builder().build();
-        return projectService.getFilteredProjects(userId, emptyDto);
+        return projectService.getFilteredProjects(emptyDto);
     }
 
-    public ProjectDto getProjectById(long userId, long projectId) {
-        return projectService.getProjectById(userId, projectId);
-    }
-
-    private ProjectDto validateCreation(long userId, ProjectDto projectDto) {
-        if (projectDto.getName() == null
-                || projectDto.getDescription() == null
-                || projectDto.getName().isBlank()
-                || projectDto.getDescription().isBlank()) {
-            throw new DataValidationException("Every project should have a name and a description");
-        }
-        if (projectDto.getOwnerId() == null) {
-            projectDto.setOwnerId(userId);
-        }
-        return projectDto;
-    }
-
-    private void validateUpdate(ProjectDto projectDto) {
-        if (projectDto.getId() == null) {
-            throw new DataValidationException("Project for updating should be found by ID. Fill in this field.");
-        }
-        if (projectDto.getOwnerId() == null) {
-            throw new DataValidationException("Project for updating should have ownerID. Fill in this field.");
-        }
+    @GetMapping("/{projectId}")
+    public ProjectOutputDto getProjectById(@PathVariable long projectId) {
+        return projectService.getProjectById(projectId);
     }
 }

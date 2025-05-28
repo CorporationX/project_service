@@ -5,14 +5,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
-@Builder
-public class ProjectDto {
-    private Long id;
-    private String name;
-    private String description;
-    private Long ownerId;
-    private ProjectStatus status;
-    private ProjectVisibility visibility;
-    private Long newOwnerId;
+public abstract class ProjectDto {
+
 }

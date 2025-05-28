@@ -1,13 +1,14 @@
-package faang.school.projectservice.filter.projecfilters;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
+import org.springframework.stereotype.Component;
+
 import java.util.stream.Stream;
 
-public class TestProjectVisibilityFilter implements ProjectFilter {
-
+@Component
+public class ProjectVisibilityFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto dto) {
         return dto.getVisibility() != null;
@@ -15,7 +16,6 @@ public class TestProjectVisibilityFilter implements ProjectFilter {
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto dto) {
-        return projects.filter(project ->
-                project.getVisibility() == ProjectVisibility.PRIVATE);
+        return projects.filter(project -> project.getVisibility().equals(dto.getVisibility()));
     }
 }
