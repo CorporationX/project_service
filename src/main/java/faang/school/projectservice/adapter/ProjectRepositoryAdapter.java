@@ -7,8 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProjectRepositoryAdapter {
-    public Project projectFromRepository (ProjectRepository repository, long projectId) {
-        return repository.findById(projectId)
+
+    private ProjectRepository projectRepository;
+
+    public Project getProjectById ( long projectId) {
+        return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project with id " + projectId + " not found"));
     }
 

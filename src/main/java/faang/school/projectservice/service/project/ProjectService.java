@@ -46,7 +46,7 @@ public class ProjectService {
     public ProjectDto updateProject(long userId, ProjectDto projectDto) {
 
         projectValidator.validate(projectDto);
-        Project project = projectRepositoryAdapter.projectFromRepository(projectRepository, projectDto.getId());
+        Project project = projectRepositoryAdapter.getProjectById(projectDto.getId());
         if (!Objects.equals(projectDto.getOwnerId(), userId)) {
             throw new DataValidationException("This project does not belong to this owner");
         }
@@ -98,7 +98,7 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(long projectId) {
-        Project project = projectRepositoryAdapter.projectFromRepository(projectRepository, projectId);
+        Project project = projectRepositoryAdapter.getProjectById(projectId);
         return projectMapper.toDto(project);
     }
 
