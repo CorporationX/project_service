@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <module name="Checker">
-    <module name="SuppressionXpathFilter">
-        <property name="file" value="config/checkstyle/suppress-annotations.xml"/>
-    </module>
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="${org.checkstyle.google.severity}" default="error"/>
     <property name="fileExtensions" value="java, properties, xml"/>
@@ -297,7 +294,7 @@
             <property name="target"
                       value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
         </module>
-        <!--<module name="JavadocMethod">
+        <module name="JavadocMethod">
             <property name="accessModifiers" value="public"/>
             <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
@@ -325,7 +322,7 @@
                       value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF,
                       RECORD_DEF, ANNOTATION_DEF"/>
             <property name="excludeScope" value="nothing"/>
-        </module>-->
+        </module>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-z0-9]*[a-zA-Z0-9]*[_]*[a-zA-Z]+[a-z0-9]*[a-zA-Z0-9]*$"/>
             <message key="name.invalidPattern"
