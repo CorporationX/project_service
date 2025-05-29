@@ -26,7 +26,7 @@ public class MomentController {
 
     @Operation(summary = "create new moment",
             description = "Receive MomentDto object, save Moment entity after mapping in DB," +
-                    " and return saved entity mapped to dto.")
+                    " and return saved entity mapped to DTO.")
     @PostMapping
     public MomentDto createMoment(@Valid @RequestBody MomentDto momentDto) {
         return momentService.createMoment(momentDto);
