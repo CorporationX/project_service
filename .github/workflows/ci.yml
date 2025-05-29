@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Run Checkstyle
-        run: ./gradlew checkstyleMain --no-daemon
+        run: ./gradlew checkstyle --no-daemon
 
       - name: Upload Checkstyle report
         if: always()
