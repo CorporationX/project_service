@@ -19,6 +19,8 @@ checkstyle {
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 
+
+
 dependencies {
     /**
      * Spring boot starters
