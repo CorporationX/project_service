@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.mapper.StageDtoMapper;
+import faang.school.projectservice.mapper.StageDtoMapper;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;

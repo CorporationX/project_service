@@ -1,8 +1,7 @@
 package faang.school.projectservice.stage.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.mapper.StageDtoMapper;
-import faang.school.projectservice.dto.stage.mapper.StageDtoMapperImpl;
+import faang.school.projectservice.mapper.StageDtoMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -47,7 +46,7 @@ public class StageServiceTest {
     @Mock
     StageRepository stageRepository;
     @Spy
-    private StageDtoMapper stageDtoMapper = new StageDtoMapperImpl();
+    private StageDtoMapper stageDtoMapper = new faang.school.projectservice.mapper.StageDtoMapperImpl();
     @Mock
     StageInvitationRepository stageInvitationRepository;
     @InjectMocks
