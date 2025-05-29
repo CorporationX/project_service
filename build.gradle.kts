@@ -14,6 +14,11 @@ repositories {
     mavenCentral()
 }
 
+checkstyle {
+    toolVersion = "10.3.1"
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+
 dependencies {
     /**
      * Spring boot starters
