@@ -16,4 +16,5 @@ public class ProjectOutputDto {
     private Long ownerId;
     private ProjectStatus status;
     private ProjectVisibility visibility;
+    private String coverImageId;
 }

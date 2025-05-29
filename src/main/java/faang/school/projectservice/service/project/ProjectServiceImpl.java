@@ -11,23 +11,30 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.service.ResourceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
+    private final ResourceService resourceService;
     private final ProjectMapper projectMapper;
     private final UserContext userContext;
 
@@ -42,9 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectOutputDto update(ProjectForUpdateDto changingProjectDto) {
         Long projectId = changingProjectDto.getId();
-        Project existingProject = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException
-                        ("No project with id %d has been found".formatted(projectId)));
+        Project existingProject = findProjectById(projectId);
         Long ownerId = existingProject.getOwnerId();
         long userId = userContext.getUserId();
         if (ownerId != userId) {
@@ -76,14 +81,50 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectOutputDto getProjectById(long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("No project with this id has been found"));
+        Project project = findProjectById(projectId);
         if (project.getVisibility() == ProjectVisibility.PRIVATE) {
             if (!isMemberOfPrivateProject(project)) {
                 throw new DataValidationException("All privet projects are visible only for members");
             }
         }
         return projectMapper.toProjectDto(project);
+    }
+
+    @Override
+    public ProjectOutputDto uploadCoverImage(Long projectId, MultipartFile file) {
+        Resource resource = resourceService.uploadResource(file, projectId);
+        Project project = resource.getProject();
+        project.setCoverImageId(resource.getId().toString());
+        return projectMapper.toProjectDto(projectRepository.save(project));
+    }
+
+    @Override
+    public ProjectOutputDto deleteCoverImage(Long projectId) {
+        Project project = findProjectById(projectId);
+        if (project.getCoverImageId() == null) {
+            throw new IllegalArgumentException(String.format("There are no cover image for project with id %d", project));
+        }
+        resourceService.deleteResource(Long.parseLong(project.getCoverImageId()));
+        project.setCoverImageId(null);
+        return projectMapper.toProjectDto(projectRepository.save(project));
+    }
+
+    @Override
+    public byte[] getCoverImage(Long projectId) {
+        byte[] bytes;
+        Project project = findProjectById(projectId);
+        try {
+            bytes = resourceService.downloadResource(Long.parseLong(project.getCoverImageId())).readAllBytes();
+        } catch (IOException e) {
+            log.error("IOException was thrown while downloading cover image", e);
+            throw new RuntimeException("Error while downloading cover image");
+        }
+        return bytes;
+    }
+
+    private Project findProjectById(long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Project with id %d was not found".formatted(projectId)));
     }
 
     private boolean isMemberOfPrivateProject(Project project) {
