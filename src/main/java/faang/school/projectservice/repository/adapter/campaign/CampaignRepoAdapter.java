@@ -6,6 +6,9 @@ import faang.school.projectservice.repository.CampaignRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,5 +35,9 @@ public class CampaignRepoAdapter {
 
     public List<Campaign> getAll() {
         return campaignRepository.findAll();
+    }
+
+    public Page<Campaign> getAllPages(Specification<Campaign> spec, Pageable pageable) {
+        return campaignRepository.findAll(spec, pageable);
     }
 }

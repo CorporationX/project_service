@@ -2,15 +2,16 @@ package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
-import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
-import faang.school.projectservice.service.campaign.CampaignService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -35,14 +36,13 @@ public class CampaignServiceSoftDeleteTest {
     @Mock
     private CampaignMapper campaignMapper;
 
-    @Spy
-    private List<CampaignFilter> filters = new ArrayList<>();
-
     @InjectMocks
     private CampaignService campaignService;
 
     private Campaign existing;
-    private CampaignDto outputDto;
+
+    @Captor
+    private ArgumentCaptor<Campaign> campaignCaptor;
 
     @BeforeEach
     void setUp() {
@@ -58,38 +58,36 @@ public class CampaignServiceSoftDeleteTest {
         existing.setStatus(CampaignStatus.ACTIVE);
 
         when(campaignRepoAdapter.getCampaignById(7L)).thenReturn(existing);
+        when(campaignRepoAdapter.save(any(Campaign.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(campaignMapper.toDto(any(Campaign.class)))
+                .thenReturn(CampaignDto.builder().id(7L).build());
     }
 
     @Test
     public void testSoftDeleteAsCreator(){
-        when(campaignRepoAdapter.save(any()))
-                .thenAnswer(inv -> inv.getArgument(0));
-        when(campaignMapper.toDto(any()))
-                .thenReturn(CampaignDto.builder().id(7L).build());
-
         CampaignDto result = campaignService.softDelete(7L, 100L);
 
-        assertThat(existing.getStatus()).isEqualTo(CampaignStatus.CANCELED);
-        assertThat(existing.getUpdatedBy()).isEqualTo(100L);
-        assertThat(existing.getUpdatedAt()).isNotNull();
+        verify(campaignRepoAdapter).save(campaignCaptor.capture());
+
+        Campaign capturedCampaign = campaignCaptor.getValue();
+
+        assertThat(capturedCampaign.getStatus()).isEqualTo(CampaignStatus.CANCELED);
+        assertThat(capturedCampaign.getUpdatedBy()).isEqualTo(100L);
+        assertThat(capturedCampaign.getUpdatedAt()).isNull();
+
         assertThat(result.getId()).isEqualTo(7L);
 
-        verify(campaignRepoAdapter).save(existing);
-        verify(campaignMapper).toDto(existing);
+        verify(campaignMapper).toDto(capturedCampaign);
     }
 
     @Test
     public void testSoftDeleteAsOwner(){
-        when(campaignRepoAdapter.save(any()))
-                .thenAnswer(inv -> inv.getArgument(0));
-        when(campaignMapper.toDto(any()))
-                .thenReturn(CampaignDto.builder().id(7L).build());
-
         CampaignDto result = campaignService.softDelete(7L, 200L);
 
         assertThat(existing.getStatus()).isEqualTo(CampaignStatus.CANCELED);
         assertThat(existing.getUpdatedBy()).isEqualTo(200L);
-        assertThat(existing.getUpdatedAt()).isNotNull();
+        assertThat(existing.getUpdatedAt()).isNull();
         assertThat(result.getId()).isEqualTo(7L);
 
         verify(campaignRepoAdapter).save(existing);

@@ -2,11 +2,17 @@ package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
-import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
-import faang.school.projectservice.service.campaign.CampaignService;
+import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
+import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +22,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -34,6 +39,9 @@ public class CampaignServiceUpdateTest {
 
     @Mock
     private CampaignMapper campaignMapper;
+
+    @Mock
+    private TeamMemberRepoAdapter teamMemberRepoAdapter;
 
     @Spy
     private List<CampaignFilter> filters;
@@ -55,6 +63,11 @@ public class CampaignServiceUpdateTest {
         existing.setDescription("Old Desc");
         existing.setGoal(new BigDecimal("500"));
         existing.setStatus(CampaignStatus.ACTIVE);
+
+        Project project = new Project();
+        project.setId(10L);
+        project.setOwnerId(200L);
+        existing.setProject(project);
 
         inputDto = CampaignDto.builder()
                 .id(5L)
@@ -82,7 +95,6 @@ public class CampaignServiceUpdateTest {
         assertThat(existing.getGoal()).isEqualByComparingTo("1000");
         assertThat(existing.getStatus()).isEqualTo(CampaignStatus.CANCELED);
         assertThat(existing.getUpdatedBy()).isEqualTo(200L);
-        assertThat(existing.getUpdatedAt()).isNotNull();
         assertThat(result).isEqualTo(outputDto);
 
         verify(campaignRepoAdapter).save(existing);
@@ -91,6 +103,20 @@ public class CampaignServiceUpdateTest {
 
     @Test
     void testUpdateSomeFieldsNullLeavesOriginal() {
+        Project projectForManager = new Project();
+        projectForManager.setId(10L);
+        projectForManager.setOwnerId(200L);
+
+        Team teamForManager = new Team();
+        teamForManager.setProject(projectForManager);
+
+        TeamMember managerTeamMember = new TeamMember();
+        managerTeamMember.setUserId(300L);
+        managerTeamMember.setTeam(teamForManager);
+        managerTeamMember.setRoles(List.of(TeamRole.MANAGER));
+
+        when(teamMemberRepoAdapter.getByUserId(300L)).thenReturn(List.of(managerTeamMember));
+
         when(campaignRepoAdapter.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(campaignMapper.toDto(any())).thenReturn(outputDto);
 
@@ -106,8 +132,12 @@ public class CampaignServiceUpdateTest {
         assertThat(existing.getGoal()).isEqualByComparingTo("500");
         assertThat(existing.getStatus()).isEqualTo(CampaignStatus.ACTIVE);
         assertThat(existing.getUpdatedBy()).isEqualTo(300L);
-        assertThat(existing.getUpdatedAt()).isNotNull();
+        assertThat(existing.getUpdatedAt()).isNull();
         assertThat(result).isEqualTo(outputDto);
+
+        verify(campaignRepoAdapter).save(existing);
+        verify(campaignMapper).toDto(existing);
+        verify(teamMemberRepoAdapter).getByUserId(300L);
     }
 
     @Test

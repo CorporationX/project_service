@@ -1,8 +1,7 @@
 package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
-import faang.school.projectservice.filter.campaign.CampaignFilter;
-import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -11,7 +10,6 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
 import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
-import faang.school.projectservice.service.campaign.CampaignService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,6 +132,7 @@ public class CampaignServiceCreateTest {
         assertThatThrownBy(() ->
                 campaignService.createCampaign(inputDto, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("User not allowed to create campaign");
+                .hasMessage("User 42 is not allowed to perform this operation on project 10. " +
+                        "Reason: Not project owner and not a manager.");
     }
 }
