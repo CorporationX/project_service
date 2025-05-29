@@ -1,8 +1,7 @@
 package faang.school.projectservice.stage.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.mapper.StageDtoMapper;
-import faang.school.projectservice.dto.stage.mapper.StageDtoMapperImpl;
+import faang.school.projectservice.mapper.StageDtoMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -16,6 +15,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.stage.StageServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class StageServiceTest {
     @Mock
     StageRepository stageRepository;
     @Spy
-    private StageDtoMapper stageDtoMapper = new StageDtoMapperImpl();
+    private StageDtoMapper stageDtoMapper = new faang.school.projectservice.mapper.StageDtoMapperImpl();
     @Mock
     StageInvitationRepository stageInvitationRepository;
     @InjectMocks
@@ -89,7 +89,7 @@ public class StageServiceTest {
     @Test
     void testFindById_WhenStageDoesNotExist() {
         when(stageRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.findById(1L));
+        assertThrows(EntityNotFoundException.class, () -> stageService.findById(1L));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class StageServiceTest {
     @Test
     void testFindAllStages_WhenProjectDoesNotExist() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.findAllStages(1L));
+        assertThrows(EntityNotFoundException.class, () -> stageService.findAllStages(1L));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class StageServiceTest {
     void testUpdateStage_WhenStageNotFound_ThrowsException() {
         StageDto inputDto = StageDto.builder().stageId(999L).project(project).build();
         when(stageRepository.findById(inputDto.getStageId())).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.updateStage(inputDto));
+        assertThrows(EntityNotFoundException.class, () -> stageService.updateStage(inputDto));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class StageServiceTest {
     @Test
     void testDeleteStage_WhenNoStageFound_ThrowsException() {
         when(stageRepository.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NoSuchElementException.class, () -> stageService.findById(1L));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> stageService.findById(1L));
     }
 
     @Test

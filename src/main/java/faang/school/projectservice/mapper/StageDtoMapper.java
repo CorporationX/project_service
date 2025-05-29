@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.mapper;
+package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.model.stage.Stage;
