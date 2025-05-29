@@ -29,6 +29,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain --no-daemon
+
+      - name: Upload Checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-report
+          path: build/reports/checkstyle/
+
       - name: Build
         run: ./gradlew build -x test --no-daemon
 
