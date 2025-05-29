@@ -16,7 +16,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,7 +30,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class DonationServiceImplTest {
@@ -140,7 +140,7 @@ public class DonationServiceImplTest {
 
     @Test
     public void testSendDonation_BadPaymentResponse() {
-        when(paymentServiceClient.sendPayment(request))
+        when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
                 .thenReturn(wrongResponse);
 
         assertThrows(IllegalArgumentException.class, () -> donationService.sendDonation(donationDto));
@@ -148,23 +148,14 @@ public class DonationServiceImplTest {
 
     @Test
     public void testSendDonation_ReturnDonationDto() {
-        Donation donationEntity = donationMapper.toEntity(donationDto);
-
-        when(paymentServiceClient.sendPayment(request))
+        when(paymentServiceClient.sendPayment(any(PaymentRequest.class)))
                 .thenReturn(successfulResponse);
 
-        // Вот это
-        when(donationRepository.save(donationEntity)).thenReturn(donationEntity);
+        when(donationRepository.save(any(Donation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        DonationDto returnedDto = donationService.sendDonation(donationDto);
-
-        // Совместно с вот эти - это же полный бред?
-        // Сам создал, сказал чтоб мок вернул его же, отслеживаю что верну то что сказал заранее, сравниваю само с собой, фигня же?
-        ArgumentCaptor<Donation> argumentCaptor = ArgumentCaptor.forClass(Donation.class);
-        verify(donationRepository, times(1)).save(argumentCaptor.capture());
-        Donation donation = argumentCaptor.getValue();
-
-        assertEquals(donationMapper.toDto(donation), returnedDto);
+        donationDto.setCampaignId(null);
+        assertEquals(donationDto, donationService.sendDonation(donationDto));
     }
 
     @Test
@@ -180,9 +171,6 @@ public class DonationServiceImplTest {
 
         when(donationRepository.findByIdAndUserId(donationId, userId)).thenReturn(Optional.of(entity));
 
-        // В изначальном ДТО есть ид компании.
-        // При превращении в энтити ид теряется, тк меняется на сущность компании равную налл
-        // При обратном превращении в ДТО сущность пытается превратиться в ид, но тк налл поле остается пустым.
         donationDto.setCampaignId(null);
         assertEquals(donationDto, donationService.getDonationByIdAndUserId(donationId, userId));
     }

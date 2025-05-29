@@ -18,6 +18,7 @@ public class DonationCreatedAtFilter implements DonationFilterStrategy {
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto donationFilterDto) {
         return donations.filter(donation ->
-                donation.getDonationTime() != null && donation.getDonationTime().isEqual(donationFilterDto.getCreatedAt()));
+                donation.getDonationTime() != null &&
+                donation.getDonationTime().isEqual(donationFilterDto.getCreatedAt()));
     }
 }

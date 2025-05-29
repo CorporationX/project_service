@@ -15,7 +15,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/donations")
+@RequestMapping("/api/v1/donations")
 public class DonationController {
 
     private final DonationService donationService;
@@ -31,7 +31,9 @@ public class DonationController {
     }
 
     @GetMapping(value = "/{userId}")
-    public List<DonationDto> getAllDonationsByUserId(@PathVariable long userId, @RequestBody DonationFilterDto donationFilterDto) {
+    public List<DonationDto> getAllDonationsByUserId(
+            @PathVariable long userId,
+            @RequestBody DonationFilterDto donationFilterDto) {
         return donationService.getAllDonationsByUserId(userId, donationFilterDto);
     }
 }

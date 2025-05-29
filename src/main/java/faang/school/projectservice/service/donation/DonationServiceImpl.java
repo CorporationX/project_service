@@ -3,6 +3,7 @@ package faang.school.projectservice.service.donation;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.PaymentRequest;
+import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.filter.DonationFilterStrategy;
@@ -12,12 +13,15 @@ import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.DonationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DonationServiceImpl implements DonationService {
@@ -30,19 +34,24 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     public DonationDto sendDonation(DonationDto donationDto) {
-        Donation donation = donationMapper.toEntity(donationDto);
-
         PaymentRequest paymentRequest = new PaymentRequest(
-                donation.getPaymentNumber(),
-                donation.getAmount(),
-                donation.getCurrency(),
-                donation.getCurrency()
+                donationDto.getPaymentNumber(),
+                donationDto.getAmount(),
+                donationDto.getCurrency(),
+                donationDto.getCurrency()
         );
 
-        if (!Objects.equals(paymentServiceClient.sendPayment(paymentRequest).status(), "SUCCESS")) {
-            throw new IllegalArgumentException("Payment hasn't gone through");
+        PaymentResponse paymentResponse = paymentServiceClient.sendPayment(paymentRequest);
+
+        if (!Objects.equals(paymentResponse.status(), "SUCCESS")) {
+            log.warn("Attempt to send donation failed:\nDonationDto:\n{}\nPaymentRequest:\n{}\nPaymentResponse:\n{}",
+                    donationDto, paymentRequest, paymentResponse);
+            throw new IllegalArgumentException(
+                    "Payment with payment number: (%s) hasn't gone through".formatted(donationDto.getPaymentNumber())
+            );
         }
 
+        Donation donation = donationMapper.toEntity(donationDto);
         donation = donationRepository.save(donation);
 
         return donationMapper.toDto(donation);
@@ -50,9 +59,10 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     public DonationDto getDonationByIdAndUserId(long donationId, long userId) {
-        Donation donation = donationRepository.findByIdAndUserId(donationId, userId).orElseThrow(
-                () -> new EntityNotFoundException("Either donation with Id (%s) or user with Id (%s) were not found".formatted(donationId, userId))
-        );
+        Donation donation = donationRepository.findByIdAndUserId(donationId, userId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Either donation with Id (%s) or user with Id (%s) were not found"
+                                .formatted(donationId, userId)));
 
         return donationMapper.toDto(donation);
     }
@@ -73,8 +83,7 @@ public class DonationServiceImpl implements DonationService {
 
         return donationStream
                 .map(donationMapper::toDto)
-                .sorted((d1, d2)
-                        -> d1.getDonationTime().isBefore(d2.getDonationTime()) ? 1 : -1)
+                .sorted(Comparator.comparing(DonationDto::getDonationTime))
                 .toList();
     }
 }

@@ -17,6 +17,7 @@ public class DonationMinAmountFilter implements DonationFilterStrategy {
 
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto donationFilterDto) {
-        return donations.filter(donation -> donation.getAmount().compareTo(donationFilterDto.getMinAmount()) >= 0);
+        return donations.filter(donation ->
+                donation.getAmount().compareTo(donationFilterDto.getMinAmount()) >= 0);
     }
 }

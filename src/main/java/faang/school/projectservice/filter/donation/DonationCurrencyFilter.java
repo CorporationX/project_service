@@ -18,6 +18,7 @@ public class DonationCurrencyFilter implements DonationFilterStrategy {
 
     @Override
     public Stream<Donation> apply(Stream<Donation> donations, DonationFilterDto donationFilterDto) {
-        return donations.filter(donation -> Objects.equals(donation.getCurrency(), donationFilterDto.getCurrency()));
+        return donations.filter(donation ->
+                Objects.equals(donation.getCurrency(), donationFilterDto.getCurrency()));
     }
 }
