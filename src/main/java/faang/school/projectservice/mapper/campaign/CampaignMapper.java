@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.model.Campaign;

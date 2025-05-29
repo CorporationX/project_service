@@ -3,7 +3,7 @@ package faang.school.projectservice.service.campaign;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
-import faang.school.projectservice.mapper.CampaignMapper;
+import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
@@ -12,13 +12,15 @@ import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -104,19 +106,23 @@ public class CampaignService {
         return campaignMapper.toDto(existing);
     }
 
-    public List<CampaignDto> getCampaignDtoWithFilters(CampaignFilterDto campaignFilterDto) {
-        Stream<Campaign> filteredCampaign = campaignRepoAdapter.getAll().stream();
+    public Page<CampaignDto> getCampaignDtoWithFilters(
+            CampaignFilterDto campaignFilterDto,
+            Pageable pageable
+    ) {
+        List<Specification<Campaign>> specifications = new ArrayList<>();
 
         for (CampaignFilter campaignFilter : filters) {
             if (campaignFilter.isApplicable(campaignFilterDto)) {
-                filteredCampaign = campaignFilter.apply(filteredCampaign, campaignFilterDto);
+                specifications.add(campaignFilter.apply(campaignFilterDto));
             }
         }
 
-        return filteredCampaign
-                .map(campaignMapper::toDto)
-                .sorted(Comparator.comparing(CampaignDto::getCreatedAt)
-                        .reversed())
-                .toList();
+        Specification<Campaign> combinedSpec = specifications.stream()
+                .reduce(Specification.where(null), Specification::and);
+
+        Page<Campaign> campaignPage = campaignRepoAdapter.getAllPages(combinedSpec, pageable);
+
+        return campaignPage.map(campaignMapper::toDto);
     }
 }
