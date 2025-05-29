@@ -16,10 +16,8 @@ repositories {
 
 checkstyle {
     toolVersion = "10.3.1"
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    configFile = file("${rootDir}/checkstyle.xml")
 }
-
-
 
 dependencies {
     /**
