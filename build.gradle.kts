@@ -20,6 +20,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     implementation("org.springframework:spring-aop")
+    implementation("org.zalando:logbook-spring-boot-starter:3.6.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**

@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultVacancyServiceTest {
+public class VacancyServiceImplTest {
     private static final Long VACANCY_ID = 1L;
     private static final String VACANCY_NAME = "Java Developer";
     private static final String VACANCY_DESCRIPTION = "example vacancy description";
@@ -89,7 +89,7 @@ public class DefaultVacancyServiceTest {
     @Mock
     private DomainEventPublisher eventPublisher;
     @InjectMocks
-    private DefaultVacancyService vacancyService;
+    private VacancyServiceImpl vacancyService;
 
     private final CreateVacancyDto createVacancyDto = new CreateVacancyDto();
     private final Project project = new Project();

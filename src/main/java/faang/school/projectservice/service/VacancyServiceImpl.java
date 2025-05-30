@@ -24,6 +24,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +38,10 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class DefaultVacancyService implements VacancyService {
+public class VacancyServiceImpl implements VacancyService {
     private final VacancyRepository vacancyRepository;
     private final CandidateRepository candidateRepository;
+    private final VacancyRepositoryAdapter vacancyRepositoryAdapter;
 
     private final UserContext userContext;
     private final VacancyMapper vacancyMapper;
@@ -70,7 +72,7 @@ public class DefaultVacancyService implements VacancyService {
 
     @Override
     public DetailedVacancyDto update(Long id, UpdateVacancyDto dto) {
-        Vacancy vacancy = getVacancyOrThrow(id);
+        Vacancy vacancy = vacancyRepositoryAdapter.getVacancyOrThrow(id);
         assertOwnerOrManager(vacancy.getProject().getId(), userContext.getUserId());
         if (dto == null) {
             return vacancyMapper.toDetailedDto(vacancy);
@@ -83,7 +85,7 @@ public class DefaultVacancyService implements VacancyService {
     @Transactional
     @Override
     public CandidateDto addCandidate(Long id, CreateCandidateDto dto) {
-        Vacancy vacancy =  getVacancyOrThrow(id);
+        Vacancy vacancy =  vacancyRepositoryAdapter.getVacancyOrThrow(id);
         Long candidateUserId = dto.getUserId();
         Long projectId = vacancy.getProject().getId();
         if (!Objects.equals(candidateUserId, userContext.getUserId())) {
@@ -109,7 +111,7 @@ public class DefaultVacancyService implements VacancyService {
     @Transactional
     @Override
     public DetailedVacancyDto close(Long id) {
-        Vacancy vacancy = getVacancyOrThrow(id);
+        Vacancy vacancy = vacancyRepositoryAdapter.getVacancyOrThrow(id);
         Long projectId = vacancy.getProject().getId();
         assertOwnerOrManager(projectId, userContext.getUserId());
         if (vacancy.getCount() > vacancy.getCandidates().size()) {
@@ -164,15 +166,6 @@ public class DefaultVacancyService implements VacancyService {
         if (!roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
             throw new AccessDeniedException("Need OWNER or MANAGER");
         }
-    }
-
-    private Vacancy getVacancyOrThrow(Long id) {
-        Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new VacancyNotFoundException(id));
-        if (Objects.equals(vacancy.getStatus(), VacancyStatus.CLOSED)) {
-            throw new BusinessValidationException("Vacancy already closed");
-        }
-        return vacancy;
     }
 
     private void saveAcceptedCandidatesAsTeamMembers(List<Candidate> acceptedCandidates) {
