@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -113,11 +114,11 @@ public class ProjectServiceImpl implements ProjectService {
     public byte[] getCoverImage(Long projectId) {
         byte[] bytes;
         Project project = findProjectById(projectId);
-        try {
-            bytes = resourceService.downloadResource(Long.parseLong(project.getCoverImageId())).readAllBytes();
+        try (InputStream inputStream = resourceService.downloadResource(Long.parseLong(project.getCoverImageId()))) {
+            bytes = inputStream.readAllBytes();
         } catch (IOException e) {
-            log.error("IOException was thrown while downloading cover image", e);
-            throw new RuntimeException("Error while downloading cover image");
+            log.error("IOException was thrown while downloading cover image for project ID {}: {}", projectId, e.getMessage(), e);
+            throw new RuntimeException("Error while downloading cover image for project ID %d".formatted(projectId), e);
         }
         return bytes;
     }
@@ -139,12 +140,10 @@ public class ProjectServiceImpl implements ProjectService {
         long projectOwnerId = userContext.getUserId();
         String projectName = projectDto.getName();
         Optional<List<Project>> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
-        if (sameNamedProjects.isPresent()) {
-            if (sameNamedProjects.get().stream()
-                    .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
-                throw new DataValidationException(
-                        String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
-            }
+        if (!sameNamedProjects.get().isEmpty() && sameNamedProjects.get().stream()
+                .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
+            throw new DataValidationException(
+                    String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
         }
     }
 

@@ -9,22 +9,21 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.service.CloudService;
+import faang.school.projectservice.util.ImageUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "services.s3.isMocked")
 public class S3ServiceImpl implements CloudService {
     private final AmazonS3 s3Client;
 
@@ -33,19 +32,15 @@ public class S3ServiceImpl implements CloudService {
 
     @Override
     public Resource uploadFile(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
+        ByteArrayInputStream fileStream = ImageUtils.getResizedImageStream(file);
+        byte[] imageBytes = fileStream.readAllBytes();
+        long fileSize = imageBytes.length;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(fileSize);
         metadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
-            s3Client.putObject(putObjectRequest);
-        } catch (IOException e) {
-            log.error("IO exception was thrown", e);
-            throw new FileException("Error while uploading file %s to bucket %s"
-                    .formatted(file.getOriginalFilename(), bucketName));
-        }
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, new ByteArrayInputStream(imageBytes), metadata);
+        s3Client.putObject(putObjectRequest);
         return Resource.builder()
                 .key(key)
                 .name(file.getOriginalFilename())
