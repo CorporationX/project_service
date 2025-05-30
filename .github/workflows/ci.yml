@@ -15,6 +15,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -24,15 +25,18 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain --no-daemon
+
       - name: Upload Checkstyle report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
           path: build/reports/checkstyle/
-      - name: Build
+
+      - name: Build with Gradle
         run: ./gradlew build -x test --no-daemon
   test:
     name: Run Tests with Coverage
@@ -57,16 +61,20 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Run Checkstyle
         run: ./gradlew checkstyleTest --no-daemon
+
       - name: Upload Checkstyle report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
           path: build/reports/checkstyle/
+
       - name: Run tests
         run: ./gradlew test --no-daemon
+
       - name: Build, Test, and Validate Coverage with Gradle
         run: ./gradlew clean build test jacocoTestReport jacocoTestCoverageVerification
+
       - name: Upload JaCoCo coverage report
         uses: actions/upload-artifact@v4
         with:
