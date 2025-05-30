@@ -19,6 +19,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Build with Gradle
+      run: ./gradlew build -x test --no-daemon
+
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -52,9 +55,6 @@ jobs:
       with:
         name: jacoco_report
         path: build/reports/jacoco/test/html
-
-    - name: Build with Gradle
-      run: ./gradlew build -x test --no-daemon
 
   test:
     name: Run Tests with Coverage
