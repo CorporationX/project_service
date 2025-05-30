@@ -10,37 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+      - name: Build with Gradle
+        run: ./gradlew build testClasses -x test -x check -x checkstyleMain -x checkstyleTest --no-daemon
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Test with Gradle
+        run: ./gradlew test -x testClasses --no-daemon --continue
 
-      - name: Run Checkstyle
-        run: ./gradlew checkstyleMain --no-daemon
+      - name: Verify Test Coverage
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
 
-      - name: Upload Checkstyle report
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+
+      - name: Archive test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: checkstyle-report
-          path: build/reports/checkstyle/
+          name: test_report
+          path: build/reports/tests/test
 
-      - name: Build
-        run: ./gradlew build -x test --no-daemon
+      - name: Archive jacoco report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco_report
+          path: build/reports/jacoco/test/html
+
+      - name: Archive checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle_report
+          path: build/reports/checkstyle
 
   test:
     name: Run Tests with Coverage
