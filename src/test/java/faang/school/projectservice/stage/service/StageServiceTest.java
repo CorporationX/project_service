@@ -15,6 +15,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.stage.StageServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +89,7 @@ public class StageServiceTest {
     @Test
     void testFindById_WhenStageDoesNotExist() {
         when(stageRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.findById(1L));
+        assertThrows(EntityNotFoundException.class, () -> stageService.findById(1L));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class StageServiceTest {
     @Test
     void testFindAllStages_WhenProjectDoesNotExist() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.findAllStages(1L));
+        assertThrows(EntityNotFoundException.class, () -> stageService.findAllStages(1L));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class StageServiceTest {
     void testUpdateStage_WhenStageNotFound_ThrowsException() {
         StageDto inputDto = StageDto.builder().stageId(999L).project(project).build();
         when(stageRepository.findById(inputDto.getStageId())).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class, () -> stageService.updateStage(inputDto));
+        assertThrows(EntityNotFoundException.class, () -> stageService.updateStage(inputDto));
     }
 
     @Test
@@ -203,7 +204,7 @@ public class StageServiceTest {
     @Test
     void testDeleteStage_WhenNoStageFound_ThrowsException() {
         when(stageRepository.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NoSuchElementException.class, () -> stageService.findById(1L));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> stageService.findById(1L));
     }
 
     @Test
