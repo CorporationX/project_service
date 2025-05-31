@@ -1,7 +1,10 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.dto.ErrorResponseDto;
+import faang.school.projectservice.exception.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,15 +22,32 @@ import java.util.stream.Collectors;
 public class ControllerExceptionHandler {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleConstraintViolation(ConstraintViolationException e) {
+        log.error("Constraint violation", e);
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining("; "));
+        return new ErrorResponseDto(
+                HttpStatus.BAD_REQUEST.name(),
+                "Invalid data provided.",
+                errorMessage,
+                LocalDateTime.now().format(formatter)
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponseDto handleInvalidData(MethodArgumentNotValidException e) {
         log.error("Invalid data from request given", e);
-        String message = Arrays.stream(e.getDetailMessageArguments()).map(Object::toString).collect(Collectors.joining("; "));
+        String errorMessage = Arrays.stream(e.getDetailMessageArguments())
+                .map(Object::toString)
+                .collect(Collectors.joining("; "));
         return new ErrorResponseDto(
                 HttpStatus.BAD_REQUEST.name(),
                 "Invalid data provided.",
-                message,
+                errorMessage,
                 LocalDateTime.now().format(formatter)
         );
     }
@@ -39,6 +59,18 @@ public class ControllerExceptionHandler {
         return new ErrorResponseDto(
                 HttpStatus.NOT_FOUND.name(),
                 "Resource not found.",
+                e.getMessage(),
+                LocalDateTime.now().format(formatter)
+        );
+    }
+
+    @ExceptionHandler(DataValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleDataValidation(DataValidationException e) {
+        log.error("Invalid data provided", e);
+        return new ErrorResponseDto(
+                HttpStatus.BAD_REQUEST.name(),
+                "Invalid data provided.",
                 e.getMessage(),
                 LocalDateTime.now().format(formatter)
         );
