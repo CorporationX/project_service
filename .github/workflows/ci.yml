@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -29,15 +30,26 @@ jobs:
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain --no-daemon
 
+      - name: Verify Test Coverage
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
+
       - name: Upload Checkstyle report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
-          path: build/reports/checkstyle/
+          path: build/reports/checkstyle
+
+      - name: Archive jacoco report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco_report
+          path: build/reports/jacoco/test/html
 
       - name: Build with Gradle
         run: ./gradlew build -x test --no-daemon
+
   test:
     name: Run Tests with Coverage
     runs-on: ubuntu-latest
@@ -65,21 +77,29 @@ jobs:
       - name: Run Checkstyle
         run: ./gradlew checkstyleTest --no-daemon
 
-      - name: Upload Checkstyle report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: checkstyle-report
-          path: '**/checkstyle.xml'
-
       - name: Run tests
         run: ./gradlew test --no-daemon
 
       - name: Build, Test, and Validate Coverage with Gradle
         run: ./gradlew clean build test jacocoTestReport jacocoTestCoverageVerification
 
-      - name: Upload JaCoCo coverage report
+      - name: Archive test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
-          path: build/reports/jacoco/test/html/
+          name: test_report
+          path: build/reports/tests/test
+
+      - name: Archive Checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-report
+          path: build/reports/checkstyle
+
+      - name: Archive jacoco report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco_report
+          path: build/reports/jacoco/test/html
