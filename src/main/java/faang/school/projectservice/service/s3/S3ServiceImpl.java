@@ -42,7 +42,6 @@ public class S3ServiceImpl implements S3Service {
             log.error(e.getMessage());
             throw new RuntimeException();
         }
-
         return Resource.builder()
                 .key(key)
                 .name(file.getOriginalFilename())
