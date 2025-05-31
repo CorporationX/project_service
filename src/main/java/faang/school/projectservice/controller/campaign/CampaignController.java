@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.campaign;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.service.campaign.CampaignService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +23,12 @@ public class CampaignController {
     private final CampaignService campaignService;
 
     @PostMapping("/campaigns")
-    public List<CampaignDto> findAll(CampaignFilterDto campaignFilterDto) {
+    public List<CampaignDto> findAll(@RequestBody CampaignFilterDto campaignFilterDto) {
        return campaignService.findAll(campaignFilterDto);
     }
 
     @PostMapping("/campaign")
-    public void create(@RequestBody CampaignDto campaignDto) {
+    public void create(@RequestBody @Valid CampaignDto campaignDto) {
         campaignService.createCampaign(campaignDto);
     }
 
@@ -37,7 +38,7 @@ public class CampaignController {
     }
 
     @PutMapping("/campaign/{id}")
-    public void update(@RequestBody CampaignDto campaignDto, @PathVariable Long id) {
+    public void update(@RequestBody @Valid CampaignDto campaignDto, @PathVariable Long id) {
         campaignService.updateCampaign(campaignDto, id);
     }
 
@@ -45,6 +46,4 @@ public class CampaignController {
     public void delete(@PathVariable Long id) {
         campaignService.deleteCampaign(id);
     }
-
-
 }

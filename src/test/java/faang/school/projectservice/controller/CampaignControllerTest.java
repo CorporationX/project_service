@@ -1,4 +1,4 @@
-package faang.school.projectservice.stage.controller;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.service.campaign.CampaignService;
 import lombok.RequiredArgsConstructor;
