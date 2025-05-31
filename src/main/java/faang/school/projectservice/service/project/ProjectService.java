@@ -31,7 +31,6 @@ public class ProjectService {
     private final UserContext userContext;
 
     public ProjectDto createProject(long userId, ProjectDto projectDto) {
-
         projectValidator.validate(projectDto);
         if (projectRepository.existsByOwnerIdAndName(userId, projectDto.getName())) {
             throw new DataValidationException("Project already exists");
@@ -44,7 +43,6 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(long userId, ProjectDto projectDto) {
-
         projectValidator.validate(projectDto);
         Project project = projectRepositoryAdapter.getProjectById(projectDto.getId());
         if (!Objects.equals(projectDto.getOwnerId(), userId)) {

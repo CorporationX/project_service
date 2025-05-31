@@ -25,7 +25,7 @@ public class ProjectController {
 
     @PostMapping("/users/{userId}")
     public ResponseEntity<ProjectDto> createProject(
-            @PathVariable @Positive long userId,
+            @PathVariable @Positive Long userId,
             @RequestBody @Valid ProjectDto projectDto) {
         log.info("Creating project for user {}", userId);
         ProjectDto createdProject = projectService.createProject(userId, projectDto);
@@ -34,7 +34,7 @@ public class ProjectController {
 
     @PutMapping("/users/{userId}")
     public ResponseEntity<ProjectDto> updateProject(
-            @PathVariable @Positive long userId,
+            @PathVariable @Positive Long userId,
             @RequestBody @Valid ProjectDto projectDto) {
         log.info("Updating project for user {}", userId);
         return ResponseEntity.ok(projectService.updateProject(userId, projectDto));

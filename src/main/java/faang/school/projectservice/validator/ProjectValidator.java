@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectValidator {
     public void validate(ProjectDto projectDto) {
-        if (projectDto.getName() == null || projectDto.getName().isEmpty()) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
            throw new DataValidationException("Project name cannot be empty");
         }
-        if (projectDto.getDescription() == null || projectDto.getDescription().isEmpty()) {
+        if (projectDto.getDescription() == null || projectDto.getDescription().isBlank()) {
             throw new DataValidationException("Project description cannot be empty");
         }
     }
