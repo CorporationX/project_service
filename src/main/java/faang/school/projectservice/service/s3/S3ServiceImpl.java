@@ -3,9 +3,11 @@ package faang.school.projectservice.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,14 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URL;
 import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class S3ServiceImpl implements faang.school.projectservice.service.S3Service {
+public class S3ServiceImpl implements S3Service {
     private final AmazonS3 amazonS3;
 
     @Value("${services.s3.bucketName}")
@@ -31,7 +33,7 @@ public class S3ServiceImpl implements faang.school.projectservice.service.S3Serv
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
-        String key = String.format("%s/%s", projectName, file.getName());
+        String key = String.format("%s/%s", projectName, file.getOriginalFilename());
         try {
             PutObjectRequest savedFile = new PutObjectRequest(bucketName, key, file.getInputStream(), objectMetadata);
             amazonS3.putObject(savedFile);
@@ -42,7 +44,7 @@ public class S3ServiceImpl implements faang.school.projectservice.service.S3Serv
 
         return Resource.builder()
                 .key(key)
-                .name(file.getName())
+                .name(file.getOriginalFilename())
                 .size(BigInteger.valueOf(file.getSize()))
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
@@ -52,8 +54,9 @@ public class S3ServiceImpl implements faang.school.projectservice.service.S3Serv
     }
 
     @Override
-    public URL getFileUrl(String fileKey) {
-        return amazonS3.getUrl(bucketName, fileKey);
+    public InputStream downloadFile(String fileKey) {
+        S3Object s3Object = amazonS3.getObject(bucketName, fileKey);
+        return s3Object.getObjectContent();
     }
 
     @Override
