@@ -22,7 +22,6 @@ import org.springframework.util.unit.DataSize;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -107,9 +106,9 @@ public class ProjectServiceImpl implements ProjectService {
     private void validateTitleUniqueness(ProjectForCreationDto projectDto) {
         long projectOwnerId = userContext.getUserId();
         String projectName = projectDto.getName();
-        Optional<List<Project>> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
-        if (sameNamedProjects.isPresent()) {
-            if (sameNamedProjects.get().stream()
+        List<Project> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
+        if (!sameNamedProjects.isEmpty()) {
+            if (sameNamedProjects.stream()
                     .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
                 throw new DataValidationException(
                         String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));

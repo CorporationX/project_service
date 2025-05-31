@@ -5,10 +5,8 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectForCreationDto;
 import faang.school.projectservice.dto.project.ProjectOutputDto;
 import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.ResourceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/projects")
 public class ProjectController {
-    private final ResourceService resourceService;
+
     private final ProjectService projectService;
 
     @PostMapping

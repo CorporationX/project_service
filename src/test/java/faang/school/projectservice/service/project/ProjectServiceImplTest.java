@@ -187,7 +187,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerAlreadyHasProject_WithSameName_Uncancelled() {
         String name = "Bakery";
-        Optional<List<Project>> sameNamedProjects = Optional.of(List.of(project1));
+        List<Project> sameNamedProjects = List.of(project1);
         project1.setStatus(ProjectStatus.CREATED);
         project1.setName(name);
         when(projectRepository.findByNameAndOwnerId(name, user2Id)).thenReturn(sameNamedProjects);
@@ -207,7 +207,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerAlreadyHasProject_WithSameName_Cancelled() {
         String name = "Bakery";
-        Optional<List<Project>> sameNamedProjects = Optional.of(List.of(project1));
+        List<Project> sameNamedProjects = List.of(project1);
         project1.setStatus(ProjectStatus.CANCELLED);
         project1.setName(name);
         when(projectRepository.findByNameAndOwnerId(name, user2Id)).thenReturn(sameNamedProjects);
@@ -226,7 +226,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerHasNotProject_WithSameName() {
         when(userContext.getUserId()).thenReturn(user2Id);
-        when(projectRepository.findByNameAndOwnerId("Bakery", user2Id)).thenReturn(Optional.empty());
+        when(projectRepository.findByNameAndOwnerId("Bakery", user2Id)).thenReturn(List.of());
         creationDto.setName("Bakery");
         creationDto.setOwnerId(user2Id);
 
