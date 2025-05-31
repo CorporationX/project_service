@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.CandidateDto;
-import faang.school.projectservice.dto.CreateCandidateDto;
+import faang.school.projectservice.dto.candidate.CandidateDto;
+import faang.school.projectservice.dto.candidate.CreateCandidateDto;
 import faang.school.projectservice.model.Candidate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.event;
+package faang.school.projectservice.event.vacancy;
 
 import faang.school.projectservice.model.VacancyStatus;
 import lombok.Data;
@@ -8,12 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 @Data
-public class CandidateAcceptedEvent implements DomainEvent {
+public class CandidateRejectedEvent implements DomainEvent {
     private final UUID eventId = UUID.randomUUID();
     private final Instant occurredAt = Instant.now();
     private final Long candidateId;
     private final Long vacancyId;
-    private final Long teamId;
 
     @Override
     public VacancyStatus getEventType() {

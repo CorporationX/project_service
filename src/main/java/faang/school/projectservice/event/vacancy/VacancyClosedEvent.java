@@ -1,4 +1,4 @@
-package faang.school.projectservice.event;
+package faang.school.projectservice.event.vacancy;
 
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;

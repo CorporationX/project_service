@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.candidate;
 
 import faang.school.projectservice.model.CandidateStatus;
 import jakarta.persistence.EnumType;

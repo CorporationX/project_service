@@ -1,16 +1,16 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.CandidateDto;
-import faang.school.projectservice.dto.CreateCandidateDto;
-import faang.school.projectservice.dto.CreateVacancyDto;
-import faang.school.projectservice.dto.DetailedVacancyDto;
-import faang.school.projectservice.dto.UpdateVacancyDto;
-import faang.school.projectservice.dto.VacancyDto;
-import faang.school.projectservice.dto.VacancyFilterDto;
-import faang.school.projectservice.event.DomainEventPublisher;
-import faang.school.projectservice.event.VacancyClosedEvent;
-import faang.school.projectservice.event.VacancyCreatedEvent;
+import faang.school.projectservice.dto.candidate.CandidateDto;
+import faang.school.projectservice.dto.candidate.CreateCandidateDto;
+import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.DetailedVacancyDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.event.vacancy.DomainEventPublisher;
+import faang.school.projectservice.event.vacancy.VacancyClosedEvent;
+import faang.school.projectservice.event.vacancy.VacancyCreatedEvent;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessValidationException;
 import faang.school.projectservice.exception.VacancyNotFoundException;

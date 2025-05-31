@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +25,6 @@ public class DetailedVacancyDto {
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
+    private List<Long> requiredSkillIds;
+    private String coverImageKey;
 }

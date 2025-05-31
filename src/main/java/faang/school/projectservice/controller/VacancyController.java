@@ -1,12 +1,12 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.CandidateDto;
-import faang.school.projectservice.dto.CreateCandidateDto;
-import faang.school.projectservice.dto.CreateVacancyDto;
-import faang.school.projectservice.dto.DetailedVacancyDto;
-import faang.school.projectservice.dto.UpdateVacancyDto;
-import faang.school.projectservice.dto.VacancyDto;
-import faang.school.projectservice.dto.VacancyFilterDto;
+import faang.school.projectservice.dto.candidate.CandidateDto;
+import faang.school.projectservice.dto.candidate.CreateCandidateDto;
+import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.DetailedVacancyDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.CandidateService;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;

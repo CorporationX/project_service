@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.event.CandidateAcceptedEvent;
-import faang.school.projectservice.event.CandidateRejectedEvent;
-import faang.school.projectservice.event.DomainEventPublisher;
+import faang.school.projectservice.event.vacancy.CandidateAcceptedEvent;
+import faang.school.projectservice.event.vacancy.CandidateRejectedEvent;
+import faang.school.projectservice.event.vacancy.DomainEventPublisher;
 import faang.school.projectservice.exception.BusinessValidationException;
 import faang.school.projectservice.exception.CandidateNotFoundException;
 import faang.school.projectservice.model.Candidate;
@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class DefaultCandidateService implements CandidateService {
+public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
     private final TeamService teamService;
     private final DomainEventPublisher eventPublisher;

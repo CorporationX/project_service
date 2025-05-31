@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.candidate;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

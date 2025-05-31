@@ -1,16 +1,16 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.CandidateDto;
-import faang.school.projectservice.dto.CreateCandidateDto;
-import faang.school.projectservice.dto.CreateVacancyDto;
-import faang.school.projectservice.dto.DetailedVacancyDto;
-import faang.school.projectservice.dto.UpdateVacancyDto;
-import faang.school.projectservice.dto.VacancyDto;
-import faang.school.projectservice.dto.VacancyFilterDto;
-import faang.school.projectservice.event.DomainEventPublisher;
-import faang.school.projectservice.event.VacancyClosedEvent;
-import faang.school.projectservice.event.VacancyCreatedEvent;
+import faang.school.projectservice.dto.candidate.CandidateDto;
+import faang.school.projectservice.dto.candidate.CreateCandidateDto;
+import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.DetailedVacancyDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.event.vacancy.DomainEventPublisher;
+import faang.school.projectservice.event.vacancy.VacancyClosedEvent;
+import faang.school.projectservice.event.vacancy.VacancyCreatedEvent;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessValidationException;
 import faang.school.projectservice.exception.VacancyNotFoundException;
@@ -26,6 +26,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -72,6 +73,8 @@ public class VacancyServiceImplTest {
     private VacancyRepository vacancyRepository;
     @Mock
     private CandidateRepository candidateRepository;
+    @Mock
+    private VacancyRepositoryAdapter vacancyRepositoryAdapter;
     @Mock
     private UserContext userContext;
     @Spy
@@ -177,7 +180,7 @@ public class VacancyServiceImplTest {
     class UpdateTests {
         @BeforeEach
         void setUp() {
-            when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.ofNullable(vacancy));
+            when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(vacancy);
             when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER));
             when(userContext.getUserId()).thenReturn(USER_ID);
         }
@@ -248,7 +251,7 @@ public class VacancyServiceImplTest {
             createCandidateDto.setUserId(USER_ID);
             createCandidateDto.setUsername(USER_NAME);
 
-            when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.ofNullable(vacancy));
+            when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(vacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
         }
 
@@ -319,7 +322,7 @@ public class VacancyServiceImplTest {
             cand3.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
             cand3.setVacancy(vacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
-            when(vacancyRepository.findById(VACANCY_ID)).thenReturn(Optional.ofNullable(vacancy));
+            when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(vacancy);
         }
 
         @Test

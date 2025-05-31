@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.event.CandidateAcceptedEvent;
-import faang.school.projectservice.event.CandidateRejectedEvent;
-import faang.school.projectservice.event.DomainEventPublisher;
+import faang.school.projectservice.event.vacancy.CandidateAcceptedEvent;
+import faang.school.projectservice.event.vacancy.CandidateRejectedEvent;
+import faang.school.projectservice.event.vacancy.DomainEventPublisher;
 import faang.school.projectservice.exception.BusinessValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultCandidateServiceTest {
+class CandidateServiceImplTest {
     private static final Long VACANCY_ID = 1L;
     private static final Long CANDIDATE_ID = 2L;
     private static final Long TEAM_ID = 3L;
@@ -53,7 +53,7 @@ class DefaultCandidateServiceTest {
     private DomainEventPublisher eventPublisher;
 
     @InjectMocks
-    private DefaultCandidateService candidateService;
+    private CandidateServiceImpl candidateService;
 
     private Candidate candidate;
     private Vacancy vacancy;
