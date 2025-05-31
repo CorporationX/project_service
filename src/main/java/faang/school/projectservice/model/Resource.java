@@ -31,6 +31,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

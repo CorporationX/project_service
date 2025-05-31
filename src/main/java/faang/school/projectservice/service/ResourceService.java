@@ -1,14 +1,14 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.dto.ResourceDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
 public interface ResourceService {
-    InputStream downloadResource(long resourceId);
+    ResourceDto uploadEntityFile(MultipartFile file, long id);
 
-    Resource uploadResource(MultipartFile file, long projectId);
+    InputStream downloadFile(String fileKey);
 
-    Resource deleteResource(long resourceId);
+    void deleteFile(String fileFey);
 }

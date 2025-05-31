@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.ProjectForUpdateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectForCreationDto;
+import faang.school.projectservice.dto.project.ProjectForUpdateDto;
 import faang.school.projectservice.dto.project.ProjectOutputDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.ProjectFilter;
@@ -16,10 +16,13 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ResourceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -32,6 +35,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Service
 public class ProjectServiceImpl implements ProjectService {
+    private final static long DEFAULT_START_SIZE = 0;
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
@@ -39,11 +43,17 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
     private final UserContext userContext;
 
+    @Value("${entity.project.default-storage-size}")
+    private long maxStorageSize;
+
     @Override
     public ProjectOutputDto create(ProjectForCreationDto projectDto) {
         validateTitleUniqueness(projectDto);
         ProjectForCreationDto completedDto = setDefaultCreationFields(projectDto);
         Project project = projectMapper.toProjectEntity(completedDto);
+        project.setMaxStorageSize(convertToBigInt(maxStorageSize));
+        project.setStorageSize(convertToBigInt(DEFAULT_START_SIZE));
+
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
@@ -132,18 +142,20 @@ public class ProjectServiceImpl implements ProjectService {
         long userId = userContext.getUserId();
         boolean isTeamMember = Stream.ofNullable(project.getTeams()).flatMap(List::stream)
                 .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getId() == userId);
+                .anyMatch(teamMember -> teamMember.getUserId() == userId);
         return (project.getOwnerId() == userId || isTeamMember);
     }
 
     private void validateTitleUniqueness(ProjectForCreationDto projectDto) {
         long projectOwnerId = userContext.getUserId();
         String projectName = projectDto.getName();
-        Optional<List<Project>> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
-        if (!sameNamedProjects.get().isEmpty() && sameNamedProjects.get().stream()
-                .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
-            throw new DataValidationException(
-                    String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
+        List<Project> sameNamedProjects = projectRepository.findByNameAndOwnerId(projectName, projectOwnerId);
+        if (!sameNamedProjects.isEmpty()) {
+            if (sameNamedProjects.stream()
+                    .noneMatch(project -> project.getStatus().equals(ProjectStatus.CANCELLED))) {
+                throw new DataValidationException(
+                        String.format("User with id = %d already has a project named %s", projectOwnerId, projectName));
+            }
         }
     }
 
@@ -156,5 +168,9 @@ public class ProjectServiceImpl implements ProjectService {
         }
         dto.setStatus(ProjectStatus.CREATED);
         return dto;
+    }
+
+    public BigInteger convertToBigInt(long value) {
+        return BigInteger.valueOf(DataSize.ofGigabytes(value).toBytes());
     }
 }
