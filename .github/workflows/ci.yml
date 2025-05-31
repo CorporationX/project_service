@@ -45,11 +45,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -59,6 +61,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      
       - name: Run Checkstyle
         run: ./gradlew checkstyleTest --no-daemon
 
@@ -67,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
-          path: build/reports/checkstyle/
+          path: '**/checkstyle.xml'
 
       - name: Run tests
         run: ./gradlew test --no-daemon
