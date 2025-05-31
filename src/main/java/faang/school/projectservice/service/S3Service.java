@@ -3,12 +3,12 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.model.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URL;
+import java.io.InputStream;
 
 public interface S3Service {
     Resource uploadFile(MultipartFile file, String entityName);
 
-    URL getFileUrl(String fileKey);
+    InputStream downloadFile(String fileKey);
 
     void deleteFile(String fileKey);
 }

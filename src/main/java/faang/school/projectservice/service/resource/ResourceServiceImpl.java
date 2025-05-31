@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.resourse;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
@@ -19,14 +19,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
-    protected final S3Service s3Service;
+    private final S3Service s3Service;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;
@@ -37,8 +38,10 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public ResourceDto uploadEntityFile(MultipartFile file, long id) {
         Project project = projectRepository.findById(id).orElseThrow();
+        validateFreeSpace(project.getStorageSize(), project.getMaxStorageSize(), file.getSize());
+
         // ToDo: Предполагается, что файл уникален для имени и проекта. Этого достаточно в данный момент?
-        Optional<Resource> resource = resourceRepository.findByNameAndProjectId(file.getName(), id);
+        Optional<Resource> resource = resourceRepository.findByNameAndProjectId(file.getOriginalFilename(), id);
         if (resource.isEmpty()) {
             return createResource(file, project);
         }
@@ -47,8 +50,9 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public URL getFileUrl(String fileKey) {
-        return s3Service.getFileUrl(fileKey);
+    public InputStream downloadFile(String fileKey) {
+        resourceRepository.findByKey(fileKey).orElseThrow();
+        return s3Service.downloadFile(fileKey);
     }
 
     @Transactional
@@ -63,27 +67,34 @@ public class ResourceServiceImpl implements ResourceService {
         decreaseProjectSize(resource.getProject(), resource.getSize());
     }
 
-    public ResourceDto createResource(MultipartFile file, Project project) {
-        validateFreeSpace(project.getStorageSize(), project.getMaxStorageSize(), file.getSize());
+    private ResourceDto createResource(MultipartFile file, Project project) {
         TeamMember teamMember = findTeamMember(project.getId());
 
         Resource uploadedResource = s3Service.uploadFile(file, project.getName());
 
-        createResourceByTeamMember(uploadedResource, teamMember, project);
+        uploadedResource = createResourceByTeamMember(uploadedResource, teamMember, project);
         increaseProjectSize(project, uploadedResource.getSize());
 
         return resourceMapper.toDto(uploadedResource);
     }
 
     private ResourceDto updateResource(MultipartFile file, Project project, Resource existingResource) {
-        validateFreeSpace(project.getStorageSize(), project.getMaxStorageSize(), file.getSize());
         TeamMember teamMember = findTeamMember(project.getId());
 
-        return null;
+        if (existingResource.getKey() != null && !existingResource.getKey().isBlank()) {
+            s3Service.deleteFile(existingResource.getKey());
+        }
+        Resource uploadedResource = s3Service.uploadFile(file, project.getName());
+        decreaseProjectSize(project, existingResource.getSize());
+
+        Resource updatedResource = updateResourceByTeamMember(existingResource, uploadedResource, teamMember);
+        increaseProjectSize(project, updatedResource.getSize());
+
+        return resourceMapper.toDto(updatedResource);
     }
 
     private void validateFreeSpace(BigInteger currentSize, BigInteger maxSize, long fileSize) {
-        int freeSpace = maxSize.getLowestSetBit() - currentSize.getLowestSetBit();
+        long freeSpace = maxSize.subtract(currentSize).abs().longValue();
         if (freeSpace > fileSize) {
             return;
         }
@@ -95,7 +106,7 @@ public class ResourceServiceImpl implements ResourceService {
     private void validateDeletionAccess(Resource resource) {
         if (
                 resource.getProject().getOwnerId() == userContext.getUserId()
-                || resource.getCreatedBy().getUserId() == userContext.getUserId()
+                        || resource.getCreatedBy().getUserId() == userContext.getUserId()
         ) {
             return;
         }
@@ -130,12 +141,21 @@ public class ResourceServiceImpl implements ResourceService {
         resourceRepository.save(resource);
     }
 
-    private void createResourceByTeamMember(Resource resource, TeamMember teamMember, Project project) {
+    private Resource createResourceByTeamMember(Resource resource, TeamMember teamMember, Project project) {
         resource.setCreatedBy(teamMember);
         resource.setUpdatedBy(teamMember);
-        resource.setAllowedRoles(teamMember.getRoles());
+        resource.setAllowedRoles(new ArrayList<>(teamMember.getRoles()));
         resource.setProject(project);
 
-        resourceRepository.save(resource);
+        return resourceRepository.save(resource);
+    }
+
+    private Resource updateResourceByTeamMember(Resource existingResource, Resource resource, TeamMember teamMember) {
+        existingResource.setUpdatedBy(teamMember);
+        existingResource.setSize(resource.getSize());
+        existingResource.setKey(resource.getKey());
+        existingResource.setStatus(ResourceStatus.ACTIVE);
+
+        return resourceRepository.save(existingResource);
     }
 }
