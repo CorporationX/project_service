@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.exception.StorageSizeExceedException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -13,7 +12,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.CloudService;
 import faang.school.projectservice.service.ResourceService;
 import faang.school.projectservice.service.S3Service;
 import jakarta.transaction.Transactional;
@@ -26,14 +24,12 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
     private final S3Service s3Service;
-    private final CloudService cloudService;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
     private final TeamMemberRepository teamMemberRepository;

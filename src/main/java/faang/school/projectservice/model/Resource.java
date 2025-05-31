@@ -28,7 +28,6 @@ import java.util.List;
 @Entity
 @Table(name = "project_resource")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

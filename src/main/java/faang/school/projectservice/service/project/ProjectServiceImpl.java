@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectForCreationDto;
 import faang.school.projectservice.dto.project.ProjectForUpdateDto;
@@ -15,6 +16,8 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.util.ByteArrayMultipartFile;
+import faang.school.projectservice.util.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -103,9 +106,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectOutputDto uploadCoverImage(Long projectId, MultipartFile file) {
-        Resource resource = resourceService.uploadResource(file, projectId);
-        Project project = resource.getProject();
-        project.setCoverImageId(resource.getId().toString());
+        ByteArrayInputStream fileStream = ImageUtils.getResizedImageStream(file);
+        byte[] imageBytes = fileStream.readAllBytes();
+        ByteArrayMultipartFile resizedFile = new ByteArrayMultipartFile(imageBytes, file.getName(),
+                file.getOriginalFilename(), file.getContentType());
+        ResourceDto uploadedResource = resourceService.uploadEntityFile(resizedFile, projectId);
+        Project project = findProjectById(projectId);
+        project.setCoverImageId(String.valueOf(uploadedResource.getId()));
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
@@ -113,9 +120,9 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectOutputDto deleteCoverImage(Long projectId) {
         Project project = findProjectById(projectId);
         if (project.getCoverImageId() == null) {
-            throw new IllegalArgumentException(String.format("There are no cover image for project with id %d", project));
+            throw new IllegalArgumentException(String.format("There are no cover image for project with id %d", projectId));
         }
-        resourceService.deleteResource(Long.parseLong(project.getCoverImageId()));
+        resourceService.deleteFile(Long.parseLong(project.getCoverImageId()));
         project.setCoverImageId(null);
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
@@ -124,7 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
     public byte[] getCoverImage(Long projectId) {
         byte[] bytes;
         Project project = findProjectById(projectId);
-        try (InputStream inputStream = resourceService.downloadResource(Long.parseLong(project.getCoverImageId()))) {
+        try (InputStream inputStream = resourceService.downloadFile(Long.parseLong(project.getCoverImageId()))) {
             bytes = inputStream.readAllBytes();
         } catch (IOException e) {
             log.error("IOException was thrown while downloading cover image for project ID {}: {}", projectId, e.getMessage(), e);
