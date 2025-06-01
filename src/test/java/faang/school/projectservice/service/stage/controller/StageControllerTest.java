@@ -1,4 +1,4 @@
-package faang.school.projectservice.stage.controller;
+package faang.school.projectservice.service.stage.controller;
 
 import faang.school.projectservice.controller.stage.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
