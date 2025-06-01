@@ -112,7 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
                 file.getOriginalFilename(), file.getContentType());
         ResourceDto uploadedResource = resourceService.uploadEntityFile(resizedFile, projectId);
         Project project = findProjectById(projectId);
-        project.setCoverImageId(String.valueOf(uploadedResource.getId()));
+        project.setCoverImageId(uploadedResource.getKey());
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
 
@@ -122,7 +122,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (project.getCoverImageId() == null) {
             throw new IllegalArgumentException(String.format("There are no cover image for project with id %d", projectId));
         }
-        resourceService.deleteFile(Long.parseLong(project.getCoverImageId()));
+        resourceService.deleteFile(project.getCoverImageId());
         project.setCoverImageId(null);
         return projectMapper.toProjectDto(projectRepository.save(project));
     }
@@ -131,7 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
     public byte[] getCoverImage(Long projectId) {
         byte[] bytes;
         Project project = findProjectById(projectId);
-        try (InputStream inputStream = resourceService.downloadFile(Long.parseLong(project.getCoverImageId()))) {
+        try (InputStream inputStream = resourceService.downloadFile(project.getCoverImageId())) {
             bytes = inputStream.readAllBytes();
         } catch (IOException e) {
             log.error("IOException was thrown while downloading cover image for project ID {}: {}", projectId, e.getMessage(), e);
