@@ -26,4 +26,15 @@ public class CampaignCreationDateFilterStrategyTest {
       campaignFilterDto.setCreatedAt(LocalDate.now().minusDays(1));
       Assertions.assertFalse(strategy.filter(campaign, campaignFilterDto));
    }
+
+   @Test
+   public void testIsApplicable_when_Null () {
+      Assertions.assertFalse(strategy.isApplicable(campaignFilterDto));
+   }
+
+   @Test
+   public void testIsApplicable_when_Present () {
+      campaignFilterDto.setCreatedAt(LocalDate.now());
+      Assertions.assertTrue(strategy.isApplicable(campaignFilterDto));
+   }
 }

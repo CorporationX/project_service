@@ -5,4 +5,5 @@ import faang.school.projectservice.model.Campaign;
 
 public interface CampaignFilterStrategy {
     boolean filter(Campaign campaign, CampaignFilterDto campaignFilterDto);
+    boolean isApplicable(CampaignFilterDto campaignFilterDto);
 }

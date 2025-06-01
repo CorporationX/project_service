@@ -10,4 +10,9 @@ public class CampaignCreatedByFilterStrategy implements CampaignFilterStrategy {
     public boolean filter(Campaign campaign, CampaignFilterDto campaignFilterDto) {
         return campaign.getCreatedBy().equals(campaignFilterDto.getCreatedBy());
     }
+
+    @Override
+    public boolean isApplicable(CampaignFilterDto campaignFilterDto) {
+        return campaignFilterDto.getCreatedBy() != null;
+    }
 }

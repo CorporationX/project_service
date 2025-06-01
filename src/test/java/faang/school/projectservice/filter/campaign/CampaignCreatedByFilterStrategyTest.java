@@ -23,4 +23,15 @@ public class CampaignCreatedByFilterStrategyTest {
         campaignFilterDto.setCreatedBy(1L);
         Assertions.assertFalse(campaignCreatedByFilterStrategy.filter(campaign, campaignFilterDto));
     }
+
+    @Test
+    public void testIsApplicable_when_Null () {
+        Assertions.assertFalse(campaignCreatedByFilterStrategy.isApplicable(campaignFilterDto));
+    }
+
+    @Test
+    public void testIsApplicable_when_Present () {
+        campaignFilterDto.setCreatedBy(1L);
+        Assertions.assertTrue(campaignCreatedByFilterStrategy.isApplicable(campaignFilterDto));
+    }
 }

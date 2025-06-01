@@ -10,4 +10,9 @@ public class CampaignStatusFilterStrategy implements CampaignFilterStrategy {
     public boolean filter(Campaign campaign, CampaignFilterDto campaignFilterDto) {
         return campaign.getStatus() == campaignFilterDto.getStatus();
     }
+
+    @Override
+    public boolean isApplicable(CampaignFilterDto campaignFilterDto) {
+        return campaignFilterDto.getStatus() != null;
+    }
 }

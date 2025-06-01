@@ -10,4 +10,9 @@ public class CampaignCreationDateFilterStrategy implements CampaignFilterStrateg
     public boolean filter(Campaign campaign, CampaignFilterDto campaignFilterDto) {
         return campaign.getCreatedAt().toLocalDate().equals(campaignFilterDto.getCreatedAt());
     }
+
+    @Override
+    public boolean isApplicable(CampaignFilterDto campaignFilterDto) {
+        return campaignFilterDto.getCreatedAt() != null;
+    }
 }

@@ -180,6 +180,10 @@ public class CampaignServiceTest {
 
         when(campaignRepository.findAll()).thenReturn(campaigns);
 
+        when(campaignCreatedByFilterStrategy.isApplicable(filterDto)).thenReturn(true);
+        when(campaignStatusFilterStrategy.isApplicable(filterDto)).thenReturn(true);
+        when(campaignCreationDateFilterStrategy.isApplicable(filterDto)).thenReturn(true);
+
         when(campaignCreatedByFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);
         when(campaignStatusFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);
         when(campaignCreationDateFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);

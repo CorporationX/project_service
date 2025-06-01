@@ -89,7 +89,9 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     private boolean filterCampaigns(Campaign campaign, CampaignFilterDto filterDto) {
-        return campaignFilterStrategies.stream().allMatch(strategy -> strategy.filter(campaign, filterDto));
+        return campaignFilterStrategies.stream()
+                .filter(strategy -> strategy.isApplicable(filterDto))
+                .allMatch(strategy -> strategy.filter(campaign, filterDto));
     }
 
     private Campaign findCampaignByID(Long id) {

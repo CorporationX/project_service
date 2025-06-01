@@ -6,6 +6,8 @@ import faang.school.projectservice.model.CampaignStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+
 public class CampaignStatusFilterStrategyTest {
     private CampaignStatusFilterStrategy strategy = new CampaignStatusFilterStrategy();
     private Campaign campaign = new Campaign();
@@ -23,5 +25,16 @@ public class CampaignStatusFilterStrategyTest {
         campaign.setStatus(CampaignStatus.ACTIVE);
         campaignFilterDto.setStatus(CampaignStatus.CANCELED);
         Assertions.assertFalse(strategy.filter(campaign, campaignFilterDto));
+    }
+
+    @Test
+    public void testIsApplicable_when_Null () {
+        Assertions.assertFalse(strategy.isApplicable(campaignFilterDto));
+    }
+
+    @Test
+    public void testIsApplicable_when_Present () {
+        campaignFilterDto.setStatus(CampaignStatus.ACTIVE);
+        Assertions.assertTrue(strategy.isApplicable(campaignFilterDto));
     }
 }
