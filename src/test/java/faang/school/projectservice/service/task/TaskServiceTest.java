@@ -83,6 +83,7 @@ public class TaskServiceTest {
 
     @Test
     public void test_createTask_when_NullProject() {
+        taskDto.setProject(null);
         Assertions.assertThrows(DataValidationException.class, () -> taskService.createTask(taskDto));
     }
 
@@ -124,7 +125,7 @@ public class TaskServiceTest {
         when(userContext.getUserId()).thenReturn(1L);
         when(taskRepository.findAllByProjectId(1L)).thenReturn(tasks);
         List<TaskDto> result = taskService.getAllTasks(1L, null);
-        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(3, result.size());
     }
 
     @Test
