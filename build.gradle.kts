@@ -35,6 +35,17 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
+     * Minio
+     */
+    // https://mvnrepository.com/artifact/io.minio/minio
+    implementation("io.minio:minio:8.5.17")
+    /**
+     * Security
+     */
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+    implementation("org.springframework.security:spring-security-core:6.5.0")
+
+    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")

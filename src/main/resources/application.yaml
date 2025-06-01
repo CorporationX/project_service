@@ -35,6 +35,12 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+minio:
+    url: http://192.168.88.4:9000
+    access-key: user
+    secret-key: password
+    bucket: corpbucket
+
 services:
   s3:
     endpoint: http://localhost:9000
