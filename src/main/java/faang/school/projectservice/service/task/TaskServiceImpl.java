@@ -74,6 +74,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void validateTaskAndProjectExistence(TaskDto taskDto) {
+        if (taskDto == null) {
+            throw new IllegalArgumentException("taskDto cannot be null");
+        }
         if (taskDto.getProject() == null) {
             log.error("No project for task with ID={}, taskName={}", taskDto.getId(), taskDto.getName());
             throw new DataValidationException(String.format("No project for task with ID=%s, taskName=%s"
@@ -92,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
                 () -> new EntityNotFoundException("Project with id " + projectId + " not found"));
         boolean isWorking = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .noneMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
+                .allMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
         if (!isWorking) {
             log.error("User does not have permission to access tasks of project with ID = {}", projectId);
             throw new DataValidationException(String.format("User does not have permission to access tasks of project with ID = %d", projectId));
