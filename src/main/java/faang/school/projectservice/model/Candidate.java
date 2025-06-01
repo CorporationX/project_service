@@ -31,4 +31,8 @@ public class Candidate {
     @ManyToOne
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
 }
