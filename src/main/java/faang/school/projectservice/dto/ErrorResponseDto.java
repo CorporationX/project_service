@@ -1,13 +1,12 @@
 package faang.school.projectservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ErrorResponseDto {
-    private String status;
-    private String reason;
-    private String message;
-    private String timestamp;
+    private final String status;
+    private final String reason;
+    private final String message;
+    private final String timestamp;
 }
+
