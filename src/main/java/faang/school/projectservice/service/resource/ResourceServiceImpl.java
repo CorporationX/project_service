@@ -40,7 +40,6 @@ public class ResourceServiceImpl implements ResourceService {
         Project project = projectRepository.findById(id).orElseThrow();
         validateFreeSpace(project.getStorageSize(), project.getMaxStorageSize(), file.getSize());
 
-        // ToDo: Предполагается, что файл уникален для имени и проекта. Этого достаточно в данный момент?
         Optional<Resource> resource = resourceRepository.findByNameAndProjectId(file.getOriginalFilename(), id);
         if (resource.isEmpty()) {
             return createResource(file, project);
