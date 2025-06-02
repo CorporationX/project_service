@@ -2,6 +2,7 @@ package faang.school.projectservice.repository.adapter.project;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,6 @@ public class ProjectRepoAdapter {
 
     public Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
 }

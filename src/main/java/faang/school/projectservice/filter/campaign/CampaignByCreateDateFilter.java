@@ -12,6 +12,8 @@ import java.util.List;
 
 @Component
 public class CampaignByCreateDateFilter implements CampaignFilter {
+    private static final String CREATED_AT = "createdAt";
+
     @Override
     public boolean isApplicable(CampaignFilterDto campaignDtoFilterDto) {
         return campaignDtoFilterDto.getCreatedFrom() != null
@@ -25,11 +27,8 @@ public class CampaignByCreateDateFilter implements CampaignFilter {
             LocalDateTime to = campaignFilterDto.getCreatedTo();
 
             List<Predicate> predicates = new ArrayList<>();
-
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), from));
-
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), to));
-
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(CREATED_AT), from));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(CREATED_AT), to));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
