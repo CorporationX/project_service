@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Service
 public class ProjectServiceImpl implements ProjectService {
-    private final static long DEFAULT_START_SIZE = 0;
+    private final static long DEFAULT_START_STORAGE_SIZE = 0;
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
@@ -43,7 +43,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectForCreationDto completedDto = setDefaultCreationFields(projectDto);
         Project project = projectMapper.toProjectEntity(completedDto);
         project.setMaxStorageSize(convertToBigInt(maxStorageSize));
-        project.setStorageSize(convertToBigInt(DEFAULT_START_SIZE));
+        project.setStorageSize(convertToBigInt(DEFAULT_START_STORAGE_SIZE));
 
         return projectMapper.toProjectDto(projectRepository.save(project));
     }

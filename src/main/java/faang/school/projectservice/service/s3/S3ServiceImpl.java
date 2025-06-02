@@ -1,9 +1,11 @@
 package faang.school.projectservice.service.s3;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -39,7 +41,7 @@ public class S3ServiceImpl implements S3Service {
             amazonS3.putObject(savedFile);
         } catch (IOException e) {
             log.error(e.getMessage());
-            throw new RuntimeException();
+            throw new FileException(String.format("File saving failed: %s", e.getMessage()));
         }
 
         return Resource.builder()
@@ -55,8 +57,12 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public InputStream downloadFile(String fileKey) {
-        S3Object s3Object = amazonS3.getObject(bucketName, fileKey);
-        return s3Object.getObjectContent();
+        try {
+            S3Object s3Object = amazonS3.getObject(bucketName, fileKey);
+            return s3Object.getObjectContent();
+        } catch (SdkClientException e) {
+            throw new FileException(String.format("File not found: %s", e.getMessage()));
+        }
     }
 
     @Override
