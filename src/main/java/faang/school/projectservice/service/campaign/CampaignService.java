@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -50,11 +51,12 @@ public class CampaignService {
     private void validateUserProjectPermissions(Long userId, Project project) {
         boolean isManager = teamMemberRepoAdapter.getByUserId(userId).stream()
                 .filter(teamMember ->
-                        teamMember.getTeam().getProject().getId().equals(project.getId()))
+                        Objects.equals(teamMember.getTeam().getProject().getId(), project.getId()))
                 .flatMap(teamMember -> teamMember.getRoles().stream())
-                .anyMatch(teamRole -> teamRole.name().equals("MANAGER"));
+                .anyMatch(teamRole ->
+                Objects.equals(teamRole.name(), "MANAGER"));
 
-        if (!project.getOwnerId().equals(userId) && !isManager) {
+        if (!Objects.equals(project.getOwnerId(), userId) && !isManager) {
             String errorMessage =
                     String.format("User %d is not allowed to perform this operation on project %d." +
                             " Reason: Not project owner and not a manager.", userId, project.getId());
