@@ -1,28 +1,33 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AccessControlService {
 
     private final VacancyRepository vacancyRepository;
+    private final UserContext userContext;
 
     public void checkAccess(long vacancyId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = authentication.getName();
-        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(vacancyId);
-        if (vacancyOptional.isPresent()) {
-            Vacancy vacancy = vacancyOptional.get();
-            if (!currentUserId.equals(String.valueOf(vacancy.getCreatedBy()))) {
-                throw new RuntimeException("Access denied");
-            }
-        } else throw new RuntimeException("Vacancy not found");
+        long currentUserId = userContext.getUserId();
+
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
+
+        boolean isAuthor = vacancy.getCreatedBy() == currentUserId;
+        boolean isProjectOwner = vacancy.getProject() != null &&
+                vacancy.getProject().getOwnerId() != null &&
+                vacancy.getProject().getOwnerId().equals(currentUserId);
+
+        if (!isAuthor && !isProjectOwner) {
+            throw new AccessDeniedException("Access denied");
+        }
     }
 }

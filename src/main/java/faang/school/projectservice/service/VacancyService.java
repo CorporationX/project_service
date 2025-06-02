@@ -1,12 +1,13 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.addon.ImageResizer;
+import faang.school.projectservice.util.ImageResizer;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -16,18 +17,21 @@ public class VacancyService {
     private final AccessControlService accessControlService;
 
     public void uploadCover(Long vacancyId, MultipartFile file) throws Exception {
-        accessControlService.checkAccess(vacancyId); // 🔥 проверка доступа
+        long fileLimitMb = 5L;
+        long fileLimitBytes = fileLimitMb * 1024 * 1024;
 
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException("File size exceeds 5MB limit");
+        accessControlService.checkAccess(vacancyId);
+        if (file.getSize() > fileLimitBytes) {
+            throw new FileSizeLimitExceededException("File must be smaller than 5MB",
+                    file.getSize(), fileLimitBytes);
         }
 
         byte[] originalBytes = file.getBytes();
         byte[] resizedBytes = ImageResizer.resizeImage(originalBytes);
         String fileName = file.getOriginalFilename();
 
-        String coverImageKey = minioService.storeFile(fileName, resizedBytes); // 🔥 передаём байты
-        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new RuntimeException("Vacancy not found"));
+        String coverImageKey = minioService.storeFile(fileName, resizedBytes);
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException("Vacancy not found"));
         vacancy.setCoverImageKey(coverImageKey);
         vacancyRepository.save(vacancy);
     }
@@ -40,18 +44,6 @@ public class VacancyService {
             minioService.deleteFile(vacancy.getCoverImageKey());
             vacancy.setCoverImageKey(null);
             vacancyRepository.save(vacancy);
-        }
-    }
-
-    private void validateFile(MultipartFile file) throws IOException {
-        byte[] imageToBytes = file.getBytes();
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException("File size exceeds 5MB limit");
-        }
-        try {
-            ImageResizer.resizeImage(imageToBytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Invalid image size");
         }
     }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.addon;
+package faang.school.projectservice.util;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,13 +25,13 @@ public class ImageResizer {
         } else {
             targetWidth = (int) ((double) width / height * 512);
         }
-        BufferedImage resizedImage = new BufferedImage(targetWidth,targetHeight,BufferedImage.TYPE_INT_RGB);
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = resizedImage.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics.drawImage(image, 0, 0, targetWidth, targetHeight, null);
         graphics.dispose();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(resizedImage,"jpg",outputStream);
+        ImageIO.write(resizedImage, "jpg", outputStream);
         return outputStream.toByteArray();
     }
 }
