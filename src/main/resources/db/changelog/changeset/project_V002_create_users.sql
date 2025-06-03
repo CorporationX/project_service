@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS users
+(
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(64) NOT NULL UNIQUE,
+    email VARCHAR(128) NOT NULL UNIQUE,
+    first_name VARCHAR(64),
+    last_name VARCHAR(64),
+    avatar_url VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
