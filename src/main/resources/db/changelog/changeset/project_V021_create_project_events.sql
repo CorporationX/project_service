@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS events (
     creator_id BIGINT NOT NULL,
     status VARCHAR(16) NOT NULL,
     title VARCHAR(128) NOT NULL,
+    calendar_event_id VARCHAR(64) NOT NULL,
     description VARCHAR(512) NOT NULL,
     starts_at TIMESTAMP NOT NULL,
     ends_at TIMESTAMP NOT NULL,

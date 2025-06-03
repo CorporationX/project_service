@@ -5,4 +5,8 @@ import faang.school.projectservice.dto.event.EventOutputDto;
 
 public interface EventService {
     EventOutputDto createEvent(CreateEventDto createEventDto, long projectId);
+
+    EventOutputDto getEvent(long projectId, long eventId);
+
+    EventOutputDto deleteEvent(long projectId, long eventId);
 }

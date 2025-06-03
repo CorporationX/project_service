@@ -14,9 +14,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,6 +31,8 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(exclude = "id")
 public class Event {
     @Id
@@ -44,6 +48,9 @@ public class Event {
 
     @Column(name = "description", length = 512, nullable = false)
     private String description;
+
+    @Column(name = "calendar_event_id", length = 64, nullable = false)
+    private String calendarEventId;
 
     @Column(name = "creator_id", nullable = false)
     private long creatorId;

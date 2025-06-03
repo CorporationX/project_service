@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalendarEventResponse {
+    private String id;
     private String summary;
     private String description;
     private EventDateTimeDto start;

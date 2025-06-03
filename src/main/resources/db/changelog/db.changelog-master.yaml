@@ -34,4 +34,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V020_alter_candidate_add_username.sql
   - include:
-      file: db/changelog/changeset/project_V021_create_events.sql
+      file: db/changelog/changeset/project_V021_create_project_events.sql

@@ -7,6 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "Spring")
 public interface EventMapper {
-    @Mapping(target = "projectId", source = "event.id")
+    @Mapping(target = "projectId", source = "project.id")
     EventOutputDto toEventOutputDto(Event event);
 }
