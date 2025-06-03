@@ -46,6 +46,7 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
   payment-service:
     host: http://localhost
     port: 9080

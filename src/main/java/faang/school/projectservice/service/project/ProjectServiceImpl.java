@@ -12,7 +12,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.ResourceService;
@@ -25,8 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Service
 public class ProjectServiceImpl implements ProjectService {
-    private final static long DEFAULT_START_SIZE = 0;
+    private final static long DEFAULT_START_STORAGE_SIZE = 0;
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
@@ -55,7 +54,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectForCreationDto completedDto = setDefaultCreationFields(projectDto);
         Project project = projectMapper.toProjectEntity(completedDto);
         project.setMaxStorageSize(convertToBigInt(maxStorageSize));
-        project.setStorageSize(convertToBigInt(DEFAULT_START_SIZE));
+        project.setStorageSize(convertToBigInt(DEFAULT_START_STORAGE_SIZE));
 
         return projectMapper.toProjectDto(projectRepository.save(project));
     }

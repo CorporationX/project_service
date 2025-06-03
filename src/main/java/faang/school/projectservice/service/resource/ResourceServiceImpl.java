@@ -16,7 +16,6 @@ import faang.school.projectservice.service.ResourceService;
 import faang.school.projectservice.service.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +24,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
@@ -42,7 +40,6 @@ public class ResourceServiceImpl implements ResourceService {
         Project project = projectRepository.findById(id).orElseThrow();
         validateFreeSpace(project.getStorageSize(), project.getMaxStorageSize(), file.getSize());
 
-        // ToDo: Предполагается, что файл уникален для имени и проекта. Этого достаточно в данный момент?
         Optional<Resource> resource = resourceRepository.findByNameAndProjectId(file.getOriginalFilename(), id);
         if (resource.isEmpty()) {
             return createResource(file, project);

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.s3;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -9,7 +10,6 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.service.S3Service;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,14 +41,17 @@ public class S3ServiceImpl implements S3Service {
             amazonS3.putObject(savedFile);
         } catch (IOException e) {
             log.error(e.getMessage());
-            throw new RuntimeException();
+            throw new FileException(String.format("File saving failed: %s", e.getMessage()));
         }
+
         return Resource.builder()
                 .key(key)
                 .name(file.getOriginalFilename())
                 .size(BigInteger.valueOf(file.getSize()))
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -56,30 +60,13 @@ public class S3ServiceImpl implements S3Service {
         try {
             S3Object s3Object = amazonS3.getObject(bucketName, fileKey);
             return s3Object.getObjectContent();
-        } catch (Exception e) {
-            log.error("Exception was thrown while downloading file", e);
-            throw new FileException("Error while downloading file with key %s from bucket %s"
-                    .formatted(fileKey, bucketName));
+        } catch (SdkClientException e) {
+            throw new FileException(String.format("File not found: %s", e.getMessage()));
         }
     }
 
     @Override
     public void deleteFile(String fileKey) {
-        try {
-            amazonS3.deleteObject(bucketName, fileKey);
-            log.debug("File with key %s was deleted from bucket %s".formatted(fileKey, bucketName));
-        } catch (Exception e) {
-            log.error("Unexpected error while deleting file {} from bucket {}", fileKey, bucketName, e);
-            throw new FileException("Error while deleting file with key %s from bucket %s"
-                    .formatted(fileKey, bucketName));
-        }
-    }
-
-    @PostConstruct
-    private void initializeBucket() {
-        if (!amazonS3.doesBucketExistV2(bucketName)) {
-            amazonS3.createBucket(bucketName);
-            log.debug("Bucket %s created successfully".formatted(bucketName));
-        }
+        amazonS3.deleteObject(bucketName, fileKey);
     }
 }
