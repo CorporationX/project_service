@@ -87,6 +87,62 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            enabled = false
+            element = "CLASS"
+            includes = listOf("org.gradle.*")
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.8".toBigDecimal()
+            }
+        }
+    }
+}
+tasks.build {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+tasks.jacocoTestReport {
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude(
+                "**/mapper/**",
+                "**/entity/**",
+                "**/client/**",
+                "**/config/**",
+                "**/dto/**",
+                "**/model/**",
+                "**/controller/**",
+                "**/repository/**",
+                "**/**Test.class",
+                "**/ProjectServiceApplication.class",
+                "**/**Impl.class",
+            )
+        }
+    }))
+}
+checkstyle {
+    toolVersion = "10.17.0"
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    checkstyle.enableExternalDtdLoad.set(true)
+}
+
+tasks.checkstyleMain {
+    source = fileTree("${project.rootDir}/src/main/java")
+    include("**/*.java")
+    exclude("**/resources/**")
+
+    classpath = files()
+}
+
+tasks.checkstyleTest {
+    source = fileTree("${project.rootDir}/src/test")
+    include("**/*.java")
+
+    classpath = files()
+}
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
