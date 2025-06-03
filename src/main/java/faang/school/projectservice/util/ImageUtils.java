@@ -68,7 +68,7 @@ public class ImageUtils {
     }
 
     private void validateFileType(MultipartFile file) {
-        if (!file.getContentType().startsWith("image")) {
+        if (file.getContentType() != null && !file.getContentType().startsWith("image")) {
             throw new IllegalArgumentException("Incorrect file type %s".formatted(file.getContentType()));
         }
     }

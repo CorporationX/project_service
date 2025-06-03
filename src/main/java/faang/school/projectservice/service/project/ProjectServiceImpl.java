@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 @Service
 public class ProjectServiceImpl implements ProjectService {
     private final static long DEFAULT_START_STORAGE_SIZE = 0;
+    private final static long COVER_IMAGE_SIZE_LIMIT_MEGABYTES = 5;
 
     private final List<ProjectFilter> filters;
     private final ProjectRepository projectRepository;
@@ -109,6 +110,10 @@ public class ProjectServiceImpl implements ProjectService {
         byte[] imageBytes = fileStream.readAllBytes();
         ByteArrayMultipartFile resizedFile = new ByteArrayMultipartFile(imageBytes, file.getName(),
                 file.getOriginalFilename(), file.getContentType());
+        if (resizedFile.getSize() > DataSize.ofMegabytes(COVER_IMAGE_SIZE_LIMIT_MEGABYTES).toBytes()) {
+            throw new IllegalArgumentException("Max upload cover image size is %d megabytes"
+                    .formatted(COVER_IMAGE_SIZE_LIMIT_MEGABYTES));
+        }
         ResourceDto uploadedResource = resourceService.uploadEntityFile(resizedFile, projectId);
         Project project = findProjectById(projectId);
         project.setCoverImageId(uploadedResource.getKey());
@@ -128,15 +133,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public byte[] getCoverImage(Long projectId) {
-        byte[] bytes;
         Project project = findProjectById(projectId);
         try (InputStream inputStream = resourceService.downloadFile(project.getCoverImageId())) {
-            bytes = inputStream.readAllBytes();
+           return inputStream.readAllBytes();
         } catch (IOException e) {
             log.error("IOException was thrown while downloading cover image for project ID {}: {}", projectId, e.getMessage(), e);
             throw new RuntimeException("Error while downloading cover image for project ID %d".formatted(projectId), e);
         }
-        return bytes;
     }
 
     private Project findProjectById(long projectId) {
