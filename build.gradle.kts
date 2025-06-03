@@ -1,5 +1,5 @@
 plugins {
-    java
+    id("java")
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm")
@@ -26,6 +26,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -145,8 +146,15 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.0".toBigDecimal()
+                minimum = "0.8".toBigDecimal()
             }
         }
     }
 }
+
+//подключение библиотеки java.desktop к проекту. импорт java.awt.*
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("--add-modules")
+    options.compilerArgs.add("java.desktop")
+}
+

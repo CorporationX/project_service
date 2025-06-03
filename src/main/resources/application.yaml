@@ -42,9 +42,20 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    signingRegion: us-east-1
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080
+
+application:
+  cover-image:
+    fileSizeMB: 5
+    squareSize: 1080
+    rectWidthSize: 1080
+    rectHeightSize: 566
+
