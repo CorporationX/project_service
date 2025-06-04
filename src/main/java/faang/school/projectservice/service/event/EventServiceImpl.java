@@ -33,7 +33,7 @@ public class EventServiceImpl implements EventService {
     public EventOutputDto createEvent(CreateEventDto createEventDto, long projectId) {
         Project project = findProjectById(projectId);
         CalendarEventResponse eventCreationResponse = googleCalendarClient.createEvent(createEventDto);
-        if (!eventCreationResponse.getStatus().equals("confirmed")) {
+        if (!"confirmed".equals(eventCreationResponse.getStatus())) {
             throw new FailedRequestException("Creating event for project with id %d failed".formatted(projectId));
         }
         Event event = Event.builder()
@@ -52,20 +52,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventOutputDto getEvent(long projectId, long eventId) {
-        Project project = findProjectById(projectId);
-        if (project.getEvents().stream()
-                .noneMatch(event -> event.getId() == eventId)) {
+        findProjectById(projectId);
+        if (!eventRepository.existsByProjectIdAndEventId(projectId, eventId)) {
             throw new IllegalArgumentException("Project with id %d doesn't contains event with id %d".formatted(projectId, eventId));
         }
         Event existingEvent = findEventById(eventId);
-        CalendarEventResponse getEventResponse = null;
-        try {
-            getEventResponse = googleCalendarClient.getEvent(existingEvent.getCalendarEventId());
-        } catch (Exception e) {
-            System.out.println(1);
-        }
-        if (!getEventResponse.getStatus().equals("confirmed")) {
-            throw new FailedRequestException("Creating event for project with id %d failed".formatted(projectId));
+        CalendarEventResponse getEventResponse = googleCalendarClient.getEvent(existingEvent.getCalendarEventId());
+
+        if (!"confirmed".equals(getEventResponse.getStatus())) {
+            throw new FailedRequestException("Getting event for project with id %d failed".formatted(projectId));
         }
         return eventMapper.toEventOutputDto(existingEvent);
     }
@@ -73,9 +68,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventOutputDto deleteEvent(long projectId, long eventId) {
-        Project project = findProjectById(projectId);
-        if (project.getEvents().stream()
-                .noneMatch(event -> event.getId() == eventId)) {
+        findProjectById(projectId);
+        if (!eventRepository.existsByProjectIdAndEventId(projectId, eventId)) {
             throw new IllegalArgumentException("Project with id %d doesn't contains event with id %d".formatted(projectId, eventId));
         }
         Event existingEvent = findEventById(eventId);
