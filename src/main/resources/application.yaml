@@ -58,8 +58,6 @@ services:
     bucketName: projectbucket
     isMocked: false
   payment-service:
-    host: http://localhost
-    port: 9080
+    name: payment-service
   user-service:
-    host: http://localhost
-    port: 8080
+    name: user-service

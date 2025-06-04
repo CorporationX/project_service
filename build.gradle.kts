@@ -11,6 +11,7 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
     mavenCentral()
 }
+
 val springCloudVersion by extra("2022.0.5")
 
 dependencies {
