@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.resource;
 
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.Builder;

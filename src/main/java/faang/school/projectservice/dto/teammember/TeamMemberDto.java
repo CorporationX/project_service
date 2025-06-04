@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.resource;
+package faang.school.projectservice.dto.teammember;
 
 import faang.school.projectservice.model.TeamRole;
 import lombok.Builder;
