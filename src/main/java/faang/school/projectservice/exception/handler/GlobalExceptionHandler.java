@@ -30,25 +30,35 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentExceptions(IllegalArgumentException ex) {
-        log.error(ex.getMessage());
-        return ResponseEntity
-                .badRequest()
-                .body(ex.getMessage());
+        return badRequest(ex);
     }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Object> handleIOExceptions(IOException ex) {
-        log.error(ex.getMessage());
-        return ResponseEntity
-                .badRequest()
-                .body(ex.getMessage());
+        return badRequest(ex);
     }
 
     @ExceptionHandler(ServletException.class)
     public ResponseEntity<Object> handleServletExceptions(ServletException ex) {
+        return internalServerError(ex);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<Object> handleNullPointerExceptions(NullPointerException ex) {
+        return internalServerError(ex);
+    }
+
+    private ResponseEntity<Object> internalServerError(Exception ex) {
         log.error(ex.getMessage());
         return ResponseEntity
                 .internalServerError()
+                .body(ex.getMessage());
+    }
+
+    private ResponseEntity<Object> badRequest(Exception ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity
+                .badRequest()
                 .body(ex.getMessage());
     }
 }
