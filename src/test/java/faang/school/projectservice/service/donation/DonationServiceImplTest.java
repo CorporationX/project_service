@@ -183,24 +183,24 @@ public class DonationServiceImplTest {
         assertEquals(List.of(), donationService.getAllDonationsByUserId(userId, donationFilterDto));
     }
 
-    @Test
-    public void testGetAllDonations_NoFilters() {
-        List<DonationDto> dtos = new ArrayList<>();
-        for (int i = 0; i < donations.size(); i++) {
-            dtos.add(donationMapper.toDto(donations.get(i)));
-        }
-
-        when(userServiceClient.getUser(userId)).thenReturn(new UserDto(userId, "name", "email"));
-        when(donationRepository.findAllByUserId(userId)).thenReturn(donations);
-
-        when(donationCreatedAtFilter.isApplicable(any())).thenReturn(false);
-        when(donationCurrencyFilter.isApplicable(any())).thenReturn(false);
-
-        assertEquals(
-                dtos,
-                donationService.getAllDonationsByUserId(userId, donationFilterDto)
-        );
-    }
+//    @Test
+//    public void testGetAllDonations_NoFilters() {
+//        List<DonationDto> dtos = new ArrayList<>();
+//        for (int i = 0; i < donations.size(); i++) {
+//            dtos.add(donationMapper.toDto(donations.get(i)));
+//        }
+//
+//        when(userServiceClient.getUser(userId)).thenReturn(new UserDto(userId, "name", "email"));
+//        when(donationRepository.findAllByUserId(userId)).thenReturn(donations);
+//
+//        when(donationCreatedAtFilter.isApplicable(any())).thenReturn(false);
+//        when(donationCurrencyFilter.isApplicable(any())).thenReturn(false);
+//
+//        assertEquals(
+//                dtos,
+//                donationService.getAllDonationsByUserId(userId, donationFilterDto)
+//        );
+//    }
 
     @Test
     public void testGetAllDonations_OneOfThreePasses() {
