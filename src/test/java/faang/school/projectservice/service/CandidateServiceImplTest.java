@@ -11,6 +11,8 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
+import faang.school.projectservice.repository.adapter.team.TeamRepositoryAdapter;
+import faang.school.projectservice.service.candidate.CandidateServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,7 +49,7 @@ class CandidateServiceImplTest {
     private CandidateRepository candidateRepository;
 
     @Mock
-    private TeamService teamService;
+    private TeamRepositoryAdapter teamRepositoryAdapter;
 
     @Mock
     private DomainEventPublisher eventPublisher;
@@ -92,7 +94,7 @@ class CandidateServiceImplTest {
         @DisplayName("Should successfully accept a candidate and publish event")
         void testAcceptCandidateSuccess() {
             when(candidateRepository.findById(CANDIDATE_ID)).thenReturn(Optional.of(candidate));
-            when(teamService.getById(TEAM_ID)).thenReturn(team);
+            when(teamRepositoryAdapter.getById(TEAM_ID)).thenReturn(team);
 
             candidateService.acceptCandidate(VACANCY_ID, CANDIDATE_ID, TEAM_ID);
 
@@ -109,7 +111,7 @@ class CandidateServiceImplTest {
             Project newProject = new Project();
             newProject.setId(55L);
             team.setProject(newProject);
-            when(teamService.getById(TEAM_ID)).thenReturn(team);
+            when(teamRepositoryAdapter.getById(TEAM_ID)).thenReturn(team);
 
             BusinessValidationException ex = assertThrows(
                     BusinessValidationException.class,

@@ -1,7 +1,5 @@
 package faang.school.projectservice.service.project;
 
-
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.excepcion.DataValidationException;
@@ -10,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
-    private final ProjectRepositoryAdapter projectRepositoryAdapter;
+    private final ProjectRepoAdapter projectRepoAdapter;
     private final UserContext userContext;
 
     public ProjectDto createProject(long userId, ProjectDto projectDto) {
@@ -44,7 +43,7 @@ public class ProjectService {
 
     public ProjectDto updateProject(long userId, ProjectDto projectDto) {
         projectValidator.validate(projectDto);
-        Project project = projectRepositoryAdapter.getProjectById(projectDto.getId());
+        Project project = projectRepoAdapter.getProjectById(projectDto.getId());
         if (!Objects.equals(projectDto.getOwnerId(), userId)) {
             throw new DataValidationException("This project does not belong to this owner");
         }
@@ -96,7 +95,7 @@ public class ProjectService {
     }
 
     public ProjectDto getProjectById(long projectId) {
-        Project project = projectRepositoryAdapter.getProjectById(projectId);
+        Project project = projectRepoAdapter.getProjectById(projectId);
         return projectMapper.toDto(project);
     }
 

@@ -1,6 +1,5 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.adapter.ProjectRepositoryAdapter;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.excepcion.DataValidationException;
@@ -9,6 +8,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ class ProjectServiceTest {
     @Mock
     private UserContext userContext;
     @Mock
-    private ProjectRepositoryAdapter projectRepositoryAdapter;
+    private ProjectRepoAdapter projectRepoAdapter;
 
     @InjectMocks
     private ProjectService projectService;
@@ -91,7 +91,7 @@ class ProjectServiceTest {
     void updateProject_Success() {
         projectDto.setOwnerId(USER_ID);
 
-        when(projectRepositoryAdapter.getProjectById(PROJECT_ID))
+        when(projectRepoAdapter.getProjectById(PROJECT_ID))
                 .thenReturn(project);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
@@ -101,7 +101,7 @@ class ProjectServiceTest {
         assertNotNull(result);
         assertEquals(projectDto, result);
         verify(projectValidator).validate(projectDto);
-        verify(projectRepositoryAdapter).getProjectById(PROJECT_ID);
+        verify(projectRepoAdapter).getProjectById(PROJECT_ID);
     }
 
     @Test
@@ -109,21 +109,21 @@ class ProjectServiceTest {
         long anotherUserId = 2L;
         projectDto.setOwnerId(anotherUserId);
 
-        when(projectRepositoryAdapter.getProjectById(PROJECT_ID))
+        when(projectRepoAdapter.getProjectById(PROJECT_ID))
                 .thenReturn(project);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectService.updateProject(USER_ID, projectDto));
 
         assertEquals("This project does not belong to this owner", exception.getMessage());
-        verify(projectRepositoryAdapter).getProjectById(PROJECT_ID);
+        verify(projectRepoAdapter).getProjectById(PROJECT_ID);
         verify(projectValidator).validate(projectDto);
         verifyNoMoreInteractions(projectRepository, projectMapper);
     }
 
     @Test
     void getProjectById_Success() {
-        when(projectRepositoryAdapter.getProjectById(PROJECT_ID))
+        when(projectRepoAdapter.getProjectById(PROJECT_ID))
                 .thenReturn(project);
         when(projectMapper.toDto(project)).thenReturn(projectDto);
 
