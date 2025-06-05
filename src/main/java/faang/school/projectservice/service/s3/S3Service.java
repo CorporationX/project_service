@@ -56,7 +56,7 @@ public class S3Service {
             client.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(key).build());
         } catch (Exception e) {
             log.error("Failed to delete file from S3: ", e);
-            throw new StorageException("File uploading failed");
+            throw new StorageException("File deleting failed");
         }
     }
 
