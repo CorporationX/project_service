@@ -53,3 +53,11 @@ services:
 entity:
     project:
         default-storage-size: 2
+
+google:
+  service-account:
+    key-file-path: kelpie10google.json
+  api:
+    url: https://www.googleapis.com/
+  calendar:
+    id: 948a850ea2013122e19246b99a8b9c2caeed1bac182d7928d4bd158ec1f06182@group.calendar.google.com
