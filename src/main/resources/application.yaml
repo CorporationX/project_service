@@ -50,6 +50,6 @@ services:
     port: 8080
 
 jira:
-  base-url: https://faang-school.atlassian.net/
+  base-url: https://faang-school.atlassian.net
   username: gaanjara3@gmail.com
   api-token: ATATT3xFfGF0wZNdk25y0503_ibL8ZzwlGlo5nBkr_UDi3hFUJlv-Jwm9rxIHIwJ3y1rEKHY6KB6-_TV6IqbEeV2RhYq0qasJKvl-BOKblLCsClrtujAwXyAEt_yOUCprOmf7xwBNLDuQkHBo7d2tbuyQlCIA0mR5XcJIUpWv0yJgazAU8zmnEk=8B67832C

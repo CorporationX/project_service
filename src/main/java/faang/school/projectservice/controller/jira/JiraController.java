@@ -1,9 +1,6 @@
 package faang.school.projectservice.controller.jira;
 
-import faang.school.projectservice.dto.jira.task.JiraCreateIssueJSON;
-import faang.school.projectservice.dto.jira.task.JiraCreateTaskDto;
-import faang.school.projectservice.dto.jira.task.JiraChangeTaskDto;
-import faang.school.projectservice.dto.jira.task.JiraTaskFilterDto;
+import faang.school.projectservice.dto.jira.task.JiraIssueFilterDto;
 import faang.school.projectservice.service.JiraService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -25,40 +23,38 @@ public class JiraController {
     private final JiraService jiraService;
 
     @PostMapping("/issues")
-    public ResponseEntity<?> createIssue(@RequestBody JiraCreateTaskDto jiraCreateTaskDto) {
-        Map<String, Object> result = jiraService.createIssue(jiraCreateTaskDto);
-        return ResponseEntity.ok(result);
-    }
-
-    // Tак ведь лучше?
-    // Если прикинуть с фронта мы бы получали запрос либо через открывающуюся вкладку где выбирали параметры таски перед созданием.
-    // Или уже созданную таску с нашего сервиса, разбивали бы на необходимые компоненты и их отсылали бы?
-    @PostMapping("/issues/json")
-    public ResponseEntity<?> createIssueWithJSON(@RequestBody Map json) {
-        Map<String, Object> result = jiraService.createIssueWithJSON(json);
+    public ResponseEntity<?> createIssue(@RequestBody Map body) {
+        Map<String, Object> result = jiraService.createIssue(body);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/issues/{issueId}")
-    public ResponseEntity<?> changeIssue(@PathVariable long issueId, @RequestBody JiraChangeTaskDto jiraTaskDto) {
-        Map<String, Object> result = jiraService.changeIssue(issueId, jiraTaskDto);
+    public ResponseEntity<?> changeIssue(@PathVariable long issueId, @RequestBody Map body) {
+        Map<String, Object> result = jiraService.changeIssue(issueId, body);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/projects/{projectKey}/filter")
-    public ResponseEntity<?> getAllIssuesWithFilter(@PathVariable String projectKey, JiraTaskFilterDto jiraTaskFilterDto) {
-        if (jiraTaskFilterDto == null) {
-            return getAllIssues(projectKey);
+    public ResponseEntity<?> getAllIssuesWithFilter(@PathVariable String projectKey,
+                                                    @RequestBody JiraIssueFilterDto jiraTaskFilterDto,
+                                                    @RequestParam(defaultValue = "0") int startAt,
+                                                    @RequestParam(defaultValue = "100") int maxResults,
+                                                    @RequestParam(required = false) Integer limit) {
+        if (jiraTaskFilterDto == null ||
+                (jiraTaskFilterDto.getAssignee() == null && jiraTaskFilterDto.getStatus() == null)) {
+            return getAllIssues(projectKey, startAt, maxResults, limit);
         }
 
-        Map<String, Object> result = jiraService.getAllIssuesWithFilter(projectKey, jiraTaskFilterDto);
+        Map<String, Object> result = jiraService.getAllIssuesWithFilter(projectKey, jiraTaskFilterDto, startAt, maxResults, limit);
         return ResponseEntity.ok(result);
     }
 
-    // Not enough permission, спросить у Михаила
     @GetMapping("/projects/{projectKey}")
-    public ResponseEntity<?> getAllIssues(@PathVariable String projectKey) {
-        Map<String, Object> result = jiraService.getAllIssues(projectKey);
+    public ResponseEntity<?> getAllIssues(@PathVariable String projectKey,
+                                          @RequestParam(defaultValue = "0") int startAt,
+                                          @RequestParam(defaultValue = "100") int maxResults,
+                                          @RequestParam(required = false) Integer limit) {
+        Map<String, Object> result = jiraService.getAllIssues(projectKey, startAt, maxResults, limit);
         return ResponseEntity.ok(result);
     }
 
