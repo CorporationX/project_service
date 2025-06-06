@@ -28,7 +28,7 @@ import java.util.Objects;
 @RequestMapping("/api/v1/teams/avatars/")
 public class TeamAvatarController {
     private final TeamAvatarService teamAvatarService;
-    private static final Long MAX_AVATAR_SIZE = 5 * 1024 * 1024L; // 5 MB
+    private static final Long MAX_AVATAR_SIZE = 5L * 1024L * 1024L; // 5 MB
 
     @PostMapping("{teamId}/create")
     public TeamDto createAvatar(@NotNull @Positive @PathVariable Long teamId,
