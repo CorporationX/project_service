@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,7 +43,9 @@ public class S3Service {
                     .contentLength(file.getSize())
                     .contentType(file.getContentType())
                     .build();
-            client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            try (InputStream inputStream = file.getInputStream()) {
+                client.putObject(request, RequestBody.fromInputStream(inputStream, file.getSize()));
+            }
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new FileException("File uploading failed");
@@ -61,10 +64,15 @@ public class S3Service {
     }
 
     public S3FileDto downloadFile(String key) {
-        try {
-            ResponseInputStream<GetObjectResponse> s3Object = client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build());
-            Resource streamResource = new InputStreamResource(s3Object);
+        try (ResponseInputStream<GetObjectResponse> s3Object = client.getObject(
+                GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build())
+        )
+        {
 
+            Resource streamResource = new InputStreamResource(s3Object);
             HeadObjectResponse metadata = client.headObject(HeadObjectRequest.builder().bucket(bucketName).key(key).build());
 
             return S3FileDto.builder()
