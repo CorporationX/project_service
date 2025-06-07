@@ -5,6 +5,20 @@ spring:
     username: user
     password: password
 
+  config:
+    import: 'optional:consul:'
+  application:
+    name: project-service
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery: project-service-i1
+      config:
+        enabled: true
+        watch:
+          enabled: true
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -44,8 +58,6 @@ services:
     bucketName: projectbucket
     isMocked: false
   payment-service:
-    host: http://localhost
-    port: 9080
+    name: payment-service
   user-service:
-    host: http://localhost
-    port: 8080
+    name: user-service
