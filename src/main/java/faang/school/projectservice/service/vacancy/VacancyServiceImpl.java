@@ -9,6 +9,7 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -37,6 +38,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final UserContext userContext;
     private final TeamMemberRepository teamMemberRepository;
     private final VacancyMapper vacancyMapper;
+    private final CandidateMapper candidateMapper;
     private final VacancyValidator vacancyValidator;
     private final List<Filter<Vacancy, VacancyFilterDto>> vacancyFilters;
 
@@ -63,13 +65,8 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     @Transactional
     public VacancyResponseDto updateVacancy(UpdateVacancyDto dto) {
-
         Vacancy vacancy = vacancyRepository.findById(dto.getId())
-                .orElseThrow(() -> {
-                    String errorMsg = String.format(VACANCY_NOT_FOUND, dto.getId());
-                    log.error(errorMsg);
-                    return new EntityNotFoundException(errorMsg);
-                });
+                .orElseThrow(() -> new EntityNotFoundException(String.format(VACANCY_NOT_FOUND, dto.getId())));
 
         vacancyValidator.checkRoleUpdatingUser(userContext.getUserId());
         if (dto.getPosition() != null) {
@@ -92,14 +89,8 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     @Transactional
     public VacancyResponseDto closeVacancy(Long vacancyId, CloseVacancyDto dto) {
-
-
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> {
-                    String errorMsg = String.format(VACANCY_NOT_FOUND, vacancyId);
-                    log.error(errorMsg);
-                    return new EntityNotFoundException(errorMsg);
-                });
+                .orElseThrow(() -> new EntityNotFoundException(String.format(VACANCY_NOT_FOUND, vacancyId)));
 
         vacancyValidator.checkRoleUpdatingUser(userContext.getUserId());
         vacancyValidator.validateCandidateSelectionForClosing(vacancy, dto.getSelectedCandidateIds());
@@ -133,28 +124,20 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public VacancyResponseDto getVacancyById(Long id) {
-        Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> {
-                    String errorMsg = String.format(VACANCY_NOT_FOUND, id);
-                    log.error(errorMsg);
-                    return new EntityNotFoundException(errorMsg);
-                });
+    public VacancyResponseDto getVacancyById(Long vacancyId) {
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format(VACANCY_NOT_FOUND, vacancyId)));
 
-        log.debug("Retrieved vacancy {}", id);
+        log.debug("Retrieved vacancy {}", vacancyId);
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
     private void addCandidatesToVacancy(Vacancy vacancy, List<CandidateDto> candidatesToAdd) {
         List<Candidate> newCandidates = candidatesToAdd.stream()
                 .map(dto -> {
-                    Candidate candidate = Candidate.builder()
-                            .userId(dto.getUserId())
-                            .username(dto.getUsername())
-                            .vacancy(vacancy)
-                            .candidateStatus(CandidateStatus.WAITING_RESPONSE)
-                            .coverLetter(dto.getCoverLetter())
-                            .build();
+                    Candidate candidate = candidateMapper.toCandidateEntity(dto);
+                    candidate.setVacancy(vacancy);
+                    candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
                     vacancy.getCandidates().add(candidate);
                     return candidate;
                 })

@@ -33,7 +33,7 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.createVacancy(dto));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{vacancyId}")
     public ResponseEntity<VacancyResponseDto> updateVacancy(
             @PathVariable Long id,
             @Valid @RequestBody UpdateVacancyDto dto) {
@@ -41,7 +41,7 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.updateVacancy(dto));
     }
 
-    @PostMapping("/{id}/close")
+    @PostMapping("/{vacancyId}/close")
     public ResponseEntity<VacancyResponseDto> closeVacancy(
             @PathVariable Long id,
             @Valid @RequestBody CloseVacancyDto dto) {
@@ -54,7 +54,7 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.getFilteredVacancies(filterDto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{vacancyId}")
     public ResponseEntity<VacancyResponseDto> getVacancyById(@PathVariable Long id) {
         return ResponseEntity.ok(vacancyService.getVacancyById(id));
     }

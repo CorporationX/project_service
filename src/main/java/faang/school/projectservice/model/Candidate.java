@@ -27,6 +27,7 @@ public class Candidate {
     private Long id;
     @NotNull
     private Long userId;
+    @NotNull
     private String username;
     private String resumeDocKey;
     private String coverLetter;

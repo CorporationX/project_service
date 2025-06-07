@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.InvalidOperationException;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.model.Candidate;
@@ -15,6 +14,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -84,6 +84,7 @@ class VacancyValidatorTest {
         candidate = Candidate.builder()
                 .id(CANDIDATE_ID)
                 .userId(USER_ID)
+                .username("user101")
                 .candidateStatus(CandidateStatus.ACCEPTED)
                 .build();
 

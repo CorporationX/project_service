@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -61,6 +63,8 @@ public class VacancyServiceImplTest {
     private UserContext userContext;
     @Mock
     private VacancyMapper vacancyMapper;
+    @Mock
+    private CandidateMapper candidateMapper;
     @Mock
     private VacancyValidator validator;
     @Mock
@@ -106,6 +110,7 @@ public class VacancyServiceImplTest {
                 userContext,
                 teamMemberRepo,
                 vacancyMapper,
+                candidateMapper,
                 validator,
                 List.of(mockFilter)
         );
@@ -134,14 +139,45 @@ public class VacancyServiceImplTest {
     @Test
     @DisplayName("Обновление вакансии - полная проверка")
     void shouldUpdateAllFieldsAndCandidates_whenUpdateVacancy() {
+        CandidateDto candidateDto1 = CandidateDto.builder()
+                .userId(101L)
+                .username("user101")
+                .build();
+
+        CandidateDto candidateDto2 = CandidateDto.builder()
+                .userId(102L)
+                .username("user102")
+                .build();
+
+        Candidate candidate1 = Candidate.builder()
+                .userId(101L)
+                .username("user101")
+                .vacancy(testVacancy)
+                .candidateStatus(CandidateStatus.WAITING_RESPONSE)
+                .build();
+
+        Candidate candidate2 = Candidate.builder()
+                .userId(102L)
+                .username("user102")
+                .vacancy(testVacancy)
+                .candidateStatus(CandidateStatus.WAITING_RESPONSE)
+                .build();
+
         when(vacancyRepo.findById(vacancyId)).thenReturn(Optional.of(testVacancy));
         when(userContext.getUserId()).thenReturn(userId);
+        when(candidateMapper.toCandidateEntity(candidateDto1)).thenReturn(candidate1);
+        when(candidateMapper.toCandidateEntity(candidateDto2)).thenReturn(candidate2);
+        when(candidateRepo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         vacancyService.updateVacancy(updateDto);
-
+        
         verify(vacancyRepo).findById(vacancyId);
+        verify(candidateMapper, times(2)).toCandidateEntity(any());
+        verify(candidateRepo).saveAll(anyList());
+
         assertThat(testVacancy.getCount()).isEqualTo(3);
         assertThat(testVacancy.getUpdatedBy()).isEqualTo(userId);
+        assertThat(testVacancy.getCandidates()).hasSize(3); // 1
     }
 
     @Test

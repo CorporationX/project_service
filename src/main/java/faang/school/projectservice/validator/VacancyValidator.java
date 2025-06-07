@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.InvalidOperationException;
 import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.model.Candidate;
@@ -13,6 +12,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class VacancyValidator {
 
     public void validateProjectExists(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException("Project with ID " + projectId + " not found");
+            throw new EntityNotFoundException(String.format("Project with ID %d not found", projectId));
         }
     }
 
@@ -58,13 +58,15 @@ public class VacancyValidator {
 
     public boolean checkRoleUpdatingUser(Long id) {
         TeamMember updatingUser = teamMemberRepository.findByUserId(id).stream()
-                .findFirst().orElseThrow(() -> new DataValidationException("Вы не можете обновлять вакансии"));
-        try {
-            return updatingUser.getRoles().stream()
-                    .anyMatch(role -> role == TeamRole.OWNER || role == TeamRole.MANAGER);
-        } catch (Exception e) {
+                .findFirst()
+                .orElseThrow(() -> new DataValidationException("Вы не можете обновлять вакансии"));
+        boolean hasRequiredRole = updatingUser.getRoles().stream()
+                .anyMatch(role -> role == TeamRole.OWNER || role == TeamRole.MANAGER);
+
+        if (!hasRequiredRole) {
             throw new DataValidationException("Обновлять вакансии могут только OWNER или MANAGER");
         }
+        return hasRequiredRole;
     }
 
     public void validateCandidateSelectionForClosing(Vacancy vacancy, List<Long> selectedIds) {
@@ -74,7 +76,7 @@ public class VacancyValidator {
 
         if (selectedIds.size() != vacancy.getCount()) {
             throw new DataValidationException(
-                    "Требуется " + vacancy.getCount() + " кандидатов, но выбрано " + selectedIds.size());
+                    String.format("Требуется %d кандидатов, но выбрано %d", vacancy.getCount(), selectedIds.size()));
         }
 
         Set<Long> validCandidateIds = vacancy.getCandidates().stream()
@@ -86,7 +88,7 @@ public class VacancyValidator {
                 .toList();
 
         if (!invalidIds.isEmpty()) {
-            throw new DataValidationException("Недействительные candidateIds: " + invalidIds);
+            throw new DataValidationException(String.format("Недействительные candidateIds: %s", invalidIds));
         }
 
         selectedIds.forEach(candidateId -> {
@@ -95,7 +97,8 @@ public class VacancyValidator {
 
             if (candidate.getCandidateStatus() != CandidateStatus.ACCEPTED) {
                 throw new DataValidationException(
-                        "Кандидат " + candidateId + " имеет недопустимый статус: " + candidate.getCandidateStatus());
+                        String.format("Кандидат %d имеет недопустимый статус: %s",
+                                candidateId, candidate.getCandidateStatus()));
             }
         });
     }
