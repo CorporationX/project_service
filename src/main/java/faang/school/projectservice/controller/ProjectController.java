@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
 
-    @Autowired
-    private ProjectService projectService;
+    private final ProjectService projectService;
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
@@ -37,8 +35,8 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectDto>> getAllProjects(@RequestParam(required = false) String name,
-                                                           @RequestParam(required = false) String status) {
+    public ResponseEntity<List<ProjectDto>> getAllProjects(@RequestParam String name,
+                                                           @RequestParam String status) {
         List<ProjectDto> projects = projectService.getAllProjects(name, status);
         return ResponseEntity.ok(projects);
     }

@@ -5,21 +5,22 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class ProjectService {
 
-    @Autowired
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    @Autowired
-    private ProjectMapper projectMapper;
+    private final ProjectMapper projectMapper;
 
     public ProjectDto createProject(ProjectDto projectDto) {
 
@@ -34,6 +35,7 @@ public class ProjectService {
         return projectMapper.toProjectDto(savedProject);
     }
 
+    @Transactional
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
 
         Optional<Project> optionalProject = projectRepository.findById(id);
