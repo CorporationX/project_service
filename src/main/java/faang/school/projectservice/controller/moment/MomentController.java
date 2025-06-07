@@ -2,6 +2,10 @@ package faang.school.projectservice.controller.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.service.moment.MomentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +21,14 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "moment_controller_methods")
 @RequestMapping("/moments")
 public class MomentController {
     private final MomentService momentService;
 
+    @Operation(summary = "create new moment",
+            description = "Receive MomentDto object, save Moment entity after mapping in DB," +
+                    " and return saved entity mapped to DTO.")
     @PostMapping
     public MomentDto createMoment(@Valid @RequestBody MomentDto momentDto) {
         return momentService.createMoment(momentDto);
