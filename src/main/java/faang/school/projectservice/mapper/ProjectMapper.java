@@ -3,15 +3,18 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
-import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" , unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
+    ProjectMapper INSTANCE = Mappers.getMapper(ProjectMapper.class);
 
-    Project toProject(ProjectDto projectDto);
+    @Mapping(target = "status", expression = "java(project.getStatus().name())")
+    ProjectDto toDto(Project project);
 
-    ProjectDto toProjectDto(Project project);
-
-    List<ProjectDto> toProjectDtoList(List<Project> projects);
+    @Mapping(target = "status", expression = "java(faang.school.projectservice.model.ProjectStatus.valueOf(projectDto.getStatus()))")
+    Project toEntity(ProjectDto projectDto);
 }

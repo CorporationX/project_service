@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -19,8 +18,7 @@ public class ProjectDto {
     private String description;
     private String status;
     private Long ownerId;
-    private Instant createdAt;
-    private Instant lastModified;
-    private Instant updatedAt;
-    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
 }
