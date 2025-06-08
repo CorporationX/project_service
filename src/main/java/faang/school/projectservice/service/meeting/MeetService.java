@@ -1,17 +1,15 @@
 package faang.school.projectservice.service.meeting;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.meeting.MeetDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ParticipantNotFoundException;
-import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.mapper.moment.meeting.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
+import faang.school.projectservice.repository.adapter.meeting.MeetRepositoryAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,37 +27,38 @@ import static faang.school.projectservice.model.MeetStatus.PENDING;
 public class MeetService {
     private final MeetRepository meetRepository;
     private final MeetMapper meetMapper;
+    private final MeetRepositoryAdapter meetRepositoryAdapter;
 
     @Transactional
     public MeetDto create(long creatorId, MeetDto MeetDto) {
-        Meet toSave = meetMapper.toEntity(MeetDto);
-        toSave.setId(null);
-        toSave.setCreatorId(creatorId);
-        toSave.setStatus(PENDING);
-        toSave.setActive(true);
+        Meet meet = meetMapper.toEntity(MeetDto);
+        meet.setId(null);
+        meet.setCreatorId(creatorId);
+        meet.setStatus(PENDING);
+        meet.setActive(true);
         LocalDateTime now = LocalDateTime.now();
-        toSave.setCreatedAt(now);
-        toSave.setUpdatedAt(now);
+        meet.setCreatedAt(now);
+        meet.setUpdatedAt(now);
 
-        Meet savedMeet = meetRepository.save(toSave);
+        Meet savedMeet = meetRepository.save(meet);
         return meetMapper.toDto(savedMeet);
     }
 
+    @Transactional
     public MeetDto cancel(long meetId, long memberId) {
-       Meet existing = fetchByIdOrThrow(meetId);
+       Meet existing = meetRepositoryAdapter.fetchByIdOrThrow(meetId);
        assertCreator(existing, memberId);
        existing.setStatus(CANCELLED);
        existing.setActive(false);
        existing.setUpdatedAt(LocalDateTime.now());
 
-       Meet savedMeet = meetRepository.save(existing);
-       log.info("Meet {} cancelled by user {}", savedMeet.getId(), memberId);
-       return meetMapper.toDto(savedMeet);
+        log.info("Meet {} cancelled by user {}", existing.getId(), memberId);
+        return meetMapper.toDto(existing);
     }
 
     @Transactional
     public MeetDto removeParticipant(long meetId, long memberId, long participantId) {
-        Meet meeting = fetchByIdOrThrow(meetId);
+        Meet meeting = meetRepositoryAdapter.fetchByIdOrThrow(meetId);
         assertCreator(meeting, memberId);
 
         boolean removed = meeting.getUserIds() != null &&
@@ -74,7 +73,7 @@ public class MeetService {
     }
 
     public MeetDto update(Long meetId, Long memberId, MeetDto updateMeetDto) {
-        Meet existing  = fetchByIdOrThrow(meetId);
+        Meet existing  = meetRepositoryAdapter.fetchByIdOrThrow(meetId);
         assertCreator(existing, memberId);
 
         existing.setTitle(updateMeetDto.getTitle());
@@ -93,7 +92,7 @@ public class MeetService {
     }
 
     public MeetDto findById(long meetId) {
-        return meetMapper.toDto(fetchByIdOrThrow(meetId));
+        return meetMapper.toDto(meetRepositoryAdapter.fetchByIdOrThrow(meetId));
     }
 
     public List<MeetDto> findAll() {
@@ -113,11 +112,6 @@ public class MeetService {
         return meetMapper.toDtoList(meets);
     }
 
-    private Meet fetchByIdOrThrow(long id) {
-        return meetRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Meeting with id=" + id + " not found"));
-    }
-
     private void assertCreator(Meet meet, long memberId) {
         if (!memberIdEquals(meet.getCreatorId(), memberId)) {
             throw new AccessDeniedException("Only the meeting creator can modify/cancel it");
@@ -125,7 +119,6 @@ public class MeetService {
     }
 
     private boolean memberIdEquals(Long firstMember, Long secondMember) {
-        return firstMember != null && Objects.equals(firstMember, secondMember);
+        return Objects.equals(firstMember, secondMember);
     }
-
 }
