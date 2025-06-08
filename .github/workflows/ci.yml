@@ -50,12 +50,12 @@ jobs:
           name: checkstyle-report
           path: build/reports/checkstyle
 
-      - name: Upload jacoco report
+      - name: Archive jacoco report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jacoco_report
-          path: build/reports/jacoco
+          path: build/reports/jacoco/test/html
 
       - name: Archive test report
         if: always()
