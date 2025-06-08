@@ -6,8 +6,11 @@ import faang.school.projectservice.dto.task.TaskFilterDto;
 import java.util.List;
 
 public interface TaskService {
-    public void createTask(TaskDto taskDto);
-    public void updateTask(Long taskId, TaskDto taskDto);
-    public List<TaskDto> getAllTasks(Long projectId, TaskFilterDto taskFilterDto);
-    public TaskDto getTask(Long taskId);
+    void createTask(TaskDto taskDto);
+
+    void updateTask(Long taskId, TaskDto taskDto);
+
+    List<TaskDto> getAllTasks(Long projectId, TaskFilterDto taskFilterDto);
+
+    TaskDto getTask(Long taskId);
 }

@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 public class TaskPerformerFilter implements TaskFilterStrategy {
     @Override
     public boolean filter(Task task, TaskFilterDto taskFilterDto) {
-        return  task.getPerformerUserId().equals(taskFilterDto.getPerformerUserId());
+        return task.getPerformerUserId()
+                .equals(taskFilterDto.getPerformerUserId());
     }
+
     @Override
-    public boolean isAppicable (TaskFilterDto taskFilterDto) {
+    public boolean isApplicable(TaskFilterDto taskFilterDto) {
         return taskFilterDto.getPerformerUserId() != null;
     }
 }

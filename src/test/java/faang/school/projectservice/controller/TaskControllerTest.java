@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskControllerTest {
@@ -34,6 +35,7 @@ public class TaskControllerTest {
     void setUp() {
         taskDto = TaskDto.builder()
                 .id(taskId)
+                .name("test")
                 .description("Test Description")
                 .build();
 

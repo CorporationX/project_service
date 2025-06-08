@@ -3,6 +3,7 @@ package faang.school.projectservice.service.task;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.task.TaskFilterStrategy;
 import faang.school.projectservice.mapper.TaskMapper;
@@ -54,7 +55,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDto> getAllTasks(Long projectId, TaskFilterDto taskFilterDto) {
-        isWorkingOnProject(projectId);
+        hasAccessToTasks(projectId);
         if (taskFilterDto == null) {
             return taskMapper.toTaskDtoList(taskRepository.findAllByProjectId(projectId));
         }
@@ -66,17 +67,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDto getTask(Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
-                () -> new EntityNotFoundException("Task with id " + taskId + " not found")
+                () -> new EntityNotFoundException(String.format("Task with id %d not found", taskId))
         );
        Long projectId = task.getProject().getId();
-       isWorkingOnProject(projectId);
+       hasAccessToTasks(projectId);
        return taskMapper.toTaskDto(task);
     }
 
     private void validateTaskAndProjectExistence(TaskDto taskDto) {
-        if (taskDto == null) {
-            throw new IllegalArgumentException("taskDto cannot be null");
-        }
         if (taskDto.getProject() == null) {
             log.error("No project for task with ID={}, taskName={}", taskDto.getId(), taskDto.getName());
             throw new DataValidationException(String.format("No project for task with ID=%s, taskName=%s"
@@ -86,19 +84,19 @@ public class TaskServiceImpl implements TaskService {
 
     private boolean filterTasks(TaskFilterDto taskFilterDto, Task task) {
         return taskFilterStrategies.stream()
-                .filter(strategy -> strategy.isAppicable(taskFilterDto))
+                .filter(strategy -> strategy.isApplicable(taskFilterDto))
                 .allMatch(taskToFilter -> taskToFilter.filter(task, taskFilterDto));
     }
 
-    private void isWorkingOnProject(Long projectId) {
+    private void hasAccessToTasks(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException("Project with id " + projectId + " not found"));
+                () -> new EntityNotFoundException(String.format("Project with id %d not found", projectId)));
         boolean isWorking = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .allMatch(teamMember -> teamMember.getId().equals(userContext.getUserId()));
         if (!isWorking) {
             log.error("User does not have permission to access tasks of project with ID = {}", projectId);
-            throw new DataValidationException(String.format("User does not have permission to access tasks of project with ID = %d", projectId));
+            throw new AccessDeniedException(String.format("User does not have permission to access tasks of project with ID = %d", projectId));
         }
     }
 

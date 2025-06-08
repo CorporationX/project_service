@@ -8,10 +8,13 @@ import org.springframework.stereotype.Component;
 public class TaskKeyWordFilter implements TaskFilterStrategy {
     @Override
     public boolean filter(Task task, TaskFilterDto taskFilterDto) {
-        return task.getDescription().toLowerCase().contains(taskFilterDto.getKeyword().toLowerCase());
+        return task.getDescription()
+                .toLowerCase()
+                .contains(taskFilterDto.getKeyword().toLowerCase());
     }
+
     @Override
-    public boolean isAppicable (TaskFilterDto taskFilterDto) {
+    public boolean isApplicable(TaskFilterDto taskFilterDto) {
         return taskFilterDto.getKeyword() != null;
     }
 }

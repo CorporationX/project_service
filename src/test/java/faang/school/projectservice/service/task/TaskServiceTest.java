@@ -3,6 +3,7 @@ package faang.school.projectservice.service.task;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.task.TaskFilterStrategy;
 import faang.school.projectservice.filter.task.TaskKeyWordFilter;
@@ -10,11 +11,13 @@ import faang.school.projectservice.filter.task.TaskPerformerFilter;
 import faang.school.projectservice.filter.task.TaskStatusFilter;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.mapper.TaskMapperImpl;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.task.TaskService;
-import faang.school.projectservice.service.task.TaskServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
@@ -54,16 +57,15 @@ public class TaskServiceTest {
     private TaskService taskService;
 
 
-    Task task = Task.builder().description("123").status(TaskStatus.TESTING).performerUserId(1L)
-            .project(Project.builder().id(1L).build()).build();
-    Task matchingTask = Task.builder().description("222").status(TaskStatus.IN_PROGRESS).performerUserId(10L).build();
-    Task matchingTask2 = Task.builder().description("222").status(TaskStatus.IN_PROGRESS).performerUserId(10L).build();
-    TaskFilterDto filterDto = new TaskFilterDto("222", TaskStatus.IN_PROGRESS, 10L);
-    List<TeamMember> teamMembers = List.of(TeamMember.builder().id(1L).build());
-    List<Team> teams = List.of(Team.builder().id(1L).teamMembers(teamMembers).build());
-    List<Task> tasks = List.of(task, matchingTask, matchingTask2);
-    Project project = Project.builder().id(1L).tasks(tasks).teams(teams).build();
-    TaskDto taskDto = TaskDto.builder().id(1L).name("test").project(project).build();
+    private Task task;
+    private Task matchingTask;
+    private Task matchingTask2;
+    private TaskFilterDto filterDto;
+    private List<TeamMember> teamMembers;
+    private List<Team> teams;
+    private List<Task> tasks;
+    private Project project;
+    private TaskDto taskDto;
 
 
     @BeforeEach
@@ -79,6 +81,17 @@ public class TaskServiceTest {
                 taskFilterStrategies,
                 projectRepository
         );
+
+        task = Task.builder().description("123").status(TaskStatus.TESTING).performerUserId(1L)
+                .project(Project.builder().id(1L).build()).build();
+        matchingTask = Task.builder().description("222").status(TaskStatus.IN_PROGRESS).performerUserId(10L).build();
+        matchingTask2 = Task.builder().description("222").status(TaskStatus.IN_PROGRESS).performerUserId(10L).build();
+        filterDto = new TaskFilterDto("222", TaskStatus.IN_PROGRESS, 10L);
+        teamMembers = List.of(TeamMember.builder().id(1L).build());
+        teams = List.of(Team.builder().id(1L).teamMembers(teamMembers).build());
+        tasks = List.of(task, matchingTask, matchingTask2);
+        project = Project.builder().id(1L).tasks(tasks).teams(teams).build();
+        taskDto = TaskDto.builder().id(1L).name("test").project(project).build();
     }
 
     @Test
@@ -87,10 +100,6 @@ public class TaskServiceTest {
         Assertions.assertThrows(DataValidationException.class, () -> taskService.createTask(taskDto));
     }
 
-    @Test
-    public void test_createTask_when_NullTask() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> taskService.createTask(null));
-    }
 
     @Test
     public void test_createTask_ShouldSaveTask() {
@@ -115,7 +124,7 @@ public class TaskServiceTest {
     public void test_getAllTasks_when_NotWorkingOnProject() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
         when(userContext.getUserId()).thenReturn(10L);
-        Assertions.assertThrows(DataValidationException.class,
+        Assertions.assertThrows(AccessDeniedException.class,
                 () -> taskService.getAllTasks(1L, null));
     }
 
@@ -134,9 +143,9 @@ public class TaskServiceTest {
         when(userContext.getUserId()).thenReturn(1L);
         when(taskRepository.findAllByProjectId(1L)).thenReturn(tasks);
 
-        when(taskKeyWordFilter.isAppicable(filterDto)).thenReturn(false);
-        when(taskPerformerFilter.isAppicable(filterDto)).thenReturn(true);
-        when(taskStatusFilter.isAppicable(filterDto)).thenReturn(false);
+        when(taskKeyWordFilter.isApplicable(filterDto)).thenReturn(false);
+        when(taskPerformerFilter.isApplicable(filterDto)).thenReturn(true);
+        when(taskStatusFilter.isApplicable(filterDto)).thenReturn(false);
 
         when(taskPerformerFilter.filter(task, filterDto)).thenReturn(false);
         when(taskPerformerFilter.filter(matchingTask, filterDto)).thenReturn(true);
@@ -148,7 +157,7 @@ public class TaskServiceTest {
     @Test
     public void test_getTaskById_when_TaskNotFound() {
         when(taskRepository.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class,()-> taskService.getTask(1L));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> taskService.getTask(1L));
     }
 
     @Test

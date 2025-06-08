@@ -5,13 +5,14 @@ import faang.school.projectservice.model.Task;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskStatusFilter implements TaskFilterStrategy{
+public class TaskStatusFilter implements TaskFilterStrategy {
     @Override
     public boolean filter(Task task, TaskFilterDto taskFilterDto) {
         return taskFilterDto.getStatus() == task.getStatus();
     }
+
     @Override
-    public boolean isAppicable (TaskFilterDto taskFilterDto) {
+    public boolean isApplicable(TaskFilterDto taskFilterDto) {
         return taskFilterDto.getStatus() != null;
     }
 }
