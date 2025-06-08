@@ -21,27 +21,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Grant execute permission for gradle
+        run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build -x test --no-daemon
+        run: ./gradlew build testClasses -x test -x check -x checkstyleMain -x checkstyleTest --no-daemon
 
-      - name: Run Checkstyle
-        run: ./gradlew checkstyleMain --no-daemon
+      - name: Test with Gradle
+        run: ./gradlew test -x testClasses --no-daemon --continue
 
       - name: Verify Test Coverage
         run: ./gradlew jacocoTestCoverageVerification --no-daemon
 
-      - name: Run tests
-        run: ./gradlew test --no-daemon
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
       - name: Upload Checkstyle report
         if: always()
