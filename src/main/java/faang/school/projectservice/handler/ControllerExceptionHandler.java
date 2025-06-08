@@ -1,7 +1,9 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.dto.ErrorResponseDto;
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.FileException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -33,6 +35,30 @@ public class ControllerExceptionHandler {
                 HttpStatus.BAD_REQUEST.name(),
                 "Invalid data provided.",
                 errorMessage,
+                LocalDateTime.now().format(formatter)
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponseDto handleAccessDenied(AccessDeniedException e) {
+        log.error("Access denied", e);
+        return new ErrorResponseDto(
+                HttpStatus.FORBIDDEN.name(),
+                "Have no permission.",
+                e.getMessage(),
+                LocalDateTime.now().format(formatter)
+        );
+    }
+
+    @ExceptionHandler(FileException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleFileException(FileException e) {
+        log.error("Error on file logic processing", e);
+        return new ErrorResponseDto(
+                HttpStatus.BAD_REQUEST.name(),
+                "File exception.",
+                e.getMessage(),
                 LocalDateTime.now().format(formatter)
         );
     }

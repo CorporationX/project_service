@@ -1,4 +1,4 @@
-package faang.school.projectservice.client;
+package faang.school.projectservice.client.interceptor;
 
 import faang.school.projectservice.config.context.UserContext;
 import feign.RequestInterceptor;
