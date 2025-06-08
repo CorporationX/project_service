@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "kelpie-stream-10",
+  "private_key_id": "b995269b430fa7c7759b002cebeae8ad31354dfe",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXnpR7FY1rcHo/\nNLOC9bDhwlfVf7bx3HPlZ6Kl5VeNmP6Mgu/RMOaI13BinIULNv5Yxgl/GwOC7x1d\nme7FDRA9E0BN5frT62qtedvYKDhRjC2QrDoSXtFoxUuK6LJ7C3SI8Iw9hZe1T2fW\n6wZcPVMl+Ab3W2ZWfyXkEe5ijLJ8ILC6dnDsBupUyiWoTx1NM6EdWmyVmRUunJIQ\ndVGEyYu9vx+QTZcKX3lVkXXUjm0pe+BeTjmwSCuCJE5B30pJXmzMxwRatUCaRwPp\nkKPT8skGOOBBWCCldVoOiBNVKR2GJig0Uu00rnmDZ6MCZR8ljCDRj/bxTBLIWQwh\n1wYuBVaxAgMBAAECggEADPwaJfzjaMRAGe3k4kYxlPIIhOqsQ6QgQlEo8Sl2ITSt\nNyInEOytz6IYuD9ElyBpcbebHFk3SKU7B/c9Bz/uSDa/+vPjUncewpbVNLrEEPrO\n860GR6i6aS09Yhr53xcM7sXgEsxAQPk5EMM9vxRK7M1kJla76dQ3jePZvTOkvQPL\nazDSJoOPSPoBVxi+9nMKRL2s/ajt+YJ6oH0QOL8ZGWPOjuKmBRZ73XruJIugHhcM\nm+/FOGhuq3Wb2wl2/s7F7z6EZAkH+ZgCOZJIVeFDJL2S1171/DsKQJcB10OOuB9a\nKdF+i2LbcRsZIRyI3NUizB5pKhML8riNWh9HYZ52KQKBgQDOJGq46Ztf/iu0ahj2\nXmvC2JJJ5cj47K/LXXZJUeq5xxJhVECzcZiv+7La6cyp46nTQ+OlBW9Mx1R/NQ1+\nRYNTL6L0ijp5tdv02VIwcbRJUF01H72UK5NCKgbYtOnkU10LJ68Yt+d1nVBbkT4r\nbvYdBKHDCkbM8LOJ1OWkeCidmQKBgQC8Sk71EtkEXUyVdxue4FJf5SAthuimHvRV\n8vxyBS/1ZgW3YN3RD+KMh6IEIGxzVaPcScWwKyx46Dd2q9W/Hg2XoEdjLDDRRkor\nez+Cfahpziuk+etbIgRqrtBhI1+F1xj9KMCSThB5gQCyRYXkuARiCJeYst8Se6pR\nUrCOZa3A2QKBgFxLFbUgcj4yMCMgdXiooZqlGCoZxTcd0T894x3EnVD7/hCxhh5R\nN8li6Zr1nnpZwcki1iMmIcTAYeZqPFZSjQ+Lfmv6D2A6ufYP7qpd3hgM8Q493cUf\nFVlEM7iGl0lwwXGjHNP2UpzoB/hXOPx9O5eWYU5PpY9QHTISrZZLbfPRAoGAPVnR\nBFWR1LQ5wfG/VDMvZAOaSntMzuQDJQY5b0V1bPZDIo8zd20/mh6PkdymuaXL8Hkx\nKsfGg9bWS5qN2OoH78HPwOajOW03uZc9CF29RExjOCweneElo0U2rJAEDe4aPFLM\n/F7nS0/XVD8G85FqDC9UhfKycKlOw5S35o4G4XECgYBY6cNZGVF93BCwYI3dCEn6\nplcN7IAqsfQjUsTbhWRhCNXdL88PFjjc+345sf4nBNwSTCkpsl8SHZPTvo2SWY3N\nufzshtjCNoiZUGFmM5Hih/+DEBs4cN7ISGCwz1gsKLsxBdMVec3xgYwWY7370T6z\nkzOX9HU7Ithr2qXPFTsYxA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "kelpie10stream@kelpie-stream-10.iam.gserviceaccount.com",
+  "client_id": "103461122319389283079",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/kelpie10stream%40kelpie-stream-10.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

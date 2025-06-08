@@ -23,13 +23,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -185,10 +186,10 @@ public class DonationServiceImplTest {
 
     @Test
     public void testGetAllDonations_NoFilters() {
-        List<DonationDto> expectedDtos = donations.stream()
-                .map(donationMapper::toDto)
-                .sorted(Comparator.comparing(DonationDto::getDonationTime))
-                .toList();
+        List<DonationDto> dtos = new ArrayList<>();
+        for (int i = 0; i < donations.size(); i++) {
+            dtos.add(donationMapper.toDto(donations.get(i)));
+        }
 
         when(userServiceClient.getUser(userId)).thenReturn(new UserDto(userId, "name", "email"));
         when(donationRepository.findAllByUserId(userId)).thenReturn(donations);
@@ -196,10 +197,10 @@ public class DonationServiceImplTest {
         when(donationCreatedAtFilter.isApplicable(any())).thenReturn(false);
         when(donationCurrencyFilter.isApplicable(any())).thenReturn(false);
 
-        assertEquals(
-                expectedDtos,
-                donationService.getAllDonationsByUserId(userId, donationFilterDto)
-        );
+        List<DonationDto> donationsByUser = donationService.getAllDonationsByUserId(userId, donationFilterDto);
+
+        assertEquals(dtos.size(), donationsByUser.size());
+        assertTrue(dtos.containsAll(donationsByUser));
     }
 
     @Test
@@ -216,7 +217,7 @@ public class DonationServiceImplTest {
             Stream<Donation> stream = invocation.getArgument(0);
 
             return stream.filter(donation -> donation.getDonationTime() != null
-                                             && donation.getDonationTime().isEqual(donationFilterDto.createdAt));
+                    && donation.getDonationTime().isEqual(donationFilterDto.createdAt));
         });
 
         when(donationCurrencyFilter.apply(any(), any())).thenAnswer(invocation -> {

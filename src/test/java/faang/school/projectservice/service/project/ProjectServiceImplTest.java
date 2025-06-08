@@ -15,7 +15,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.service.ResourceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +28,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +43,9 @@ class ProjectServiceImplTest {
 
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private ResourceService resourceService;
 
     private final ProjectFilter visibilityFilter = new TestProjectVisibilityFilter();
     private final ProjectFilter statusFilter = new TestProjectStatusFilter();
@@ -78,7 +82,7 @@ class ProjectServiceImplTest {
     public void setUp() {
         service = new ProjectServiceImpl
                 (List.of(visibilityFilter, statusFilter, nameFilter),
-                        projectRepository, projectMapper, userContext);
+                        projectRepository, resourceService, projectMapper, userContext);
         creationDto = ProjectForCreationDto.builder().build();
         updateDto = ProjectForUpdateDto.builder().build();
         outputDto = ProjectOutputDto.builder().build();
@@ -187,7 +191,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerAlreadyHasProject_WithSameName_Uncancelled() {
         String name = "Bakery";
-        Optional<List<Project>> sameNamedProjects = Optional.of(List.of(project1));
+        List<Project> sameNamedProjects = List.of(project1);
         project1.setStatus(ProjectStatus.CREATED);
         project1.setName(name);
         when(projectRepository.findByNameAndOwnerId(name, user2Id)).thenReturn(sameNamedProjects);
@@ -207,7 +211,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerAlreadyHasProject_WithSameName_Cancelled() {
         String name = "Bakery";
-        Optional<List<Project>> sameNamedProjects = Optional.of(List.of(project1));
+        List<Project> sameNamedProjects = List.of(project1);
         project1.setStatus(ProjectStatus.CANCELLED);
         project1.setName(name);
         when(projectRepository.findByNameAndOwnerId(name, user2Id)).thenReturn(sameNamedProjects);
@@ -226,7 +230,7 @@ class ProjectServiceImplTest {
     @Test
     public void testCreate_OwnerHasNotProject_WithSameName() {
         when(userContext.getUserId()).thenReturn(user2Id);
-        when(projectRepository.findByNameAndOwnerId("Bakery", user2Id)).thenReturn(Optional.empty());
+        when(projectRepository.findByNameAndOwnerId("Bakery", user2Id)).thenReturn(List.of());
         creationDto.setName("Bakery");
         creationDto.setOwnerId(user2Id);
 
@@ -244,10 +248,10 @@ class ProjectServiceImplTest {
 
         when(projectRepository.findById(nonExistentProjectId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
                 () -> service.update(updateDto));
 
-        assertEquals("No project with id %d has been found".formatted(nonExistentProjectId), exception.getMessage());
+        assertEquals("Project with id %d was not found".formatted(nonExistentProjectId), exception.getMessage());
     }
 
     @Test
@@ -309,10 +313,10 @@ class ProjectServiceImplTest {
     public void testGetProjectById_ProjectNotFound(){
         when(projectRepository.findById(nonExistentProjectId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
                 () -> service.getProjectById(nonExistentProjectId));
 
-        assertEquals("No project with this id has been found", exception.getMessage());
+        assertEquals("Project with id %d was not found".formatted(nonExistentProjectId), exception.getMessage());
     }
 
     @Test
