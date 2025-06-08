@@ -59,14 +59,14 @@ public class CampaignServiceTest {
 
     private CampaignServiceImpl campaignServiceImpl;
 
-    private final TeamMember withoutManagerOrOwnerRoles = TeamMember.builder().id(1L).roles(List.of(TeamRole.DEVELOPER)).build();
-    private final TeamMember manager = TeamMember.builder().id(2L).roles(List.of(TeamRole.MANAGER)).build();
-    private Project project = Project.builder().id(1L).name("project").build();
-    private CampaignDto campaignDTO = CampaignDto.builder().createdBy(1L).createdBy(1L).project(project).build();
-    private Campaign campaign = new Campaign();
-    private Campaign campaignForFilters = new Campaign();
-    private List<CampaignDto> campaignDtos = new ArrayList<>();
-    private List<Campaign> campaigns = new ArrayList<>();
+    private TeamMember withoutManagerOrOwnerRoles;
+    private TeamMember manager;
+    private Project project;
+    private CampaignDto campaignDTO;
+    private Campaign campaign;
+    private Campaign campaignForFilters;
+    private List<CampaignDto> campaignDtos;
+    private List<Campaign> campaigns;
 
     @BeforeEach
     void setUp() {
@@ -83,6 +83,14 @@ public class CampaignServiceTest {
                 teamMemberRepository,
                 campaignFilterStrategies
         );
+        withoutManagerOrOwnerRoles = TeamMember.builder().id(1L).roles(List.of(TeamRole.DEVELOPER)).build();
+        manager = TeamMember.builder().id(2L).roles(List.of(TeamRole.MANAGER)).build();
+        project = Project.builder().id(1L).name("project").build();
+        campaignDTO = CampaignDto.builder().createdBy(1L).createdBy(1L).project(project).build();
+        campaign = new Campaign();
+        campaignForFilters = new Campaign();
+        campaignDtos = new ArrayList<>();
+        campaigns = new ArrayList<>();
 
         campaign.setCreatedBy(1L);
         campaign.setProject(project);
@@ -95,6 +103,10 @@ public class CampaignServiceTest {
         campaigns.add(campaign);
         campaigns.add(campaign);
         campaigns.add(campaignForFilters);
+
+
+
+
     }
 
 
@@ -184,11 +196,11 @@ public class CampaignServiceTest {
         when(campaignStatusFilterStrategy.isApplicable(filterDto)).thenReturn(true);
         when(campaignCreationDateFilterStrategy.isApplicable(filterDto)).thenReturn(true);
 
-        when(campaignCreatedByFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);
-        when(campaignStatusFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);
-        when(campaignCreationDateFilterStrategy.filter(campaignForFilters,filterDto)).thenReturn(true);
+        when(campaignCreatedByFilterStrategy.filter(campaignForFilters, filterDto)).thenReturn(true);
+        when(campaignStatusFilterStrategy.filter(campaignForFilters, filterDto)).thenReturn(true);
+        when(campaignCreationDateFilterStrategy.filter(campaignForFilters, filterDto)).thenReturn(true);
 
-        when(campaignCreatedByFilterStrategy.filter(campaign,filterDto)).thenReturn(false);
+        when(campaignCreatedByFilterStrategy.filter(campaign, filterDto)).thenReturn(false);
 
         List<CampaignDto> campaignDtos = campaignServiceImpl.findAll(filterDto);
 

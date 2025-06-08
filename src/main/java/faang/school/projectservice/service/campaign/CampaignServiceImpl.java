@@ -31,27 +31,31 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public void createCampaign(CampaignDto campaignDto) {
         Campaign campaign = campaignDtoMapper.toCampaign(campaignDto);
-        projectRepository.existsById(campaign.getProject().getId());
-        boolean isManagerOrOwner = getTeamRole(campaign).contains(TeamRole.MANAGER)
-                                   || getTeamRole(campaign).contains(TeamRole.OWNER);
+        if (!projectRepository.existsById(campaign.getProject().getId())) {
+            throw new EntityNotFoundException(String.format("Project with id %s not found", campaign.getProject().getId()));
+        }
+        List<TeamRole> roles = getTeamRole(campaign);
+        boolean isManagerOrOwner = roles.contains(TeamRole.MANAGER) || roles.contains(TeamRole.OWNER);
         if (isManagerOrOwner) {
             campaignRepository.save(campaign);
         } else {
-            throw new CampaignCreationException("No members with roles MANAGER or OWNER in project");
+            throw new CampaignCreationException(String.format(
+                    "No members with roles MANAGER or OWNER in project with Id = %d"
+                    , campaign.getProject().getId()));
         }
     }
 
     @Transactional
     @Override
     public void updateCampaign(CampaignDto campaignDto, Long id) {
-        Campaign campaign = findCampaignByID(id);
+        Campaign campaign = findCampaignById(id);
+        if (campaign.getUpdatedBy() == null) {
+            throw new CampaignCreationException("Info of update Author not filled in");
+        }
         if (!campaign.getCreatedBy().equals(campaignDto.getCreatedBy())) {
             throw new CampaignCreationException(String.format(
                     "Id of creator cannot be changed. Campaign was created by user with ID = %d"
                     , campaignDto.getCreatedBy()));
-        }
-        if (campaign.getUpdatedBy() == null) {
-            throw new CampaignCreationException("Info of update Author not filled in");
         }
         campaignRepository.save(campaign);
     }
@@ -59,16 +63,15 @@ public class CampaignServiceImpl implements CampaignService {
     @Transactional
     @Override
     public void deleteCampaign(Long id) {
-        Campaign campaign = findCampaignByID(id);
+        Campaign campaign = findCampaignById(id);
         campaign.setStatus(CampaignStatus.CANCELED);
         campaignRepository.save(campaign);
     }
 
     @Override
     public CampaignDto findById(Long id) {
-         Campaign campaign = campaignRepository.findById(id)
+        return campaignRepository.findById(id).map(campaignDtoMapper::toCampaignDto)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Campaign with ID = %d not found", id)));
-        return campaignDtoMapper.toCampaignDto(campaign);
     }
 
     @Override
@@ -78,7 +81,7 @@ public class CampaignServiceImpl implements CampaignService {
         if (campaignFilterDto == null) {
             return campaignDtoList;
         }
-        List <Campaign> filteredList =  campaignList.stream()
+        List<Campaign> filteredList = campaignList.stream()
                 .filter(campaign -> filterCampaigns(campaign, campaignFilterDto)).toList();
         return campaignDtoMapper.toListCampaignDto(filteredList);
     }
@@ -94,7 +97,7 @@ public class CampaignServiceImpl implements CampaignService {
                 .allMatch(strategy -> strategy.filter(campaign, filterDto));
     }
 
-    private Campaign findCampaignByID(Long id) {
+    private Campaign findCampaignById(Long id) {
         return campaignRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Campaign with ID = %d not found", id)));
     }

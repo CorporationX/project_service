@@ -17,33 +17,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/campaign")
 @RequiredArgsConstructor
 public class CampaignController {
     private final CampaignService campaignService;
 
     @PostMapping("/campaigns")
-    public List<CampaignDto> findAll(@RequestBody CampaignFilterDto campaignFilterDto) {
-       return campaignService.findAll(campaignFilterDto);
+    public List<CampaignDto> findAllCampaigns(@RequestBody CampaignFilterDto campaignFilterDto) {
+        return campaignService.findAll(campaignFilterDto);
     }
 
-    @PostMapping("/campaign")
-    public void create(@RequestBody @Valid CampaignDto campaignDto) {
+    @PostMapping
+    public void createCampaign(@RequestBody @Valid CampaignDto campaignDto) {
         campaignService.createCampaign(campaignDto);
     }
 
-    @GetMapping("/campaign/{id}")
-    public void findById(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public void findCampaignById(@PathVariable Long id) {
         campaignService.findById(id);
     }
 
-    @PutMapping("/campaign/{id}")
-    public void update(@RequestBody @Valid CampaignDto campaignDto, @PathVariable Long id) {
+    @PutMapping("/{id}")
+    public void updateCampaign(@PathVariable Long id, @RequestBody @Valid CampaignDto campaignDto) {
         campaignService.updateCampaign(campaignDto, id);
     }
 
-    @DeleteMapping ("/campaign/{id}")
-    public void delete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public void deleteCampaign(@PathVariable Long id) {
         campaignService.deleteCampaign(id);
     }
 }
