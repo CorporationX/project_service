@@ -24,7 +24,7 @@ import java.io.InputStream;
 public class S3Service{
     private final AmazonS3 s3Client;
 
-    @Value("${service.s3.bucketName}")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder) {

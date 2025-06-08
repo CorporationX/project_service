@@ -57,11 +57,14 @@ public class TeamAvatarController {
         if (Objects.isNull(avatar) || avatar.isEmpty()) {
             log.error("Empty or null avatar file!");
             throw new DataValidationException("Avatar file cannot be null or empty!");
-        } else if (avatar.getSize() > MAX_AVATAR_SIZE) {
+        }
+        if (avatar.getSize() > MAX_AVATAR_SIZE) {
             log.error("Avatar file size exceeds the maximum limit of 5 MB!");
             throw new DataValidationException("Avatar file size exceeds the maximum limit of 5 MB!");
-        } else if (Objects.isNull(avatar.getContentType()) || !avatar.getContentType().endsWith("image/jpeg") &&
-                !avatar.getContentType().endsWith("image/png")) {
+        }
+        String contentType = avatar.getContentType();
+        if (Objects.isNull(contentType) || !contentType.endsWith("image/jpeg") &&
+                !contentType.endsWith("image/png")) {
             log.error("Invalid avatar file type: {}", avatar.getContentType());
             throw new DataValidationException("Invalid avatar file type! Only JPEG and PNG are allowed.");
         }

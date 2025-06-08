@@ -44,7 +44,7 @@ public class TeamAvatarService {
         return teamMapper.toDto(teamRepository.save(team));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public InputStream getTeamAvatar(Long teamId) {
         checkIfTeamExists(teamId);
         Team team = teamRepository.findById(teamId).get();
