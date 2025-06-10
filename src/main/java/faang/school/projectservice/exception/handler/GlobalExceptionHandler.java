@@ -2,6 +2,7 @@ package faang.school.projectservice.exception.handler;
 
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +48,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleNullPointerExceptions(NullPointerException ex) {
         return internalServerError(ex);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleObjectNotFoundExceptions(ObjectNotFoundException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity
+                .notFound()
+                .build();
+    }
+
 
     private ResponseEntity<Object> internalServerError(Exception ex) {
         log.error(ex.getMessage());
