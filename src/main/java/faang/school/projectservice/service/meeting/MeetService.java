@@ -3,7 +3,7 @@ package faang.school.projectservice.service.meeting;
 import faang.school.projectservice.dto.meeting.MeetDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ParticipantNotFoundException;
-import faang.school.projectservice.mapper.moment.meeting.MeetMapper;
+import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
@@ -36,9 +36,6 @@ public class MeetService {
         meet.setCreatorId(creatorId);
         meet.setStatus(PENDING);
         meet.setActive(true);
-        LocalDateTime now = LocalDateTime.now();
-        meet.setCreatedAt(now);
-        meet.setUpdatedAt(now);
 
         Meet savedMeet = meetRepository.save(meet);
         return meetMapper.toDto(savedMeet);
@@ -50,8 +47,6 @@ public class MeetService {
        assertCreator(existing, memberId);
        existing.setStatus(CANCELLED);
        existing.setActive(false);
-       existing.setUpdatedAt(LocalDateTime.now());
-
         log.info("Meet {} cancelled by user {}", existing.getId(), memberId);
         return meetMapper.toDto(existing);
     }
@@ -67,8 +62,6 @@ public class MeetService {
             throw new ParticipantNotFoundException(
                     "User " + participantId + " is not in meeting " + meetId);
         }
-
-        meeting.setUpdatedAt(LocalDateTime.now());
         return meetMapper.toDto(meetRepository.save(meeting));
     }
 
@@ -83,8 +76,6 @@ public class MeetService {
                 .map(MeetStatus::valueOf)
                 .orElse(existing.getStatus())
         );
-        existing.setUpdatedAt(LocalDateTime.now());
-
         Meet savedMeet = meetRepository.save(existing);
         log.debug("Meet updated: {} by user {}", savedMeet.getId(), memberId);
         return meetMapper.toDto(savedMeet);

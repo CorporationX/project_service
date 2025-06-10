@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.meeting.MeetDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.ParticipantNotFoundException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
-import faang.school.projectservice.mapper.moment.meeting.MeetMapper;
+import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
