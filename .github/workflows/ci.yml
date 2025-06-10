@@ -49,11 +49,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco_report
-          path: build/reports/jacoco
+          path: build/reports
 
       - name: Archive test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test_report
-          path: build/reports/tests
+          path: build/reports
