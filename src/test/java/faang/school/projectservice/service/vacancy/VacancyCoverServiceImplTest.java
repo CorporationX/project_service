@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,8 +68,11 @@ class VacancyCoverServiceImplTest {
     private final Long PROJECT_ID = 200L;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         ReflectionTestUtils.setField(vacancyCoverService, "coversBucket", BUCKET_NAME);
+        Field field = VacancyCoverServiceImpl.class.getDeclaredField("maxImageSizeBytes");
+        field.setAccessible(true);
+        field.set(vacancyCoverService, 5 * 1024 * 1024L);
     }
 
     private Vacancy createMockVacancy(Long createdByUserId, String coverImageKey) {

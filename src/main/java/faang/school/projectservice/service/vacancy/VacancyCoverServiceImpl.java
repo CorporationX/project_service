@@ -24,7 +24,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class VacancyCoverServiceImpl implements VacancyCoverService {
-    private static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
     private final UserContext userContext;
     private final S3Service s3Service;
@@ -34,6 +33,9 @@ public class VacancyCoverServiceImpl implements VacancyCoverService {
 
     @Value("${services.s3.bucketName}")
     private String coversBucket;
+
+    @Value("${services.upload.vacancy-cover.maxFileSize}")
+    private long maxImageSizeBytes;
 
     @Override
     @Transactional
@@ -45,9 +47,9 @@ public class VacancyCoverServiceImpl implements VacancyCoverService {
             log.warn("Multipart file is empty for vacancy ID: {}", vacancyId);
             throw new ImageProcessingException("Uploaded file is empty.");
         }
-        if (multipartFile.getSize() > MAX_FILE_SIZE_BYTES) {
+        if (multipartFile.getSize() > maxImageSizeBytes) {
             log.error("File size {} bytes for vacancy ID {} exceeds limit of {} bytes.",
-                    multipartFile.getSize(), vacancyId, MAX_FILE_SIZE_BYTES);
+                    multipartFile.getSize(), vacancyId, maxImageSizeBytes);
             throw new ImageProcessingException("File exceeds maximum allowed size of 5MB.");
         }
         String originalContentType = multipartFile.getContentType();

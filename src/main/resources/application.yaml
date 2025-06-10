@@ -49,3 +49,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+  upload:
+    vacancy-cover:
+      maxFileSize: 5_242_880 # 5 MB

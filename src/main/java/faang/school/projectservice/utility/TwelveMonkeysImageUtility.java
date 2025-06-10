@@ -89,37 +89,7 @@ public class TwelveMonkeysImageUtility {
                 g.drawImage(image, 0, 0, targetWidth, targetHeight, null);
                 g.dispose();
 
-                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                    ImageWriter jpegWriter = getJpegWriter();
-                    ImageWriteParam jpegParams = jpegWriter.getDefaultWriteParam();
-                    jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                    jpegParams.setCompressionQuality(JPEG_COMPRESSION_QUALITY);
-
-                    try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
-                        jpegWriter.setOutput(ios);
-                        jpegWriter.write(null,
-                                new IIOImage(resizedImage, null, null), jpegParams);
-                    } finally {
-                        jpegWriter.dispose();
-                    }
-
-                    byte[] processedBytes = baos.toByteArray();
-                    log.info("Resized and compressed image key [{}] to {}x{}, {} bytes, content type: {}",
-                            originalObjectKey, targetWidth, targetHeight,
-                            processedBytes.length, OUTPUT_CONTENT_TYPE_JPEG);
-
-                    return new ProcessedImage(
-                            new ByteArrayInputStream(processedBytes),
-                            processedBytes.length,
-                            OUTPUT_CONTENT_TYPE_JPEG,
-                            OUTPUT_EXTENSION_JPEG
-                    );
-                } catch (IOException e) {
-                    log.error("IOException during JPEG compression for key [{}]: {}",
-                            originalObjectKey, e.getMessage());
-                    throw new ImageProcessingException(String.format("Failed to compress image %s",
-                            originalObjectKey));
-                }
+                return compressAndPackageAsJpeg(resizedImage, originalObjectKey, targetWidth, targetHeight);
             } else {
                 log.info("Image key [{}] ({}x{}) is within max dimensions. " +
                                 "No processing needed. Returning original.",
@@ -136,6 +106,44 @@ public class TwelveMonkeysImageUtility {
             throw new ImageProcessingException(String.format("Failed to process image %s", originalObjectKey));
         }
     }
+
+    private ProcessedImage compressAndPackageAsJpeg(BufferedImage imageToCompress,
+                                                    String originalObjectKey,
+                                                    int targetWidth,
+                                                    int targetHeight) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageWriter jpegWriter = getJpegWriter();
+            ImageWriteParam jpegParams = jpegWriter.getDefaultWriteParam();
+            jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            jpegParams.setCompressionQuality(JPEG_COMPRESSION_QUALITY);
+
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+                jpegWriter.setOutput(ios);
+                jpegWriter.write(null,
+                        new IIOImage(imageToCompress, null, null), jpegParams);
+            } finally {
+                jpegWriter.dispose();
+            }
+
+            byte[] processedBytes = baos.toByteArray();
+            log.info("Resized and compressed image key [{}] to {}x{}, {} bytes, content type: {}",
+                    originalObjectKey, targetWidth, targetHeight,
+                    processedBytes.length, OUTPUT_CONTENT_TYPE_JPEG);
+
+            return new ProcessedImage(
+                    new ByteArrayInputStream(processedBytes),
+                    processedBytes.length,
+                    OUTPUT_CONTENT_TYPE_JPEG,
+                    OUTPUT_EXTENSION_JPEG
+            );
+        } catch (IOException e) {
+            log.error("IOException during JPEG compression for key [{}]: {}",
+                    originalObjectKey, e.getMessage());
+            throw new ImageProcessingException(String.format("Failed to compress image %s",
+                    originalObjectKey));
+        }
+    }
+
 
     private ImageWriter getJpegWriter() throws ImageProcessingException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
