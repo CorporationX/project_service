@@ -82,6 +82,11 @@ dependencies {
     implementation( "org.springdoc", "springdoc-openapi-starter-webmvc-ui",  "2.0.4")
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+}
+
 checkstyle {
     toolVersion = "10.17.0"
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
@@ -89,23 +94,6 @@ checkstyle {
 }
 
 
-tasks.checkstyleMain {
-    source = fileTree("${project.rootDir}/src/main/java")
-    include("**/*.java")
-    exclude("**/resources/**")
-
-    classpath = files()
-}
-
-tasks.checkstyleTest {
-    source = fileTree("${project.rootDir}/src/test")
-    include("**/*.java")
-
-    classpath = files()
-}
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
 
 tasks.jacocoTestCoverageVerification {
     violationRules {
