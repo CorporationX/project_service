@@ -19,11 +19,6 @@ import java.util.stream.Collectors;
 public class ProjectRepositoryAdapter {
     private final ProjectRepository projectRepository;
 
-    public Project getProjectById(long projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-    }
-
     public List<Project> getAllProjectsById(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             throw new IllegalArgumentException("Ids are empty");
