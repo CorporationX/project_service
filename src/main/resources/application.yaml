@@ -55,9 +55,19 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     isMocked: false
   payment-service:
     name: payment-service
+    host: http://localhost
+    port: 9080
   user-service:
-    name: user-service
+     name: user-service
+     host: http://localhost
+     port: 8080
+
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 5MB
+    max-request-size: 5MB
