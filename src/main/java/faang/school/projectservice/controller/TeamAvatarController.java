@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import faang.school.projectservice.service.TeamAvatarUploadServiceImpl;
+import faang.school.projectservice.service.TeamAvatarServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/v1/avatar/team")
 @RequiredArgsConstructor
-public class TeamAvatarUploadController {
-    private final TeamAvatarUploadServiceImpl teamAvatarUploadService;
+public class TeamAvatarController {
+    private final TeamAvatarServiceImpl teamAvatarService;
 
     @Value("${team-avatar-file.maxSize}")
     private Long avatarMaxSizeValue;
@@ -39,7 +39,7 @@ public class TeamAvatarUploadController {
             throw new IllegalArgumentException("The file is too large.");
         }
 
-        teamAvatarUploadService.uploadFile(teamId, file);
+        teamAvatarService.uploadFile(teamId, file);
 
         return ResponseEntity.ok("File uploaded successfully");
     }
@@ -47,19 +47,21 @@ public class TeamAvatarUploadController {
     @GetMapping(path = "/{teamId}", produces = "application/octet-stream")
     public ResponseEntity<byte[]> downloadImage(@PathVariable long teamId) {
         byte[] imageBytes = null;
+        String contentType = "";
         try {
-            imageBytes = teamAvatarUploadService.downloadFile(teamId).readAllBytes();
+            imageBytes = teamAvatarService.downloadFile(teamId).readAllBytes();
+            contentType = teamAvatarService.getAvatarContentType(teamId);
         } catch (Exception e) {
             e.printStackTrace();
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentType(MediaType.parseMediaType(contentType));
         return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
     }
 
     @DeleteMapping("/{teamId}")
     public ResponseEntity<String> delete(@PathVariable long teamId) {
-        teamAvatarUploadService.deleteFile(teamId);
-        return ResponseEntity.ok("File uploaded successfully");
+        teamAvatarService.deleteFile(teamId);
+        return ResponseEntity.ok("File deleted successfully");
     }
 }
