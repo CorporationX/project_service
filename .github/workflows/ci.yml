@@ -146,4 +146,4 @@ jobs:
           sleep 60
           
           echo "Pinging health endpoint..."
-          curl -f http://localhost:8080
+          curl -f http://localhost:8082
