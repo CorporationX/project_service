@@ -103,7 +103,7 @@ jobs:
 
       - name: Create the dev bucket
         # URL `s3` работает, т.к. GitHub Actions добавляет сервисы в /etc/hosts раннера
-        run: ./mc alias set minio http://s3:9000 dev admindev && ./mc mb minio/dev-bucket
+        run: ./mc alias set minio http://localhost:9000 dev admindev && ./mc mb minio/dev-bucket
 
       - name: Remove mc client
         if: always() # Запускаем этот шаг всегда, чтобы не оставлять артефактов
