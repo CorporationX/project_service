@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MeetControllerTest {
     @Mock
-    MeetService meetService; xxx
+    MeetService meetService;
 
     @InjectMocks
     MeetController controller;
