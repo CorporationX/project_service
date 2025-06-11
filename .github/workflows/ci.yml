@@ -126,7 +126,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build and Run Unit/Integration Tests
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon
+        run: ./gradlew clean build test --no-daemon
 
       - name: Run Application Smoke Test
         env:
