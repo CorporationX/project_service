@@ -67,6 +67,11 @@ dependencies {
      */
     implementation("com.google.auth:google-auth-library-oauth2-http:1.23.0")
     implementation("com.google.http-client:google-http-client-jackson2:1.43.3")
+
+    /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 }
 
 tasks.withType<Test> {

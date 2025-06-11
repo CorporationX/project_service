@@ -61,3 +61,10 @@ google:
     url: https://www.googleapis.com/
   calendar:
     id: 948a850ea2013122e19246b99a8b9c2caeed1bac182d7928d4bd158ec1f06182@group.calendar.google.com
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+  api-docs:
+    path: /api-docs
