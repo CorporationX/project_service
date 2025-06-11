@@ -62,13 +62,13 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage());
         return ResponseEntity
                 .internalServerError()
-                .body(ex.getMessage());
+                .body(ex.getStackTrace());
     }
 
     private ResponseEntity<Object> badRequest(Exception ex) {
         log.error(ex.getMessage());
         return ResponseEntity
                 .badRequest()
-                .body(ex.getMessage());
+                .body(ex.getStackTrace());
     }
 }
