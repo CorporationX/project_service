@@ -48,6 +48,15 @@ public class S3Service {
         }
     }
 
+    public String getAvatarContentType(String objectKey) {
+        try {
+            S3Object s3Object = s3Client.getObject(bucketName, objectKey);
+            return s3Object.getObjectMetadata().getContentType();
+        } catch (Exception e) {
+            throw new RuntimeException("Error downloading file from S3");
+        }
+    }
+
     public void listContent() {
         s3Client.listObjects(bucketName).getObjectSummaries().forEach(objectSummary -> {
             log.info("==== key {}", objectSummary.getKey());
