@@ -1,16 +1,14 @@
-name: Project Service CI Pipeline
+name: Post Service CI Pipeline
 
 on:
   pull_request:
     branches:
       - hydra-master-stream10
-      - feature/pipeline-BJS2-77450
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # --- НАЧАЛО: Секция сервис-контейнеров ---
     services:
       postgres:
         image: postgres:13.3
@@ -44,9 +42,13 @@ jobs:
         ports:
           - 9000:9000
           - 9001:9001
-        # Вместо 'command' из docker-compose, передаем команду через entrypoint
+        # ИСПРАВЛЕНИЕ: Вызываем entrypoint контейнера напрямую, передавая ему команду как аргументы.
+        # Это позволяет избежать конфликта флагов '-c'.
         options: >-
-          --entrypoint /bin/sh -c "minio server /data --console-address :9001"
+          --entrypoint /usr/bin/docker-entrypoint.sh
+          server
+          /data
+          --console-address :9001
           --health-cmd "curl -f http://localhost:9000/minio/health/live"
           --health-interval 10s
           --health-timeout 5s
@@ -56,14 +58,15 @@ jobs:
         image: hashicorp/consul:1.16
         ports:
           - "8500:8500"
+        # ИСПРАВЛЕНИЕ: Аналогично minio, вызываем entrypoint напрямую.
         options: >-
-          --entrypoint /bin/sh -c "consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data"
+          --entrypoint /usr/local/bin/docker-entrypoint.sh
+          agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
           --health-cmd "curl -f http://localhost:8500/v1/status/leader"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
-      # Кластер Kafka. Они могут общаться друг с другом по именам сервисов (kafka-1, kafka-2, kafka-3)
       kafka-1:
         image: bitnami/kafka:3.6.0
         ports:
@@ -91,7 +94,7 @@ jobs:
           KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9094
           KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9090,EXTERNAL://localhost:9094
           KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CFG_CONTROLLER_NAMES: CONTROLLER
           KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
       kafka-3:
@@ -108,16 +111,13 @@ jobs:
           KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
           KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    # --- КОНЕЦ: Секция сервис-контейнеров ---
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # --- НАЧАЛО: Шаги инициализации ---
       - name: Initialize Minio Bucket
         run: |
-          # Ждем 5 секунд, чтобы сервис Minio точно был готов
           sleep 5
           curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc
           chmod +x mc
@@ -129,7 +129,6 @@ jobs:
         run: |
           chmod +x ./ci/load-kv.sh
           ./ci/load-kv.sh
-          # --- КОНЕЦ: Шаги инициализации ---
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -151,7 +150,6 @@ jobs:
         run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon
 
       - name: Run Application Smoke Test
-        # Передаем приложению переменные окружения для подключения ко всем сервисам
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres
           SPRING_DATASOURCE_USERNAME: user
@@ -165,14 +163,11 @@ jobs:
           SPRING_CLOUD_CONSUL_PORT: 8500
           SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092,localhost:9094,localhost:9096
         run: |
-          # Запускаем приложение в фоновом режиме
           ./gradlew bootRun --no-daemon &
           
-          # Увеличим время ожидания, т.к. инфраструктура большая
           echo "Waiting 60 seconds for the application to start..."
           sleep 60
           
-          # Проверяем health-эндпоинт
           echo "Pinging health endpoint..."
           curl -f http://localhost:8080/actuator/health
 
