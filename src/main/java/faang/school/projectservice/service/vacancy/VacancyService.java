@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.dto.candidate.CreateCandidateDto;

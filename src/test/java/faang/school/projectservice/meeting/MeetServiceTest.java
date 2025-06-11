@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
+import faang.school.projectservice.repository.adapter.meeting.MeetRepositoryAdapter;
 import faang.school.projectservice.service.meeting.MeetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ class MeetServiceTest {
 
     @InjectMocks
     MeetService meetService;
+
+    @Mock
+    private MeetRepositoryAdapter meetRepositoryAdapter;
 
     MeetDto dto;
     Meet entity;
@@ -88,8 +92,9 @@ class MeetServiceTest {
         long creator = 2L;
         entity.setId(meetId);
         entity.setCreatorId(creator);
-        when(meetRepository.findById(meetId)).thenReturn(Optional.of(entity));
-        when(meetRepository.save(entity)).thenReturn(entity);
+
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenReturn(entity);
         when(meetMapper.toDto(entity)).thenReturn(new MeetDto());
 
         meetService.cancel(meetId, creator);
@@ -102,7 +107,9 @@ class MeetServiceTest {
     void cancel_wrongUser() {
         entity.setId(7L);
         entity.setCreatorId(1L);
-        when(meetRepository.findById(7L)).thenReturn(Optional.of(entity));
+
+        when(meetRepositoryAdapter.fetchByIdOrThrow(7L))
+                .thenReturn(entity);
 
         assertThatThrownBy(() -> meetService.cancel(7L, 9L))
                 .isInstanceOf(AccessDeniedException.class);
@@ -110,12 +117,17 @@ class MeetServiceTest {
 
     @Test
     void removeParticipant_ok() {
-        when(meetRepository.findById(10L)).thenReturn(Optional.of(entity));
+        long meetId = 10L;
+        entity.setCreatorId(2L);
+        entity.setId(meetId);
+
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenReturn(entity);
         when(meetRepository.save(entity)).thenReturn(entity);
         MeetDto dto = new MeetDto();
         when(meetMapper.toDto(entity)).thenReturn(dto);
 
-        MeetDto result = meetService.removeParticipant(10L, 2L, 3L);
+        MeetDto result = meetService.removeParticipant(meetId, 2L, 3L);
 
         assertThat(result).isSameAs(dto);
         assertThat(entity.getUserIds()).doesNotContain(3L);
@@ -124,17 +136,28 @@ class MeetServiceTest {
 
     @Test
     void removeParticipant_wrongCreator() {
-        when(meetRepository.findById(10L)).thenReturn(Optional.of(entity));
+        long meetId = 10L;
+        entity.setCreatorId(2L);
+        entity.setId(meetId);
 
-        assertThatThrownBy(() -> meetService.removeParticipant(10L, 99L, 3L))
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenReturn(entity);
+
+        assertThatThrownBy(() -> meetService.removeParticipant(meetId, 99L, 3L))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void removeParticipant_notPresent() {
-        when(meetRepository.findById(10L)).thenReturn(Optional.of(entity));
+        long meetId = 10L;
+        entity.setCreatorId(2L);
+        entity.setUserIds(new ArrayList<>(List.of(4L,5L)));
+        entity.setId(meetId);
 
-        assertThatThrownBy(() -> meetService.removeParticipant(10L, 2L, 99L))
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenReturn(entity);
+
+        assertThatThrownBy(() -> meetService.removeParticipant(meetId, 2L, 3L))
                 .isInstanceOf(ParticipantNotFoundException.class);
     }
 
@@ -144,7 +167,9 @@ class MeetServiceTest {
         long creator = 4L;
         entity.setId(meetId);
         entity.setCreatorId(creator);
-        when(meetRepository.findById(meetId)).thenReturn(Optional.of(entity));
+
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenReturn(entity);
         when(meetRepository.save(entity)).thenReturn(entity);
         when(meetMapper.toDto(entity)).thenReturn(new MeetDto());
 
@@ -161,8 +186,11 @@ class MeetServiceTest {
 
     @Test
     void findById_notFound() {
-        when(meetRepository.findById(100L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> meetService.findById(100L))
+        long meetId = 100L;
+        when(meetRepositoryAdapter.fetchByIdOrThrow(meetId))
+                .thenThrow(new ProjectNotFoundException(meetId));
+
+        assertThatThrownBy(() -> meetService.findById(meetId))
                 .isInstanceOf(ProjectNotFoundException.class);
     }
 

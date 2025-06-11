@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.candidate;
 
 import faang.school.projectservice.event.vacancy.CandidateAcceptedEvent;
 import faang.school.projectservice.event.vacancy.CandidateRejectedEvent;
@@ -11,6 +11,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
+import faang.school.projectservice.repository.adapter.team.TeamRepositoryAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
-    private final TeamService teamService;
+    private final TeamRepositoryAdapter teamRepositoryAdapter;
     private final DomainEventPublisher eventPublisher;
 
     @Override
@@ -29,7 +30,7 @@ public class CandidateServiceImpl implements CandidateService {
         Candidate candidate = getCandidateOrThrow(vacancyId, candidateId);
         validCandidate(candidate, CandidateStatus.ACCEPTED);
         Vacancy vacancy = candidate.getVacancy();
-        Team team = teamService.getById(teamId);
+        Team team = teamRepositoryAdapter.getById(teamId);
         if (!Objects.equals(team.getProject().getId(), vacancy.getProject().getId())) {
             throw new BusinessValidationException("Team %d is not part of vacancy's project %d"
                     .formatted(teamId, vacancy.getProject().getId()));
