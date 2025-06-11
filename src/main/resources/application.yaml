@@ -62,12 +62,8 @@ services:
       maxFileSize: 5_242_880 # 5 MB
   payment-service:
     name: payment-service
-    host: http://localhost
-    port: 9080
   user-service:
-     name: user-service
-     host: http://localhost
-     port: 8080
+    name: user-service
 
 servlet:
   multipart:
