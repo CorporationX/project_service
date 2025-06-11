@@ -30,6 +30,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     List<TeamMember> findAllByUserIdIn(Collection<Long> userIds);
 
+    List<TeamMember> getTeamMemberById(Long id);
+  
     @Query(
             "SELECT COUNT(tm) > 0 FROM TeamMember tm JOIN tm.team t " +
                     "WHERE tm.userId = :userId " +

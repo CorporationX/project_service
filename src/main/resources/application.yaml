@@ -5,6 +5,20 @@ spring:
     username: user
     password: password
 
+  config:
+    import: 'optional:consul:'
+  application:
+    name: project-service
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery: project-service-i1
+      config:
+        enabled: true
+        watch:
+          enabled: true
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -43,12 +57,20 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
-  payment-service:
-    host: http://localhost
-    port: 9080
-  user-service:
-    host: http://localhost
-    port: 8080
   upload:
     vacancy-cover:
       maxFileSize: 5_242_880 # 5 MB
+  payment-service:
+    name: payment-service
+    host: http://localhost
+    port: 9080
+  user-service:
+     name: user-service
+     host: http://localhost
+     port: 8080
+
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 5MB
+    max-request-size: 5MB
