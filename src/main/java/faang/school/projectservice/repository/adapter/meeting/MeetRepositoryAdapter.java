@@ -14,6 +14,6 @@ public class MeetRepositoryAdapter {
 
     public Meet fetchByIdOrThrow(long id) {
         return meetRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Meeting with id=" + id + " not found"));
+                .orElseThrow(() -> new ProjectNotFoundException(id));
     }
 }
