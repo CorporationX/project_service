@@ -36,33 +36,26 @@ jobs:
           --health-retries 5
 
       minio:
-        image: minio/minio
+        # ИСПРАВЛЕНИЕ: Команда 'server ...' указывается после имени образа
+        image: minio/minio server /data --console-address :9001
         env:
           MINIO_ROOT_USER: user
           MINIO_ROOT_PASSWORD: password
         ports:
           - 9000:9000
           - 9001:9001
-        # ИСПРАВЛЕНИЕ: Вызываем entrypoint контейнера напрямую, передавая ему команду как аргументы.
-        # Это позволяет избежать конфликта флагов '-c'.
         options: >-
-          --entrypoint /usr/bin/docker-entrypoint.sh
-          server
-          /data
-          --console-address :9001
           --health-cmd "curl -f http://localhost:9000/minio/health/live"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
       consul:
-        image: hashicorp/consul:1.16
+        # ИСПРАВЛЕНИЕ: Аналогично minio, команда 'agent ...' указывается после имени образа
+        image: hashicorp/consul:1.16 agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
         ports:
           - "8500:8500"
-        # ИСПРАВЛЕНИЕ: Аналогично minio, вызываем entrypoint напрямую.
         options: >-
-          --entrypoint /usr/local/bin/docker-entrypoint.sh
-          agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
           --health-cmd "curl -f http://localhost:8500/v1/status/leader"
           --health-interval 10s
           --health-timeout 5s
@@ -95,7 +88,7 @@ jobs:
           KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9094
           KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9090,EXTERNAL://localhost:9094
           KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-          KAFKA_CFG_CONTROLLER_NAMES: CONTROLLER
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
       kafka-3:
