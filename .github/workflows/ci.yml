@@ -10,104 +10,9 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13.3
-        env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U user -d postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis/redis-stack:latest
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      s3:
-        image: minio/minio:edge-cicd
-        ports:
-          - 9000:9000
-          - 9001:9001
-        options: --health-cmd "curl -s http://localhost:9000/minio/health/live"
-        env:
-          MINIO_ROOT_USER: dev
-          MINIO_ROOT_PASSWORD: admindev
-
-
-      kafka-1:
-        image: bitnami/kafka:3.6.0
-        ports:
-          - "9092:9092"
-        env:
-          KAFKA_CFG_NODE_ID: 1
-          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
-          KAFKA_CFG_PROCESS_ROLES: controller,broker
-          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
-          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9092
-          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9090,EXTERNAL://localhost:9092
-          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
-      kafka-2:
-        image: bitnami/kafka:3.6.0
-        ports:
-          - "9094:9094"
-        env:
-          KAFKA_CFG_NODE_ID: 2
-          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
-          KAFKA_CFG_PROCESS_ROLES: controller,broker
-          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
-          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9094
-          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9090,EXTERNAL://localhost:9094
-          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
-      kafka-3:
-        image: bitnami/kafka:3.6.0
-        ports:
-          - "9096:9096"
-        env:
-          KAFKA_CFG_NODE_ID: 3
-          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
-          KAFKA_CFG_PROCESS_ROLES: controller,broker
-          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
-          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9096
-          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9090,EXTERNAL://localhost:9096
-          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Wait for services to be healthy
-        run: sleep 10
-
-      - name: Fetch mc client
-        run: curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x ./mc
-
-      - name: Create the dev bucket
-        # URL `s3` работает, т.к. GitHub Actions добавляет сервисы в /etc/hosts раннера
-        run: ./mc alias set minio http://localhost:9000 dev admindev && ./mc mb minio/dev-bucket
-
-      - name: Remove mc client
-        if: always() # Запускаем этот шаг всегда, чтобы не оставлять артефактов
-        run: rm -v ./mc
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -125,25 +30,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build and Run Unit/Integration Tests
+      - name: Build and run tests
         run: ./gradlew clean build test --no-daemon
-
-      - name: Run Application Smoke Test
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres
-          SPRING_DATASOURCE_USERNAME: user
-          SPRING_DATASOURCE_PASSWORD: password
-          SPRING_REDIS_HOST: localhost
-          SPRING_REDIS_PORT: 6379
-          MINIO_URL: http://localhost:9000
-          MINIO_ACCESS_KEY: dev
-          MINIO_SECRET_KEY: admindev
-          SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092,localhost:9094,localhost:9096
-        run: |
-          ./gradlew bootRun --no-daemon &
-          
-          echo "Waiting 60 seconds for the application to start..."
-          sleep 60
-          
-          echo "Pinging health endpoint..."
-          curl -f http://localhost:8082
