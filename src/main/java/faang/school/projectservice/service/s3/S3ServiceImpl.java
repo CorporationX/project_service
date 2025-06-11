@@ -22,7 +22,7 @@ import java.io.InputStream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class S3ServiceImpl implements S3Service {
+public class S3ServiceImpl implements S3ServiceInterface {
     private final AmazonS3 s3Client;
 
     @Override

@@ -6,7 +6,7 @@ import faang.school.projectservice.excepcion.S3OperationException;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
 import faang.school.projectservice.service.adapter.TeamMemberServiceAdapter;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.S3ServiceInterface;
 import faang.school.projectservice.utility.TwelveMonkeysImageUtility;
 import faang.school.projectservice.model.internal.ProcessedImage;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class VacancyCoverServiceImpl implements VacancyCoverService {
 
     private final UserContext userContext;
-    private final S3Service s3Service;
+    private final S3ServiceInterface s3ServiceInterface;
     private final TwelveMonkeysImageUtility imageUtility;
     private final VacancyRepositoryAdapter vacancyRepositoryAdapter;
     private final TeamMemberServiceAdapter teamMemberServiceAdapter;
@@ -72,7 +72,7 @@ public class VacancyCoverServiceImpl implements VacancyCoverService {
                     processedImage.outputExtension()
             );
             try (InputStream processedInputStream = processedImage.inputStream()) {
-                s3Service.uploadObject(
+                s3ServiceInterface.uploadObject(
                         coversBucket,
                         finalObjectKey,
                         processedInputStream,
@@ -111,7 +111,7 @@ public class VacancyCoverServiceImpl implements VacancyCoverService {
             return;
         }
         try {
-            s3Service.removeObject(coversBucket, coverImageKey);
+            s3ServiceInterface.removeObject(coversBucket, coverImageKey);
             log.info("Successfully deleted cover image from vacancy ID {} from S3: s3://{}/{}",
                     vacancyId, coversBucket, coverImageKey);
             vacancy.setCoverImageKey(null);

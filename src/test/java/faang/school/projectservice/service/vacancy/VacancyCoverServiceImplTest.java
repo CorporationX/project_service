@@ -8,7 +8,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.internal.ProcessedImage;
 import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
 import faang.school.projectservice.service.adapter.TeamMemberServiceAdapter;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.S3ServiceInterface;
 import faang.school.projectservice.utility.TwelveMonkeysImageUtility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +51,7 @@ class VacancyCoverServiceImplTest {
     @Mock
     private UserContext userContext;
     @Mock
-    private S3Service s3Service;
+    private S3ServiceInterface s3ServiceInterface;
     @Mock
     private TwelveMonkeysImageUtility imageUtility;
     @Mock
@@ -108,7 +108,7 @@ class VacancyCoverServiceImplTest {
 
             vacancyCoverService.uploadVacancyCover(VACANCY_ID, multipartFile);
 
-            verify(s3Service).uploadObject(
+            verify(s3ServiceInterface).uploadObject(
                     eq(BUCKET_NAME),
                     anyString(),
                     any(InputStream.class),
@@ -142,7 +142,7 @@ class VacancyCoverServiceImplTest {
 
             vacancyCoverService.uploadVacancyCover(VACANCY_ID, multipartFile);
 
-            verify(s3Service).uploadObject(
+            verify(s3ServiceInterface).uploadObject(
                     eq(BUCKET_NAME),
                     anyString(),
                     any(InputStream.class),
@@ -233,7 +233,7 @@ class VacancyCoverServiceImplTest {
             when(imageUtility.processAndResizeImage(any(InputStream.class), anyString(), anyString()))
                     .thenReturn(processedImage);
             doThrow(new S3OperationException("S3 upload failed"))
-                    .when(s3Service).uploadObject(anyString(), anyString(), any(InputStream.class), anyLong(), anyString());
+                    .when(s3ServiceInterface).uploadObject(anyString(), anyString(), any(InputStream.class), anyLong(), anyString());
 
             S3OperationException exception = assertThrows(S3OperationException.class,
                     () -> vacancyCoverService.uploadVacancyCover(VACANCY_ID, multipartFile));
@@ -310,11 +310,11 @@ class VacancyCoverServiceImplTest {
 
             when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(mockVacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
-            doNothing().when(s3Service).removeObject(BUCKET_NAME, coverKey);
+            doNothing().when(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
 
             vacancyCoverService.deleteVacancyCover(VACANCY_ID);
 
-            verify(s3Service).removeObject(BUCKET_NAME, coverKey);
+            verify(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
             verify(vacancyRepositoryAdapter).save(mockVacancy);
             assertNull(mockVacancy.getCoverImageKey());
         }
@@ -328,11 +328,11 @@ class VacancyCoverServiceImplTest {
             when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(mockVacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
             doNothing().when(teamMemberServiceAdapter).assertOwnerOrManager(PROJECT_ID, USER_ID);
-            doNothing().when(s3Service).removeObject(BUCKET_NAME, coverKey);
+            doNothing().when(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
 
             vacancyCoverService.deleteVacancyCover(VACANCY_ID);
 
-            verify(s3Service).removeObject(BUCKET_NAME, coverKey);
+            verify(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
             verify(vacancyRepositoryAdapter).save(mockVacancy);
             assertNull(mockVacancy.getCoverImageKey());
         }
@@ -346,7 +346,7 @@ class VacancyCoverServiceImplTest {
 
             vacancyCoverService.deleteVacancyCover(VACANCY_ID);
 
-            verify(s3Service, never()).removeObject(anyString(), anyString());
+            verify(s3ServiceInterface, never()).removeObject(anyString(), anyString());
             verify(vacancyRepositoryAdapter, never()).save(any(Vacancy.class));
         }
 
@@ -360,7 +360,7 @@ class VacancyCoverServiceImplTest {
 
             vacancyCoverService.deleteVacancyCover(VACANCY_ID);
 
-            verify(s3Service, never()).removeObject(anyString(), anyString());
+            verify(s3ServiceInterface, never()).removeObject(anyString(), anyString());
             verify(vacancyRepositoryAdapter, never()).save(any(Vacancy.class));
         }
 
@@ -372,7 +372,7 @@ class VacancyCoverServiceImplTest {
             when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(mockVacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
             doThrow(new S3OperationException("S3 delete failed"))
-                    .when(s3Service).removeObject(BUCKET_NAME, coverKey);
+                    .when(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
 
             S3OperationException exception = assertThrows(S3OperationException.class,
                     () -> vacancyCoverService.deleteVacancyCover(VACANCY_ID));
@@ -387,13 +387,13 @@ class VacancyCoverServiceImplTest {
 
             when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(mockVacancy);
             when(userContext.getUserId()).thenReturn(USER_ID);
-            doNothing().when(s3Service).removeObject(BUCKET_NAME, coverKey);
+            doNothing().when(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
             doThrow(new RuntimeException("DB save failed")).when(vacancyRepositoryAdapter).save(mockVacancy);
 
 
             S3OperationException exception = assertThrows(S3OperationException.class,
                     () -> vacancyCoverService.deleteVacancyCover(VACANCY_ID));
-            verify(s3Service).removeObject(BUCKET_NAME, coverKey);
+            verify(s3ServiceInterface).removeObject(BUCKET_NAME, coverKey);
             verify(vacancyRepositoryAdapter).save(mockVacancy);
             assertTrue(exception.getMessage().startsWith("Failed to delete cover image for vacancy"));
             assertEquals("DB save failed",exception.getCause().getMessage());

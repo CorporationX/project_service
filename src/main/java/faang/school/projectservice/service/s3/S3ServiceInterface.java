@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import java.io.InputStream;
 
-public interface S3Service {
+public interface S3ServiceInterface {
     ObjectMetadata getObjectMetadata(String bucketName, String objectKey);
 
     S3ObjectInputStream getObject(String bucketName, String objectKey);
