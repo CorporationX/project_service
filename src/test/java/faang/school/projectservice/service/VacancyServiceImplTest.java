@@ -26,7 +26,10 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
+import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.vacancy.VacancyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,7 +47,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -84,7 +87,7 @@ public class VacancyServiceImplTest {
     @Spy
     private CandidateTeamMemberMapperImpl candidateTeamMemberMapper;
     @Mock
-    private ProjectService projectService;
+    private ProjectRepoAdapter projectRepoAdapter;
     @Mock
     private CandidateService candidateService;
     @Mock
@@ -130,8 +133,7 @@ public class VacancyServiceImplTest {
         @Test
         @DisplayName("create() success returns correct DTO and publishes VacancyCreatedEvent")
         void testCreateSuccess() {
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER));
-            when(projectService.getProjectById(PROJECT_ID)).thenReturn(project);
+            when(projectRepoAdapter.getProjectById(PROJECT_ID)).thenReturn(project);
             when(vacancyRepository.save(any(Vacancy.class))).thenAnswer(invocation -> {
                 Vacancy toSave = invocation.getArgument(0);
                 toSave.setId(VACANCY_ID);
@@ -150,7 +152,7 @@ public class VacancyServiceImplTest {
             assertEquals(PROJECT_ID, result.getProjectId());
             assertEquals(VacancyStatus.OPEN, result.getStatus(), "Status should be OPEN");
             verify(vacancyMapper, times(2)).toEntity(createVacancyDto);
-            verify(projectService).getProjectById(PROJECT_ID);
+            verify(projectRepoAdapter).getProjectById(PROJECT_ID);
             verify(vacancyRepository).save(vacancy);
             verify(vacancyMapper).toDetailedDto(vacancy);
             verify(eventPublisher).publishEvent(argThat(event ->
@@ -164,14 +166,15 @@ public class VacancyServiceImplTest {
         @Test
         @DisplayName("create() user with no permission should throw AccessDeniedException")
         void testCreateUnauthorizedException() {
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(VACANCY_POSITION));
+            doThrow(new AccessDeniedException("Need OWNER or MANAGER"))
+                    .when(teamMemberService).assertOwnerOrManager(PROJECT_ID, USER_ID);
             AccessDeniedException ex = assertThrows(
                     AccessDeniedException.class,
                     () -> vacancyService.create(createVacancyDto),
                     "Expected create() to throw AccessDeniedException when user doesn't have" +
                             "permission to create vacancy");
             assertEquals("Need OWNER or MANAGER", ex.getMessage());
-            verifyNoMoreInteractions(projectService, vacancyRepository, eventPublisher);
+            verifyNoMoreInteractions(projectRepoAdapter, vacancyRepository, eventPublisher);
         }
     }
 
@@ -181,7 +184,7 @@ public class VacancyServiceImplTest {
         @BeforeEach
         void setUp() {
             when(vacancyRepositoryAdapter.getVacancyOrThrow(VACANCY_ID)).thenReturn(vacancy);
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER));
+//            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER));
             when(userContext.getUserId()).thenReturn(USER_ID);
         }
 
@@ -291,7 +294,6 @@ public class VacancyServiceImplTest {
             Long newUserId = USER_ID + 1;
             createCandidateDto.setUserId(newUserId);
             when(teamMemberService.isMember(PROJECT_ID, newUserId)).thenReturn(false);
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER, TeamRole.MANAGER));
             when(candidateRepository.save(any(Candidate.class))).thenReturn(new Candidate());
 
             CandidateDto result = vacancyService.addCandidate(VACANCY_ID, createCandidateDto);
@@ -331,8 +333,6 @@ public class VacancyServiceImplTest {
             vacancy.setCount(2);
             vacancy.setCandidates(List.of(cand1, cand2, cand3));
 
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER, TeamRole.MANAGER));
-
             DetailedVacancyDto result = vacancyService.close(VACANCY_ID);
 
             assertNotNull(result, "Resulting vacancyDto should not be null");
@@ -358,8 +358,6 @@ public class VacancyServiceImplTest {
             vacancy.setCount(3);
             vacancy.setCandidates(List.of(cand1, cand2));
 
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID)).thenReturn(Set.of(TeamRole.OWNER, TeamRole.MANAGER));
-
             BusinessValidationException ex = assertThrows(
                     BusinessValidationException.class,
                     () -> vacancyService.close(VACANCY_ID),
@@ -376,9 +374,6 @@ public class VacancyServiceImplTest {
         void testCloseNotEnoughAcceptedCandidates() {
             vacancy.setCount(2);
             vacancy.setCandidates(List.of(cand1, cand3));
-
-            when(teamMemberService.getUserRoles(PROJECT_ID, USER_ID))
-                    .thenReturn(Set.of(TeamRole.OWNER, TeamRole.MANAGER));
 
             BusinessValidationException ex = assertThrows(
                     BusinessValidationException.class,

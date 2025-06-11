@@ -7,8 +7,9 @@ import faang.school.projectservice.dto.vacancy.DetailedVacancyDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.service.CandidateService;
-import faang.school.projectservice.service.VacancyService;
+import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.vacancy.VacancyCoverService;
+import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -36,6 +39,7 @@ import java.net.URI;
 @Slf4j
 public class VacancyController {
     private final VacancyService vacancyService;
+    private final VacancyCoverService vacancyCoverService;
     private final CandidateService candidateService;
 
     @PostMapping
@@ -48,12 +52,6 @@ public class VacancyController {
                 .buildAndExpand(created.getId())
                 .toUri();
         return ResponseEntity.created(location).body(created);
-    }
-
-    @PatchMapping("/{id}")
-    public DetailedVacancyDto updateVacancy(@PathVariable @Min(1) Long id,
-                                    @RequestBody @Valid UpdateVacancyDto dto) {
-        return vacancyService.update(id, dto);
     }
 
     @PostMapping("/{id}")
@@ -77,9 +75,11 @@ public class VacancyController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/close")
-    public DetailedVacancyDto closeVacancy(@PathVariable @Min(1) Long id) {
-        return vacancyService.close(id);
+    @PostMapping("/{vacancyId}/cover")
+    public ResponseEntity<Void> addCover(@PathVariable @Min(1) Long vacancyId,
+                                         @RequestParam MultipartFile cover) {
+        vacancyCoverService.uploadVacancyCover(vacancyId, cover);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -91,5 +91,22 @@ public class VacancyController {
     @GetMapping("/{id}")
     public DetailedVacancyDto getVacancyById(@PathVariable @Min(1) Long id) {
         return vacancyService.getById(id);
+    }
+
+
+    @PatchMapping("/{id}")
+    public DetailedVacancyDto updateVacancy(@PathVariable @Min(1) Long id,
+                                    @RequestBody @Valid UpdateVacancyDto dto) {
+        return vacancyService.update(id, dto);
+    }
+
+    @PatchMapping("/{id}/close")
+    public DetailedVacancyDto closeVacancy(@PathVariable @Min(1) Long id) {
+        return vacancyService.close(id);
+    }
+
+    @DeleteMapping("/{vacancyId}/cover")
+    public void deleteVacancyCover(@PathVariable @Min(1) Long vacancyId) {
+        vacancyCoverService.deleteVacancyCover(vacancyId);
     }
 }

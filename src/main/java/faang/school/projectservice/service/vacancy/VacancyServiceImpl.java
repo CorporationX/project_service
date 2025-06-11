@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.candidate.CandidateDto;
@@ -11,7 +11,6 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.event.vacancy.DomainEventPublisher;
 import faang.school.projectservice.event.vacancy.VacancyClosedEvent;
 import faang.school.projectservice.event.vacancy.VacancyCreatedEvent;
-import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.BusinessValidationException;
 import faang.school.projectservice.exception.VacancyNotFoundException;
 import faang.school.projectservice.mapper.CandidateMapper;
@@ -19,12 +18,14 @@ import faang.school.projectservice.mapper.CandidateTeamMemberMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.repository.adapter.vacancy.VacancyRepositoryAdapter;
+import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,21 +35,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
+    private final UserContext userContext;
+
     private final VacancyRepository vacancyRepository;
     private final CandidateRepository candidateRepository;
     private final VacancyRepositoryAdapter vacancyRepositoryAdapter;
 
-    private final UserContext userContext;
     private final VacancyMapper vacancyMapper;
     private final CandidateMapper candidateMapper;
     private final CandidateTeamMemberMapper mapper;
 
-    private final ProjectService projectService;
+    private final ProjectRepoAdapter projectRepoAdapter;
     private final CandidateService candidateService;
     private final TeamMemberService teamMemberService;
 
@@ -58,9 +59,9 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public DetailedVacancyDto create(CreateVacancyDto dto) {
         Long userId = userContext.getUserId();
-        assertOwnerOrManager(dto.getProjectId(), userId);
+        teamMemberService.assertOwnerOrManager(dto.getProjectId(), userId);
         Vacancy vacancy = vacancyMapper.toEntity(dto);
-        vacancy.setProject(projectService.getProjectById(dto.getProjectId()));
+        vacancy.setProject(projectRepoAdapter.getProjectById(dto.getProjectId()));
         vacancy.setStatus(VacancyStatus.OPEN);
         vacancyRepository.save(vacancy);
         eventPublisher.publishEvent(new VacancyCreatedEvent(
@@ -73,7 +74,7 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public DetailedVacancyDto update(Long id, UpdateVacancyDto dto) {
         Vacancy vacancy = vacancyRepositoryAdapter.getVacancyOrThrow(id);
-        assertOwnerOrManager(vacancy.getProject().getId(), userContext.getUserId());
+        teamMemberService.assertOwnerOrManager(vacancy.getProject().getId(), userContext.getUserId());
         if (dto == null) {
             return vacancyMapper.toDetailedDto(vacancy);
         }
@@ -86,10 +87,13 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public CandidateDto addCandidate(Long id, CreateCandidateDto dto) {
         Vacancy vacancy =  vacancyRepositoryAdapter.getVacancyOrThrow(id);
+        if (Objects.equals(vacancy.getStatus(), VacancyStatus.CLOSED)) {
+            throw new BusinessValidationException("Vacancy already closed");
+        }
         Long candidateUserId = dto.getUserId();
         Long projectId = vacancy.getProject().getId();
         if (!Objects.equals(candidateUserId, userContext.getUserId())) {
-            assertOwnerOrManager(projectId, userContext.getUserId());
+            teamMemberService.assertOwnerOrManager(projectId, userContext.getUserId());
         }
         if (teamMemberService.isMember(projectId, candidateUserId)) {
             throw new BusinessValidationException(String.format("User %d already member of project %d",
@@ -112,8 +116,11 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public DetailedVacancyDto close(Long id) {
         Vacancy vacancy = vacancyRepositoryAdapter.getVacancyOrThrow(id);
+        if (Objects.equals(vacancy.getStatus(), VacancyStatus.CLOSED)) {
+            throw new BusinessValidationException("Vacancy already closed");
+        }
         Long projectId = vacancy.getProject().getId();
-        assertOwnerOrManager(projectId, userContext.getUserId());
+        teamMemberService.assertOwnerOrManager(projectId, userContext.getUserId());
         if (vacancy.getCount() > vacancy.getCandidates().size()) {
             throw new BusinessValidationException("Not enough candidates for vacancy %d"
                     .formatted(id));
@@ -159,13 +166,6 @@ public class VacancyServiceImpl implements VacancyService {
         return vacancyRepository
                 .findAllByFilter(filter.getName(), filter.getPosition(), pageable)
                 .map(vacancyMapper::toDto);
-    }
-
-    private void assertOwnerOrManager(Long projectId, Long userId) {
-        Set<TeamRole> roles = teamMemberService.getUserRoles(projectId, userId);
-        if (!roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
-            throw new AccessDeniedException("Need OWNER or MANAGER");
-        }
     }
 
     private void saveAcceptedCandidatesAsTeamMembers(List<Candidate> acceptedCandidates) {
