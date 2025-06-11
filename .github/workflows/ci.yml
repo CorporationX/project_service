@@ -1,4 +1,4 @@
-name: Post Service CI Pipeline
+name: Project Service CI Pipeline
 
 on:
   pull_request:
@@ -35,31 +35,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      minio:
-        # ИСПРАВЛЕНИЕ: Команда 'server ...' указывается после имени образа
-        image: minio/minio server /data --console-address :9001
-        env:
-          MINIO_ROOT_USER: user
-          MINIO_ROOT_PASSWORD: password
+      s3:
+        image: minio/minio:edge-cicd
         ports:
           - 9000:9000
           - 9001:9001
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: --health-cmd "curl -s http://localhost:9000/minio/health/live"
+        env:
+          MINIO_ROOT_USER: dev
+          MINIO_ROOT_PASSWORD: admindev
 
-      consul:
-        # ИСПРАВЛЕНИЕ: Аналогично minio, команда 'agent ...' указывается после имени образа
-        image: hashicorp/consul:1.16 agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data
-        ports:
-          - "8500:8500"
-        options: >-
-          --health-cmd "curl -f http://localhost:8500/v1/status/leader"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
       kafka-1:
         image: bitnami/kafka:3.6.0
@@ -110,19 +95,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Initialize Minio Bucket
-        run: |
-          sleep 5
-          curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc
-          chmod +x mc
-          ./mc config host add local http://localhost:9000 user password
-          ./mc mb local/corpbucket
-          ./mc anonymous set public local/corpbucket
+      - name: Wait for services to be healthy
+        run: sleep 10
 
-      - name: Initialize Consul KV Store
-        run: |
-          chmod +x ./ci/load-kv.sh
-          ./ci/load-kv.sh
+      - name: Fetch mc client
+        run: curl -o ./mc -# https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x ./mc
+
+      - name: Create the dev bucket
+        # URL `s3` работает, т.к. GitHub Actions добавляет сервисы в /etc/hosts раннера
+        run: ./mc alias set minio http://s3:9000 dev admindev && ./mc mb minio/dev-bucket
+
+      - name: Remove mc client
+        if: always() # Запускаем этот шаг всегда, чтобы не оставлять артефактов
+        run: rm -v ./mc
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -151,10 +136,8 @@ jobs:
           SPRING_REDIS_HOST: localhost
           SPRING_REDIS_PORT: 6379
           MINIO_URL: http://localhost:9000
-          MINIO_ACCESS_KEY: user
-          MINIO_SECRET_KEY: password
-          SPRING_CLOUD_CONSUL_HOST: localhost
-          SPRING_CLOUD_CONSUL_PORT: 8500
+          MINIO_ACCESS_KEY: dev
+          MINIO_SECRET_KEY: admindev
           SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092,localhost:9094,localhost:9096
         run: |
           ./gradlew bootRun --no-daemon &
@@ -163,11 +146,4 @@ jobs:
           sleep 60
           
           echo "Pinging health endpoint..."
-          curl -f http://localhost:8080/actuator/health
-
-      - name: Upload JaCoCo Report
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: build/reports/jacoco/test
+          curl -f http://localhost:8080
