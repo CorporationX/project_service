@@ -1,0 +1,10 @@
+{
+  "config/user-service/goals/max-active-goals": 3,
+  "config/post-service/post-media.maxImageSizeMb": 5242880,
+  "config/post-service/post-media.maxAudioSizeMb": 3145728,
+  "config/post-service/post-media.maxVideoSizeMb": 31457280,
+  "config/post-service/post-media.allowedContentTypePrefixes[0]": "image/",
+  "config/post-service/post-media.allowedContentTypePrefixes[1]": "video/",
+  "config/post-service/post-media.allowedContentTypePrefixes[2]": "audio/",
+  "config/post-service/post-media/max-post-media-files-amount": 10
+}

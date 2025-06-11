@@ -1,0 +1,183 @@
+name: Project Service CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - hydra-master-stream10
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # --- НАЧАЛО: Секция сервис-контейнеров ---
+    services:
+      postgres:
+        image: postgres:13.3
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis/redis-stack:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ROOT_USER: user
+          MINIO_ROOT_PASSWORD: password
+        ports:
+          - 9000:9000
+          - 9001:9001
+        # Вместо 'command' из docker-compose, передаем команду через entrypoint
+        options: >-
+          --entrypoint /bin/sh -c "minio server /data --console-address :9001"
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      consul:
+        image: hashicorp/consul:1.16
+        ports:
+          - "8500:8500"
+        options: >-
+          --entrypoint /bin/sh -c "consul agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0 -data-dir=/consul/data"
+          --health-cmd "curl -f http://localhost:8500/v1/status/leader"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # Кластер Kafka. Они могут общаться друг с другом по именам сервисов (kafka-1, kafka-2, kafka-3)
+      kafka-1:
+        image: bitnami/kafka:3.6.0
+        ports:
+          - "9092:9092"
+        env:
+          KAFKA_CFG_NODE_ID: 1
+          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9092
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9090,EXTERNAL://localhost:9092
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      kafka-2:
+        image: bitnami/kafka:3.6.0
+        ports:
+          - "9094:9094"
+        env:
+          KAFKA_CFG_NODE_ID: 2
+          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9094
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9090,EXTERNAL://localhost:9094
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      kafka-3:
+        image: bitnami/kafka:3.6.0
+        ports:
+          - "9096:9096"
+        env:
+          KAFKA_CFG_NODE_ID: 3
+          KAFKA_KRAFT_CLUSTER_ID: PVjHlx7ESeesq55jeB6Efs
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9096
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9090,EXTERNAL://localhost:9096
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    # --- КОНЕЦ: Секция сервис-контейнеров ---
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # --- НАЧАЛО: Шаги инициализации ---
+      - name: Initialize Minio Bucket
+        run: |
+          # Ждем 5 секунд, чтобы сервис Minio точно был готов
+          sleep 5
+          curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc
+          chmod +x mc
+          ./mc config host add local http://localhost:9000 user password
+          ./mc mb local/corpbucket
+          ./mc anonymous set public local/corpbucket
+
+      - name: Initialize Consul KV Store
+        run: |
+          chmod +x ./ci/load-kv.sh
+          ./ci/load-kv.sh
+          # --- КОНЕЦ: Шаги инициализации ---
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build and Run Unit/Integration Tests
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon
+
+      - name: Run Application Smoke Test
+        # Передаем приложению переменные окружения для подключения ко всем сервисам
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres
+          SPRING_DATASOURCE_USERNAME: user
+          SPRING_DATASOURCE_PASSWORD: password
+          SPRING_REDIS_HOST: localhost
+          SPRING_REDIS_PORT: 6379
+          MINIO_URL: http://localhost:9000
+          MINIO_ACCESS_KEY: user
+          MINIO_SECRET_KEY: password
+          SPRING_CLOUD_CONSUL_HOST: localhost
+          SPRING_CLOUD_CONSUL_PORT: 8500
+          SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092,localhost:9094,localhost:9096
+        run: |
+          # Запускаем приложение в фоновом режиме
+          ./gradlew bootRun --no-daemon &
+          
+          # Увеличим время ожидания, т.к. инфраструктура большая
+          echo "Waiting 60 seconds for the application to start..."
+          sleep 60
+          
+          # Проверяем health-эндпоинт
+          echo "Pinging health endpoint..."
+          curl -f http://localhost:8080/actuator/health
+
+      - name: Upload JaCoCo Report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test
