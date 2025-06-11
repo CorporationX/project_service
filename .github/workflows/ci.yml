@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - hydra-master-stream10
+      - feature/pipeline-BJS2-77450
 
 jobs:
   build-and-test:
