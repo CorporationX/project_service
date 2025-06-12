@@ -40,9 +40,6 @@ jobs:
       - name: Generate jacoco report
         run: ./gradlew jacocoTestReport --no-daemon
 
-      - name: Check if jacoco report folder exists
-        run: ls -R build/reports/jacoco/html
-
       - name: Archive test report
         if: always()
         uses: actions/upload-artifact@v4
