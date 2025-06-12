@@ -127,17 +127,17 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(files(classDirectories.files.map {
         fileTree(it).apply {
             exclude(
-                "**/mapper/**",
-                "**/entity/**",
-                "**/client/**",
-                "**/config/**",
-                "**/dto/**",
-                "**/model/**",
-                "**/controller/**",
-                "**/repository/**",
-                "**/**Test.class",
-                "**/ProjectServiceApplication.class",
-                "**/**Impl.class",
+//                "**/mapper/**",
+//                "**/entity/**",
+//                "**/client/**",
+//                "**/config/**",
+//                "**/dto/**",
+//                "**/model/**",
+//                "**/controller/**",
+//                "**/repository/**",
+//                "**/**Test.class",
+//                "**/ProjectServiceApplication.class",
+//                "**/**Impl.class",
             )
         }
     }))
