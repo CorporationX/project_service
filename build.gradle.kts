@@ -93,8 +93,6 @@ checkstyle {
     checkstyle.enableExternalDtdLoad.set(true)
 }
 
-
-
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
@@ -131,10 +129,14 @@ tasks.jacocoTestReport {
         }
     }))
 }
-checkstyle {
-    toolVersion = "10.17.0"
-    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
-    checkstyle.enableExternalDtdLoad.set(true)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
 }
 
 tasks.checkstyleMain {
