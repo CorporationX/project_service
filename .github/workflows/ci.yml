@@ -37,6 +37,9 @@ jobs:
       - name: Checkstyle verification
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
+      - name: Generate jacoco report
+        run: ./gradlew jacocoTestReport --no-daemon
+
       - name: Archive test report
         if: always()
         uses: actions/upload-artifact@v4
