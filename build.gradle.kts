@@ -107,9 +107,15 @@ tasks.jacocoTestCoverageVerification {
         }
     }
 }
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
 tasks.build {
     dependsOn(tasks.jacocoTestCoverageVerification)
 }
+
 tasks.jacocoTestReport {
     classDirectories.setFrom(files(classDirectories.files.map {
         fileTree(it).apply {
@@ -153,6 +159,7 @@ tasks.checkstyleTest {
 
     classpath = files()
 }
+
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
