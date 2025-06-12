@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v2
@@ -37,12 +37,12 @@ jobs:
       - name: Checkstyle verification
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
-      - name: Upload Checkstyle report
+      - name: Archive test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: checkstyle-report
-          path: build/reports/checkstyle
+          name: test_report
+          path: build/reports/tests/test
 
       - name: Archive jacoco report
         if: always()
@@ -51,9 +51,9 @@ jobs:
           name: jacoco_report
           path: build/reports/jacoco/html
 
-      - name: Archive test report
+      - name: Upload Checkstyle report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test_report
-          path: build/reports/tests/test
+          name: checkstyle-report
+          path: build/reports/checkstyle
