@@ -172,3 +172,64 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+jacoco {
+    toolVersion = "0.8.13"
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+
+tasks.jacocoTestReport {
+    reports {
+        dependsOn(tasks.test) // tests are required to run before generating the report
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8.toBigDecimal()
+            }
+        }
+
+        rule {
+            enabled = false
+            element = "CLASS"
+            includes = listOf("org.gradle.*")
+
+            limit {
+                counter = "LINE"
+                value = "TOTALCOUNT"
+                maximum = 0.3.toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.jacocoTestReport {
+    classDirectories.setFrom(files(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude(
+                "**/mapper/**",                         //Исключить mapper
+                "**/entity/**",                         //Исключить пакет с сущностями
+                "**/client/**",                         //Исключить пакет client
+                "**/config/**",                         //Исключить пакет config
+                "**/dto/**",                            //Исключить пакет с dto
+                "**/model/**",                          //Исключить пакет model
+                "**/controller/**",                     //Исключить контроллеры
+                "**/repository/**",                     //Исключить репозитории
+                "**/**Test.class",                      //Исключить тесты
+                "**/ProjectServiceApplication.class",   //Исключить класс с main
+                "**/**Impl.class",                      //Исключить Impl классы
+            )
+        }
+    }))
+
+}
