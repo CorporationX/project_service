@@ -1,0 +1,62 @@
+name: Build and Test
+on:
+  pull_request:
+    branches: [ "kraken-master-stream10" ]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java-version: [ 17 ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'adopt'
+
+
+      - name: Grant execute permission for gradle
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build testClasses -x test -x check -x checkstyleMain -x checkstyleTest --no-daemon
+
+      - name: Test with Gradle
+        run: ./gradlew test -x testClasses --no-daemon --continue
+
+      - name: Verify jacoco Test Coverage
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
+
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+
+      - name: Generate jacoco report
+        run: ./gradlew jacocoTestReport --no-daemon
+
+      - name: Archive test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_report
+          path: build/reports/tests/test
+
+      - name: Archive jacoco report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco_report
+          path: build/reports/jacocoHtml
+
+      - name: Upload Checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-report
+          path: build/reports/checkstyle
