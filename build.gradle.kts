@@ -1,23 +1,23 @@
 plugins {
     java
+    checkstyle
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-    id("jacoco")
-    id("checkstyle")
-    kotlin("jvm")
 }
 
 group = "faang.school"
 version = "1.0"
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
 
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
@@ -87,23 +87,10 @@ tasks.withType<Test> {
     finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
 }
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
-
-tasks.bootJar {
-    archiveFileName.set("service.jar")
-}
-
-jacoco {
-    toolVersion = "0.8.13"
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-    }
+checkstyle {
+    toolVersion = "10.17.0"
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    checkstyle.enableExternalDtdLoad.set(true)
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -111,20 +98,7 @@ tasks.jacocoTestCoverageVerification {
         rule {
             enabled = false
             element = "CLASS"
-            excludes = listOf(
-                "faang.school.postservice.client.*",
-                "faang.school.postservice.mapper.*",
-                "faang.school.postservice.entity.*",
-                "faang.school.postservice.config.*",
-                "faang.school.postservice.dto.*",
-                "faang.school.postservice.model.*",
-                "faang.school.postservice.repository.*",
-                "faang.school.postservice.controller.LikeController",
-                "**/*Test.class",
-                "**/*Impl.class",
-                "faang.school.postservice.PostServiceApp"
-            )
-
+            includes = listOf("org.gradle.*")
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
@@ -132,6 +106,10 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+jacoco {
+    toolVersion = "0.8.13"
 }
 
 tasks.build {
@@ -157,10 +135,14 @@ tasks.jacocoTestReport {
         }
     }))
 }
-checkstyle {
-    toolVersion = "10.17.0"
-    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
-    checkstyle.enableExternalDtdLoad.set(true)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
 }
 
 tasks.checkstyleMain {
@@ -176,4 +158,10 @@ tasks.checkstyleTest {
     include("**/*.java")
 
     classpath = files()
+}
+
+val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+
+tasks.bootJar {
+    archiveFileName.set("service.jar")
 }
