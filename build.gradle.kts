@@ -4,6 +4,7 @@ plugins {
     jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    kotlin("jvm") version "1.9.0"
 }
 
 group = "faang.school"
@@ -80,6 +81,8 @@ dependencies {
      * swagger
      */
     implementation( "org.springdoc", "springdoc-openapi-starter-webmvc-ui",  "2.0.4")
+
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {
