@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew jacocoTestReport --no-daemon
 
       - name: Check if jacoco report folder exists
-        run: ls -R build/reports/jacoco
+        run: ls -R build/reports/jacocoHtml
 
       - name: Archive test report
         if: always()
@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco_report
-          path: build/reports/jacoco/html
+          path: build/reports/jacocoHtml
 
       - name: Upload Checkstyle report
         if: always()

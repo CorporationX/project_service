@@ -82,6 +82,10 @@ dependencies {
     implementation( "org.springdoc", "springdoc-openapi-starter-webmvc-ui",  "2.0.4")
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
