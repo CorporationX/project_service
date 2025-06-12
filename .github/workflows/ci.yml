@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco_report
-          path: build/reports/jacocoHtml
+          path: build/jacocoHtml
 
       - name: Upload Checkstyle report
         if: always()
