@@ -1,5 +1,6 @@
 plugins {
     java
+    checkstyle
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     id("jacoco")
@@ -11,6 +12,12 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
 }
 
 dependencies {
@@ -66,8 +73,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
-
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
@@ -77,8 +82,31 @@ jacoco {
     reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
 }
 
+tasks.checkstyleMain {
+    source = fileTree("${project.rootDir}/src/main/java")
+    include("**/*.java")
+    exclude("**/resources/**")
+    classpath = files()
+}
+
+tasks.checkstyleTest {
+    source = fileTree("${project.rootDir}/src/test")
+    include("**/*.java")
+    classpath = files()
+}
+
 tasks.test {
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification) // report is always generated after tests run
+}
+
+tasks.build {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+checkstyle {
+    toolVersion = "10.17.0"
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    checkstyle.enableExternalDtdLoad.set(true)
 }
 
 tasks.jacocoTestReport {
@@ -131,4 +159,10 @@ tasks.jacocoTestReport {
         }
     }))
 
+}
+
+val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+
+tasks.bootJar {
+    archiveFileName.set("service.jar")
 }
