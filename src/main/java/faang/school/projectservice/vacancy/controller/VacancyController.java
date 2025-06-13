@@ -52,15 +52,9 @@ public class VacancyController {
         return vacancyService.closeVacancy(id, dto);
     }
 
-
-    @GetMapping("/{id}")
+    @GetMapping
     public List<VacancyDto> getAllVacancies() {
         return vacancyService.getAllVacancies();
-    }
-
-    @GetMapping("/{id}")
-    public VacancyDto getVacancyById(@PathVariable UUID id) {
-        return vacancyService.getVacancyById(id);
     }
 
     @GetMapping("/{id}")
@@ -68,7 +62,7 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.getVacancy(id));
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     public List<Vacancy> filter(@RequestParam TeamRole position,
                                 @RequestParam String title) {
         return vacancyService.filterVacancies(position, title);

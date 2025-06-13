@@ -2,10 +2,12 @@ package faang.school.projectservice.vacancy.service;
 
 import faang.school.projectservice.vacancy.repository.ProjectRoleRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 @AllArgsConstructor
 public class ProjectRoleService {
     private final ProjectRoleRepository projectRoleRepository;

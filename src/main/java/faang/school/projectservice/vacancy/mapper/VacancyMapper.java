@@ -18,7 +18,6 @@ public interface VacancyMapper {
     VacancyMapper INSTANCE = Mappers.getMapper(VacancyMapper.class);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "uuidToLong")
-    @Mapping(target = "projectId", source = "projectId", qualifiedByName = "uuidToLong")
     VacancyDto toDto(Vacancy vacancy);
 
     Vacancy toEntity(VacancyCreateDto dto);

@@ -14,5 +14,4 @@ public class VacancyDto {
     private int capacity;
     private List<CandidateDto> candidates;
     private String status;
-    private Long projectId;
 }

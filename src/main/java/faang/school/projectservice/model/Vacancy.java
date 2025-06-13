@@ -46,9 +46,6 @@ public class Vacancy {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID projectId;
-
-    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
@@ -82,7 +79,7 @@ public class Vacancy {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-    
+
     @LastModifiedBy
     private Long updatedBy;
 

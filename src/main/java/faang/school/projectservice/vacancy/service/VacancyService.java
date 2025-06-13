@@ -53,7 +53,7 @@ public class VacancyService {
         long userId = userContext.getUserId();
         Vacancy vacancy = getVacancyEntity(id);
 
-        checkOwnerOrManager(userId, vacancy.getProjectId(), "обновления вакансии");
+        checkOwnerOrManager(userId, vacancy.getProject().getId(), "обновления вакансии");
 
         vacancy.setTitle(dto.getTitle());
         vacancy.setPosition(dto.getPosition());
@@ -69,7 +69,7 @@ public class VacancyService {
 
         List<Candidate> candidatesToAdd = dto.getCandidates().stream()
                 .map(vacancyMapper::toEntity)
-                .filter(candidate -> !projectRoleService.isProjectMember(vacancy.getProjectId(), candidate.getId()))
+                .filter(candidate -> !projectRoleService.isProjectMember(vacancy.getProject().getId(), candidate.getId()))
                 .collect(Collectors.toList());
 
         vacancy.getCandidates().addAll(candidatesToAdd);
@@ -83,14 +83,14 @@ public class VacancyService {
         long userId = userContext.getUserId();
         Vacancy vacancy = getVacancyEntity(id);
 
-        checkOwnerOrManager(userId, vacancy.getProjectId(), "закрытия вакансии");
+        checkOwnerOrManager(userId, vacancy.getProject().getId(), "закрытия вакансии");
 
         if (dto.getSelectedCandidateIds().size() != vacancy.getSlots()) {
             throw new IllegalStateException("Количество выбранных кандидатов должно совпадать с количеством мест.");
         }
 
         projectRoleService.assignRolesToProject(
-                vacancy.getProjectId(),
+                vacancy.getProject().getId(),
                 vacancy.getPosition(),
                 dto.getSelectedCandidateIds()
         );

@@ -3,6 +3,7 @@ package faang.school.projectservice.model;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
@@ -41,7 +42,7 @@ public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @Column(name = "name", length = 128, nullable = false)
     private String name;
