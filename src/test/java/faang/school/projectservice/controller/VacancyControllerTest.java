@@ -17,8 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -84,64 +82,58 @@ class VacancyControllerTest {
     }
 
     @Test
-    @DisplayName("testCreateVacancy - успешное создание вакансии")
-    void testCreateVacancy_shouldReturnCreatedVacancy() {
+    @DisplayName("Создание вакансии - успешный сценарий")
+    void createVacancy_shouldReturnCreatedVacancy() {
         when(vacancyService.createVacancy(any())).thenReturn(responseDto);
 
-        ResponseEntity<VacancyResponseDto> response = vacancyController.createVacancy(createDto);
+        VacancyResponseDto result = vacancyController.createVacancy(createDto);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseDto, response.getBody());
+        assertEquals(responseDto, result);
         verify(vacancyService).createVacancy(createDto);
     }
 
     @Test
-    @DisplayName("testUpdateVacancy - успешное обновление")
-    void testUpdateVacancy_shouldReturnUpdatedVacancy() {
+    @DisplayName("Обновление вакансии - успешный сценарий")
+    void updateVacancy_shouldReturnUpdatedVacancy() {
         when(vacancyService.updateVacancy(any())).thenReturn(responseDto);
 
-        ResponseEntity<VacancyResponseDto> response = vacancyController.updateVacancy(1L, updateDto);
+        VacancyResponseDto result = vacancyController.updateVacancy(1L, updateDto);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseDto, response.getBody());
+        assertEquals(responseDto, result);
         verify(vacancyService).updateVacancy(updateDto);
     }
 
     @Test
-    @DisplayName("testCloseVacancy - успешное закрытие")
-    void testCloseVacancy_shouldReturnDto() {
-        when(vacancyService.closeVacancy(anyLong(), any()))
-                .thenReturn(responseDto);
+    @DisplayName("Закрытие вакансии - успешный сценарий")
+    void closeVacancy_shouldReturnVacancyDto() {
+        when(vacancyService.closeVacancy(anyLong(), any())).thenReturn(responseDto);
 
-        ResponseEntity<VacancyResponseDto> response = vacancyController.closeVacancy(1L, closeDto);
+        VacancyResponseDto result = vacancyController.closeVacancy(1L, closeDto);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseDto, response.getBody());
+        assertEquals(responseDto, result);
         verify(vacancyService).closeVacancy(1L, closeDto);
     }
 
     @Test
-    @DisplayName("testGetFilteredVacancies - успешная фильтрация")
-    void testGetFilteredVacancies_shouldReturnFiltered() {
+    @DisplayName("Получение отфильтрованных вакансий - успешный сценарий")
+    void getFilteredVacancies_shouldReturnFilteredList() {
         when(vacancyService.getFilteredVacancies(any())).thenReturn(List.of(responseDto));
 
-        ResponseEntity<List<VacancyResponseDto>> response = vacancyController.getFilteredVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyController.getFilteredVacancies(filterDto);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
-        assertEquals(responseDto, response.getBody().get(0));
+        assertEquals(1, result.size());
+        assertEquals(responseDto, result.get(0));
         verify(vacancyService).getFilteredVacancies(filterDto);
     }
 
     @Test
-    @DisplayName("testGetVacancyById - успешное получение")
-    void testGetVacancyById_shouldReturnVacancy() {
+    @DisplayName("Получение вакансии по ID - успешный сценарий")
+    void getVacancyById_shouldReturnVacancy() {
         when(vacancyService.getVacancyById(1L)).thenReturn(responseDto);
 
-        ResponseEntity<VacancyResponseDto> response = vacancyController.getVacancyById(1L);
+        VacancyResponseDto result = vacancyController.getVacancyById(1L);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseDto, response.getBody());
+        assertEquals(responseDto, result);
         verify(vacancyService).getVacancyById(1L);
     }
 }

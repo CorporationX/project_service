@@ -8,8 +8,6 @@ import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,38 +22,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/vacancies")
 @RequiredArgsConstructor
-@Slf4j
 public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public ResponseEntity<VacancyResponseDto> createVacancy(@Valid @RequestBody CreateVacancyDto dto) {
-        return ResponseEntity.ok(vacancyService.createVacancy(dto));
+    public VacancyResponseDto createVacancy(@Valid @RequestBody CreateVacancyDto dto) {
+        return vacancyService.createVacancy(dto);
     }
 
     @PutMapping("/{vacancyId}")
-    public ResponseEntity<VacancyResponseDto> updateVacancy(
+    public VacancyResponseDto updateVacancy(
             @PathVariable Long id,
             @Valid @RequestBody UpdateVacancyDto dto) {
         dto.setId(id);
-        return ResponseEntity.ok(vacancyService.updateVacancy(dto));
+        return vacancyService.updateVacancy(dto);
     }
 
-    @PostMapping("/{vacancyId}/close")
-    public ResponseEntity<VacancyResponseDto> closeVacancy(
+    @PutMapping("/{vacancyId}/close")
+    public VacancyResponseDto closeVacancy(
             @PathVariable Long id,
             @Valid @RequestBody CloseVacancyDto dto) {
         VacancyResponseDto response = vacancyService.closeVacancy(id, dto);
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @GetMapping
-    public ResponseEntity<List<VacancyResponseDto>> getFilteredVacancies(@Valid VacancyFilterDto filterDto) {
-        return ResponseEntity.ok(vacancyService.getFilteredVacancies(filterDto));
+    public List<VacancyResponseDto> getFilteredVacancies(@Valid VacancyFilterDto filterDto) {
+        return vacancyService.getFilteredVacancies(filterDto);
     }
 
     @GetMapping("/{vacancyId}")
-    public ResponseEntity<VacancyResponseDto> getVacancyById(@PathVariable Long id) {
-        return ResponseEntity.ok(vacancyService.getVacancyById(id));
+    public VacancyResponseDto getVacancyById(@PathVariable Long id) {
+        return vacancyService.getVacancyById(id);
     }
 }

@@ -7,19 +7,21 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.exception.InvalidOperationException;
+import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.VacancyValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,8 +68,6 @@ public class VacancyServiceImplTest {
     private VacancyMapper vacancyMapper;
     @Mock
     private CandidateMapper candidateMapper;
-    @Mock
-    private VacancyValidator validator;
     @Mock
     private Filter<Vacancy, VacancyFilterDto> mockFilter;
     @InjectMocks
@@ -107,11 +108,10 @@ public class VacancyServiceImplTest {
         vacancyService = new VacancyServiceImpl(
                 vacancyRepo,
                 candidateRepo,
-                userContext,
                 teamMemberRepo,
+                userContext,
                 vacancyMapper,
                 candidateMapper,
-                validator,
                 List.of(mockFilter)
         );
     }
@@ -122,18 +122,37 @@ public class VacancyServiceImplTest {
         VacancyResponseDto responseDto = new VacancyResponseDto();
 
         when(userContext.getUserId()).thenReturn(userId);
+        when(teamMemberRepo.findByUserIdAndProjectId(userId, projectId))
+                .thenReturn(Optional.of(TeamMember.builder()
+                        .roles(List.of(TeamRole.MANAGER))
+                        .build()));
         when(vacancyMapper.toVacancyEntity(createDto)).thenReturn(testVacancy);
         when(vacancyRepo.save(testVacancy)).thenReturn(testVacancy);
         when(vacancyMapper.toVacancyDto(testVacancy)).thenReturn(responseDto);
 
         VacancyResponseDto result = vacancyService.createVacancy(createDto);
 
+        verify(teamMemberRepo).findByUserIdAndProjectId(userId, projectId);
         verify(vacancyMapper).toVacancyEntity(createDto);
         verify(vacancyRepo).save(testVacancy);
         verify(vacancyMapper).toVacancyDto(testVacancy);
         assertThat(result).isEqualTo(responseDto);
         assertThat(testVacancy.getStatus()).isEqualTo(VacancyStatus.OPEN);
         assertThat(testVacancy.getCreatedBy()).isEqualTo(userId);
+    }
+
+    @Test
+    @DisplayName("Проверка роли польз для созд. вакансии")
+    void createVacancy_shouldThrow_whenUserNotOwnerOrManager() {
+        when(userContext.getUserId()).thenReturn(userId);
+        when(teamMemberRepo.findByUserIdAndProjectId(userId, projectId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(PermissionDeniedException.class,
+                () -> vacancyService.createVacancy(createDto));
+
+        assertThrows(PermissionDeniedException.class,
+                () -> vacancyService.createVacancy(createDto));
     }
 
     @Test
@@ -193,6 +212,17 @@ public class VacancyServiceImplTest {
         assertThat(testVacancy.getStatus()).isEqualTo(VacancyStatus.CLOSED);
         assertThat(testVacancy.getCandidates().get(0).getCandidateStatus())
                 .isEqualTo(CandidateStatus.ACCEPTED);
+    }
+
+    @Test
+    @DisplayName("Закрытие вакансии с неправильным количеством кандидатов")
+    void closeVacancy_shouldThrow_henCandidatesCountMismatch() {
+        testVacancy.setCount(2);
+        when(vacancyRepo.findById(vacancyId)).thenReturn(Optional.of(testVacancy));
+        CloseVacancyDto dto = new CloseVacancyDto(List.of(101L)); // Только 1 кандидат
+
+        assertThrows(InvalidOperationException.class,
+                () -> vacancyService.closeVacancy(vacancyId, dto));
     }
 
     @Test

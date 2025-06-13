@@ -8,17 +8,20 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.InvalidOperationException;
+import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,21 +38,16 @@ public class VacancyServiceImpl implements VacancyService {
 
     private final VacancyRepository vacancyRepository;
     private final CandidateRepository candidateRepository;
+    private final TeamMemberRepository teamMemberRepo;
     private final UserContext userContext;
-    private final TeamMemberRepository teamMemberRepository;
     private final VacancyMapper vacancyMapper;
     private final CandidateMapper candidateMapper;
-    private final VacancyValidator vacancyValidator;
     private final List<Filter<Vacancy, VacancyFilterDto>> vacancyFilters;
 
     @Override
     @Transactional
     public VacancyResponseDto createVacancy(CreateVacancyDto dto) {
-        vacancyValidator.validateTeamRole((dto.getPosition()));
-        vacancyValidator.validateProjectExists(dto.getProjectId());
-
-        Long currentUserId = userContext.getUserId();
-        vacancyValidator.validateUserHasCreateRights(currentUserId, dto.getProjectId());
+        assertOwnerOrManager(userContext.getUserId(), dto.getProjectId());
 
         Vacancy vacancy = vacancyMapper.toVacancyEntity(dto);
         vacancy.setStatus(VacancyStatus.OPEN);
@@ -62,16 +60,20 @@ public class VacancyServiceImpl implements VacancyService {
         return vacancyMapper.toVacancyDto(savedVacancy);
     }
 
+    private void assertOwnerOrManager(Long userId, Long projectId) {
+        TeamMember member = teamMemberRepo.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new PermissionDeniedException("User is not in project"));
+
+        if (!member.getRoles().contains(TeamRole.OWNER) && !member.getRoles().contains(TeamRole.MANAGER)) {
+            throw new PermissionDeniedException("User must be OWNER or MANAGER");
+        }
+    }
+
     @Override
     @Transactional
     public VacancyResponseDto updateVacancy(UpdateVacancyDto dto) {
         Vacancy vacancy = vacancyRepository.findById(dto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(VACANCY_NOT_FOUND, dto.getId())));
-
-        vacancyValidator.checkRoleUpdatingUser(userContext.getUserId());
-        if (dto.getPosition() != null) {
-            vacancyValidator.validateTeamRole(dto.getPosition());
-        }
 
         vacancyMapper.updateVacancyEntityFromVacancyDto(dto, vacancy);
         vacancy.setUpdatedBy(userContext.getUserId());
@@ -92,8 +94,11 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(VACANCY_NOT_FOUND, vacancyId)));
 
-        vacancyValidator.checkRoleUpdatingUser(userContext.getUserId());
-        vacancyValidator.validateCandidateSelectionForClosing(vacancy, dto.getSelectedCandidateIds());
+        if (dto.getSelectedCandidateIds().size() != vacancy.getCount()) {
+            throw new InvalidOperationException(String.format("Candidates %d < need %d ",
+                    dto.getSelectedCandidateIds().size(),
+                    vacancy.getCount()));
+        }
 
         updateCandidateStatuses(vacancy, dto.getSelectedCandidateIds());
 
@@ -113,14 +118,14 @@ public class VacancyServiceImpl implements VacancyService {
             throw new DataValidationException("Filter parameters cannot be null");
         }
 
-        List<VacancyResponseDto> result = vacancyFilters.stream()
+        List<VacancyResponseDto> resultResponseDto = vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
                 .flatMap(filter -> filter.apply(vacancyRepository.findAll().stream(), filterDto))
                 .map(vacancyMapper::toVacancyDto)
                 .toList();
 
-        log.debug("Found {} vacancies with filters {}", result.size(), filterDto);
-        return result;
+        log.debug("Found {} vacancies with filters {}", resultResponseDto.size(), filterDto);
+        return resultResponseDto;
     }
 
     @Override
