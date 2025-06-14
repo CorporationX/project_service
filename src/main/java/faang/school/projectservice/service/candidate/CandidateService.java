@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.candidate;
 
 import org.springframework.stereotype.Service;
 

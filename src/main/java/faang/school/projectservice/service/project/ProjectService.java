@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ public class ProjectService {
 
     public void checkProjectExists(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
-            throw new IllegalArgumentException("Project does not exist");
+            throw new ProjectNotFoundException(projectId);
         }
     }
 }

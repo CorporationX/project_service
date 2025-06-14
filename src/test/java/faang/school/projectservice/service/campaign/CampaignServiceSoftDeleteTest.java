@@ -108,4 +108,3 @@ public class CampaignServiceSoftDeleteTest {
         verify(campaignRepoAdapter, never()).save(any());
     }
 }
-

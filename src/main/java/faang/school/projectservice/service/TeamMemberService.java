@@ -11,4 +11,6 @@ public interface TeamMemberService {
     boolean isMember(Long projectId, Long userId);
 
     void save(TeamMember teamMember);
+
+    void assertOwnerOrManager(Long projectId, Long userId);
 }

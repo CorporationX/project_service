@@ -72,4 +72,3 @@ public class CampaignController {
         return campaignService.getCampaignDtoWithFilters(campaignFilterDto, pageable);
     }
 }
-
