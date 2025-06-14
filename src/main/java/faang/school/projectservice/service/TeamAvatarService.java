@@ -8,4 +8,5 @@ public interface TeamAvatarService {
     void uploadFile(long teamId, MultipartFile file);
     InputStream downloadFile(long teamId);
     void deleteFile(long teamId);
+    String getAvatarContentType(long teamId);
 }

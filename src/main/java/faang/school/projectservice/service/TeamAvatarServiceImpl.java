@@ -1,7 +1,5 @@
 package faang.school.projectservice.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +10,10 @@ import faang.school.projectservice.exception.AuthorizationException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.utils.FileProcessor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
 
 @Slf4j
 @Service
@@ -24,31 +22,37 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     private final TeamRepository teamRepository;
     private final S3Service s3Service;
     private final TeamMemberService teamMemberService;
+    private final FileProcessor fileProcessor;
 
-    @Value("${team-avatar-file.maxDimension}")
-    private int avatarMaxDimension;
+    @Value("${team-avatar-file.maxSize}")
+    private Long avatarMaxSizeValue;
 
+    @Override
     public void uploadFile(long teamId, MultipartFile file) {
+        checkFileContent(file);
         Team team = getTeam(teamId);
-        String objectKey =s3Service.uploadFile(resizeImage(file), file.getContentType(), "team-avatars");
+        String objectKey = s3Service.uploadFile(fileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
         team.setAvatarKey(objectKey);
         teamRepository.save(team);
         log.info("File is saved with key {}", objectKey);
     }
 
+    @Override
     public InputStream downloadFile(long teamId) {
         Team team = getTeam(teamId);
-        s3Service.listContent();
         return s3Service.downloadFile(team.getAvatarKey());
     }
 
+    @Override
     public String getAvatarContentType(long teamId) {
         Team team = getTeam(teamId);
         return s3Service.getAvatarContentType(team.getAvatarKey());
     }
 
+    @Override
     public void deleteFile(long teamId) {
         if (!teamMemberService.ifUserIsManager(teamId)) {
+            log.error("The user is not a team {} manager.", teamId);
             throw new AuthorizationException(String.format("You are not a manager of this team %d.", teamId));
         }
         Team team = getTeam(teamId);
@@ -58,21 +62,20 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
         log.info("Link to avatar is removed from team {}. File {} was removed.", teamId, team.getAvatarKey());
     }
 
-    private File resizeImage(MultipartFile file) {
-        try {
-            File outputFile = new File(file.getOriginalFilename());
-            Thumbnails.of(file.getInputStream())
-                .size(avatarMaxDimension, avatarMaxDimension)
-                .keepAspectRatio(true)
-                .toFile(outputFile);
-            return outputFile;
-        } catch (IOException e) {
-            log.error("Error while resizing a fiele, {}.", e.getMessage());
-            throw new RuntimeException(String.format("Error while resizing a file, %s.", e.getMessage()));
-        }
-    }
-
     private Team getTeam(long teamId) {
         return teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team not found"));
+    }
+
+    private void checkFileContent(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            log.error("The file is not attached or it is not an image.");
+            throw new IllegalArgumentException("The file is not attached or it is not an image.");
+        }
+
+        if (file.getSize() > avatarMaxSizeValue) {
+            log.error("The file is too large.");
+            throw new IllegalArgumentException("The file is too large.");
+        }
     }
 }

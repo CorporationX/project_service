@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,23 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 public class TeamAvatarController {
     private final TeamAvatarServiceImpl teamAvatarService;
 
-    @Value("${team-avatar-file.maxSize}")
-    private Long avatarMaxSizeValue;
-    
     @PostMapping("/{teamId}")
-    public ResponseEntity<String> upload(@PathVariable long teamId, @RequestParam MultipartFile file) {
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("The file is not attached or it is not an image.");
-        }
-
-        if (file.getSize() > avatarMaxSizeValue) {
-            throw new IllegalArgumentException("The file is too large.");
-        }
-
+    public void upload(@PathVariable long teamId, @RequestParam MultipartFile file) {
         teamAvatarService.uploadFile(teamId, file);
-
-        return ResponseEntity.ok("File uploaded successfully");
     }
 
     @GetMapping(path = "/{teamId}", produces = "application/octet-stream")

@@ -34,15 +34,15 @@ public class RestControllerExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException e) {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("bad_request", e.getMessage()));
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.BAD_GATEWAY)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("bad_request", e.getMessage()));
     }
 
