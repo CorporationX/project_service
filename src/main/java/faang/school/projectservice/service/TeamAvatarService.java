@@ -6,8 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface TeamAvatarService {
 
-    ResponseEntity<String> addTeamAvatar(@NotNull Long userId, MultipartFile file);
+    String addTeamAvatar(@NotNull Long userId, MultipartFile file);
 
-    ResponseEntity<String> removeTeamAvatar(@NotNull Long userId);
+    String removeTeamAvatar(@NotNull Long userId);
 
 }

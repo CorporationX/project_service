@@ -33,7 +33,7 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     private final S3Service s3Service;
 
     @Override
-    public ResponseEntity<String> addTeamAvatar(Long userId, MultipartFile file) {
+    public String addTeamAvatar(Long userId, MultipartFile file) {
         ByteArrayInputStream resizedImageByte = ImageUtils.resizeImageToFitLongestSide(file, MAX_TEAM_AVATAR_SIDE);
 
         MultipartFile resizedFile = convertToMultipart(resizedImageByte, file);
@@ -51,12 +51,12 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
         teamRepository.save(team);
 
-        return ResponseEntity.ok(key);
+        return key;
 
     }
 
     @Override
-    public ResponseEntity<String> removeTeamAvatar(@NotNull Long userId) {
+    public String removeTeamAvatar(@NotNull Long userId) {
         if (!teamMemberRepository.findByUserId(userId).get(0).getRoles().contains(TeamRole.MANAGER)) {
             throw new TeamMemberRoleException("User with id %d can't delete Avatar.".formatted(userId) +
                     " User with id %d must be Project Manager for Deleting Avatar".formatted(userId));
@@ -72,7 +72,7 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
         teamRepository.save(team);
 
-        return ResponseEntity.ok("Avatar was Deleted");
+        return key;
     }
 
 
