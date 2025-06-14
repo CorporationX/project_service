@@ -8,22 +8,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/v1/teamPhoto")
+@RequestMapping("/api/v1/team-photo")
 @RequiredArgsConstructor
 public class TeamAvatarController {
 
     private final TeamAvatarService teamAvatarService;
 
-    @PostMapping("user/{userId}")
-
+    @PostMapping("/user/{userId}")
     public ResponseEntity<String> addTeamAvatar(@NotNull @PathVariable Long userId,
-                                                @NotNull @RequestParam("Avatar") MultipartFile file) throws Exception {
+                                                @NotNull @RequestParam("Avatar") MultipartFile file) {
         return teamAvatarService.addTeamAvatar(userId, file);
     }
 
     @DeleteMapping("user/{userId}")
-    public ResponseEntity<String> removeTeamAvatar(@NotNull @PathVariable Long userId) throws Exception {
+    public ResponseEntity<String> removeTeamAvatar(@NotNull @PathVariable Long userId) {
         return teamAvatarService.removeTeamAvatar(userId);
-
     }
 }

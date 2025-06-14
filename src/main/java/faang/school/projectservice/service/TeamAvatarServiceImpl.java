@@ -5,39 +5,45 @@ import faang.school.projectservice.config.AvatarConfiguration;
 import faang.school.projectservice.exception.TeamMemberRoleException;
 
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.util.ByteArrayMultipartFile;
 import faang.school.projectservice.util.ImageUtils;
-import faang.school.projectservice.validator.TeamMemberRoleValidator;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.ByteArrayInputStream;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TeamAvatarServiceImpl implements TeamAvatarService {
+    private final static int MAX_TEAM_AVATAR_SIDE = 512;
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamMemberRoleValidator teamMemberRoleValidator;
     private final TeamRepository teamRepository;
     private final AvatarConfiguration config;
     private final S3Service s3Service;
-    private final static int MAX_TEAM_AVATAR_SIDE = 512;
 
     @Override
-    public ResponseEntity<String> addTeamAvatar(@NotNull Long userId, @NotNull MultipartFile file) {
-
+    public ResponseEntity<String> addTeamAvatar(Long userId, MultipartFile file) {
         ByteArrayInputStream resizedImageByte = ImageUtils.resizeImageToFitLongestSide(file, MAX_TEAM_AVATAR_SIDE);
 
         MultipartFile resizedFile = convertToMultipart(resizedImageByte, file);
 
         String key = s3Service.uploadFile(resizedFile);
+
+        if (teamMemberRepository.findByUserId(userId).isEmpty()) {
+            log.error("User with id %d was not found in member list".formatted(userId));
+            throw new EntityNotFoundException("User with id %d was not found in member list".formatted(userId));
+        }
 
         Team team = teamMemberRepository.findByUserId(userId).get(0).getTeam();
 
@@ -45,13 +51,13 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
         teamRepository.save(team);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(key);
+        return ResponseEntity.ok(key);
 
     }
 
     @Override
     public ResponseEntity<String> removeTeamAvatar(@NotNull Long userId) {
-        if (!teamMemberRoleValidator.isTeamManager(userId)) {
+        if (!teamMemberRepository.findByUserId(userId).get(0).getRoles().contains(TeamRole.MANAGER)) {
             throw new TeamMemberRoleException("User with id %d can't delete Avatar.".formatted(userId) +
                     " User with id %d must be Project Manager for Deleting Avatar".formatted(userId));
         }
@@ -66,7 +72,7 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
         teamRepository.save(team);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Avatar was Deleted");
+        return ResponseEntity.ok("Avatar was Deleted");
     }
 
 

@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 amazonS3;
