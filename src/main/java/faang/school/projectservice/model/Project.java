@@ -1,9 +1,5 @@
 package faang.school.projectservice.model;
 
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -30,6 +26,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "project")
@@ -58,8 +58,8 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
@@ -76,7 +76,6 @@ public class Project {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
