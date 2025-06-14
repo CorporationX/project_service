@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
-import faang.school.projectservice.filter.campaign.CampaignFilter;
 import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -14,13 +13,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
