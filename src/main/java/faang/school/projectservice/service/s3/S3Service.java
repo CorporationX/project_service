@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 s3Client;
@@ -24,18 +24,13 @@ public class S3Service {
 
     public String uploadFile(File file, String contentType, String folder) {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getName());
-        log.info("==== file name {}", key);
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(
-                bucketName, 
-                key, 
-                file
-            );
-            s3Client.putObject(putObjectRequest);
-        } catch (Exception e) {
-            log.error("Error uploading file to S3: {}", e.getMessage());
-            throw new RuntimeException("Error uploading file to S3");
-        }
+        PutObjectRequest putObjectRequest = new PutObjectRequest(
+            bucketName, 
+            key, 
+            file
+        );
+        s3Client.putObject(putObjectRequest);
+        log.debug("File is saved with name {}", key);
         return key;
     }
 
@@ -55,12 +50,6 @@ public class S3Service {
         } catch (Exception e) {
             throw new RuntimeException("Error downloading file from S3");
         }
-    }
-
-    public void listContent() {
-        s3Client.listObjects(bucketName).getObjectSummaries().forEach(objectSummary -> {
-            log.info("==== key {}", objectSummary.getKey());
-        });
     }
 
     public void deleteFile(String key) {
