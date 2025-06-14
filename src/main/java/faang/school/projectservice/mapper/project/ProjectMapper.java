@@ -10,22 +10,28 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
-    @Mapping(target = "teams", source = "teams", expression = "java(listIdTeams(project))")
+    @Mapping(target = "teams", expression = "java(listIdTeams(project))")
     ProjectDto toDto(Project project);
 
-    Project toEntity (ProjectDto projectDto);
+    @Mapping(target = "teams", ignore = true)
+    Project toEntity(ProjectDto projectDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "teams", ignore = true)
     void updateProjectFromDto(ProjectDto dto, @MappingTarget Project entity);
 
 
-    default List<Long> listIdTeams (Project project){
+    default List<Long> listIdTeams(Project project) {
+        if (project.getTeams() == null) {
+            return Collections.emptyList();
+        }
         return project.getTeams().stream().map(Team::getId).toList();
     }
 }
