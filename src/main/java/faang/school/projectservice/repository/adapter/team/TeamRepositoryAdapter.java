@@ -3,6 +3,7 @@ package faang.school.projectservice.repository.adapter.team;
 import faang.school.projectservice.exception.TeamNotFoundException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.TeamRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

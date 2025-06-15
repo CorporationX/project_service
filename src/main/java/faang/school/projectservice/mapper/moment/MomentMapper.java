@@ -25,7 +25,6 @@ public interface MomentMapper {
     @Mapping(target = "filterProjectIds", ignore = true)
     MomentDto toDto(Moment entity);
 
-
     @Named("projectsToIds")
     default List<Long> projectsToIds(List<Project> projects) {
         if (projects == null || projects.isEmpty()) {
