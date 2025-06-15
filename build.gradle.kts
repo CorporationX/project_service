@@ -34,6 +34,8 @@ dependencies {
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
+    implementation ("net.coobird:thumbnailator:0.4.20")
+
     /**
      * Utils & Logging
      */
@@ -59,9 +61,23 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+
+
+    /**
+     * Google Auth
+     */
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.23.0")
+    implementation("com.google.http-client:google-http-client-jackson2:1.43.3")
+
+    /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
 }
 
 tasks.withType<Test> {
