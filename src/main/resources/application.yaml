@@ -48,3 +48,7 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+team-avatar-file:
+  maxSize: 26500
+  maxDimension: 50
