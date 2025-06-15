@@ -37,6 +37,7 @@ public class TeamAvatarController {
             imageBytes = teamAvatarService.downloadFile(teamId).readAllBytes();
             contentType = teamAvatarService.getAvatarContentType(teamId);
         } catch (Exception e) {
+            log.error("Error downloading image: {}", e.getMessage());
             e.printStackTrace();
         }
         HttpHeaders headers = new HttpHeaders();

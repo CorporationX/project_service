@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import faang.school.projectservice.exception.AuthorizationException;
+import faang.school.projectservice.exception.NotAllowedFileException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.TeamRepository;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.S3ServiceImpl;
 import faang.school.projectservice.utils.FileProcessor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TeamAvatarServiceImpl implements TeamAvatarService {
     private final TeamRepository teamRepository;
-    private final S3Service s3Service;
+    private final S3ServiceImpl s3Service;
     private final TeamMemberService teamMemberService;
-    private final FileProcessor fileProcessor;
+    // private final FileProcessor fileProcessor;
 
     @Value("${team-avatar-file.maxSize}")
     private Long avatarMaxSizeValue;
@@ -31,7 +32,8 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     public void uploadFile(long teamId, MultipartFile file) {
         checkFileContent(file);
         Team team = getTeam(teamId);
-        String objectKey = s3Service.uploadFile(fileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
+        // String objectKey = s3Service.uploadFile(fileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
+        String objectKey = s3Service.uploadFile(FileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
         team.setAvatarKey(objectKey);
         teamRepository.save(team);
         log.info("File is saved with key {}", objectKey);
@@ -70,12 +72,12 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             log.error("The file is not attached or it is not an image.");
-            throw new IllegalArgumentException("The file is not attached or it is not an image.");
+            throw new NotAllowedFileException("The file is not attached or it is not an image.");
         }
 
         if (file.getSize() > avatarMaxSizeValue) {
             log.error("The file is too large.");
-            throw new IllegalArgumentException("The file is too large.");
+            throw new NotAllowedFileException("The file is too large.");
         }
     }
 }

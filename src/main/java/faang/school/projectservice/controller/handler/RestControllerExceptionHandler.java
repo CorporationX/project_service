@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.handler;
 
 import faang.school.projectservice.exception.AuthorizationException;
+import faang.school.projectservice.exception.NotAllowedFileException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class RestControllerExceptionHandler {
                 .body(new ErrorResponse("not_found", e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(NotAllowedFileException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
@@ -35,7 +36,7 @@ public class RestControllerExceptionHandler {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse("bad_request", e.getMessage()));
+                .body(new ErrorResponse("unauthorized", e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -43,7 +44,7 @@ public class RestControllerExceptionHandler {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("bad_request", e.getMessage()));
+                .body(new ErrorResponse("internal_server_error", e.getMessage()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
