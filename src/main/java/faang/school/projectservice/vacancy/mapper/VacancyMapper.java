@@ -20,10 +20,12 @@ public interface VacancyMapper {
     @Mapping(target = "id", source = "id", qualifiedByName = "uuidToLong")
     VacancyDto toDto(Vacancy vacancy);
 
+    CandidateDto toDto(Candidate candidate);
+
     Vacancy toEntity(VacancyCreateDto dto);
 
     Candidate toEntity(CandidateDto dto);
-    CandidateDto toDto(Candidate candidate);
+
 
     @Named("uuidToLong")
     default Long uuidToLong(UUID value) {
