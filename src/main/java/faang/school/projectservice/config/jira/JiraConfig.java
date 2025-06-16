@@ -1,6 +1,7 @@
 package faang.school.projectservice.config.jira;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -8,26 +9,22 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class JiraConfig {
 
-    @Value("${jira.username}")
-    private String username;
-
-    @Value("${jira.api-token}")
-    private String apiToken;
-
-    @Value("${jira.base-url}")
-    private String baseUrl;
+    private final JiraProperties jiraProperties;
 
     @Bean
     public RestTemplate jiraRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
 
         restTemplate.getInterceptors().add((request, body, execution) -> {
-            String auth = username + ":" + apiToken;
+            String auth = jiraProperties.username() + ":" + jiraProperties.apiToken();
             byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
             String authHeader = "Basic " + new String(encodedAuth);
+            log.debug("Authorization header: {}", authHeader);
             request.getHeaders().set("Authorization", authHeader);
             return execution.execute(request, body);
         });

@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.jira.task;
+package faang.school.projectservice.dto.jira.issue;
 
 import faang.school.projectservice.model.TaskStatus;
 import lombok.Data;

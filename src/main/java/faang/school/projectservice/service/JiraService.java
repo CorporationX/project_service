@@ -1,18 +1,24 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.jira.task.JiraIssueFilterDto;
-
-import java.util.Map;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
 
 public interface JiraService {
 
-    Map<String, Object> createIssue(Map json);
+    JiraCreateIssueResponseDto createIssue(JiraCreateIssueDto requestBody);
 
-    Map<String, Object> changeIssue(long issueId, Map json);
+    JiraUpdateIssueResponse changeIssue(long issueId, JiraUpdateIssueRequest requestBody);
 
-    Map<String, Object> getAllIssuesWithFilter(String projectKey, JiraIssueFilterDto jiraIssueFilterDto, int startAt, int maxResults, Integer limit);
+    JiraGetMultipleIssuesResponse getAllIssuesWithFilter(String projectKey,
+                                                         JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto);
 
-    Map<String, Object> getAllIssues(String projectKey, int startAt, int maxResults, Integer limit);
+    JiraGetMultipleIssuesResponse getAllIssues(String projectKey,
+                                               JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto);
 
-    Map<String, Object> getIssueById(long issueId);
+    JiraGetIssueResponseDto getIssueById(long issueId);
 }

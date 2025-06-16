@@ -63,6 +63,9 @@ google:
     id: 948a850ea2013122e19246b99a8b9c2caeed1bac182d7928d4bd158ec1f06182@group.calendar.google.com
 
 jira:
-  base-url: https://faang-school.atlassian.net
+  base-url: https://jegor-test.atlassian.net
+  rest-api-url: /rest/api/3
+  jql-search: /search
+  issue: /issue
   username: gaanjara3@gmail.com
-  api-token: ATATT3xFfGF0wZNdk25y0503_ibL8ZzwlGlo5nBkr_UDi3hFUJlv-Jwm9rxIHIwJ3y1rEKHY6KB6-_TV6IqbEeV2RhYq0qasJKvl-BOKblLCsClrtujAwXyAEt_yOUCprOmf7xwBNLDuQkHBo7d2tbuyQlCIA0mR5XcJIUpWv0yJgazAU8zmnEk=8B67832C
+  api-token: ATATT3xFfGF0Jo35o2YdQiO4RdBE9ho0elcnNrraM28sTwWwmOPR4vlR1TUI41qqYGesDwoIE7IihNIQFn6WWQnX7zpQbHqjn1Ma4q4ODp0sLc94mCISrJsfQy5v6X7fsiyD9X0Kd_KRDioRmBU8QanIMD4hoOEkfpTLvJzDwGkWyamypOgHHQY=08C841C4
