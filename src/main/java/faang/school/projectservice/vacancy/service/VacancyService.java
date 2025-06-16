@@ -69,7 +69,8 @@ public class VacancyService {
 
         List<Candidate> candidatesToAdd = dto.getCandidates().stream()
                 .map(vacancyMapper::toEntity)
-                .filter(candidate -> !projectRoleService.isProjectMember(vacancy.getProject().getId(), candidate.getId()))
+                .filter(candidate -> !projectRoleService.isProjectMember(vacancy.getProject().getId(),
+                        candidate.getId()))
                 .collect(Collectors.toList());
 
         vacancy.getCandidates().addAll(candidatesToAdd);
