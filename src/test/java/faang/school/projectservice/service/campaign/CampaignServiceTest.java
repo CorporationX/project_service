@@ -113,7 +113,8 @@ public class CampaignServiceTest {
     @Test
     void test_createCampaign_WhenCreatedBy_OwnerOrManager() {
         when(projectRepository.existsById(1L)).thenReturn(true);
-        when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(manager);
+        when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L))
+                .thenReturn(Optional.of(manager));
         campaignServiceImpl.createCampaign(campaignDTO);
         verify(campaignRepository).save(any());
     }
@@ -121,7 +122,8 @@ public class CampaignServiceTest {
     @Test
     void test_createCampaign_WhenNotCreatedBy_OwnerOrManager() {
         when(projectRepository.existsById(1L)).thenReturn(true);
-        when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L)).thenReturn(withoutManagerOrOwnerRoles);
+        when(teamMemberRepository.findByUserIdAndProjectId(1L, 1L))
+                .thenReturn(Optional.of(withoutManagerOrOwnerRoles));
         Assertions.assertThrows(CampaignCreationException.class, () -> campaignServiceImpl.createCampaign(campaignDTO));
     }
 
@@ -131,7 +133,8 @@ public class CampaignServiceTest {
         campaign.setId(1L);
         campaignDTO.setUpdatedBy(10L);
         when(campaignRepository.findById(1L)).thenReturn(Optional.ofNullable(campaign));
-        Assertions.assertThrows(CampaignCreationException.class, () -> campaignServiceImpl.updateCampaign(campaignDTO, 1L));
+        Assertions.assertThrows(CampaignCreationException.class, () ->
+                campaignServiceImpl.updateCampaign(campaignDTO, 1L));
     }
 
     @Test
@@ -152,7 +155,8 @@ public class CampaignServiceTest {
         campaign.setId(1L);
         campaign.setCreatedBy(1L);
         campaignDTO.setCreatedBy(1L);
-        Assertions.assertThrows(CampaignCreationException.class, () -> campaignServiceImpl.updateCampaign(campaignDTO, 1L));
+        Assertions.assertThrows(CampaignCreationException.class, () ->
+                campaignServiceImpl.updateCampaign(campaignDTO, 1L));
     }
 
     @Test
