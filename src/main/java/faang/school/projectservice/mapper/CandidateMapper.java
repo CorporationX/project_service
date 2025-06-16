@@ -11,6 +11,7 @@ import java.util.List;
 public interface CandidateMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "resumeDocKey", ignore = true)
+    @Mapping(target = "vacancy", ignore = true)
     Candidate toCandidateEntity(CandidateDto dto);
 
     CandidateDto toCandidateDto(Candidate candidate);

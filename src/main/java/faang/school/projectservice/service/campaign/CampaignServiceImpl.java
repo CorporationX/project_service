@@ -87,8 +87,10 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     private List<TeamRole> getTeamRole(Campaign campaign) {
-        return teamMemberRepository.findByUserIdAndProjectId(campaign.getCreatedBy(), campaign.getProject()
-                .getId()).getRoles();
+        return teamMemberRepository.findByUserIdAndProjectId(campaign.getCreatedBy(),
+                        campaign.getProject().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Team member not found"))
+                .getRoles();
     }
 
     private boolean filterCampaigns(Campaign campaign, CampaignFilterDto filterDto) {
