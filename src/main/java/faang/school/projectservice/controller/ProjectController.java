@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.exception.ProjectImageCoverException;
 import faang.school.projectservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,21 +23,17 @@ import java.io.IOException;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/cover-image/{projectId}")
+    @PostMapping("/{projectId}/cover-image")
     @ResponseStatus(HttpStatus.CREATED)
     public void addCoverImage(
             @PathVariable Long projectId,
             @RequestParam("image") MultipartFile file
     ) {
-        try {
-            log.debug("request add project: projectId: {}, image.bites_count: {}", projectId, file.getBytes().length);
-            projectService.addCoverImage(projectId, file);
-        } catch (IOException e) {
-            log.error("error find a size of image file", e);
-        }
+        log.debug("request add project: projectId: {}", projectId);
+        projectService.addCoverImage(projectId, file);
     }
 
-    @DeleteMapping("/cover-image/{projectId}")
+    @DeleteMapping("/{projectId}/cover-image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCoverImage(@PathVariable Long projectId) {
         log.debug("request delete project cover image: projectId: {}", projectId);

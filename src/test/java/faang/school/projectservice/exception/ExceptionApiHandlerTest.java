@@ -46,7 +46,7 @@ class ExceptionApiHandlerTest {
                 .controllerAdvice(exceptionApiHandler)
                 .build()
                 .delete()
-                .uri(utils.format("/projects/cover-image/{}", PROJECT_ID))
+                .uri(utils.format("/projects/{}/cover-image", PROJECT_ID))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -67,7 +67,7 @@ class ExceptionApiHandlerTest {
                 .controllerAdvice(exceptionApiHandler)
                 .build()
                 .post()
-                .uri(utils.format("/projects/cover-image/{}", PROJECT_ID))
+                .uri(utils.format("/projects/{}/cover-image", PROJECT_ID))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData("image",
                         new ByteArrayResource(imageBytes) {
@@ -86,7 +86,7 @@ class ExceptionApiHandlerTest {
                 .controllerAdvice(exceptionApiHandler)
                 .build()
                 .delete()
-                .uri("/projects/cover-image/wrongValue")
+                .uri("/projects/wrongValue/cover-image")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
                 .expectBody()
@@ -101,7 +101,7 @@ class ExceptionApiHandlerTest {
                 .controllerAdvice(exceptionApiHandler)
                 .build()
                 .post()
-                .uri(utils.format("/projects/cover-image/{}", 0))
+                .uri(utils.format("/projects/{}/cover-image", 0))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)

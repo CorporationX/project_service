@@ -42,7 +42,7 @@ class ProjectControllerTest {
 
     @Test
     public void testAddCoverImageSuccess() throws Exception {
-        String uri = utils.format("/projects/cover-image/{}", PROJECT_ID);
+        String uri = utils.format("/projects/{}/cover-image", PROJECT_ID);
         // Создаем реальное изображение
         BufferedImage image = new BufferedImage(500, 300, BufferedImage.TYPE_INT_RGB);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -66,7 +66,7 @@ class ProjectControllerTest {
 
     @Test
     public void testDeleteCoverImage() throws Exception {
-        String uri = utils.format("/projects/cover-image/{}", PROJECT_ID);
+        String uri = utils.format("/projects/{}/cover-image", PROJECT_ID);
 
         doNothing().when(projectService).deleteCoverImage(PROJECT_ID);
 
