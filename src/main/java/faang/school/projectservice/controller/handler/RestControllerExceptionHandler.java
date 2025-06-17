@@ -24,7 +24,7 @@ public class RestControllerExceptionHandler {
     }
 
     @ExceptionHandler(NotAllowedFileException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
+    public ResponseEntity<ErrorResponse> handleNotAllowedFileException(NotAllowedFileException e) {
         log.warn("Bad request: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -33,7 +33,7 @@ public class RestControllerExceptionHandler {
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException e) {
-        log.warn("Bad request: {}", e.getMessage());
+        log.warn("Authorization error: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("unauthorized", e.getMessage()));
@@ -41,7 +41,7 @@ public class RestControllerExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.warn("Bad request: {}", e.getMessage());
+        log.warn("Internal server error: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("internal_server_error", e.getMessage()));

@@ -51,4 +51,3 @@ services:
 
 team-avatar-file:
   maxSize: 26500
-  maxDimension: 50
