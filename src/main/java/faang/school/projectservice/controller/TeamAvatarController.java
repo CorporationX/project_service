@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/team-photo")
 @RequiredArgsConstructor
 public class TeamAvatarController {
-
     private final TeamAvatarService teamAvatarService;
 
     @PostMapping("/user/{userId}")

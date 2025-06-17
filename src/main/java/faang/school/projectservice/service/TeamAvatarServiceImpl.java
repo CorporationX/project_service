@@ -5,6 +5,7 @@ import faang.school.projectservice.config.AvatarConfiguration;
 import faang.school.projectservice.exception.TeamMemberRoleException;
 
 import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
@@ -35,20 +36,11 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     @Override
     public String addTeamAvatar(Long userId, MultipartFile file) {
         ByteArrayInputStream resizedImageByte = ImageUtils.resizeImageToFitLongestSide(file, MAX_TEAM_AVATAR_SIDE);
-
         MultipartFile resizedFile = convertToMultipart(resizedImageByte, file);
-
         String key = s3Service.uploadFile(resizedFile);
-
-        if (teamMemberRepository.findByUserId(userId).isEmpty()) {
-            log.error("User with id %d was not found in member list".formatted(userId));
-            throw new EntityNotFoundException("User with id %d was not found in member list".formatted(userId));
-        }
-
-        Team team = teamMemberRepository.findByUserId(userId).get(0).getTeam();
+        Team team = getTeam(userId);
 
         team.setAvatarKey(key);
-
         teamRepository.save(team);
 
         return key;
@@ -62,14 +54,10 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
                     " User with id %d must be Project Manager for Deleting Avatar".formatted(userId));
         }
 
-        Team team = teamMemberRepository.findByUserId(userId).get(0).getTeam();
-
+        Team team = getTeam(userId);
         String key = team.getAvatarKey();
-
         s3Service.deleteFile(key);
-
         team.setAvatarKey(null);
-
         teamRepository.save(team);
 
         return key;
@@ -79,5 +67,22 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     private MultipartFile convertToMultipart(ByteArrayInputStream inputStream, MultipartFile file) {
         return new ByteArrayMultipartFile(inputStream.readAllBytes(), file.getName(),
                 file.getOriginalFilename(), file.getContentType());
+    }
+
+    private Team getTeam(Long userId) {
+        log.debug("Searching team for user ID: {}", userId);
+       return teamMemberRepository.findByUserId(userId)
+               .stream()
+               .findFirst()
+               .map(teamMember -> {
+                   log.debug("Found team member: {}", teamMember.getId());
+                   return teamMember.getTeam();
+               })
+               .orElseThrow(() -> {
+                   String errorMsg = "Team for team member with user id: %d was not found!"
+                           .formatted(userId);
+                   log.error(errorMsg);
+                   return new EntityNotFoundException(errorMsg);
+               });
     }
 }
