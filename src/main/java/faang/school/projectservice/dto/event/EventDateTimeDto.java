@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.event;
 
 import faang.school.projectservice.validation.ValidDateTimeString;
 import faang.school.projectservice.validation.ValidTimeZone;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,13 +17,16 @@ import java.time.format.DateTimeParseException;
 @Data
 @Builder
 @AllArgsConstructor
+@Schema(description = "Event date time with timezone")
 public class EventDateTimeDto {
     @NotNull(message = "DateTime could not be null")
     @ValidDateTimeString(message = "date time is not in correct format")
+    @Schema(description = "Date time", example = "15.01.2025 14:30", pattern = "dd.MM.yyyy HH:mm")
     private String dateTime;
 
     @NotNull(message = "Timezone could not be null")
     @ValidTimeZone(message = "Timezone is not in correct format")
+    @Schema(description = "Date time timezone", example = "Europe/Moscow")
     private String timeZone;
 
     public LocalDateTime toLocalDateTime() {

@@ -16,7 +16,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ResourceService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -248,10 +248,10 @@ class ProjectServiceImplTest {
 
         when(projectRepository.findById(nonExistentProjectId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
                 () -> service.update(updateDto));
 
-        assertEquals("No project with id %d has been found".formatted(nonExistentProjectId), exception.getMessage());
+        assertEquals("Project with id %d was not found".formatted(nonExistentProjectId), exception.getMessage());
     }
 
     @Test
@@ -313,10 +313,10 @@ class ProjectServiceImplTest {
     public void testGetProjectById_ProjectNotFound(){
         when(projectRepository.findById(nonExistentProjectId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
                 () -> service.getProjectById(nonExistentProjectId));
 
-        assertEquals("No project with this id has been found", exception.getMessage());
+        assertEquals("Project with id %d was not found".formatted(nonExistentProjectId), exception.getMessage());
     }
 
     @Test
