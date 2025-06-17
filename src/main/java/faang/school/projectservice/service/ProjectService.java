@@ -3,6 +3,8 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.ImageConfig;
 import faang.school.projectservice.exception.ProjectImageCoverException;
 import faang.school.projectservice.exception.ProjectNotFound;
+import faang.school.projectservice.exception.TaskEntityNotFoundException;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.util.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -70,5 +72,14 @@ public class ProjectService {
             log.error("error upload image to S3 service.", e);
             throw new ProjectImageCoverException(ERROR_UPLOAD_PROJECT_IMAGE_COVER);
         }
+    }
+
+    public Project getProjectById(Long id) {
+        log.debug("Getting project by id: {}", id);
+        return projectRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Project not found with id: {}", id);
+                    return new TaskEntityNotFoundException("Project not found with id: " + id);
+                });
     }
 }

@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -65,10 +66,12 @@ public class Task {
     private LocalDateTime updatedAt;
 
     @ManyToOne
+    @ToString.Exclude
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
     @ManyToMany
+    @ToString.Exclude
     @JoinTable(
             name = "task_linked_tasks",
             joinColumns = @JoinColumn(name = "task_id"),
