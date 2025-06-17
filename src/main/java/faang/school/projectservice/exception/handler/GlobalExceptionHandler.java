@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> handleIOExceptions(IOException ex) {
+    public ResponseEntity<Object> handleInputOutputExceptions(IOException ex) {
         return badRequest(ex);
     }
 
