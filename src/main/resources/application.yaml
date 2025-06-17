@@ -69,3 +69,11 @@ jira:
   issue: /issue
   username: gaanjara3@gmail.com
   api-token: ATATT3xFfGF0Jo35o2YdQiO4RdBE9ho0elcnNrraM28sTwWwmOPR4vlR1TUI41qqYGesDwoIE7IihNIQFn6WWQnX7zpQbHqjn1Ma4q4ODp0sLc94mCISrJsfQy5v6X7fsiyD9X0Kd_KRDioRmBU8QanIMD4hoOEkfpTLvJzDwGkWyamypOgHHQY=08C841C4
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+  api-docs:
+    path: /api-docs

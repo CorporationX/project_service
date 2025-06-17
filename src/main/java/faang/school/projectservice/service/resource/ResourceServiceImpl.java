@@ -114,12 +114,12 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     private TeamMember findTeamMember(long projectId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), projectId);
-        if (teamMember == null) {
-            throw new AccessDeniedException("Only project members can upload files");
+        if (userContext.getUserId() == 0) {
+            throw new AccessDeniedException("User not authenticated");
         }
 
-        return teamMember;
+        return teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), projectId)
+                .orElseThrow(() -> new AccessDeniedException("Only project members can upload files"));
     }
 
     private void increaseProjectSize(Project project, BigInteger fileSize) {

@@ -1,4 +1,4 @@
-package faang.school.projectservice.stage.service;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.mapper.StageDtoMapper;
@@ -14,7 +14,6 @@ import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.stage.StageServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
@@ -28,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
