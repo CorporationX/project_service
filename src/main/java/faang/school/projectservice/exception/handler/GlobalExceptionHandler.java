@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<Object> handleObjectNotFoundExceptions(ObjectNotFoundException ex) {
-        log.error(ex.getMessage());
+        log.error(Arrays.toString(ex.getStackTrace()));
         return ResponseEntity
                 .notFound()
                 .build();
@@ -59,16 +60,16 @@ public class GlobalExceptionHandler {
 
 
     private ResponseEntity<Object> internalServerError(Exception ex) {
-        log.error(ex.getMessage());
+        log.error(Arrays.toString(ex.getStackTrace()));
         return ResponseEntity
                 .internalServerError()
-                .body(ex.getStackTrace());
+                .body(ex.getMessage());
     }
 
     private ResponseEntity<Object> badRequest(Exception ex) {
-        log.error(ex.getMessage());
+        log.error(Arrays.toString(ex.getStackTrace()));
         return ResponseEntity
                 .badRequest()
-                .body(ex.getStackTrace());
+                .body(ex.getMessage());
     }
 }
