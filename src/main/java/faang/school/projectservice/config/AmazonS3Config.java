@@ -15,16 +15,16 @@ import org.springframework.context.annotation.Configuration;
 public class AmazonS3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
-    @Value("${services.s3.access-key}")
+    @Value("${services.s3.accessKey}")
     private String accessKey;
-    @Value("${services.s3.secret-key}")
+    @Value("${services.s3.secretKey}")
     private String secretKey;
     @Value("${services.s3.signingRegion:us-east-1}")
     private String signingRegion;
 
     @Bean
     public AmazonS3 amazonS3() {
-        log.debug("create AmazonS3 bean");
+        log.debug("create AmazonS3 bean.");
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
         return AmazonS3ClientBuilder.standard()
