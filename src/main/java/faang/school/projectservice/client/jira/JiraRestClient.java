@@ -1,5 +1,14 @@
 package faang.school.projectservice.client.jira;
 
+import faang.school.projectservice.config.jira.JiraProperties;
+import faang.school.projectservice.dto.jira.issue.JiraIssueFilterDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -18,6 +28,123 @@ import java.util.Map;
 public class JiraRestClient {
 
     private final RestTemplate jiraRestTemplate;
+    private final JiraProperties jiraProperties;
+
+    public ResponseEntity<JiraCreateIssueResponseDto> createIssue(JiraCreateIssueDto jiraCreateIssueDto) {
+        String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
+                .append(jiraProperties.issue())
+                .toString();
+
+        return post(
+                url,
+                jiraCreateIssueDto,
+                JiraCreateIssueResponseDto.class
+        );
+    }
+
+    public ResponseEntity<JiraUpdateIssueResponse> changeIssue(long issueId, JiraUpdateIssueRequest requestBody) {
+        String url = new StringBuilder()
+                .append(jiraProperties.jiraRestApiBaseUrl())
+                .append(jiraProperties.issue())
+                .append("/")
+                .append(issueId)
+                .append("?returnIssue=true")
+                .toString();
+
+        return put(
+                url,
+                requestBody,
+                JiraUpdateIssueResponse.class
+        );
+    }
+
+    public ResponseEntity<JiraGetMultipleIssuesResponse> getAllIssuesWithFilter(
+            String projectKey,
+            JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto
+    ) {
+        String url = new StringBuilder()
+                .append(jiraProperties.jiraRestApiBaseUrl())
+                .append(jiraProperties.jqlSearch())
+                .toString();
+
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraTaskFilterDto()));
+        queryParam.putAll(getQueryParams(jiraGetMultipleIssuesDto));
+
+        return get(
+                url,
+                queryParam,
+                JiraGetMultipleIssuesResponse.class
+        );
+    }
+
+    public ResponseEntity<JiraGetMultipleIssuesResponse> getAllIssues(
+            String projectKey,
+            JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto
+    ) {
+        String url = new StringBuilder()
+                .append(jiraProperties.jiraRestApiBaseUrl())
+                .append(jiraProperties.jqlSearch())
+                .toString();
+
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraTaskFilterDto()));
+        queryParam.putAll(getQueryParams(jiraGetMultipleIssuesDto));
+
+        return get(
+                url,
+                queryParam,
+                JiraGetMultipleIssuesResponse.class
+        );
+    }
+
+    public ResponseEntity<JiraGetIssueResponseDto> getIssueById(long issueId) {
+        String url = new StringBuilder()
+                .append(jiraProperties.jiraRestApiBaseUrl())
+                .append(jiraProperties.issue())
+                .append("/")
+                .append(issueId)
+                .toString();
+
+        return get(
+                url,
+                new HashMap<>(),
+                JiraGetIssueResponseDto.class
+        );
+    }
+
+    private Map<String, String> getQueryParams(JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
+        Map<String, String> queryParam = new HashMap<>();
+
+        queryParam.put("startAt", jiraGetMultipleIssuesDto.getStartAt() != null ?
+                String.valueOf(jiraGetMultipleIssuesDto.getStartAt()) : "0");
+
+        queryParam.put("maxResults", jiraGetMultipleIssuesDto.getMaxResults() == null ?
+                (jiraGetMultipleIssuesDto.getLimit() != null ?
+                        String.valueOf(jiraGetMultipleIssuesDto.getLimit()) : "50")
+                : String.valueOf(jiraGetMultipleIssuesDto.getMaxResults()));
+
+        return queryParam;
+    }
+
+    private String getJqlFromFilter(String projectKey, JiraIssueFilterDto jiraIssueFilterDto) {
+        StringBuilder jql = new StringBuilder("project=")
+                .append(projectKey);
+
+        if (jiraIssueFilterDto.getStatus() != null) {
+            jql.append("+AND+")
+                    .append("status=")
+                    .append(jiraIssueFilterDto.getStatus().ordinal());
+        }
+
+        if (jiraIssueFilterDto.getAssignee() != null && !jiraIssueFilterDto.getAssignee().isEmpty()) {
+            jql.append("+AND+")
+                    .append("assignee=")
+                    .append(jiraIssueFilterDto.getAssignee());
+        }
+
+        return jql.toString();
+    }
 
     public <T> ResponseEntity<T> post(String url, Object body, Class<T> bodyClass) {
         return jiraRestTemplate.postForEntity(url, body, bodyClass);

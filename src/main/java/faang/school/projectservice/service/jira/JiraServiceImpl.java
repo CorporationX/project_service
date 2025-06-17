@@ -1,8 +1,6 @@
 package faang.school.projectservice.service.jira;
 
 import faang.school.projectservice.client.jira.JiraRestClient;
-import faang.school.projectservice.config.jira.JiraProperties;
-import faang.school.projectservice.dto.jira.issue.JiraIssueFilterDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
@@ -17,32 +15,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class JiraServiceImpl implements JiraService {
 
     private final JiraRestClient jiraRestClient;
-    private final JiraProperties jiraProperties;
-
 
     @Override
     public JiraCreateIssueResponseDto createIssue(JiraCreateIssueDto jiraCreateIssueDto) {
-        String url = new StringBuilder()
-                .append(jiraProperties.baseUrl())
-                .append(jiraProperties.restApiUrl())
-                .append(jiraProperties.issue())
-                .toString();
-
         try {
-            ResponseEntity<JiraCreateIssueResponseDto> response = jiraRestClient.post(
-                    url,
-                    jiraCreateIssueDto,
-                    JiraCreateIssueResponseDto.class
-            );
+            ResponseEntity<JiraCreateIssueResponseDto> response = jiraRestClient.createIssue(jiraCreateIssueDto);
+            logSuccessfulResponse(response);
 
             return response.getBody();
         } catch (HttpClientErrorException e) {
@@ -53,21 +37,9 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public JiraUpdateIssueResponse changeIssue(long issueId, JiraUpdateIssueRequest requestBody) {
-        String url = new StringBuilder()
-                .append(jiraProperties.baseUrl())
-                .append(jiraProperties.restApiUrl())
-                .append(jiraProperties.issue())
-                .append("/")
-                .append(issueId)
-                .append("?returnIssue=true")
-                .toString();
-
         try {
-            ResponseEntity<JiraUpdateIssueResponse> response = jiraRestClient.put(
-                    url,
-                    requestBody,
-                    JiraUpdateIssueResponse.class
-            );
+            ResponseEntity<JiraUpdateIssueResponse> response = jiraRestClient.changeIssue(issueId, requestBody);
+            logSuccessfulResponse(response);
 
             if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
                 log.info("Task {} updated successfully and full issue data returned. Status: {}",
@@ -89,20 +61,11 @@ public class JiraServiceImpl implements JiraService {
     public JiraGetMultipleIssuesResponse getAllIssuesWithFilter(String projectKey,
                                                                 JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
         try {
-            String url = new StringBuilder()
-                    .append(jiraProperties.baseUrl())
-                    .append(jiraProperties.restApiUrl())
-                    .append(jiraProperties.jqlSearch())
-                    .toString();
-
-            Map<String, String> queryParam = getQueryParams(jiraGetMultipleIssuesDto);
-            queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraTaskFilterDto()));
-
-            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.get(
-                    url,
-                    queryParam,
-                    JiraGetMultipleIssuesResponse.class
+            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.getAllIssuesWithFilter(
+                    projectKey,
+                    jiraGetMultipleIssuesDto
             );
+            logSuccessfulResponse(response);
 
             return response.getBody();
         } catch (HttpClientErrorException e) {
@@ -115,19 +78,11 @@ public class JiraServiceImpl implements JiraService {
     public JiraGetMultipleIssuesResponse getAllIssues(String projectKey,
                                                       JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
         try {
-            String url = new StringBuilder()
-                    .append(jiraProperties.baseUrl())
-                    .append(jiraProperties.restApiUrl())
-                    .append(jiraProperties.jqlSearch())
-                    .toString();
-
-            Map<String, String> queryParam = getQueryParams(jiraGetMultipleIssuesDto);
-
-            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.get(
-                    url,
-                    queryParam,
-                    JiraGetMultipleIssuesResponse.class
+            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.getAllIssues(
+                    projectKey,
+                    jiraGetMultipleIssuesDto
             );
+            logSuccessfulResponse(response);
 
             return response.getBody();
         } catch (HttpClientErrorException e) {
@@ -138,19 +93,9 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public JiraGetIssueResponseDto getIssueById(long issueId) {
-        String url = new StringBuilder()
-                .append(jiraProperties.baseUrl())
-                .append(jiraProperties.restApiUrl())
-                .append(jiraProperties.issue())
-                .append("/")
-                .append(issueId)
-                .toString();
         try {
-            ResponseEntity<JiraGetIssueResponseDto> response = jiraRestClient.get(
-                    url,
-                    new HashMap<>(),
-                    JiraGetIssueResponseDto.class
-            );
+            ResponseEntity<JiraGetIssueResponseDto> response = jiraRestClient.getIssueById(issueId);
+            logSuccessfulResponse(response);
 
             return response.getBody();
         } catch (HttpClientErrorException e) {
@@ -159,36 +104,10 @@ public class JiraServiceImpl implements JiraService {
         }
     }
 
-    private Map<String, String> getQueryParams(JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
-        Map<String, String> queryParam = new HashMap<>();
-
-        queryParam.put("startAt", jiraGetMultipleIssuesDto.getStartAt() != null ?
-                String.valueOf(jiraGetMultipleIssuesDto.getStartAt()) : "0");
-
-        queryParam.put("maxResults", jiraGetMultipleIssuesDto.getMaxResults() == null ?
-                (jiraGetMultipleIssuesDto.getLimit() != null ?
-                        String.valueOf(jiraGetMultipleIssuesDto.getLimit()) : "50")
-                : String.valueOf(jiraGetMultipleIssuesDto.getMaxResults()));
-
-        return queryParam;
-    }
-
-    private String getJqlFromFilter(String projectKey, JiraIssueFilterDto jiraIssueFilterDto) {
-        StringBuilder jql = new StringBuilder("project=")
-                .append(projectKey);
-
-        if (jiraIssueFilterDto.getStatus() != null) {
-            jql.append("+AND+")
-                    .append("status=")
-                    .append(jiraIssueFilterDto.getStatus().ordinal());
+    private void logSuccessfulResponse(ResponseEntity<?> response) {
+        if (response.getStatusCode().is2xxSuccessful()) {
+            log.info("Successful response with ID: {}", response.getStatusCode());
+            log.info("Response body: {}", response.getBody());
         }
-
-        if (jiraIssueFilterDto.getAssignee() != null && !jiraIssueFilterDto.getAssignee().isEmpty()) {
-            jql.append("+AND+")
-                    .append("assignee=")
-                    .append(jiraIssueFilterDto.getAssignee());
-        }
-
-        return jql.toString();
     }
 }

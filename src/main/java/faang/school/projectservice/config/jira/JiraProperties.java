@@ -9,13 +9,11 @@ public record JiraProperties(
         String username,
         @Value("${api-token}")
         String apiToken,
-        @Value("${base-url}")
-        String baseUrl,
-        @Value("${rest-api-url}")
-        String restApiUrl,
         @Value("${jql-search}")
         String jqlSearch,
         @Value("${issue}")
-        String issue
+        String issue,
+        @Value("${jira-rest-api-base-url}")
+        String jiraRestApiBaseUrl
 ) {
 }
