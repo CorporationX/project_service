@@ -15,7 +15,6 @@ public class FileProcessor {
     private static final int AVATAR_MAX_DEMINSION = 50;
 
     public File resizeImage(MultipartFile file) {
-        log.info("Max picture size is: {}", AVATAR_MAX_DEMINSION);
         try {
             File outputFile = new File(file.getOriginalFilename());
             Thumbnails.of(file.getInputStream())

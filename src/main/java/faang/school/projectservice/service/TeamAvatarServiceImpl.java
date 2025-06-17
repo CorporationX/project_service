@@ -23,7 +23,6 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     private final TeamRepository teamRepository;
     private final S3ServiceImpl s3Service;
     private final TeamMemberService teamMemberService;
-    // private final FileProcessor fileProcessor;
 
     @Value("${team-avatar-file.maxSize}")
     private Long avatarMaxSizeValue;
@@ -32,7 +31,6 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     public void uploadFile(long teamId, MultipartFile file) {
         checkFileContent(file);
         Team team = getTeam(teamId);
-        // String objectKey = s3Service.uploadFile(fileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
         String objectKey = s3Service.uploadFile(FileProcessor.resizeImage(file), file.getContentType(), "team-avatars");
         team.setAvatarKey(objectKey);
         teamRepository.save(team);

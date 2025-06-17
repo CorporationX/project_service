@@ -22,6 +22,7 @@ public class S3ServiceImpl implements S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
+    @Override
     public String uploadFile(File file, String contentType, String folder) {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getName());
         PutObjectRequest putObjectRequest = new PutObjectRequest(
@@ -34,6 +35,7 @@ public class S3ServiceImpl implements S3Service {
         return key;
     }
 
+    @Override
     public InputStream downloadFile(String objectKey) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, objectKey);
@@ -44,6 +46,7 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
+    @Override
     public String getAvatarContentType(String objectKey) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, objectKey);
@@ -54,6 +57,7 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
+    @Override
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);
     }
