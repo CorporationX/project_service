@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class JiraCreateIssueDto {
+public class JiraCreateIssueRequest {
     private Fields fields;
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JiraGetIssueResponseDto {
+public class JiraGetIssueResponse {
     private String expand;
     private String id;
     private String self;
@@ -38,7 +38,6 @@ public class JiraGetIssueResponseDto {
         private String updated;
         private String duedate;
 
-        // Кастомные поля (пример)
         private Object customfield_10000;
         private Object customfield_10001;
     }

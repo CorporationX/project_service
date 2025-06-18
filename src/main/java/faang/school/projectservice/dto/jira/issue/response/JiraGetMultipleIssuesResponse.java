@@ -8,9 +8,9 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JiraGetMultipleIssuesResponse {
-    private String expand; // Расширенные поля (опционально)
-    private int startAt;   // Начальный индекс
-    private int maxResults; // Максимум задач на странице
-    private int total;      // Общее количество задач
-    private List<JiraGetIssueResponseDto> issues; // Список задач
+    private String expand;
+    private int startAt;
+    private int maxResults;
+    private int total;
+    private List<JiraGetIssueResponse> issues;
 }

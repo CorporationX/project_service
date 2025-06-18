@@ -8,5 +8,5 @@ public class JiraGetMultipleIssuesDto {
     Integer startAt;
     Integer maxResults;
     Integer limit;
-    JiraIssueFilterDto jiraTaskFilterDto;
+    JiraIssueFilterDto jiraIssueFilterDto;
 }

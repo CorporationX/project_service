@@ -1,19 +1,36 @@
 package faang.school.projectservice.service.jira;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.client.jira.JiraRestClient;
-import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
-import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
-import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
+import faang.school.projectservice.exception.JiraIntegrationException;
+import faang.school.projectservice.exception.jira.JiraAuthenticationException;
+import faang.school.projectservice.exception.jira.JiraConfigurationProblemException;
+import faang.school.projectservice.exception.jira.JiraConflictingUpdateException;
+import faang.school.projectservice.exception.jira.JiraPermissionDeniedException;
+import faang.school.projectservice.exception.jira.JiraResourceNotFoundException;
+import faang.school.projectservice.exception.jira.JiraValidationException;
 import faang.school.projectservice.service.JiraService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -21,93 +38,150 @@ import org.springframework.web.client.HttpClientErrorException;
 public class JiraServiceImpl implements JiraService {
 
     private final JiraRestClient jiraRestClient;
+    private final ObjectMapper objectMapper;
 
     @Override
-    public JiraCreateIssueResponseDto createIssue(JiraCreateIssueDto jiraCreateIssueDto) {
-        try {
-            ResponseEntity<JiraCreateIssueResponseDto> response = jiraRestClient.createIssue(jiraCreateIssueDto);
-            logSuccessfulResponse(response);
-
-            return response.getBody();
-        } catch (HttpClientErrorException e) {
-            log.error("Error creating task: {}", e.getResponseBodyAsString());
-            throw e;
-        }
+    public JiraCreateIssueResponse createIssue(JiraCreateIssueRequest jiraCreateIssueRequest) {
+        return executeRequest(
+                () -> jiraRestClient.createIssue(jiraCreateIssueRequest),
+                "Failed creating issue"
+        );
     }
 
     @Override
     public JiraUpdateIssueResponse changeIssue(long issueId, JiraUpdateIssueRequest requestBody) {
-        try {
-            ResponseEntity<JiraUpdateIssueResponse> response = jiraRestClient.changeIssue(issueId, requestBody);
-            logSuccessfulResponse(response);
+        return executeRequest(
+                () -> jiraRestClient.changeIssue(issueId, requestBody),
+                "Failed updating issue",
+                response -> {
+                    log.info("Issue updated successfully with Status: {}",
+                            response.getStatusCode());
+                    if (response.hasBody()) {
+                        log.info("Updated issue:\n{}", response.getBody());
 
-            if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-                log.info("Task {} updated successfully and full issue data returned. Status: {}",
-                        issueId,
-                        response.getStatusCode());
+                        return response.getBody();
+                    } else {
+                        log.warn("Issue was updated, but no body was requested.");
+                        log.warn("If body was expected, make sure parameter \"returnIssue\" is set to \"true\"");
 
-                return response.getBody();
-            } else {
-                log.warn("Task {} updated, but no body or unexpected status: {}", issueId, response.getStatusCode());
-                return new JiraUpdateIssueResponse();
-            }
-        } catch (HttpClientErrorException e) {
-            log.error("Error updating task {}. Response Body: {}", issueId, e.getResponseBodyAsString(), e);
-            throw e;
-        }
+                        return new JiraUpdateIssueResponse();
+                    }
+                });
     }
 
     @Override
     public JiraGetMultipleIssuesResponse getAllIssuesWithFilter(String projectKey,
                                                                 JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
-        try {
-            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.getAllIssuesWithFilter(
-                    projectKey,
-                    jiraGetMultipleIssuesDto
-            );
-            logSuccessfulResponse(response);
-
-            return response.getBody();
-        } catch (HttpClientErrorException e) {
-            log.error("Error creating task: {}", e.getResponseBodyAsString());
-            throw e;
-        }
+        return executeRequest(
+                () -> jiraRestClient.getAllIssuesWithFilter(
+                        projectKey,
+                        jiraGetMultipleIssuesDto
+                ),
+                "Failed requesting multiple issues with filter"
+        );
     }
 
     @Override
     public JiraGetMultipleIssuesResponse getAllIssues(String projectKey,
                                                       JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto) {
-        try {
-            ResponseEntity<JiraGetMultipleIssuesResponse> response = jiraRestClient.getAllIssues(
-                    projectKey,
-                    jiraGetMultipleIssuesDto
-            );
-            logSuccessfulResponse(response);
-
-            return response.getBody();
-        } catch (HttpClientErrorException e) {
-            log.error("Error creating task: {}", e.getResponseBodyAsString());
-            throw e;
-        }
+        return executeRequest(
+                () -> jiraRestClient.getAllIssues(
+                        projectKey,
+                        jiraGetMultipleIssuesDto
+                ),
+                "Failed requesting multiple issues"
+        );
     }
 
     @Override
-    public JiraGetIssueResponseDto getIssueById(long issueId) {
+    public JiraGetIssueResponse getIssueById(long issueId) {
+        return executeRequest(
+                () -> jiraRestClient.getIssueById(issueId),
+                "Failed to receive an issue"
+        );
+    }
+
+    private <T> T executeRequest(Supplier<ResponseEntity<T>> requestSupplier,
+                                 String errorMessage) {
+        return executeRequest(requestSupplier, errorMessage, ResponseEntity::getBody);
+    }
+
+    private <T, R> R executeRequest(Supplier<ResponseEntity<T>> requestSupplier,
+                                    String errorMessage,
+                                    Function<ResponseEntity<T>, R> responseHandler) {
         try {
-            ResponseEntity<JiraGetIssueResponseDto> response = jiraRestClient.getIssueById(issueId);
+            ResponseEntity<T> response = requestSupplier.get();
             logSuccessfulResponse(response);
 
-            return response.getBody();
+            return responseHandler.apply(response);
         } catch (HttpClientErrorException e) {
-            log.error("Error creating task: {}", e.getResponseBodyAsString());
-            throw e;
+            handleJiraException(errorMessage, e);
+            throw e; // supposedly never reaches this line
+        }
+    }
+
+    private void handleJiraException(String errorMessage, HttpClientErrorException e) {
+        HttpStatusCode statusCode = e.getStatusCode();
+        String errorDetails = extractJiraErrorDetails(e.getResponseBodyAsString());
+
+        String errorFullMessage = String.format("[Status: %s] %s: %s",
+                statusCode, errorMessage, errorDetails);
+
+        if (statusCode == HttpStatus.BAD_REQUEST) {
+            throw new JiraValidationException(errorFullMessage);
+        } else if (statusCode == HttpStatus.UNAUTHORIZED) {
+            throw new JiraAuthenticationException(errorFullMessage);
+        } else if (statusCode == HttpStatus.FORBIDDEN) {
+            throw new JiraPermissionDeniedException(errorFullMessage);
+        } else if (statusCode == HttpStatus.NOT_FOUND) {
+            throw new JiraResourceNotFoundException(errorFullMessage);
+        } else if (statusCode == HttpStatus.CONFLICT) {
+            throw new JiraConflictingUpdateException(errorFullMessage);
+        } else if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
+            throw new JiraConfigurationProblemException(errorFullMessage);
+        } else {
+            throw new JiraIntegrationException(errorFullMessage, (HttpStatus) statusCode, e);
+        }
+    }
+
+    private String extractJiraErrorDetails(String responseBodyAsString) {
+        try {
+            if (responseBodyAsString.isEmpty()) {
+                return "No error details provided";
+            }
+
+            JsonNode root = objectMapper.readTree(responseBodyAsString);
+            StringBuilder details = new StringBuilder();
+
+            if (root.has("errorMessages") && root.get("errorMessages").isArray()) {
+                for (JsonNode msg : root.get("errorMessages")) {
+                    details.append(msg.asText()).append(";\n");
+                }
+            }
+
+            if (root.has("errors") && root.get("errors").isObject()) {
+                JsonNode errors = root.get("errors");
+                Iterator<Map.Entry<String, JsonNode>> fields = errors.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fields.next();
+                    details.append(field.getKey())
+                            .append(": ")
+                            .append(field.getValue().asText())
+                            .append(";\n");
+                }
+            }
+
+            return !details.isEmpty() ? details.toString() : responseBodyAsString;
+        } catch (IOException ex) {
+            log.warn("Failed to parse Jira error response", ex);
+            return responseBodyAsString;
         }
     }
 
     private void logSuccessfulResponse(ResponseEntity<?> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Successful response with ID: {}", response.getStatusCode());
-            log.info("Response body: {}", response.getBody());
+            log.info("Successful response with code: {}", response.getStatusCode());
+            log.info("Response body:\n{}", response.getBody());
         }
     }
 }

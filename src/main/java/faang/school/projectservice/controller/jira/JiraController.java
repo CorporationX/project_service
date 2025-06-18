@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller.jira;
 
-import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
-import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
-import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
 import faang.school.projectservice.service.JiraService;
@@ -25,7 +25,7 @@ public class JiraController {
     private final JiraService jiraService;
 
     @PostMapping("/issues")
-    public JiraCreateIssueResponseDto createIssue(@RequestBody JiraCreateIssueDto requestBody) {
+    public JiraCreateIssueResponse createIssue(@RequestBody JiraCreateIssueRequest requestBody) {
         return jiraService.createIssue(requestBody);
     }
 
@@ -38,8 +38,9 @@ public class JiraController {
     @GetMapping("/projects/{projectKey}/filter")
     public JiraGetMultipleIssuesResponse getAllIssuesWithFilter(@PathVariable String projectKey,
                                                                 @RequestBody JiraGetMultipleIssuesDto dto) {
-        if (dto.getJiraTaskFilterDto() == null ||
-                (dto.getJiraTaskFilterDto().getAssignee() == null && dto.getJiraTaskFilterDto().getStatus() == null)) {
+        if (dto.getJiraIssueFilterDto() == null ||
+                (dto.getJiraIssueFilterDto().getAssignee() == null &&
+                        dto.getJiraIssueFilterDto().getStatus() == null)) {
             return jiraService.getAllIssues(projectKey, dto);
         }
 
@@ -53,7 +54,7 @@ public class JiraController {
     }
 
     @GetMapping("/issues/{issueId}")
-    public JiraGetIssueResponseDto getIssueById(@PathVariable long issueId) {
+    public JiraGetIssueResponse getIssueById(@PathVariable long issueId) {
         return jiraService.getIssueById(issueId);
     }
 

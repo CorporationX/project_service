@@ -1,16 +1,16 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
-import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
-import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
 
 public interface JiraService {
 
-    JiraCreateIssueResponseDto createIssue(JiraCreateIssueDto requestBody);
+    JiraCreateIssueResponse createIssue(JiraCreateIssueRequest requestBody);
 
     JiraUpdateIssueResponse changeIssue(long issueId, JiraUpdateIssueRequest requestBody);
 
@@ -20,5 +20,5 @@ public interface JiraService {
     JiraGetMultipleIssuesResponse getAllIssues(String projectKey,
                                                JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto);
 
-    JiraGetIssueResponseDto getIssueById(long issueId);
+    JiraGetIssueResponse getIssueById(long issueId);
 }

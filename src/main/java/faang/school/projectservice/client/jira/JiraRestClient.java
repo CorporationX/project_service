@@ -2,11 +2,11 @@ package faang.school.projectservice.client.jira;
 
 import faang.school.projectservice.config.jira.JiraProperties;
 import faang.school.projectservice.dto.jira.issue.JiraIssueFilterDto;
-import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueDto;
+import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
-import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponseDto;
-import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponseDto;
+import faang.school.projectservice.dto.jira.issue.response.JiraCreateIssueResponse;
+import faang.school.projectservice.dto.jira.issue.response.JiraGetIssueResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraGetMultipleIssuesResponse;
 import faang.school.projectservice.dto.jira.issue.response.JiraUpdateIssueResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +30,20 @@ public class JiraRestClient {
     private final RestTemplate jiraRestTemplate;
     private final JiraProperties jiraProperties;
 
-    public ResponseEntity<JiraCreateIssueResponseDto> createIssue(JiraCreateIssueDto jiraCreateIssueDto) {
+    public ResponseEntity<JiraCreateIssueResponse> createIssue(JiraCreateIssueRequest jiraCreateIssueRequest) {
         String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
                 .append(jiraProperties.issue())
                 .toString();
 
         return post(
                 url,
-                jiraCreateIssueDto,
-                JiraCreateIssueResponseDto.class
+                jiraCreateIssueRequest,
+                JiraCreateIssueResponse.class
         );
     }
 
     public ResponseEntity<JiraUpdateIssueResponse> changeIssue(long issueId, JiraUpdateIssueRequest requestBody) {
-        String url = new StringBuilder()
-                .append(jiraProperties.jiraRestApiBaseUrl())
+        String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
                 .append(jiraProperties.issue())
                 .append("/")
                 .append(issueId)
@@ -62,13 +61,12 @@ public class JiraRestClient {
             String projectKey,
             JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto
     ) {
-        String url = new StringBuilder()
-                .append(jiraProperties.jiraRestApiBaseUrl())
+        String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
                 .append(jiraProperties.jqlSearch())
                 .toString();
 
         Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraTaskFilterDto()));
+        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraIssueFilterDto()));
         queryParam.putAll(getQueryParams(jiraGetMultipleIssuesDto));
 
         return get(
@@ -82,13 +80,12 @@ public class JiraRestClient {
             String projectKey,
             JiraGetMultipleIssuesDto jiraGetMultipleIssuesDto
     ) {
-        String url = new StringBuilder()
-                .append(jiraProperties.jiraRestApiBaseUrl())
+        String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
                 .append(jiraProperties.jqlSearch())
                 .toString();
 
         Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraTaskFilterDto()));
+        queryParam.put("jql", getJqlFromFilter(projectKey, jiraGetMultipleIssuesDto.getJiraIssueFilterDto()));
         queryParam.putAll(getQueryParams(jiraGetMultipleIssuesDto));
 
         return get(
@@ -98,9 +95,8 @@ public class JiraRestClient {
         );
     }
 
-    public ResponseEntity<JiraGetIssueResponseDto> getIssueById(long issueId) {
-        String url = new StringBuilder()
-                .append(jiraProperties.jiraRestApiBaseUrl())
+    public ResponseEntity<JiraGetIssueResponse> getIssueById(long issueId) {
+        String url = new StringBuilder(jiraProperties.jiraRestApiBaseUrl())
                 .append(jiraProperties.issue())
                 .append("/")
                 .append(issueId)
@@ -109,7 +105,7 @@ public class JiraRestClient {
         return get(
                 url,
                 new HashMap<>(),
-                JiraGetIssueResponseDto.class
+                JiraGetIssueResponse.class
         );
     }
 
@@ -117,11 +113,11 @@ public class JiraRestClient {
         Map<String, String> queryParam = new HashMap<>();
 
         queryParam.put("startAt", jiraGetMultipleIssuesDto.getStartAt() != null ?
-                String.valueOf(jiraGetMultipleIssuesDto.getStartAt()) : "0");
+                String.valueOf(jiraGetMultipleIssuesDto.getStartAt()) : jiraProperties.defaultStartAt());
 
         queryParam.put("maxResults", jiraGetMultipleIssuesDto.getMaxResults() == null ?
                 (jiraGetMultipleIssuesDto.getLimit() != null ?
-                        String.valueOf(jiraGetMultipleIssuesDto.getLimit()) : "50")
+                        String.valueOf(jiraGetMultipleIssuesDto.getLimit()) : jiraProperties.defaultMaxResults())
                 : String.valueOf(jiraGetMultipleIssuesDto.getMaxResults()));
 
         return queryParam;
@@ -131,16 +127,18 @@ public class JiraRestClient {
         StringBuilder jql = new StringBuilder("project=")
                 .append(projectKey);
 
-        if (jiraIssueFilterDto.getStatus() != null) {
-            jql.append("+AND+")
-                    .append("status=")
-                    .append(jiraIssueFilterDto.getStatus().ordinal());
-        }
+        if (jiraIssueFilterDto != null) {
+            if (jiraIssueFilterDto.getStatus() != null) {
+                jql.append("+AND+")
+                        .append("status=")
+                        .append(jiraIssueFilterDto.getStatus().ordinal());
+            }
 
-        if (jiraIssueFilterDto.getAssignee() != null && !jiraIssueFilterDto.getAssignee().isEmpty()) {
-            jql.append("+AND+")
-                    .append("assignee=")
-                    .append(jiraIssueFilterDto.getAssignee());
+            if (jiraIssueFilterDto.getAssignee() != null && !jiraIssueFilterDto.getAssignee().isEmpty()) {
+                jql.append("+AND+")
+                        .append("assignee=")
+                        .append(jiraIssueFilterDto.getAssignee());
+            }
         }
 
         return jql.toString();

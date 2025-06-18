@@ -1,9 +1,11 @@
 package faang.school.projectservice.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Getter
 @Schema(description = "Errors and exceptions presentation")
 public class ErrorResponseDto {
     @Schema(description = "Error status code")

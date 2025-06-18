@@ -14,6 +14,10 @@ public record JiraProperties(
         @Value("${issue}")
         String issue,
         @Value("${jira-rest-api-base-url}")
-        String jiraRestApiBaseUrl
+        String jiraRestApiBaseUrl,
+        @Value("${startAt}")
+        String defaultStartAt,
+        @Value("${maxResults}")
+        String defaultMaxResults
 ) {
 }

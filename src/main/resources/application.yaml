@@ -66,6 +66,8 @@ jira:
   jira-rest-api-base-url: https://jegor-test.atlassian.net/rest/api/3
   jql-search: /search
   issue: /issue
+  startAt: 0
+  maxResults: 50
   username: gaanjara3@gmail.com
   api-token: ATATT3xFfGF0Jo35o2YdQiO4RdBE9ho0elcnNrraM28sTwWwmOPR4vlR1TUI41qqYGesDwoIE7IihNIQFn6WWQnX7zpQbHqjn1Ma4q4ODp0sLc94mCISrJsfQy5v6X7fsiyD9X0Kd_KRDioRmBU8QanIMD4hoOEkfpTLvJzDwGkWyamypOgHHQY=08C841C4
 
