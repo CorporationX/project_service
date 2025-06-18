@@ -2,7 +2,7 @@ package faang.school.projectservice.service.jira;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.client.jira.JiraRestClient;
+import faang.school.projectservice.client.JiraRestClient;
 import faang.school.projectservice.dto.jira.issue.request.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.request.JiraGetMultipleIssuesDto;
 import faang.school.projectservice.dto.jira.issue.request.JiraUpdateIssueRequest;
@@ -40,11 +40,19 @@ public class JiraServiceImpl implements JiraService {
     private final JiraRestClient jiraRestClient;
     private final ObjectMapper objectMapper;
 
+    private enum ErrorMessages {
+        FAILED_CREATING_ISSUE,
+        FAILED_UPDATING_ISSUE,
+        FAILED_REQUESTING_ISSUES,
+        FAILED_REQUESTING_ISSUES_FILTER,
+        FAILED_TO_RECEIVE_ISSUE,
+    }
+
     @Override
     public JiraCreateIssueResponse createIssue(JiraCreateIssueRequest jiraCreateIssueRequest) {
         return executeRequest(
                 () -> jiraRestClient.createIssue(jiraCreateIssueRequest),
-                "Failed creating issue"
+                ErrorMessages.FAILED_CREATING_ISSUE
         );
     }
 
@@ -52,18 +60,13 @@ public class JiraServiceImpl implements JiraService {
     public JiraUpdateIssueResponse changeIssue(long issueId, JiraUpdateIssueRequest requestBody) {
         return executeRequest(
                 () -> jiraRestClient.changeIssue(issueId, requestBody),
-                "Failed updating issue",
+                ErrorMessages.FAILED_UPDATING_ISSUE,
                 response -> {
-                    log.info("Issue updated successfully with Status: {}",
-                            response.getStatusCode());
+                    log.info("Issue updated successfully with Status: {}", response.getStatusCode());
                     if (response.hasBody()) {
-                        log.info("Updated issue:\n{}", response.getBody());
-
                         return response.getBody();
                     } else {
-                        log.warn("Issue was updated, but no body was requested.");
-                        log.warn("If body was expected, make sure parameter \"returnIssue\" is set to \"true\"");
-
+                        log.debug("If body was expected, make sure parameter \"returnIssue\" is set to \"true\"");
                         return new JiraUpdateIssueResponse();
                     }
                 });
@@ -77,7 +80,7 @@ public class JiraServiceImpl implements JiraService {
                         projectKey,
                         jiraGetMultipleIssuesDto
                 ),
-                "Failed requesting multiple issues with filter"
+                ErrorMessages.FAILED_REQUESTING_ISSUES_FILTER
         );
     }
 
@@ -89,7 +92,7 @@ public class JiraServiceImpl implements JiraService {
                         projectKey,
                         jiraGetMultipleIssuesDto
                 ),
-                "Failed requesting multiple issues"
+                ErrorMessages.FAILED_REQUESTING_ISSUES
         );
     }
 
@@ -97,35 +100,34 @@ public class JiraServiceImpl implements JiraService {
     public JiraGetIssueResponse getIssueById(long issueId) {
         return executeRequest(
                 () -> jiraRestClient.getIssueById(issueId),
-                "Failed to receive an issue"
+                ErrorMessages.FAILED_TO_RECEIVE_ISSUE
         );
     }
 
     private <T> T executeRequest(Supplier<ResponseEntity<T>> requestSupplier,
-                                 String errorMessage) {
+                                 ErrorMessages errorMessage) {
         return executeRequest(requestSupplier, errorMessage, ResponseEntity::getBody);
     }
 
     private <T, R> R executeRequest(Supplier<ResponseEntity<T>> requestSupplier,
-                                    String errorMessage,
+                                    ErrorMessages errorMessage,
                                     Function<ResponseEntity<T>, R> responseHandler) {
         try {
             ResponseEntity<T> response = requestSupplier.get();
-            logSuccessfulResponse(response);
 
             return responseHandler.apply(response);
         } catch (HttpClientErrorException e) {
             handleJiraException(errorMessage, e);
-            throw e; // supposedly never reaches this line
+            throw e;
         }
     }
 
-    private void handleJiraException(String errorMessage, HttpClientErrorException e) {
+    private void handleJiraException(ErrorMessages errorMessage, HttpClientErrorException e) {
         HttpStatusCode statusCode = e.getStatusCode();
         String errorDetails = extractJiraErrorDetails(e.getResponseBodyAsString());
 
         String errorFullMessage = String.format("[Status: %s] %s: %s",
-                statusCode, errorMessage, errorDetails);
+                statusCode, errorMessage.toString(), errorDetails);
 
         if (statusCode == HttpStatus.BAD_REQUEST) {
             throw new JiraValidationException(errorFullMessage);
@@ -175,13 +177,6 @@ public class JiraServiceImpl implements JiraService {
         } catch (IOException ex) {
             log.warn("Failed to parse Jira error response", ex);
             return responseBodyAsString;
-        }
-    }
-
-    private void logSuccessfulResponse(ResponseEntity<?> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Successful response with code: {}", response.getStatusCode());
-            log.info("Response body:\n{}", response.getBody());
         }
     }
 }

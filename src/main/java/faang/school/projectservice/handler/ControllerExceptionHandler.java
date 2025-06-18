@@ -186,7 +186,6 @@ public class ControllerExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleJiraIntegrationException(JiraIntegrationException e) {
         HttpStatus status = e.getStatus();
         log.error("Jira integration error: {}", e.getMessage());
-
         return ResponseEntity.status(status)
                 .body(new ErrorResponseDto(
                         status.name(),
