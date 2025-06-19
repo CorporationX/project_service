@@ -69,6 +69,6 @@ services:
 
 gallery:
   maxLimit: 50
-  allowedContentTypes:
+  allowed-content-types:
     - image/jpeg
     - image/png

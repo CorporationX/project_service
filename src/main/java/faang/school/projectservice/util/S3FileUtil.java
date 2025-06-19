@@ -1,7 +1,6 @@
 package faang.school.projectservice.util;
 
 import faang.school.projectservice.config.s3.S3Properties;
-import faang.school.projectservice.exception.common.FileCorruptedException;
 import faang.school.projectservice.model.Project;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +23,9 @@ public class S3FileUtil {
     }
 
     public String getKey(String folder, MultipartFile file) {
-        if(!Objects.nonNull(file.getContentType())) {
-            throw new FileCorruptedException("File has no specific content type!");
-        }
         return properties.getFilename().getKeyTemplate()
                 .replace("{folder}", folder)
-                .replace("{contentType}", file.getContentType())
+                .replace("{contentType}", Objects.requireNonNull(file.getContentType()))
                 .replace("{fileName}", getSafeKey(file))
                 .replace("{uploadTimeMillis}", String.valueOf(System.currentTimeMillis()));
     }
