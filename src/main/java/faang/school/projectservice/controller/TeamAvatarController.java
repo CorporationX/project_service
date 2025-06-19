@@ -17,15 +17,14 @@ public class TeamAvatarController {
     @PostMapping("/user/{userId}")
     public ResponseEntity<String> addTeamAvatar(@NotNull @PathVariable Long userId,
                                                 @NotNull @RequestParam("Avatar") MultipartFile file) {
-        String result = "Avatar was added, avatar key is: " + teamAvatarService.addTeamAvatar(userId, file);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(teamAvatarService.addTeamAvatar(userId, file));            //Зачем делать дто для ключа. Если стрингой можно передать. Вроде говорили же что для небольшого объекта дто лучше не создавать.
     }
 
     @DeleteMapping("user/{userId}")
     public ResponseEntity<String> removeTeamAvatar(@NotNull @PathVariable Long userId) {
-        String result = "Avatar with key: " + teamAvatarService.removeTeamAvatar(userId) + "was deleted";
+        teamAvatarService.removeTeamAvatar(userId);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(result);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

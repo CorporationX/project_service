@@ -22,12 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TeamAvatarServiceImpl implements TeamAvatarService {
     private final static int MAX_TEAM_AVATAR_SIDE = 512;
+
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final AvatarConfiguration config;
@@ -38,7 +40,7 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
         ByteArrayInputStream resizedImageByte = ImageUtils.resizeImageToFitLongestSide(file, MAX_TEAM_AVATAR_SIDE);
         MultipartFile resizedFile = convertToMultipart(resizedImageByte, file);
         String key = s3Service.uploadFile(resizedFile);
-        Team team = getTeam(userId);
+        Team team = getTeamMember(userId).getTeam();
 
         team.setAvatarKey(key);
         teamRepository.save(team);
@@ -48,13 +50,15 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
     }
 
     @Override
-    public String removeTeamAvatar(@NotNull Long userId) {
-        if (!teamMemberRepository.findByUserId(userId).get(0).getRoles().contains(TeamRole.MANAGER)) {
-            throw new TeamMemberRoleException("User with id %d can't delete Avatar.".formatted(userId) +
+    public String removeTeamAvatar(Long userId) {
+        if (!getTeamMember(userId).getRoles().contains(TeamRole.MANAGER)) {
+            String errorMsg = ("User with id %d can't delete Avatar.".formatted(userId) +
                     " User with id %d must be Project Manager for Deleting Avatar".formatted(userId));
+            log.error(errorMsg);
+            throw new TeamMemberRoleException(errorMsg);
         }
 
-        Team team = getTeam(userId);
+        Team team = getTeamMember(userId).getTeam();
         String key = team.getAvatarKey();
         s3Service.deleteFile(key);
         team.setAvatarKey(null);
@@ -69,20 +73,16 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
                 file.getOriginalFilename(), file.getContentType());
     }
 
-    private Team getTeam(Long userId) {
-        log.debug("Searching team for user ID: {}", userId);
-       return teamMemberRepository.findByUserId(userId)
-               .stream()
-               .findFirst()
-               .map(teamMember -> {
-                   log.debug("Found team member: {}", teamMember.getId());
-                   return teamMember.getTeam();
-               })
-               .orElseThrow(() -> {
-                   String errorMsg = "Team for team member with user id: %d was not found!"
-                           .formatted(userId);
-                   log.error(errorMsg);
-                   return new EntityNotFoundException(errorMsg);
-               });
+    private TeamMember getTeamMember(Long userId) {
+        List<TeamMember> teamMemberList = teamMemberRepository.findByUserId(userId);
+        log.debug("Searching team member for user ID: {}", userId);
+        if (teamMemberList.isEmpty()) {
+            String errorMsg = "Team member with user id: %d was not found!"
+                    .formatted(userId);
+            log.error(errorMsg);
+            throw new EntityNotFoundException(errorMsg);
+        } else {
+            return teamMemberList.get(0);
+        }
     }
 }
