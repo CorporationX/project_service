@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 250MB
+
 server:
   port: 8082
 
@@ -38,13 +43,32 @@ calculations_messages_processing:
 services:
   s3:
     endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    access-key: user
+    secret-key: password
+    bucket-name: projectbucket
+    is-mocked: false
+    region: us-east-1
+    path-style-access: true
+    filename:
+      folder-template: "{projectName}-{projectId}"
+      key-template: "{folder}/{contentType}/{fileName}-{uploadTimeMillis}"
+      key-whitelist: '[^a-zA-Zа-яА-ЯёЁ0-9._\- ]'
+      metadata-whitelist: '[^a-zA-Z0-9._-]'
+      replacement-char: '_'
+    async:
+      core-pool-size: 8
+      max-pool-size: 16
+      queue-capacity: 50
+      thread-name-prefix: 'S3Uploader-'
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+gallery:
+  maxLimit: 50
+  allowedContentTypes:
+    - image/jpeg
+    - image/png

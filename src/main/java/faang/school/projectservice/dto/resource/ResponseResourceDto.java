@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 public class ResponseResourceDto {
+    private Long id;
     private String name;
     private Long projectId;
     private ResourceType type;

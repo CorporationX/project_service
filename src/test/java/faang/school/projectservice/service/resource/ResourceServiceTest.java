@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.S3FileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.StorageException;
+import faang.school.projectservice.exception.common.RecordNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -193,7 +194,7 @@ class ResourceServiceTest {
         when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
         when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.empty());
 
-        assertThrows(DataValidationException.class, () -> 
+        assertThrows(RecordNotFoundException.class, () ->
             resourceService.updateResource(PROJECT_ID, RESOURCE_ID, file)
         );
     }
