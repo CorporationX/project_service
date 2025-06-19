@@ -1,9 +1,6 @@
 package faang.school.projectservice.service;
 
-
-import faang.school.projectservice.config.AvatarConfiguration;
 import faang.school.projectservice.exception.TeamMemberRoleException;
-
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
