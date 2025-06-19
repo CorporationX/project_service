@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         return internalServerError(ex);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ObjectNotFoundException.class)
     public ResponseEntity<Object> handleObjectNotFoundExceptions(ObjectNotFoundException ex) {
         log.error(Arrays.toString(ex.getStackTrace()));
         return ResponseEntity
