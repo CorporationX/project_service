@@ -13,11 +13,8 @@ import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.util.ByteArrayMultipartFile;
 import faang.school.projectservice.util.ImageUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +29,6 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
-    private final AvatarConfiguration config;
     private final S3Service s3Service;
 
     @Override
