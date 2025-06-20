@@ -1,18 +1,25 @@
 package faang.school.projectservice.util;
 
-import lombok.AllArgsConstructor;
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import java.io.*;
-import java.nio.file.Path;
-
-@AllArgsConstructor
 public class ByteArrayMultipartFile implements MultipartFile {
     private final byte[] content;
     private final String name;
-    private final String originalFileName;
+    private final String originalFilename;
     private final String contentType;
+
+    public ByteArrayMultipartFile(byte[] content, String name, String originalFilename, String contentType) {
+        this.content = content;
+        this.name = name;
+        this.originalFilename = originalFilename;
+        this.contentType = contentType;
+    }
+
     @Override
     public String getName() {
         return name;
@@ -20,7 +27,7 @@ public class ByteArrayMultipartFile implements MultipartFile {
 
     @Override
     public String getOriginalFilename() {
-        return originalFileName;
+        return originalFilename;
     }
 
     @Override
@@ -48,10 +55,9 @@ public class ByteArrayMultipartFile implements MultipartFile {
         return new ByteArrayInputStream(content);
     }
 
-
     @Override
     public void transferTo(File dest) throws IOException, IllegalStateException {
-        try(FileOutputStream fos = new FileOutputStream(dest)) {
+        try (FileOutputStream fos = new FileOutputStream(dest)) {
             fos.write(content);
         }
     }

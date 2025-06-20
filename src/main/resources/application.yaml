@@ -47,13 +47,37 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+entity:
+    project:
+        default-storage-size: 2
 
-picture-provider:
-  image_limit_size: 5
-  image_limit: 1080
+google:
+  service-account:
+    key-file-path: kelpie10google.json
+  api:
+    url: https://www.googleapis.com/
+  calendar:
+    id: 948a850ea2013122e19246b99a8b9c2caeed1bac182d7928d4bd158ec1f06182@group.calendar.google.com
+
+jira:
+  jira-rest-api-base-url: https://jegor-test.atlassian.net/rest/api/3
+  jql-search: /search
+  issue: /issue
+  startAt: 0
+  maxResults: 50
+  username: gaanjara3@gmail.com
+  api-token: ATATT3xFfGF0Jo35o2YdQiO4RdBE9ho0elcnNrraM28sTwWwmOPR4vlR1TUI41qqYGesDwoIE7IihNIQFn6WWQnX7zpQbHqjn1Ma4q4ODp0sLc94mCISrJsfQy5v6X7fsiyD9X0Kd_KRDioRmBU8QanIMD4hoOEkfpTLvJzDwGkWyamypOgHHQY=08C841C4
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+  api-docs:
+    path: /api-docs
