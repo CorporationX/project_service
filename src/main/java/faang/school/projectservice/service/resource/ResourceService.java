@@ -115,7 +115,7 @@ public class ResourceService {
 
         projectResourcesAccessPermissionCheck(project, member);
 
-        s3AsyncService.uploadFileAsync(key, file, () -> markFileAsUploaded(project.getId(), key));
+        s3AsyncService.uploadFileAsync(project.getId(), key, file);
 
         Resource resource = Resource.builder()
                 .key(key)
@@ -209,11 +209,5 @@ public class ResourceService {
         updatedSet.addAll(member.getRoles());
         updatedSet.addAll(List.of(TeamRole.OWNER, TeamRole.MANAGER));
         return new ArrayList<>(updatedSet);
-    }
-
-    private void markFileAsUploaded(Long projectId, String key) {
-        Resource uploadingFile = getResourceByProjectIdAndKey(projectId, key);
-        uploadingFile.setStatus(ResourceStatus.ACTIVE);
-        resourceRepository.save(uploadingFile);
     }
 }

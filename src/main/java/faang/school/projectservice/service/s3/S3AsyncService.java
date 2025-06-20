@@ -5,6 +5,9 @@ import faang.school.projectservice.dto.resource.S3FileDto;
 import faang.school.projectservice.exception.StorageException;
 import faang.school.projectservice.exception.common.FileCorruptedException;
 import faang.school.projectservice.exception.common.RecordNotFoundException;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.util.S3FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +19,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.ResponseInputStream;
-import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -33,46 +36,17 @@ import java.util.Map;
 public class S3AsyncService {
     private final S3Client s3Client;
     private final S3FileUtil s3FileUtil;
-    private final S3AsyncClient s3AsyncClient;
     private final S3Properties s3Properties;
+    private final ResourceRepository resourceRepository;
 
     @Async("s3AsyncExecutor")
-    @Retryable(
-            retryFor = {AwsServiceException.class, SdkClientException.class},
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
-    public void uploadFileAsync(String fileKey, MultipartFile file, Runnable uploadConfirmation) {
-        log.info("Start uploading file {}", file.getOriginalFilename());
-        try {
-            PutObjectRequest put = PutObjectRequest.builder()
-                    .bucket(s3Properties.getBucketName())
-                    .key(fileKey)
-                    .contentType(file.getContentType())
-                    .metadata(Map.of("filename", s3FileUtil.getSafeMetadataName(file)))
-                    .build();
-
-            s3AsyncClient.putObject(
-                    put,
-                    AsyncRequestBody.fromBytes(file.getBytes())
-            ).whenComplete((resp, ex) -> {
-                log.info("Finish uploading file {}", file.getOriginalFilename());
-                if (ex != null) {
-                    log.error("Failed to download file!", ex);
-                    return;
-                }
-
-                try {
-                    log.info("Start confirmation for file {}", file.getOriginalFilename());
-                    uploadConfirmation.run();
-                    log.info("File {} uploaded successfully", file.getOriginalFilename());
-                } catch (RecordNotFoundException e) {
-                    log.info("File {} upload confirmation failed", file.getOriginalFilename(), e);
-                    deleteFile(fileKey);
-                }
-            });
-        } catch (IOException e) {
-            log.info("Uploading file {} failed", file.getOriginalFilename(), e);
+    public void uploadFileAsync(long projectId, String fileKey, MultipartFile file) {
+        boolean fileUploadedToS3 = uploadFile(fileKey, file);
+        if (!fileUploadedToS3) {
+            return;
+        }
+        boolean resourceUpdatedInDb = markResourceAsActive(projectId, fileKey, file);
+        if(!resourceUpdatedInDb) {
             deleteFile(fileKey);
         }
     }
@@ -123,5 +97,57 @@ public class S3AsyncService {
             log.error("Failed to download file from storage: ", e);
             throw new StorageException("Failed to download file from storage");
         }
+    }
+
+    @Retryable(
+            retryFor = {AwsServiceException.class, SdkClientException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    private boolean uploadFile(String fileKey, MultipartFile file) {
+        log.debug("Start uploading file {}", file.getOriginalFilename());
+        try {
+            PutObjectRequest put = PutObjectRequest.builder()
+                    .bucket(s3Properties.getBucketName())
+                    .key(fileKey)
+                    .contentType(file.getContentType())
+                    .metadata(Map.of(
+                                    "filename", s3FileUtil.getSafeMetadataName(file),
+                                    "uploadedAt", LocalDateTime.now().toString()
+                            )
+                    )
+                    .build();
+
+            s3Client.putObject(
+                    put,
+                    RequestBody.fromBytes(file.getBytes())
+            );
+
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(s3Properties.getBucketName())
+                    .key(fileKey)
+                    .build());
+        } catch (Exception e) {
+            log.error("Uploading file {} failed", file.getOriginalFilename(), e);
+            return false;
+        }
+        log.info("File {} uploaded successfully", file.getOriginalFilename());
+        return true;
+    }
+
+    private boolean markResourceAsActive(long projectId, String fileKey, MultipartFile file) {
+        log.debug("Start upload confirmation for {} file", file.getOriginalFilename());
+        try {
+            Resource uploadingFile = resourceRepository.findByProjectIdAndKey(projectId, fileKey).orElseThrow(
+                    () -> new RecordNotFoundException("Resource in project [%d] with key [%s] not found".formatted(projectId, fileKey))
+            );
+            uploadingFile.setStatus(ResourceStatus.ACTIVE);
+            resourceRepository.save(uploadingFile);
+        } catch (RecordNotFoundException e) {
+            log.error("File {} not found in DB! Delete from S3", file.getOriginalFilename(), e);
+            return false;
+        }
+        log.info("Resource {} is active", file.getOriginalFilename());
+        return true;
     }
 }
