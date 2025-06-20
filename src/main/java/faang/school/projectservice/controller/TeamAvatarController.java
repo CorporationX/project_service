@@ -18,13 +18,13 @@ public class TeamAvatarController {
     public ResponseEntity<String> addTeamAvatar(@NotNull @PathVariable Long userId,
                                                 @NotNull @RequestParam("Avatar") MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(teamAvatarService.addTeamAvatar(userId, file));            //Зачем делать дто для ключа. Если стрингой можно передать. Вроде говорили же что для небольшого объекта дто лучше не создавать.
+                .body(teamAvatarService.addTeamAvatar(userId, file));
     }
 
     @DeleteMapping("user/{userId}")
-    public ResponseEntity<String> removeTeamAvatar(@NotNull @PathVariable Long userId) {
+    public ResponseEntity<Void> removeTeamAvatar(@NotNull @PathVariable Long userId) {
         teamAvatarService.removeTeamAvatar(userId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -39,7 +39,6 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
         teamRepository.save(team);
 
         return key;
-
     }
 
     @Override
@@ -59,7 +58,6 @@ public class TeamAvatarServiceImpl implements TeamAvatarService {
 
         return key;
     }
-
 
     private MultipartFile convertToMultipart(ByteArrayInputStream inputStream, MultipartFile file) {
         return new ByteArrayMultipartFile(inputStream.readAllBytes(), file.getName(),
