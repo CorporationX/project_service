@@ -55,11 +55,11 @@ services:
       key-whitelist: '[^a-zA-Zа-яА-ЯёЁ0-9._\- ]'
       metadata-whitelist: '[^a-zA-Z0-9._-]'
       replacement-char: '_'
-    async:
-      core-pool-size: 8
-      max-pool-size: 16
-      queue-capacity: 50
+    executor-config:
+      core-pool-size: 20
+      max-pool-size: 50
       thread-name-prefix: 'S3Uploader-'
+
   payment-service:
     host: http://localhost
     port: 9080

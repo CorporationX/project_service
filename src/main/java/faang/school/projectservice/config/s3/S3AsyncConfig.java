@@ -16,10 +16,9 @@ public class S3AsyncConfig {
     @Bean(name = "s3AsyncExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(s3Properties.getAsync().getCorePoolSize());
-        executor.setMaxPoolSize(s3Properties.getAsync().getMaxPoolSize());
-        executor.setQueueCapacity(s3Properties.getAsync().getQueueCapacity());
-        executor.setThreadNamePrefix(s3Properties.getAsync().getThreadNamePrefix());
+        executor.setCorePoolSize(s3Properties.getExecutorConfig().getCorePoolSize());
+        executor.setMaxPoolSize(s3Properties.getExecutorConfig().getMaxPoolSize());
+        executor.setThreadNamePrefix(s3Properties.getExecutorConfig().getThreadNamePrefix());
         executor.initialize();
         return executor;
     }

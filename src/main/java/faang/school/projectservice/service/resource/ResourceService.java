@@ -109,12 +109,10 @@ public class ResourceService {
 
     @Transactional
     public Resource uploadResourceAsync(Project project, MultipartFile file) {
-
-        String key = s3FileUtil.getKey(project, file);
         TeamMember member = getValidTeamMember(userContext.getUserId(), project.getId());
-
         projectResourcesAccessPermissionCheck(project, member);
 
+        String key = s3FileUtil.getKey(project, file);
         s3AsyncService.uploadFileAsync(project.getId(), key, file);
 
         Resource resource = Resource.builder()

@@ -63,6 +63,8 @@ public class S3AsyncService {
             log.error("Failed to delete file from S3: ", e);
             throw new StorageException("File deleting failed");
         }
+        log.info("Resource with {} deleted successfully", key);
+
     }
 
     @Retryable(

@@ -20,7 +20,7 @@ public class S3Properties {
     private boolean pathStyleAccess;
 
     private Filename filename = new Filename();
-    private Async async = new Async();
+    private ExecutorConfig executorConfig = new ExecutorConfig();
 
     @Getter
     @Setter
@@ -34,10 +34,9 @@ public class S3Properties {
 
     @Getter
     @Setter
-    public static class Async {
+    public static class ExecutorConfig {
         private int corePoolSize;
         private int maxPoolSize;
-        private int queueCapacity;
         private String threadNamePrefix;
     }
 }

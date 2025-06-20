@@ -22,7 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
+
+import static faang.school.projectservice.validation.StorageValidation.storageSizeNotExceededValidation;
 
 @Slf4j
 @Service
@@ -69,14 +73,20 @@ public class GalleryService {
 
         Project project = projectService.getProjectById(projectId);
 
+        BigInteger additionalSize = files.stream()
+                .map(file -> BigInteger.valueOf(file.getSize()))
+                .reduce(BigInteger.ZERO, BigInteger::add);
+
+        BigInteger newStorageSize = Objects.requireNonNull(project.getStorageSize()).add(additionalSize);
+        storageSizeNotExceededValidation(newStorageSize, project.getMaxStorageSize());
+
+        project.setStorageSize(newStorageSize);
+
         List<Resource> uploadingFiles = files.stream()
                 .map(file -> resourceService.uploadResourceAsync(project, file))
                 .toList();
 
-        uploadingFiles.forEach(resource -> {
-            project.setStorageSize(project.getStorageSize().add(resource.getSize()));
-            project.getGalleryFileKeys().add(resource.getKey());
-        });
+        uploadingFiles.forEach(resource -> project.getGalleryFileKeys().add(resource.getKey()));
 
         projectRepository.save(project);
     }
