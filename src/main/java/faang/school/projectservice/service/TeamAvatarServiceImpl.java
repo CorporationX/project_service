@@ -22,15 +22,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TeamAvatarServiceImpl implements TeamAvatarService {
-    private final static int MAX_TEAM_AVATAR_SIDE = 512;
-
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final S3Service s3Service;
 
     @Override
     public String addTeamAvatar(Long userId, MultipartFile file) {
-        ByteArrayInputStream resizedImageByte = ImageUtils.resizeImageToFitLongestSide(file, MAX_TEAM_AVATAR_SIDE);
+        ByteArrayInputStream resizedImageByte = ImageUtils.getResizedImageStream(file);
         MultipartFile resizedFile = convertToMultipart(resizedImageByte, file);
         String key = s3Service.uploadFile(resizedFile);
         Team team = getTeamMember(userId).getTeam();
