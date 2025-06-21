@@ -36,13 +36,8 @@ public class GlobalExceptionHandler {
         return badRequest(ex);
     }
 
-    @ExceptionHandler({ServletException.class, ServerError.class})
+    @ExceptionHandler({RuntimeException.class, ServletException.class, ServerError.class})
     public ResponseEntity<Object> handleServerErrors(Exception ex) {
-        return internalServerError(ex);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
         return internalServerError(ex);
     }
 
