@@ -1,0 +1,25 @@
+name: CI - Run Tests on PR to triton-master-stream10
+
+on:
+  pull_request:
+    branches: [ triton-master-stream10 ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build and run tests with Gradle
+        run: ./gradlew clean test
