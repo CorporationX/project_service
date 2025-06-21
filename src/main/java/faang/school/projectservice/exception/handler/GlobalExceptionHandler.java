@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.IOException;
+import java.rmi.ServerError;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,23 +31,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentExceptions(IllegalArgumentException ex) {
+    @ExceptionHandler({IllegalArgumentException.class, IOException.class})
+    public ResponseEntity<Object> handleWrongInputException(RuntimeException ex) {
         return badRequest(ex);
     }
 
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> handleInputOutputExceptions(IOException ex) {
-        return badRequest(ex);
-    }
-
-    @ExceptionHandler(ServletException.class)
-    public ResponseEntity<Object> handleServletExceptions(ServletException ex) {
+    @ExceptionHandler({ServletException.class, ServerError.class})
+    public ResponseEntity<Object> handleServerErrors(Exception ex) {
         return internalServerError(ex);
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<Object> handleNullPointerExceptions(NullPointerException ex) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
         return internalServerError(ex);
     }
 
@@ -57,7 +53,6 @@ public class GlobalExceptionHandler {
                 .notFound()
                 .build();
     }
-
 
     private ResponseEntity<Object> internalServerError(Exception ex) {
         log.error(Arrays.toString(ex.getStackTrace()));
