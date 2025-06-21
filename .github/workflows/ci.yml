@@ -1,8 +1,9 @@
-name: CI - Run Tests on PR to triton-master-stream10
+name: Check tests on PR into the Branch triton-master-stream10
 
 on:
   pull_request:
-    branches: [ triton-master-stream10 ]
+    branches:
+      - triton-master-stream10
 
 jobs:
   test:
@@ -17,6 +18,16 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
