@@ -16,6 +16,7 @@ import java.io.InputStream;
 @Slf4j
 @UtilityClass
 public class ImageUtils {
+
     private static final int TARGET_IMAGE_HEIGHT = 566;
     private static final int TARGET_IMAGE_WIDTH = 1080;
     private static final int FILE_TYPE_START_INDEX = 6;

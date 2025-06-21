@@ -5,6 +5,11 @@ spring:
     username: user
     password: password
 
+    servlet:
+      multipart:
+        max-file-size: 5MB
+        max-request-size: 15MB
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -37,7 +42,7 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://192.168.1.100:9000
     accessKey: user
     secretKey: password
     bucketName: projectbucket
@@ -49,7 +54,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
 entity:
     project:
         default-storage-size: 2

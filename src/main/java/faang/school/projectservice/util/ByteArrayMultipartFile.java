@@ -1,7 +1,6 @@
 package faang.school.projectservice.util;
 
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
