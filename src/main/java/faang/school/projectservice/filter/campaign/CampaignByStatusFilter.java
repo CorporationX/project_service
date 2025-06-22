@@ -5,8 +5,6 @@ import faang.school.projectservice.model.Campaign;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Stream;
-
 @Component
 public class CampaignByStatusFilter implements CampaignFilter {
     @Override

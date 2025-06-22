@@ -41,3 +41,4 @@ public class CampaignDto {
     private LocalDateTime updatedAt;
     private Long updatedBy;
 }
+

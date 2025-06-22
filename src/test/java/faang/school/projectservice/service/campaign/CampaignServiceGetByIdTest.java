@@ -29,7 +29,7 @@ public class CampaignServiceGetByIdTest {
     private CampaignService campaignService;
 
     @Test
-    public void testGetByIdExists(){
+    public void testGetByIdExists() {
         Campaign existing = new Campaign();
         existing.setId(77L);
         existing.setTitle("Test");
@@ -49,7 +49,7 @@ public class CampaignServiceGetByIdTest {
     }
 
     @Test
-    public void testGetByIdNotFound(){
+    public void testGetByIdNotFound() {
         when(campaignRepoAdapter.getCampaignById(123L))
                 .thenThrow(new EntityNotFoundException("Not found"));
 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query(
@@ -17,7 +18,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
                     "WHERE tm.userId = :userId " +
                     "AND t.project.id = :projectId"
     )
-    List<TeamRole> findRolesByUserIdAndProjectId(Long userId, Long projectId);
+    Set<TeamRole> findRolesByUserIdAndProjectId(Long userId, Long projectId);
 
     @Query(
         "SELECT tm FROM TeamMember tm JOIN tm.team t " +
@@ -30,6 +31,8 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     List<TeamMember> findAllByUserIdIn(Collection<Long> userIds);
 
+    List<TeamMember> getTeamMemberById(Long id);
+  
     @Query(
             "SELECT COUNT(tm) > 0 FROM TeamMember tm JOIN tm.team t " +
                     "WHERE tm.userId = :userId " +

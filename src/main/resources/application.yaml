@@ -66,7 +66,16 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+  upload:
+    vacancy-cover:
+      maxFileSize: 5_242_880 # 5 MB
   payment-service:
     name: payment-service
   user-service:
     name: user-service
+
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 5MB
+    max-request-size: 5MB

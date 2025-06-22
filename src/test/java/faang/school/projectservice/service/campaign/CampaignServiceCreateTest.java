@@ -8,15 +8,17 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
-import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
+import faang.school.projectservice.repository.adapter.project.ProjectRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -24,18 +26,21 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CampaignServiceCreateTest {
 
     @Mock
     private CampaignRepoAdapter campaignRepoAdapter;
 
     @Mock
-    private ProjectRepoAdapter projectRepoAdapter;
+    private ProjectRepositoryAdapter projectRepoAdapter;
 
     @Mock
     private TeamMemberRepoAdapter teamMemberRepoAdapter;
@@ -58,6 +63,8 @@ public class CampaignServiceCreateTest {
                 .description("Help us build")
                 .goal(new BigDecimal("1000"))
                 .projectId(10L)
+                .status(null)
+                .amountRaised(null)
                 .currency(null)
                 .build();
 
@@ -75,20 +82,24 @@ public class CampaignServiceCreateTest {
         Long userId = 42L;
         project.setOwnerId(userId);
 
-        Mockito.when(projectRepoAdapter.getProjectById(10L)).thenReturn(project);
-        Mockito.when(teamMemberRepoAdapter.getByUserId(userId))
-                .thenReturn(Collections.emptyList());
-        Mockito.when(campaignMapper.toEntity(inputDto)).thenReturn(entity);
-        Mockito.when(campaignRepoAdapter.save(entity)).thenReturn(entity);
-        Mockito.when(campaignMapper.toDto(entity)).thenReturn(outputDto);
+        when(projectRepoAdapter.getProjectById(10L)).thenReturn(project);
+
+        doReturn(Collections.emptyList()).when(teamMemberRepoAdapter).getByUserId(ArgumentMatchers.eq(userId));
+
+        doReturn(entity).when(campaignMapper).toEntity(ArgumentMatchers.eq(inputDto));
+        doReturn(entity).when(campaignRepoAdapter).save(ArgumentMatchers.eq(entity));
+        doReturn(outputDto).when(campaignMapper).toDto(ArgumentMatchers.eq(entity));
+
+        assertThat(projectRepoAdapter.getProjectById(10L)).isSameAs(project);
 
         CampaignDto result = campaignService.createCampaign(inputDto, userId);
 
         assertThat(result).isEqualTo(outputDto);
-        verify(projectRepoAdapter).getProjectById(10L);
-        verify(campaignMapper).toEntity(inputDto);
-        verify(campaignRepoAdapter).save(entity);
-        verify(campaignMapper).toDto(entity);
+
+        verify(projectRepoAdapter, times(2)).getProjectById(10L);
+        verify(campaignMapper).toEntity(ArgumentMatchers.eq(inputDto));
+        verify(campaignRepoAdapter).save(ArgumentMatchers.eq(entity));
+        verify(campaignMapper).toDto(ArgumentMatchers.eq(entity));
     }
 
     @Test

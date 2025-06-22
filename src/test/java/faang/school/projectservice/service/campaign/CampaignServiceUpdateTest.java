@@ -2,6 +2,7 @@ package faang.school.projectservice.service.campaign;
 
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
+
 import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
@@ -9,9 +10,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
-import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ public class CampaignServiceUpdateTest {
     private CampaignDto outputDto;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
 
         existing = new Campaign();
         existing.setId(5L);
@@ -84,7 +83,7 @@ public class CampaignServiceUpdateTest {
     }
 
     @Test
-    public void testUpdateAllFieldsPresentAppliesChanges(){
+    public void testUpdateAllFieldsPresentAppliesChanges() {
         when(campaignRepoAdapter.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(campaignMapper.toDto(any())).thenReturn(outputDto);
 

@@ -31,7 +31,7 @@ public class Meet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "title", length = 128, nullable = false)
     private String title;
@@ -55,6 +55,9 @@ public class Meet {
     @Column(name = "user_id")
     private List<Long> userIds;
 
+    @Column(name = "is_active")
+    private boolean active;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "starts_at", nullable = false)
     private LocalDateTime startsAt;
@@ -68,4 +71,7 @@ public class Meet {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "scheduled_at", nullable = false)
+    private LocalDateTime scheduledAt;
 }

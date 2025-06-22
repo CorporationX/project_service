@@ -41,3 +41,4 @@ public class CampaignRepoAdapter {
         return campaignRepository.findAll(spec, pageable);
     }
 }
+

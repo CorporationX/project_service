@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSpecificationExecutor<Campaign> {
+public interface CampaignRepository extends JpaRepository<Campaign, Long> , JpaSpecificationExecutor<Campaign> {
     Optional<Campaign> findByTitleAndProjectId(String title, Long projectId);
 
     @Query(

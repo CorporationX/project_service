@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.adapter;
 
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -28,5 +29,13 @@ public class TeamMemberServiceAdapter implements TeamMemberService {
     @Override
     public void save(TeamMember teamMember) {
         teamMemberRepository.save(teamMember);
+    }
+
+    @Override
+    public void assertOwnerOrManager(Long projectId, Long userId) {
+        Set<TeamRole> roles = getUserRoles(projectId, userId);
+        if (!roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
+            throw new AccessDeniedException("Need OWNER or MANAGER");
+        }
     }
 }

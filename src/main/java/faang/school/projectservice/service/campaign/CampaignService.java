@@ -3,12 +3,13 @@ package faang.school.projectservice.service.campaign;
 import faang.school.projectservice.dto.campaign.CampaignDto;
 import faang.school.projectservice.dto.campaign.CampaignFilterDto;
 import faang.school.projectservice.filter.campaign.CampaignFilter;
+
 import faang.school.projectservice.mapper.campaign.CampaignMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.adapter.campaign.CampaignRepoAdapter;
-import faang.school.projectservice.repository.adapter.project.ProjectRepoAdapter;
+import faang.school.projectservice.repository.adapter.project.ProjectRepositoryAdapter;
 import faang.school.projectservice.repository.adapter.teammember.TeamMemberRepoAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import java.util.Optional;
 @Slf4j
 public class CampaignService {
     private final CampaignRepoAdapter campaignRepoAdapter;
-    private final ProjectRepoAdapter projectRepoAdapter;
+    private final ProjectRepositoryAdapter projectRepoAdapter;
     private final TeamMemberRepoAdapter teamMemberRepoAdapter;
     private final CampaignMapper campaignMapper;
     private final List<CampaignFilter> filters;
@@ -54,7 +55,7 @@ public class CampaignService {
                         Objects.equals(teamMember.getTeam().getProject().getId(), project.getId()))
                 .flatMap(teamMember -> teamMember.getRoles().stream())
                 .anyMatch(teamRole ->
-                Objects.equals(teamRole.name(), "MANAGER"));
+                        Objects.equals(teamRole.name(), "MANAGER"));
 
         if (!Objects.equals(project.getOwnerId(), userId) && !isManager) {
             String errorMessage =

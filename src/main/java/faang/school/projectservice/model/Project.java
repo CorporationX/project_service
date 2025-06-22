@@ -36,7 +36,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
+@Builder
 public class Project {
 
     @Id
