@@ -1,6 +1,5 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.google.calendar;
 
-import faang.school.projectservice.dto.client.Currency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,7 +19,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -28,44 +26,40 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "campaign")
-public class Campaign {
+@Table(name = "event_attendee")
+public class EventAttendee {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", length = 128, nullable = false)
-    private String title;
-
-    @Column(name = "description", length = 4096)
-    private String description;
-
-    @Column(name = "goal")
-    private BigDecimal goal;
-
-    @Column(name = "amount_raised")
-    private BigDecimal amountRaised;
-
-    @Enumerated(EnumType.STRING)
-    private CampaignStatus status;
-
     @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+    @JoinColumn(name = "google_calendar_event_id", nullable = false)
+    private GoogleCalendarEvent event;
 
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Currency currency;
+    private EventRole role;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "display_name", nullable = false)
+    private String userName;
+
+    @Column(name = "attendee_response_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AttendeeResponseStatus attendeeResponseStatus;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
-    private Long createdBy;
-
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    private Long updatedBy;
 }

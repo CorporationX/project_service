@@ -39,6 +39,15 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  google:
+    api:
+      application-name: "Project-service/1.0"
+      calendar:
+        credentials:
+          path: classpath:google/calendar/credentials.json
+        tokens:
+          directory: tokens
+
 server:
   port: 8082
 
