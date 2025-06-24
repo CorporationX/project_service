@@ -30,7 +30,7 @@ import java.util.Objects;
 public class S3Service {
     private final S3Client client;
 
-    @Value("${services.s3.bucketName}")
+    @Value("${services.s3.bucket-name}")
     private String bucketName;
 
     public String uploadFile(String folder, MultipartFile file) {

@@ -16,5 +16,4 @@ public class ProjectDto {
     private boolean isPrivate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }
