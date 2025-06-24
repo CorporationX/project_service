@@ -19,6 +19,7 @@ dependencies {
      */
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -116,17 +117,17 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(files(classDirectories.files.map {
         fileTree(it).apply {
             exclude(
-                "**/mapper/**",                         //Исключить mapper
-                "**/entity/**",                         //Исключить пакет с сущностями
-                "**/client/**",                         //Исключить пакет client
-                "**/config/**",                         //Исключить пакет config
-                "**/dto/**",                            //Исключить пакет с dto
-                "**/model/**",                          //Исключить пакет model
-                "**/controller/**",                     //Исключить контроллеры
-                "**/repository/**",                     //Исключить репозитории
-                "**/**Test.class",                      //Исключить тесты
-                "**/ProjectServiceApplication.class",   //Исключить класс с main
-                "**/**Impl.class",                      //Исключить Impl классы
+                    "**/mapper/**",                         //Исключить mapper
+                    "**/entity/**",                         //Исключить пакет с сущностями
+                    "**/client/**",                         //Исключить пакет client
+                    "**/config/**",                         //Исключить пакет config
+                    "**/dto/**",                            //Исключить пакет с dto
+                    "**/model/**",                          //Исключить пакет model
+                    "**/controller/**",                     //Исключить контроллеры
+                    "**/repository/**",                     //Исключить репозитории
+                    "**/**Test.class",                      //Исключить тесты
+                    "**/ProjectServiceApplication.class",   //Исключить класс с main
+                    "**/**Impl.class",                      //Исключить Impl классы
             )
         }
     }))
