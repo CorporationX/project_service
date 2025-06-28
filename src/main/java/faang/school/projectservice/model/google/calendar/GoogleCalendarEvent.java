@@ -34,12 +34,16 @@ public class GoogleCalendarEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
     @Column(name = "title", nullable = false)
     private String title;
     @Column(name = "description", length = 4096)
     private String description;
     @Column(name = "url")
     private String url;
+    @Column(name = "location")
+    private String location;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -58,6 +62,4 @@ public class GoogleCalendarEvent {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "event")
-    private List<EventAttendee> attendees;
 }

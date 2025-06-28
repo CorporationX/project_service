@@ -65,6 +65,7 @@ public class GoogleOAuth {
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scopes)
                 .setDataStoreFactory(fileDataStoreFactory)
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
 
         return new AuthorizationCodeInstalledApp(flow,

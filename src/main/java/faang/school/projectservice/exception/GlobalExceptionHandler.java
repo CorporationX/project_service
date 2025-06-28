@@ -95,4 +95,26 @@ public class GlobalExceptionHandler {
         log.error("Exception occurred: {}", exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEventNotFoundException(EventNotFoundException exception) {
+        log.error("EventNotFoundException occurred: {}", exception.getMessage(), exception);
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(AclException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleAclException(AclException exception) {
+        log.error("AclException occurred: {}", exception.getMessage(), exception);
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(CalendarApiException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleCalendarApiException(CalendarApiException exception) {
+        log.error("GoogleJsonResponseException occurred: {}", exception.getMessage(), exception);
+        return new ErrorResponse(exception.getMessage());
+
+    }
 }

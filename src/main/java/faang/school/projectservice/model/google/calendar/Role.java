@@ -1,7 +1,7 @@
 package faang.school.projectservice.model.google.calendar;
 
-public enum EventRole {
+public enum Role {
     READER,
     WRITER,
-    OWNER
+    OWNER,
 }

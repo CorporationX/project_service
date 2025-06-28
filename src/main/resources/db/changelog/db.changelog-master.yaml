@@ -34,4 +34,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V020_alter_candidate_add_username.sql
   - include:
-      file: db/changelog/changeset/project_V021_create_google_calendar_schema.sql
+      file: db/changelog/changeset/project_V021_google_calendar_schema.sql
