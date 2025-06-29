@@ -70,8 +70,8 @@ public class TeamController {
                             schema = @Schema(type = "string", example = "Avatar deleted"))),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @DeleteMapping("/deleteAvatar/{managerId}/{fileName}")
-    public ResponseEntity<String> deleteAvatar(@PathVariable Long managerId, @PathVariable String fileName) {
+    @DeleteMapping("/deleteAvatar/{managerId}")
+    public ResponseEntity<String> deleteAvatar(@PathVariable Long managerId, @RequestParam("file") String fileName) {
         boolean deleted = teamService.deleteImage(managerId, fileName);
         if (deleted) {
             return new ResponseEntity<>("Avatar deleted", HttpStatus.OK);
