@@ -3,9 +3,8 @@ package faang.school.projectservice.bjs_77842;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.springframework.validation.FieldError;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -46,7 +45,7 @@ public class ValidationExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(RuntimeException e) {
         log.error("Unexpected error occurred", e);
-        return new ErrorResponse(e.getMessage();
+        return new ErrorResponse(e.getMessage());
 
     }
 }

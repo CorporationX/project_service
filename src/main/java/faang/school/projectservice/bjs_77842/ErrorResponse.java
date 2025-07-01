@@ -10,5 +10,4 @@ import java.time.LocalDateTime;
 public class ErrorResponse {
     private LocalDateTime localDateTime;
     private String message;
-
 }
