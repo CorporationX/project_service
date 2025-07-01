@@ -22,7 +22,9 @@ public class TeamService {
 
     public void uploadFile(long teamId, MultipartFile file, String fileName) {
         String url = s3Client.uploadFile(file, fileName);
-        Team team = teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team with id: " + teamId + " not found"));
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Team with id: " + teamId + " not found"));
         team.setAvatarKey(url);
         teamRepository.save(team);
     }
@@ -32,7 +34,9 @@ public class TeamService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Team member with id: " + managerId + " not found"));
         boolean isManager = manager.getRoles().stream().anyMatch(teamRole -> teamRole.equals(MANAGER));
-        if (!isManager) return false;
+        if (!isManager) {
+            return false;
+        }
         Team team = teamRepository.findByTeamMembers(manager);
         s3Client.deleteFile(fileName);
         team.setAvatarKey(null);
