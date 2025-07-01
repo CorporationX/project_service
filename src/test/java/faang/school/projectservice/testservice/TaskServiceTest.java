@@ -244,7 +244,6 @@ class TaskServiceTest {
     void getAllTasksByProjectIdShouldThrowExceptionWhenNoTasksFound() {
         when(taskRepository.findAllByProjectId(projectId))
                 .thenReturn(Collections.emptyList());
-
         Exception exception = assertThrows(TaskEntityNotFoundException.class, () ->
                 taskService.getAllTasksByProjectId(projectId));
 
