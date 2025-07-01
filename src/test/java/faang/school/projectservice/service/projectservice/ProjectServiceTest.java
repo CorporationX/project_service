@@ -4,7 +4,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.ProjectService.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
