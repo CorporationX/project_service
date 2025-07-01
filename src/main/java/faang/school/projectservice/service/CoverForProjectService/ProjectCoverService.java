@@ -3,6 +3,7 @@ package faang.school.projectservice.service.CoverForProjectService;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.resource.S3FileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -14,12 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static faang.school.projectservice.validation.CoverValidation.validateFile;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class ProjectCoverService {
 
     private final ProjectRepository projectRepository;
@@ -36,7 +39,7 @@ public class ProjectCoverService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Project not found with id: " + projectId));
 
-        if (!project.getOwnerId().equals(currentUser.id())) {
+        if (!Objects.equals(project.getOwnerId(), currentUser.getId())) {
             throw new DataValidationException("Only project owner can add cover");
         }
 
@@ -61,7 +64,7 @@ public class ProjectCoverService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Project not found with id: " + projectId));
 
-        if (!project.getOwnerId().equals(currentUser.id())) {
+        if (!Objects.equals(project.getOwnerId(), currentUser.getId())) {
             throw new DataValidationException("Only project owner can remove cover");
         }
 
@@ -80,5 +83,23 @@ public class ProjectCoverService {
         projectRepository.save(project);
 
         log.info("Removed cover from project {} by user {}", projectId, currentUser.id());
+    }
+
+
+    @Transactional(readOnly = true)
+    public S3FileDto getProjectCoverFile(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataValidationException("Project not found with id: " + projectId));
+
+        if (project.getCoverImageId() == null || project.getCoverImageId().isBlank()) {
+            throw new DataValidationException("Project does not have a cover");
+        }
+
+        try {
+            return s3Service.downloadFile(project.getCoverImageId());
+        } catch (Exception e) {
+            log.error("Failed to get cover file for project {}, error: {}", projectId, e.getMessage());
+            throw new DataValidationException("Failed to retrieve project cover file");
+        }
     }
 }

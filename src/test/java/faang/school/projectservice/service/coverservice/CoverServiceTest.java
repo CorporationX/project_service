@@ -3,6 +3,7 @@ package faang.school.projectservice.service.coverservice;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.resource.S3FileDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,7 @@ class CoverServiceTest {
     private final long USER_ID = 1L;
     private final long OTHER_USER_ID = 2L;
     private final String S3_KEY = "12345 - test.jpg";
-    private static final String OLD_S3_KEY = " 123 - хрень.jpg";
+    private static final String OLD_S3_KEY = " 123 - smth.jpg";
 
     private Project project;
     private MultipartFile validFile;
@@ -61,18 +63,18 @@ class CoverServiceTest {
                 .ownerId(USER_ID)
                 .build();
 
-        String FILE_NAME = "test.jpg";
+         String fileName = "test.jpg";
 
         validFile = new MockMultipartFile(
                 "file",
-                FILE_NAME,
+                fileName,
                 "image/jpeg",
                 "test image content".getBytes()
         );
 
         invalidFile = new MockMultipartFile(
                 "file",
-                FILE_NAME,
+                fileName,
                 "text/plain",
                 "invalid content".getBytes()
         );
@@ -235,5 +237,35 @@ class CoverServiceTest {
 
         assertThrows(DataValidationException.class,
                 () -> projectCoverService.removeCoverFromProjectById(PROJECT_ID));
+    }
+
+    @Test
+    void getProjectCoverFile_ProjectNotFound_ThrowsException() {
+        when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class,
+                () -> projectCoverService.getProjectCoverFile(PROJECT_ID));
+    }
+
+    @Test
+    void getProjectCoverFile_NoCoverExists_ThrowsException() {
+        project.setCoverImageId(null);
+        when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
+
+        assertThrows(DataValidationException.class,
+                () -> projectCoverService.getProjectCoverFile(PROJECT_ID));
+    }
+
+    @Test
+    void getProjectCoverFile_ValidInput_ReturnsFile() {
+        project.setCoverImageId(S3_KEY);
+        S3FileDto expectedFile = mock(S3FileDto.class);
+
+        when(projectRepository.findById(PROJECT_ID)).thenReturn(Optional.of(project));
+        when(s3Service.downloadFile(S3_KEY)).thenReturn(expectedFile);
+
+        S3FileDto result = projectCoverService.getProjectCoverFile(PROJECT_ID);
+
+        assertEquals(expectedFile, result);
     }
 }
