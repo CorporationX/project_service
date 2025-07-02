@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -24,12 +25,10 @@ public class ValidationExceptionHandler {
             MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException occurred: {}", e.getMessage());
         return e.getBindingResult().getAllErrors().stream()
-                .collect(Collectors.toMap(
-                        error -> ((FieldError) error).getField(),
-                        error -> {
-                            String message = error.getDefaultMessage();
-                            return message != null ? message : "Invalid value";
-                        }
+                .filter(error -> error instanceof FieldError)
+                .map(error -> (FieldError) error)
+                .collect(Collectors.toMap(FieldError::getField,
+                        error -> Optional.ofNullable(error.getDefaultMessage()).orElse("Invalid value")
                 ));
     }
 
