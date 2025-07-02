@@ -39,7 +39,6 @@ public class ValidationExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(RuntimeException e) {
