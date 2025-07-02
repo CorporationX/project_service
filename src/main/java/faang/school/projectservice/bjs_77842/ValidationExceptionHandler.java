@@ -45,6 +45,5 @@ public class ValidationExceptionHandler {
     public ErrorResponse handleRuntimeException(RuntimeException e) {
         log.error("Unexpected error occurred", e);
         return new ErrorResponse(e.getMessage());
-
     }
 }
