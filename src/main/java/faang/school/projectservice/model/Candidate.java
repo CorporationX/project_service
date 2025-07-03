@@ -1,5 +1,7 @@
 package faang.school.projectservice.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,15 +12,24 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
 @Table(name = "candidate")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Candidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
     @NotNull
     private Long userId;
     @NotNull
@@ -31,4 +42,12 @@ public class Candidate {
     @ManyToOne
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
+
+    @Column(nullable = false)
+    private String name;
+
+    @ElementCollection
+    private List<String> skills;
+
+    private String experience;
 }
