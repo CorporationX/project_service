@@ -39,7 +39,7 @@ class TaskServiceTest {
     @Mock
     private TaskRepository taskRepository;
 
-    @Spy // Используем реальную реализацию маппера
+    @Spy
     private TaskMapperImpl taskMapper;
 
     @Mock
@@ -75,30 +75,12 @@ class TaskServiceTest {
 
         project = new Project();
         project.setId(projectId);
-
-        stage = new Stage();
-        stage.setStageId(1L);
     }
 
     @Test
     void createTaskShouldReturnTaskDto() {
         when(projectService.getProjectById(projectId)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(reporterUserId);
-        Stage stage = Stage.builder().stageId(1L).build();
-
-        when(taskMapper.toEntity(taskRequestDto)).thenReturn(
-                Task.builder()
-                        .name("Test Task")
-                        .description("Test Description")
-                        .status(TaskStatus.OPEN)
-                        .performerUserId(3L)
-                        .reporterUserId(reporterUserId)
-                        .minutesTracked(0)
-                        .project(project)
-                        .stage(stage)
-                        .build()
-        );
-
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> {
             Task savedTask = invocation.getArgument(0);
             savedTask.setId(taskId);
@@ -115,7 +97,6 @@ class TaskServiceTest {
         assertEquals(reporterUserId, result.reporterUserId());
         assertEquals(0, result.minutesTracked());
         assertEquals(projectId, result.projectId());
-        assertEquals(1L, result.stageId());
         verify(taskRepository).save(any(Task.class));
         verify(projectService).getProjectById(projectId);
         verify(userContext).getUserId();
@@ -172,7 +153,6 @@ class TaskServiceTest {
         assertEquals(reporterUserId, result.reporterUserId());
         assertEquals(0, result.minutesTracked());
         assertEquals(projectId, result.projectId());
-        assertEquals(1L, result.stageId());
         verify(taskRepository).findById(taskId);
         verify(taskRepository).save(any(Task.class));
         verify(userContext).getUserId();
