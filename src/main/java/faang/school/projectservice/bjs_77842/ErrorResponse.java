@@ -1,13 +1,26 @@
 package faang.school.projectservice.bjs_77842;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
 public class ErrorResponse {
-    private LocalDateTime localDateTime;
+
+    @JsonFormat
+    private LocalDateTime timestamp;
+
     private String message;
+    private String url;
+    private int status;
+    private String error;
+
+    public ErrorResponse(String message) {
+        this.message = message;
+    }
 }
