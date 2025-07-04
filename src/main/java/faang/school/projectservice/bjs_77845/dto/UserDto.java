@@ -16,5 +16,4 @@ public class UserDto {
 
     @NotNull(message = "must not be null")
     private String address;
-
 }
