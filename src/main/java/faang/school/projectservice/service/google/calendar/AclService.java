@@ -2,6 +2,7 @@ package faang.school.projectservice.service.google.calendar;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.AclRule;
+import faang.school.projectservice.config.google.calendar.GoogleCalendarConfig;
 import faang.school.projectservice.dto.google.calendar.AclDto;
 import faang.school.projectservice.exception.AclException;
 import faang.school.projectservice.model.google.calendar.Role;
@@ -17,22 +18,22 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AclService {
-    private final GoogleOAuth googleOAuth;
+    private final GoogleCalendarConfig googleOAuth;
 
     private static final String CALENDAR_ID = "primary";
+    private final Calendar calendarService;
 
     public void grandAccess(AclDto acl)  {
         log.info("Granting access with ACL: {}", acl);
 
         try {
-            Calendar service = googleOAuth.init();
             AclRule rule = new AclRule()
                     .setScope(new AclRule.Scope()
                             .setType(acl.getScopeType().toString())
                             .setValue(acl.getScopeValue()))
                     .setRole(acl.getRole().toString());
 
-            service.acl().insert("primary", rule).execute();
+            calendarService.acl().insert("primary", rule).execute();
         } catch (IOException e) {
             throw new RuntimeException("Error ACL adding", e);
         }
@@ -40,8 +41,7 @@ public class AclService {
 
     public void deleteAclRule(String ruleId) {
         try {
-            Calendar service = googleOAuth.init();
-            service.acl().delete(CALENDAR_ID, ruleId).execute();
+            calendarService.acl().delete(CALENDAR_ID, ruleId).execute();
         } catch (IOException e) {
             throw new AclException("Ошибка при удалении ACL");
         }

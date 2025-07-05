@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.google.calendar;
 
 import com.google.api.services.calendar.model.Event;
+import faang.school.projectservice.config.google.calendar.GoogleCalendarConfig;
 import faang.school.projectservice.dto.google.calendar.GoogleCalendarEventDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EventNotFoundException;
@@ -25,17 +26,16 @@ import java.util.List;
 public class GoogleCalendarService {
 
     private static final String CALENDAR_ID = "primary";
+    private final Calendar calendarService;
 
     private final EventCreateMapper eventCreateMapper;
     private final GoogleCalendarEventRepository eventRepository;
-    private final GoogleOAuth googleOAuth;
     private final GoogleCalendarEventRepository googleCalendarEventRepository;
     private final EventUpdateMapper eventUpdateMapper;
     private final GoogleEventMapper googleEventMapper;
 
     public GoogleCalendarEventDto createEvent(GoogleCalendarEventDto googleCalendarEventDto) {
         try {
-            Calendar calendarService = googleOAuth.init();
 
             Event googleEvent = googleEventMapper.toGoogleEvent(googleCalendarEventDto);
 
@@ -55,8 +55,6 @@ public class GoogleCalendarService {
     public GoogleCalendarEventDto updateEvent(GoogleCalendarEventDto googleCalendarEventDto,
                                               Long eventId) {
         try {
-
-
             log.info("Updating Google Calendar event: {}", googleCalendarEventDto);
 
             GoogleCalendarEvent googleCalendarEvent = googleCalendarEventRepository.findById(eventId)
@@ -65,8 +63,6 @@ public class GoogleCalendarService {
             validateUpdatedDateRange(googleCalendarEventDto, googleCalendarEvent);
 
             eventUpdateMapper.updateEntityFromDto(googleCalendarEventDto, googleCalendarEvent);
-
-            Calendar calendarService = googleOAuth.init();
 
             Event updatedGoogleEvent = googleEventMapper.toGoogleEvent(googleCalendarEventDto);
             updatedGoogleEvent.setId(googleCalendarEvent.getGoogleCalendarId());
@@ -77,7 +73,6 @@ public class GoogleCalendarService {
                     .execute();
 
             GoogleCalendarEvent savedEvent = eventRepository.save(googleCalendarEvent);
-
 
             return eventCreateMapper.toDto(savedEvent);
         } catch (IOException e) {
@@ -92,8 +87,6 @@ public class GoogleCalendarService {
 
             GoogleCalendarEvent googleCalendarEvent = googleCalendarEventRepository.findById(eventId)
                     .orElseThrow(() -> new EventNotFoundException("Event not found"));
-
-            Calendar calendarService = googleOAuth.init();
 
             calendarService.events().delete("primary", googleCalendarEvent.getGoogleCalendarId()).execute();
 

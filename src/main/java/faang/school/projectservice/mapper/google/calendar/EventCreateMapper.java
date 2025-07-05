@@ -9,7 +9,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventCreateMapper {
     GoogleCalendarEvent toEntity(GoogleCalendarEventDto googleCalendarEventDto);
-    GoogleCalendarEventDto toDto(GoogleCalendarEvent googleCalendarEvent);
-    List<GoogleCalendarEventDto> toDtoList(List<GoogleCalendarEvent> events);
 
+    GoogleCalendarEventDto toDto(GoogleCalendarEvent googleCalendarEvent);
+
+    List<GoogleCalendarEventDto> toDtoList(List<GoogleCalendarEvent> events);
 }

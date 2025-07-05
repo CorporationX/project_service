@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.google.calendar;
+package faang.school.projectservice.config.google.calendar;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -13,8 +13,9 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +23,8 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 
-@Service
-public class GoogleOAuth {
+@Configuration
+public class GoogleCalendarConfig {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final NetHttpTransport HTTP_TRANSPORT;
@@ -45,7 +46,7 @@ public class GoogleOAuth {
     @Value("${spring.google.api.calendar.tokens.directory}")
     private String tokensDirectoryPath;
 
-    @PostConstruct
+    @Bean
     public Calendar init() throws IOException {
         Credential credential = authorize();
         return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
