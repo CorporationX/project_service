@@ -33,4 +33,13 @@ create table if not exists project_stage_executors
         foreign key (executor_id) references team_member (id)
 );
 
-create index project_stage_executors_stage_id_idx on project_stage_executors (stage_id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes
+        WHERE tablename = 'project_stage_executors'
+        AND indexname = 'project_stage_executors_stage_id_idx'
+    ) THEN
+CREATE INDEX project_stage_executors_stage_id_idx ON project_stage_executors (stage_id);
+END IF;
+END $$;

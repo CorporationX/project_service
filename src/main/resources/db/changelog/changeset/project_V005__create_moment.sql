@@ -1,4 +1,4 @@
-CREATE TABLE moment (
+CREATE TABLE IF NOT EXISTS moment (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(255),
   description TEXT,
@@ -10,7 +10,7 @@ CREATE TABLE moment (
   updated_by BIGINT
 );
 
-CREATE TABLE moment_resource (
+CREATE TABLE IF NOT EXISTS moment_resource (
   moment_id BIGINT,
   resource_id BIGINT,
   CONSTRAINT moment_resource_pk PRIMARY KEY (moment_id, resource_id),
@@ -18,7 +18,7 @@ CREATE TABLE moment_resource (
   CONSTRAINT moment_resource_resource_fk FOREIGN KEY (resource_id) REFERENCES resource (id) ON DELETE CASCADE
 );
 
-CREATE TABLE moment_project (
+CREATE TABLE IF NOT EXISTS moment_project (
   moment_id BIGINT,
   project_id BIGINT,
   CONSTRAINT moment_project_pk PRIMARY KEY (moment_id, project_id),

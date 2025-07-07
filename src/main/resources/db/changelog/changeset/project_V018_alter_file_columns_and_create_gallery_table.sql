@@ -1,6 +1,20 @@
-ALTER TABLE project
-ADD COLUMN presentation_file_key VARCHAR(255),
-ADD COLUMN presentation_generated_at TIMESTAMP;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='project' AND column_name='presentation_file_key'
+    ) THEN
+ALTER TABLE project ADD COLUMN presentation_file_key VARCHAR(255);
+END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='project' AND column_name='presentation_generated_at'
+    ) THEN
+ALTER TABLE project ADD COLUMN presentation_generated_at TIMESTAMP;
+END IF;
+END $$;
+
 
 ALTER TABLE team
 ADD COLUMN avatar_key VARCHAR(255);
