@@ -20,7 +20,7 @@ public class GlobalExeptionHandler {
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse HandleDataValidationException(DataValidationException e) {
+    public ErrorResponse handleDataValidationException(DataValidationException e) {
         log.error("Data Validation Exception occurred: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
@@ -38,7 +38,7 @@ public class GlobalExeptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse HandleEntityNotFoundException(EntityNotFoundException e) {
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("Entity Not Found Exception occurred: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

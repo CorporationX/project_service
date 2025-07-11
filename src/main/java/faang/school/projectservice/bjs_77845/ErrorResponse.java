@@ -20,10 +20,6 @@ public class ErrorResponse {
     private String error;
     private String message;
 
-    private String name;
-    private String email;
-    private String address;
-
     public ErrorResponse(HttpStatus httpStatus, String message) {
         this.timestamp = LocalDateTime.now();
         this.status = httpStatus.value();
