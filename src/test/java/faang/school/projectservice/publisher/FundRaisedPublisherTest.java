@@ -40,19 +40,18 @@ public class FundRaisedPublisherTest {
     }
 
     @Test
-    void testPublishEventToRedisSuccess() throws JsonProcessingException {
-        String json = "{\"userId\":1,\"projectId\":100,\"paymentAmount\":500,\"localDateTime\":\"2024-12-12T10:00:00\"}";
-        when(objectMapper.writeValueAsString(fundRaisedEvent)).thenReturn(json);
+    void testPublishEventToRedisSuccess() {
         when(donationTopic.getTopic()).thenReturn("donation-topic");
 
         fundRaisedEventPublisher.publish(fundRaisedEvent);
 
-        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(redisTemplate, times(1)).
-                convertAndSend(eq("donation-topic"), argumentCaptor.capture());
+        ArgumentCaptor<FundRaisedEvent> argumentCaptor = ArgumentCaptor.forClass(FundRaisedEvent.class);
+        verify(redisTemplate, times(1))
+                .convertAndSend(eq("donation-topic"), argumentCaptor.capture());
 
-        String actualJson = argumentCaptor.getValue();
-        assertEquals(json, actualJson);
+        FundRaisedEvent actualEvent = argumentCaptor.getValue();
+
+        assertEquals(fundRaisedEvent, actualEvent);
     }
 
     @Test
