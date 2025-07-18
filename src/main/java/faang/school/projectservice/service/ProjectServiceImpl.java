@@ -6,19 +6,21 @@ import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.dto.client.project.UpdateProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository repository;
@@ -28,19 +30,24 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void createProject(CreateProjectDto projectDto) {
-        Optional<Project> isHaveProjectWithSameName = getAllProjects().stream()
+        Optional<Project> isHaveProjectWithSameName =
+                getAllProjects().stream()
                 .map(mapper::toProject)
                 .filter(project -> project.getOwnerId().equals(userContext.getUserId()) &&
                         project.getName().equals(projectDto.name()))
                 .findAny();
 
         if (isHaveProjectWithSameName.isPresent()) {
-            throw new RuntimeException("Пользователь пытается создать уже имеющийся у него проект");
+            throw new RuntimeException("Пользователь пытается создать уже " +
+                    "имеющийся у него проект");
         }
 
         Project project = mapper.toProject(projectDto);
-        project.setStatus(ProjectStatus.CREATED);
+
+        project.setOwnerId(userContext.getUserId());
+        project.setCreatedAt(LocalDateTime.now());
         repository.save(project);
+        log.info("Проект {} был создан.", projectDto.name());
     }
 
     @Override
@@ -48,18 +55,23 @@ public class ProjectServiceImpl implements ProjectService {
     public void updateProject(long id, UpdateProjectDto projectDto) {
         Optional<Project> project = repository.findById(id);
         if (project.isPresent()) {
+            project.get().setUpdatedAt(LocalDateTime.now());
+            mapper.update(projectDto, project.get());
             repository.save(project.get());
         } else if (!visibilityFilter(project.get())) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         } else {
             throw new RuntimeException("Пользователь пытается обновить несуществующий проект.");
         }
+        log.info("Проект с id = {} был обновлен входными данными", id);
     }
 
     @Override
     @Transactional
     public List<ProjectDto> getProjectsFilteredByStatus(ProjectDto projectDto) {
         List<Project> projectList = repository.findAll();
+        log.info("Получение списка проектов, отсортированных по статусу {}",
+                projectDto.status());
         return projectList.stream()
                 .filter(this::visibilityFilter)
                 .map(mapper::toProjectDto)
@@ -71,10 +83,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public List<ProjectDto> getProjectsFilteredByName() {
         List<Project> projectList = repository.findAll();
+        log.info("Получение списка проектов, отсортированных по имени");
         return projectList.stream()
                 .filter(this::visibilityFilter)
                 .map(mapper::toProjectDto)
-                .filter(projectDto -> projectDto.name() != null && !projectDto.name().isEmpty())
+                .filter(projectDto -> projectDto.name() != null &&
+                        !projectDto.name().isEmpty())
                 .sorted(Comparator.comparing(ProjectDto::name))
                 .toList();
     }
@@ -83,6 +97,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public List<ProjectDto> getAllProjects() {
         List<Project> projectList = repository.findAll();
+        log.info("Получение списка проектов");
         return projectList.stream()
                 .filter(this::visibilityFilter)
                 .map(mapper::toProjectDto)
@@ -97,6 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else if (!visibilityFilter(project.get())) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
+        log.info("Получение проекта по id = {}", id);
         return mapper.toProjectDto(project.get());
     }
 
