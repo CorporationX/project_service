@@ -90,6 +90,7 @@ public class ProjectServiceImplTest {
         );
 
         when(repository.findById(5L)).thenReturn(Optional.of(project));
+        project.setVisibility(ProjectVisibility.PUBLIC);
 
         service.updateProject(5L, updateProjectDto);
         verify(repository).findById(5L);
