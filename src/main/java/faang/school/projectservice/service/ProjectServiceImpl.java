@@ -32,15 +32,15 @@ public class ProjectServiceImpl implements ProjectService {
     public void createProject(CreateProjectDto projectDto) {
         Optional<Project> isHaveProjectWithSameName =
                 getAllProjects().stream()
-                .map(mapper::toProject)
-                .filter(project -> project.getOwnerId().equals(userContext.getUserId()) &&
-                        project.getName().equals(projectDto.name()))
-                .findAny();
+                        .map(mapper::toProject)
+                        .filter(project -> project.getOwnerId().equals(userContext.getUserId()) &&
+                                project.getName().equals(projectDto.name()))
+                        .findAny();
 
-        if (isHaveProjectWithSameName.isPresent()) {
-            throw new RuntimeException("Пользователь пытается создать уже " +
-                    "имеющийся у него проект");
-        }
+
+        isHaveProjectWithSameName.ifPresent(project -> {
+            throw new RuntimeException("Пользователь пытается создать уже имеющийся у него проект");
+        });
 
         Project project = mapper.toProject(projectDto);
 
@@ -53,16 +53,15 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void updateProject(long id, UpdateProjectDto projectDto) {
-        Optional<Project> project = repository.findById(id);
-        if (project.isPresent()) {
-            project.get().setUpdatedAt(LocalDateTime.now());
-            mapper.update(projectDto, project.get());
-            repository.save(project.get());
-        } else if (!visibilityFilter(project.get())) {
+        Project project = repository.findById(id).orElseThrow(() -> new RuntimeException(String.valueOf(id)));
+
+        if (!visibilityFilter(project)) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
-        } else {
-            throw new RuntimeException("Пользователь пытается обновить несуществующий проект.");
         }
+
+        project.setUpdatedAt(LocalDateTime.now());
+        mapper.update(projectDto, project);
+        repository.save(project);
         log.info("Проект с id = {} был обновлен входными данными", id);
     }
 

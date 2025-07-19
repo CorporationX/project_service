@@ -28,7 +28,7 @@ public class ProjectController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{projectId}/update")
+    @PutMapping("/{projectId}")
     public ResponseEntity<Void> updateProject(@PathVariable long projectId,
                                               @RequestParam UpdateProjectDto projectDto) {
         service.updateProject(projectId, projectDto);

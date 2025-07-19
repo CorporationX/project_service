@@ -31,7 +31,7 @@ public class ProjectControllerTest {
     @Test
     @DisplayName("Проверка успешного обновления проекта через контроллер")
     void shouldUpdateSuccessfully() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/projects/1/update"))
+        mockMvc.perform(MockMvcRequestBuilders.put("/projects/1"))
                 .andExpect(status().isOk());
     }
 
