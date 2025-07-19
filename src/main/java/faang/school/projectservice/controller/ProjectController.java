@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.project.CreateProjectDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.dto.client.project.UpdateProjectDto;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +24,14 @@ public class ProjectController {
     private final ProjectService service;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createProject(@RequestParam CreateProjectDto projectDto) {
+    public ResponseEntity<Void> createProject(@RequestParam @Valid CreateProjectDto projectDto) {
         service.createProject(projectDto);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{projectId}")
     public ResponseEntity<Void> updateProject(@PathVariable long projectId,
-                                              @RequestParam UpdateProjectDto projectDto) {
+                                              @RequestParam @Valid UpdateProjectDto projectDto) {
         service.updateProject(projectId, projectDto);
         return ResponseEntity.ok().build();
     }

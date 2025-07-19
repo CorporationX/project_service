@@ -4,10 +4,12 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.project.CreateProjectDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,10 +55,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void updateProject(long id, UpdateProjectDto projectDto) {
-        Project project = repository.findById(id).orElseThrow(() -> new RuntimeException(String.valueOf(id)));
+        Project project = repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(String.valueOf(id)));
 
         if (!visibilityFilter(project)) {
-            throw new RuntimeException("У пользователя нет доступа к указанному проекту");
+            throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
         }
 
         project.setUpdatedAt(LocalDateTime.now());
