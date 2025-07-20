@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
 /**
@@ -24,6 +25,8 @@ import org.mapstruct.ReportingPolicy;
  * @since 20.07.2025
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+        uses = CandidateMapper.class,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface VacancyMapper {
@@ -53,5 +56,6 @@ public interface VacancyMapper {
      * @param entity сущность вакансии
      * @return представление вакансии в виде DTO
      */
+    @Mapping(target = "projectId", source = "project.id")
     VacancyDto toViewDto(Vacancy entity);
 }

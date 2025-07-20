@@ -10,7 +10,7 @@ import faang.school.projectservice.model.CandidateStatus;
  *
  * @param id           Уникальный идентификатор записи кандидата.
  * @param userId       Идентификатор пользователя, подавшего заявку.
- * @param userName     Имя пользователя (отображаемое имя).
+ * @param username     Имя пользователя (отображаемое имя).
  * @param resumeDocKey Ключ (например, из облачного хранилища) к документу с резюме.
  * @param coverLetter  Текст сопроводительного письма кандидата.
  * @param status       Текущий статус заявки кандидата (например, ОЖИДАЕТ, ОДОБРЕН, ОТКЛОНЁН).
@@ -21,7 +21,7 @@ import faang.school.projectservice.model.CandidateStatus;
 public record CandidateDto(
         Long id,
         Long userId,
-        String userName,
+        String username,
         String resumeDocKey,
         String coverLetter,
         CandidateStatus status,

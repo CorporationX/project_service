@@ -84,8 +84,8 @@ public class VacancyServiceImpl implements VacancyService {
         var userId = userContext.getUserId();
         var vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> {
-                    log.warn("Нет вакансии с таким vacancyId {}", vacancyId);
-                    return new EntityNotFoundException("Нет вакансии с таким vacancyId " + vacancyId);
+                    log.warn("Нет вакансии с таким id {}", vacancyId);
+                    return new EntityNotFoundException("Нет вакансии с таким id " + vacancyId);
                 });
         var isUserManager = teamMemberRepository.isUserHasRole(userId, vacancy.getProject().getId(), TeamRole.MANAGER);
         if (vacancy.getProject().getOwnerId() != userId && !isUserManager) {
@@ -124,8 +124,8 @@ public class VacancyServiceImpl implements VacancyService {
     public VacancyDto getById(Long vacancyId) {
         var vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> {
-                    log.warn("Вакансия с таким vacancyId {} не найдена", vacancyId);
-                    return new EntityNotFoundException("Вакансия с таким vacancyId " + vacancyId + " не найдена");
+                    log.warn("Вакансия с таким id {} не найдена", vacancyId);
+                    return new EntityNotFoundException("Вакансия с таким id " + vacancyId + " не найдена");
                 });
         return mapper.toViewDto(vacancy);
     }

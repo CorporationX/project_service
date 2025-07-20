@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,6 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/vacancies")
+@Slf4j
 public class VacancyController {
     private final VacancyService service;
 
@@ -41,6 +43,7 @@ public class VacancyController {
      */
     @PostMapping
     public ResponseEntity<VacancyDto> create(@Valid @RequestBody VacancyCreateDto createDto) {
+        log.info("create vacancy");
         var vacancy = service.create(createDto);
         return ResponseEntity.ok(vacancy);
     }
@@ -52,7 +55,7 @@ public class VacancyController {
      * @param updateDto DTO с обновлёнными данными.
      * @return Ответ с обновлённой вакансией {@link VacancyDto}.
      */
-    @PutMapping("/{vacancyId}")
+    @PutMapping("/{id}")
     public ResponseEntity<VacancyDto> update(@PathVariable Long vacancyId,
                                              @Valid @RequestBody VacancyUpdateDto updateDto) {
         var vacancy = service.update(vacancyId, updateDto);
@@ -77,7 +80,7 @@ public class VacancyController {
      * @param vacancyId Идентификатор вакансии.
      * @return DTO с информацией о вакансии {@link VacancyDto}.
      */
-    @GetMapping("/{vacancyId}")
+    @GetMapping("/{id}")
     public ResponseEntity<VacancyDto> getById(@PathVariable Long vacancyId) {
         var vacancy = service.getById(vacancyId);
         return ResponseEntity.ok(vacancy);

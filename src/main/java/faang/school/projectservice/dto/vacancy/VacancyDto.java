@@ -14,13 +14,13 @@ import java.util.List;
  * Содержит информацию о вакансии, включая описание, роль, зарплату, список кандидатов
  * и дополнительные параметры, такие как требуемые навыки и график работы.
  *
- * @param vacancyId        Уникальный идентификатор вакансии.
+ * @param id               Уникальный идентификатор вакансии.
  * @param name             Название вакансии.
  * @param description      Подробное описание вакансии.
  * @param position         Роль в команде, требуемая для этой вакансии (например, DEVELOPER, DESIGNER и т.д.).
  * @param projectId        Идентификатор проекта, к которому относится вакансия.
- * @param createAt         Дата и время создания вакансии.
- * @param updateAt         Дата и время последнего обновления вакансии.
+ * @param createdAt         Дата и время создания вакансии.
+ * @param updatedAt         Дата и время последнего обновления вакансии.
  * @param candidates       Список кандидатов, откликнувшихся на вакансию.
  * @param status           Статус вакансии (например, OPEN, CLOSE и т.д.).
  * @param salary           Предлагаемая заработная плата.
@@ -32,13 +32,14 @@ import java.util.List;
  * @since 20.07.2025
  */
 public record VacancyDto(
-        Long vacancyId,
+        Long id,
         String name,
         String description,
         TeamRole position,
+        // TODO: заменить на projectDto
         Long projectId,
-        LocalDateTime createAt,
-        LocalDateTime updateAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
         List<CandidateDto> candidates,
         VacancyStatus status,
         Double salary,
