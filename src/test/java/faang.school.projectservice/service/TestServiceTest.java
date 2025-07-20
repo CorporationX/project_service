@@ -17,7 +17,7 @@ public class TestServiceTest {
     private TestService testService;
 
     @Test
-    @DisplayName("Пример теста для TestService")
+    @DisplayName("Теста для TestService")
     public void exampleTest() {
         assertThat(testService.testMethod(1,2)).isEqualTo(3);
     }
