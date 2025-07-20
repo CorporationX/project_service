@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Тесты TestService")
+@DisplayName("Тесты TestService тестовые")
 public class TestServiceTest {
 
     @InjectMocks
