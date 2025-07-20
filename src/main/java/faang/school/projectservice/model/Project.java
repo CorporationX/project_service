@@ -43,7 +43,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 128, nullable = false)
+    @Column(name = "nameContains", length = 128, nullable = false)
     private String name;
 
     @Column(name = "description", length = 4096)

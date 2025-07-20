@@ -8,7 +8,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query(
             "SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END " +
                     "FROM Project p " +
-                    "WHERE p.ownerId = :ownerId AND p.name = :name"
+                    "WHERE p.ownerId = :ownerId AND p.nameContains = :nameContains"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 }
