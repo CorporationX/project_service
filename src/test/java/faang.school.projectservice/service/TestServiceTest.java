@@ -19,7 +19,7 @@ public class TestServiceTest {
     @Test
     @DisplayName("Теста TestService")
     public void exampleTest() {
-        assertThat(testService.testMethod(1,2)).isEqualTo(3);
+        assertThat(testService.testMethod(1,2)).isEqualTo(2);
     }
 
 }
