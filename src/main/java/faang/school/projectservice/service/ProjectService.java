@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.project.CreateProjectDto;
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 
 import java.util.List;
 
@@ -20,44 +20,45 @@ public interface ProjectService {
      *
      * @param projectDto передаваемые данные, необходимые для создания проекта
      */
-    void createProject(CreateProjectDto projectDto);
+    ProjectViewDto createProject(ProjectCreateDto projectDto);
 
     /**
      * Обновление проекта
      *
      * @param id         айди обновляемого проекта
      * @param projectDto передаваемые данные, необходимые для обновления проекта
+     * @return
      */
-    void updateProject(long id, UpdateProjectDto projectDto);
+    ProjectViewDto updateProject(long id, ProjectUpdateDto projectDto);
 
     /**
      * Получение списка проектов, отфильтрованных по статусу
      * {@link faang.school.projectservice.model.ProjectStatus}
      *
-     * @param projectDto входные данные для выявления статуса проекта
-     * @return возвращаемый лист, параметризованный {@link ProjectDto}
+     * @param projectViewDto входные данные для выявления статуса проекта
+     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
      */
-    List<ProjectDto> getProjectsFilteredByStatus(ProjectDto projectDto);
+    List<ProjectViewDto> getProjectsFilteredByStatus(ProjectViewDto projectViewDto);
 
     /**
      * Получение списка проектов, отфильтрованных по имени в алфавитном порядке
      *
-     * @return возвращаемый лист, параметризованный {@link ProjectDto}
+     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
      */
-    List<ProjectDto> getProjectsFilteredByName();
+    List<ProjectViewDto> getProjectsFilteredByName();
 
     /**
      * Получение списка всех проектов
      *
-     * @return возвращаемый лист, параметризованный {@link ProjectDto}
+     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
      */
-    List<ProjectDto> getAllProjects();
+    List<ProjectViewDto> getAllProjects();
 
     /**
      * Получение проекта по его id
      *
      * @param id принимаемый id проекта
-     * @return {@link ProjectDto} возвращаемый проект
+     * @return {@link ProjectViewDto} возвращаемый проект
      */
-    ProjectDto getProjectById(long id);
+    ProjectViewDto getProjectById(long id);
 }

@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.project.CreateProjectDto;
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,37 +23,37 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService service;
 
-    @PostMapping("/create")
-    public ResponseEntity<Void> createProject(@RequestParam @Valid CreateProjectDto projectDto) {
+    @PostMapping
+    public ResponseEntity<ProjectViewDto> createProject(@RequestParam @Valid ProjectCreateDto projectDto) {
         service.createProject(projectDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(service.createProject(projectDto));
     }
 
     @PutMapping("/{projectId}")
-    public ResponseEntity<Void> updateProject(@PathVariable long projectId,
-                                              @RequestParam @Valid UpdateProjectDto projectDto) {
-        service.updateProject(projectId, projectDto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ProjectViewDto> updateProject(@PathVariable long projectId,
+                                                        @RequestParam @Valid ProjectUpdateDto projectDto) {
+
+        return ResponseEntity.ok(service.updateProject(projectId, projectDto));
     }
 
     @GetMapping("/projectsByStatus")
-    public ResponseEntity<List<ProjectDto>> getProjectsFilteredByStatus(
-            @RequestParam ProjectDto projectDto) {
-        return ResponseEntity.ok(service.getProjectsFilteredByStatus(projectDto));
+    public ResponseEntity<List<ProjectViewDto>> getProjectsFilteredByStatus(
+            @RequestParam ProjectViewDto projectViewDto) {
+        return ResponseEntity.ok(service.getProjectsFilteredByStatus(projectViewDto));
     }
 
     @GetMapping("/projectsByName")
-    public ResponseEntity<List<ProjectDto>> getProjectsFilteredByName() {
+    public ResponseEntity<List<ProjectViewDto>> getProjectsFilteredByName() {
         return ResponseEntity.ok(service.getProjectsFilteredByName());
     }
 
-    @GetMapping()
-    public ResponseEntity<List<ProjectDto>> getAllProjects() {
+    @GetMapping
+    public ResponseEntity<List<ProjectViewDto>> getAllProjects() {
         return ResponseEntity.ok(service.getAllProjects());
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ProjectDto> getProjectById(@PathVariable long projectId) {
+    public ResponseEntity<ProjectViewDto> getProjectById(@PathVariable long projectId) {
         return ResponseEntity.ok(service.getProjectById(projectId));
     }
 }

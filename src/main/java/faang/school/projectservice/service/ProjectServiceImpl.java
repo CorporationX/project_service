@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.client.project.CreateProjectDto;
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -31,30 +31,25 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void createProject(CreateProjectDto projectDto) {
-        Optional<Project> isHaveProjectWithSameName =
-                getAllProjects().stream()
-                        .map(mapper::toProject)
-                        .filter(project -> project.getOwnerId().equals(userContext.getUserId()) &&
-                                project.getName().equals(projectDto.name()))
-                        .findAny();
+    public ProjectViewDto createProject(ProjectCreateDto projectDto) {
+        boolean isHaveProjectWithSameName =
+                repository.existsByOwnerIdAndName(userContext.getUserId(), projectDto.name());
 
-
-        isHaveProjectWithSameName.ifPresent(project -> {
+        if (isHaveProjectWithSameName) {
             throw new RuntimeException("Пользователь пытается создать уже имеющийся у него проект");
-        });
+        }
 
-        Project project = mapper.toProject(projectDto);
+        Project project = mapper.toEntity(projectDto);
 
         project.setOwnerId(userContext.getUserId());
         project.setCreatedAt(LocalDateTime.now());
-        repository.save(project);
         log.info("Проект {} был создан.", projectDto.name());
+        return mapper.toViewDto(repository.save(project));
     }
 
     @Override
     @Transactional
-    public void updateProject(long id, UpdateProjectDto projectDto) {
+    public ProjectViewDto updateProject(long id, ProjectUpdateDto projectDto) {
         Project project = repository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.valueOf(id)));
 
@@ -66,48 +61,49 @@ public class ProjectServiceImpl implements ProjectService {
         mapper.update(projectDto, project);
         repository.save(project);
         log.info("Проект с id = {} был обновлен входными данными", id);
+        return mapper.toViewDto(repository.save(project));
     }
 
     @Override
     @Transactional
-    public List<ProjectDto> getProjectsFilteredByStatus(ProjectDto projectDto) {
+    public List<ProjectViewDto> getProjectsFilteredByStatus(ProjectViewDto projectViewDto) {
         List<Project> projectList = repository.findAll();
-        log.info("Получение списка проектов, отсортированных по статусу {}",
-                projectDto.status());
+        log.info("Получение списка проектов, отфильтрованных по статусу {}",
+                projectViewDto.status());
         return projectList.stream()
                 .filter(this::visibilityFilter)
-                .map(mapper::toProjectDto)
-                .filter(project -> project.status().equals(projectDto.status()))
+                .map(mapper::toViewDto)
+                .filter(project -> project.status().equals(projectViewDto.status()))
                 .toList();
     }
 
     @Override
     @Transactional
-    public List<ProjectDto> getProjectsFilteredByName() {
+    public List<ProjectViewDto> getProjectsFilteredByName() {
         List<Project> projectList = repository.findAll();
         log.info("Получение списка проектов, отсортированных по имени");
         return projectList.stream()
                 .filter(this::visibilityFilter)
-                .map(mapper::toProjectDto)
+                .map(mapper::toViewDto)
                 .filter(projectDto -> projectDto.name() != null &&
                         !projectDto.name().isEmpty())
-                .sorted(Comparator.comparing(ProjectDto::name))
+                .sorted(Comparator.comparing(ProjectViewDto::name))
                 .toList();
     }
 
     @Override
     @Transactional
-    public List<ProjectDto> getAllProjects() {
+    public List<ProjectViewDto> getAllProjects() {
         List<Project> projectList = repository.findAll();
         log.info("Получение списка проектов");
         return projectList.stream()
                 .filter(this::visibilityFilter)
-                .map(mapper::toProjectDto)
+                .map(mapper::toViewDto)
                 .toList();
     }
 
     @Override
-    public ProjectDto getProjectById(long id) {
+    public ProjectViewDto getProjectById(long id) {
         Optional<Project> project = repository.findById(id);
         if (project.isEmpty()) {
             throw new RuntimeException("Проекта с указанным айди не существует");
@@ -115,7 +111,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
         log.info("Получение проекта по id = {}", id);
-        return mapper.toProjectDto(project.get());
+        return mapper.toViewDto(project.get());
     }
 
     private boolean visibilityFilter(Project project) {

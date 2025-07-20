@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
 
-public record UpdateProjectDto(
+public record ProjectUpdateDto(
         @NotNull
         String name,
         @NotNull

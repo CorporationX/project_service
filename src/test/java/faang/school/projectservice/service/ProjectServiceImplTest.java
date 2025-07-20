@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.client.project.CreateProjectDto;
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -52,7 +52,7 @@ public class ProjectServiceImplTest {
     @Test
     @DisplayName("Проверка создания проекта")
     void createProject() {
-        CreateProjectDto createProjectDto = new CreateProjectDto(
+        ProjectCreateDto projectCreateDto = new ProjectCreateDto(
                 "someProject",
                 "someDescription",
                 new BigInteger("4934823"),
@@ -67,8 +67,8 @@ public class ProjectServiceImplTest {
 
         when(userContext.getUserId()).thenReturn(1L);
 
-        service.createProject(createProjectDto);
-        Project project = mapper.toProject(createProjectDto);
+        service.createProject(projectCreateDto);
+        Project project = mapper.toEntity(projectCreateDto);
 
         verify(repository).save(refEq(project, "createdAt"));
     }
@@ -76,7 +76,7 @@ public class ProjectServiceImplTest {
     @Test
     @DisplayName("Проверка обновления проекта")
     void updateProjectTest() {
-        UpdateProjectDto updateProjectDto = new UpdateProjectDto(
+        ProjectUpdateDto projectUpdateDto = new ProjectUpdateDto(
                 "someProject",
                 "someDescription",
                 new BigInteger("4934823"),
@@ -92,9 +92,9 @@ public class ProjectServiceImplTest {
         when(repository.findById(5L)).thenReturn(Optional.of(project));
         project.setVisibility(ProjectVisibility.PUBLIC);
 
-        service.updateProject(5L, updateProjectDto);
+        service.updateProject(5L, projectUpdateDto);
         verify(repository).findById(5L);
-        verify(mapper).update(updateProjectDto, project);
+        verify(mapper).update(projectUpdateDto, project);
         verify(repository).save(project);
     }
 
@@ -104,7 +104,7 @@ public class ProjectServiceImplTest {
     void getProjectsFilteredByStatusTest() {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         project.setVisibility(ProjectVisibility.PUBLIC);
-        ProjectDto projectDto = mapper.toProjectDto(project);
+        ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
         Project projectWithInappropriateStatus = new Project();
         projectWithInappropriateStatus.setStatus(ProjectStatus.ON_HOLD);
@@ -112,7 +112,7 @@ public class ProjectServiceImplTest {
 
         when(repository.findAll()).thenReturn(List.of(project, projectWithInappropriateStatus));
 
-        assertEquals(List.of(projectDto), service.getProjectsFilteredByStatus(projectDto));
+        assertEquals(List.of(projectViewDto), service.getProjectsFilteredByStatus(projectViewDto));
     }
 
     @Test
@@ -121,27 +121,27 @@ public class ProjectServiceImplTest {
         Project aNameProject = new Project();
         aNameProject.setName("A");
         aNameProject.setVisibility(ProjectVisibility.PUBLIC);
-        ProjectDto aNameProjectDto = mapper.toProjectDto(aNameProject);
+        ProjectViewDto aNameProjectViewDto = mapper.toViewDto(aNameProject);
 
         Project bNameProject = new Project();
         bNameProject.setName("B");
         bNameProject.setVisibility(ProjectVisibility.PUBLIC);
-        ProjectDto bNameProjectDto = mapper.toProjectDto(bNameProject);
+        ProjectViewDto bNameProjectViewDto = mapper.toViewDto(bNameProject);
 
         when(repository.findAll()).thenReturn(List.of(aNameProject, bNameProject));
 
-        assertEquals(List.of(aNameProjectDto, bNameProjectDto), service.getProjectsFilteredByName());
+        assertEquals(List.of(aNameProjectViewDto, bNameProjectViewDto), service.getProjectsFilteredByName());
     }
 
     @Test
     @DisplayName("Проверка получения списка всех проектов")
     void getAllProjectsTest() {
         project.setVisibility(ProjectVisibility.PUBLIC);
-        ProjectDto projectDto = mapper.toProjectDto(project);
+        ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
         when(repository.findAll()).thenReturn(List.of(project));
 
-        assertEquals(List.of(projectDto), service.getAllProjects());
+        assertEquals(List.of(projectViewDto), service.getAllProjects());
     }
 
     @Test
@@ -149,11 +149,11 @@ public class ProjectServiceImplTest {
     void getProjectByIdTest() {
         project.setVisibility(ProjectVisibility.PUBLIC);
         project.setId(5L);
-        ProjectDto projectDto = mapper.toProjectDto(project);
+        ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
         when(repository.findById(5L)).thenReturn(Optional.of(project));
 
-        assertEquals(projectDto, service.getProjectById(5L));
+        assertEquals(projectViewDto, service.getProjectById(5L));
     }
 
     @Test

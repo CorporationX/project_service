@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.project.CreateProjectDto;
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.dto.client.project.UpdateProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,11 +12,11 @@ import org.mapstruct.MappingTarget;
 public interface ProjectMapper {
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    Project toProject(CreateProjectDto projectDto);
+    Project toEntity(ProjectCreateDto projectDto);
 
-    void update(UpdateProjectDto projectDto, @MappingTarget Project entity);
+    void update(ProjectUpdateDto projectDto, @MappingTarget Project entity);
 
-    ProjectDto toProjectDto(Project project);
+    ProjectViewDto toViewDto(Project project);
 
-    Project toProject(ProjectDto projectDto);
+    Project toEntity(ProjectViewDto projectViewDto);
 }
