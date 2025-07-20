@@ -38,15 +38,25 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build testClasses -x test --no-daemon
 
-      - name: Test with Gradle
-        run: ./gradlew test -x testClasses --no-daemon --continue
+      - name: Run unit tests with Gradle
+        run: ./gradlew test --info --console=plain --scan
+        env:
+          GRADLE_OPTS: -Dorg.gradle.console=plain # Чистый вывод без лишних символов
 
-      - name: Run tests with annotations
-        run: |
-          ./mvnw test --batch-mode
-          # Если тесты упали, парсим ошибки
-          if [ $? -ne 0 ]; then
-            echo "::error::Unit tests failed! Check test report"
-            # Дополнительно: парсинг JUnit отчета
-            ./mvnw surefire-report:report-only
-          fi
+      - name: Upload test reports
+        uses: actions/upload-artifact@v3
+        if: always()  # Загружаем отчеты даже при падении тестов
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests
+            **/build/test-results
+
+      - name: Publish test results
+        uses: mikepenz/action-junit-report@v3
+        if: always()  # Всегда создаем аннотации
+        with:
+          report_paths: '**/build/test-results/**/*.xml'
+          check_name: Gradle Unit Tests
+          fail_on_failure: true  # Помечает workflow как failed при ошибках
+          require_tests: true    # Ошибка если тесты не запустились
