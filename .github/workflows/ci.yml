@@ -3,7 +3,6 @@ name: Unit Tests on PR
 on:
   pull_request:
     branches:
-      - main
       - griffon-master-stream11
       - griffon/pipeline-bc11-BJS2-83672
 
