@@ -21,10 +21,39 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            isEnabled = true
+            element = "PACKAGE"
+            includes = listOf("faang.school.projectservice.service")
+
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.5".toBigDecimal()
+            }
+        }
+
+        rule {
+            isEnabled = true
+            element = "PACKAGE"
+            includes = listOf("faang.school.projectservice.service")
+
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.3".toBigDecimal()
+            }
+        }
+    }
+}
+
 jacoco {
     toolVersion = "0.8.13"
     reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
 }
+
 
 group = "faang.school"
 version = "1.0"
