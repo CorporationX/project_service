@@ -24,7 +24,7 @@ public class ProjectControllerTest {
     @Test
     @DisplayName("Проверка успешного создания проекта через контроллер")
     void shouldCreateSuccessfully() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/projects/create"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/projects"))
                 .andExpect(status().isOk());
     }
 
@@ -36,23 +36,8 @@ public class ProjectControllerTest {
     }
 
     @Test
-    @DisplayName("Проверка успешного получения проектов по статусу через контроллер")
-    void getProjectsFilteredByStatusTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/projects/projectsByStatus"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Проверка успешного получения проектов, " +
-            "отсортированных по имени через контроллер")
-    void getProjectsFilteredByNameTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/projects/projectsByName"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Проверка успешного получения всех проектов через контроллер")
-    void getAllProjectsTest() throws Exception {
+    @DisplayName("Проверка успешного получения отфильтрованных проектов через контроллер")
+    void getProjectsByFilterTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/projects"))
                 .andExpect(status().isOk());
     }

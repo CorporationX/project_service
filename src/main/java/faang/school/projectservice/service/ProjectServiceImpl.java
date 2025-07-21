@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ForbiddenException;
@@ -9,6 +10,8 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.util.project.ProjectUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
     private final UserContext userContext;
+    private final FilterService<Project, ProjectFilterDto> filterService;
 
     @Override
     @Transactional
@@ -53,73 +57,39 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = repository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.valueOf(id)));
 
-        if (!visibilityFilter(project)) {
+        if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
             throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
         }
 
         project.setUpdatedAt(LocalDateTime.now());
         mapper.update(projectDto, project);
-        repository.save(project);
         log.info("Проект с id = {} был обновлен входными данными", id);
         return mapper.toViewDto(repository.save(project));
     }
 
     @Override
     @Transactional
-    public List<ProjectViewDto> getProjectsFilteredByStatus(ProjectViewDto projectViewDto) {
+    public List<ProjectViewDto> getByFilters(ProjectFilterDto projectFilterDto) {
         List<Project> projectList = repository.findAll();
-        log.info("Получение списка проектов, отфильтрованных по статусу {}",
-                projectViewDto.status());
-        return projectList.stream()
-                .filter(this::visibilityFilter)
+        List<Project> filteredList = filterService.getFilteredList(projectList, projectFilterDto);
+
+        log.info("Получения списка всех проектов с фильтрами");
+        return filteredList.stream()
                 .map(mapper::toViewDto)
-                .filter(project -> project.status().equals(projectViewDto.status()))
                 .toList();
     }
 
     @Override
     @Transactional
-    public List<ProjectViewDto> getProjectsFilteredByName() {
-        List<Project> projectList = repository.findAll();
-        log.info("Получение списка проектов, отсортированных по имени");
-        return projectList.stream()
-                .filter(this::visibilityFilter)
-                .map(mapper::toViewDto)
-                .filter(projectDto -> projectDto.name() != null &&
-                        !projectDto.name().isEmpty())
-                .sorted(Comparator.comparing(ProjectViewDto::name))
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public List<ProjectViewDto> getAllProjects() {
-        List<Project> projectList = repository.findAll();
-        log.info("Получение списка проектов");
-        return projectList.stream()
-                .filter(this::visibilityFilter)
-                .map(mapper::toViewDto)
-                .toList();
-    }
-
-    @Override
     public ProjectViewDto getProjectById(long id) {
         Optional<Project> project = repository.findById(id);
         if (project.isEmpty()) {
             throw new RuntimeException("Проекта с указанным айди не существует");
-        } else if (!visibilityFilter(project.get())) {
+        } else if (!ProjectUtil.isAvailable(project.get(), userContext.getUserId())) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
         log.info("Получение проекта по id = {}", id);
         return mapper.toViewDto(project.get());
     }
 
-    private boolean visibilityFilter(Project project) {
-        return project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
-                project.getTeams().stream()
-                        .flatMap(team -> team.getTeamMembers().stream())
-                        .findFirst()
-                        .filter(teamMember -> teamMember.getId() == userContext.getUserId())
-                        .isPresent();
-    }
 }
