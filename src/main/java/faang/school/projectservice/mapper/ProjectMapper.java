@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
@@ -19,4 +20,5 @@ public interface ProjectMapper {
     ProjectViewDto toViewDto(Project project);
 
     Project toEntity(ProjectViewDto projectViewDto);
+
 }

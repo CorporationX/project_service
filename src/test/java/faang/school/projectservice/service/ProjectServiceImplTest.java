@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
@@ -9,6 +10,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.service.filter.project.FilterServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,8 +44,13 @@ public class ProjectServiceImplTest {
     @Spy
     private Project project;
 
+    @Mock
+    private FilterServiceImpl filterService;
+
     @InjectMocks
     private ProjectServiceImpl service;
+
+    private ProjectFilterDto projectFilterDto;
 
     @BeforeEach
     void init() {
@@ -98,26 +106,31 @@ public class ProjectServiceImplTest {
         verify(repository).save(project);
     }
 
-
     @Test
-    @DisplayName("Проверка получения списка проектов, отсортированных по заданному статусу")
+    @DisplayName("Проверка получения списка проектов, отфильтрованных по заданному статусу")
     void getProjectsFilteredByStatusTest() {
+        projectFilterDto = new ProjectFilterDto(null, ProjectStatus.IN_PROGRESS);
+
         project.setStatus(ProjectStatus.IN_PROGRESS);
         project.setVisibility(ProjectVisibility.PUBLIC);
         ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
-        Project projectWithInappropriateStatus = new Project();
-        projectWithInappropriateStatus.setStatus(ProjectStatus.ON_HOLD);
-        projectWithInappropriateStatus.setVisibility(ProjectVisibility.PUBLIC);
+        Project projectWithAnotherStatus = new Project();
+        projectWithAnotherStatus.setStatus(ProjectStatus.ON_HOLD);
+        projectWithAnotherStatus.setVisibility(ProjectVisibility.PUBLIC);
 
-        when(repository.findAll()).thenReturn(List.of(project, projectWithInappropriateStatus));
+        when(repository.findAll()).thenReturn(List.of(project, projectWithAnotherStatus));
+        when(filterService.getFilteredList(List.of(project, projectWithAnotherStatus), projectFilterDto))
+                .thenReturn(List.of(project));
 
-        assertEquals(List.of(projectViewDto), service.getProjectsFilteredByStatus(projectViewDto));
+        assertEquals(List.of(projectViewDto), service.getByFilters(projectFilterDto));
     }
 
     @Test
     @DisplayName("Проверка получения списка проектов, отсортированных по названия в алфавитном порядке")
     void getProjectsFilteredByNameTest() {
+        projectFilterDto = new ProjectFilterDto("some name", null);
+
         Project aNameProject = new Project();
         aNameProject.setName("A");
         aNameProject.setVisibility(ProjectVisibility.PUBLIC);
@@ -129,8 +142,10 @@ public class ProjectServiceImplTest {
         ProjectViewDto bNameProjectViewDto = mapper.toViewDto(bNameProject);
 
         when(repository.findAll()).thenReturn(List.of(aNameProject, bNameProject));
+        when(filterService.getFilteredList(List.of(aNameProject, bNameProject), projectFilterDto))
+                .thenReturn(List.of(aNameProject, bNameProject));
 
-        assertEquals(List.of(aNameProjectViewDto, bNameProjectViewDto), service.getProjectsFilteredByName());
+        assertEquals(List.of(aNameProjectViewDto, bNameProjectViewDto), service.getByFilters(projectFilterDto));
     }
 
     @Test
@@ -139,9 +154,12 @@ public class ProjectServiceImplTest {
         project.setVisibility(ProjectVisibility.PUBLIC);
         ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
-        when(repository.findAll()).thenReturn(List.of(project));
+        projectFilterDto = new ProjectFilterDto(null, null);
 
-        assertEquals(List.of(projectViewDto), service.getAllProjects());
+        when(repository.findAll()).thenReturn(List.of(project));
+        when(filterService.getFilteredList(List.of(project), projectFilterDto)).thenReturn(List.of(project));
+
+        assertEquals(List.of(projectViewDto), service.getByFilters(projectFilterDto));
     }
 
     @Test

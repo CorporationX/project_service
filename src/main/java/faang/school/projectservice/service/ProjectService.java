@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 
@@ -32,27 +33,12 @@ public interface ProjectService {
     ProjectViewDto updateProject(long id, ProjectUpdateDto projectDto);
 
     /**
-     * Получение списка проектов, отфильтрованных по статусу
-     * {@link faang.school.projectservice.model.ProjectStatus}
+     * Возвращает список целей, соответствующих указанным фильтрам.
      *
-     * @param projectViewDto входные данные для выявления статуса проекта
-     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
+     * @param projectFilterDto параметры фильтрации
+     * @return список проектов в виде List<{@link ProjectViewDto}>
      */
-    List<ProjectViewDto> getProjectsFilteredByStatus(ProjectViewDto projectViewDto);
-
-    /**
-     * Получение списка проектов, отфильтрованных по имени в алфавитном порядке
-     *
-     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
-     */
-    List<ProjectViewDto> getProjectsFilteredByName();
-
-    /**
-     * Получение списка всех проектов
-     *
-     * @return возвращаемый лист, параметризованный {@link ProjectViewDto}
-     */
-    List<ProjectViewDto> getAllProjects();
+    List<ProjectViewDto> getByFilters(ProjectFilterDto projectFilterDto);
 
     /**
      * Получение проекта по его id

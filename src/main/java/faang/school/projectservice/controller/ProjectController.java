@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
+import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.service.ProjectService;
@@ -32,24 +33,12 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectViewDto> updateProject(@PathVariable long projectId,
                                                         @RequestParam @Valid ProjectUpdateDto projectDto) {
-
         return ResponseEntity.ok(service.updateProject(projectId, projectDto));
     }
 
-    @GetMapping("/projectsByStatus")
-    public ResponseEntity<List<ProjectViewDto>> getProjectsFilteredByStatus(
-            @RequestParam ProjectViewDto projectViewDto) {
-        return ResponseEntity.ok(service.getProjectsFilteredByStatus(projectViewDto));
-    }
-
-    @GetMapping("/projectsByName")
-    public ResponseEntity<List<ProjectViewDto>> getProjectsFilteredByName() {
-        return ResponseEntity.ok(service.getProjectsFilteredByName());
-    }
-
     @GetMapping
-    public ResponseEntity<List<ProjectViewDto>> getAllProjects() {
-        return ResponseEntity.ok(service.getAllProjects());
+    public ResponseEntity<List<ProjectViewDto>> getProjectByFilters(ProjectFilterDto projectFilterDto) {
+        return ResponseEntity.ok(service.getByFilters(projectFilterDto));
     }
 
     @GetMapping("/{projectId}")
