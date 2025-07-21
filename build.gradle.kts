@@ -2,6 +2,28 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.13"
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
 }
 
 group = "faang.school"
