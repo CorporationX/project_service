@@ -35,7 +35,6 @@ tasks.jacocoTestCoverageVerification {
             }
         }
 
-
         rule {
             isEnabled = true
             element = "PACKAGE"
