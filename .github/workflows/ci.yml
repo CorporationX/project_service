@@ -37,22 +37,24 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build testClasses -x test --no-daemon
 
-      - name: Run unit tests with clean output
-        run: |
-          # Запускаем тесты с фильтрацией вывода
-          echo "::group::📦 Building project"
-          ./gradlew clean build --no-daemon --console=plain -x test > /dev/null
-          echo "::endgroup::"
+      - name: Run unit tests with Gradle
+        run: ./gradlew test --info --console=plain --scan
+        env:
+          GRADLE_OPTS: -Dorg.gradle.console=plain
 
-          echo "::group::🧪 Running unit tests"
-          # Основная команда тестов с фильтрацией
-          ./gradlew test --no-daemon --console=plain --info \
-            | grep -E "> Task|FAILED|PASSED|SKIPPED|BUILD|Test result|Test run" \
-            | grep -v "UP-TO-DATE" \
-            | sed -E 's/([0-9]+) ms//g; s/ ([0-9]+)s/ \1 sec/g'
-          echo "::endgroup::"
+#      - name: Run unit tests with clean output
+#        run: |
+#          echo "::group::📦 Building project"
+#          ./gradlew clean build --no-daemon --console=plain -x test > /dev/null
+#          echo "::endgroup::"
 
-          # Вывод сводки по тестам
-          echo "::group::📊 Test summary"
-          ./gradlew test --no-daemon --console=plain -q | grep "tests" | grep -v "SUCCESS"
-          echo "::endgroup::"
+#          echo "::group::🧪 Running unit tests"
+#         ./gradlew test --no-daemon --console=plain --info \
+#            | grep -E "> Task|FAILED|PASSED|SKIPPED|BUILD|Test result|Test run" \
+#            | grep -v "UP-TO-DATE" \
+#            | sed -E 's/([0-9]+) ms//g; s/ ([0-9]+)s/ \1 sec/g'
+#          echo "::endgroup::"
+
+#          echo "::group::📊 Test summary"
+#          ./gradlew test --no-daemon --console=plain -q | grep "tests" | grep -v "SUCCESS"
+#          echo "::endgroup::"
