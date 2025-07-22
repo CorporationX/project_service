@@ -38,7 +38,7 @@ public class Initiative {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nameContains", nullable = false, length = 64)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
     @Column(name = "description", nullable = false, length = 4096)

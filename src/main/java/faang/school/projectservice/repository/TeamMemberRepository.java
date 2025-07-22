@@ -18,12 +18,12 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     List<TeamMember> findByUserId(long userId);
 
     @Query("""
-            SELECT EXISTS (
-                SELECT 1 FROM TeamMember tm JOIN tm.team t
-                WHERE tm.userId = :userId
+            SELECT COUNT(tm) > 0
+            FROM TeamMember tm
+            JOIN tm.team t
+            WHERE tm.userId = :userId
                 AND t.project.id = :projectId
-                AND tm.role = :role
-            )
+                AND :role MEMBER OF tm.roles
             """)
     boolean isUserHasRole(long userId, long projectId, TeamRole role);
 }

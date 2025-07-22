@@ -2,6 +2,8 @@ package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.WorkSchedule;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -34,6 +36,7 @@ public record VacancyCreateDto(
         @Size(max = 255)
         String name,
         String description,
+        @Enumerated(EnumType.STRING)
         @NotNull
         TeamRole position,
         @NotNull
@@ -43,6 +46,7 @@ public record VacancyCreateDto(
         Integer count,
         @Positive
         Double salary,
+        @Enumerated(EnumType.STRING)
         @NotNull
         WorkSchedule workSchedule,
         @NotNull

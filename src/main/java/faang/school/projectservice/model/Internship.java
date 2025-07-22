@@ -43,7 +43,7 @@ public class Internship {
     @NotNull
     private TeamMember mentorId;
 
-    @Column(name = "position")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private TeamRole role;
 

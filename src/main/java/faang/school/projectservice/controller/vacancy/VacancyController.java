@@ -55,7 +55,7 @@ public class VacancyController {
      * @param updateDto DTO с обновлёнными данными.
      * @return Ответ с обновлённой вакансией {@link VacancyDto}.
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{vacancyId}")
     public ResponseEntity<VacancyDto> update(@PathVariable Long vacancyId,
                                              @Valid @RequestBody VacancyUpdateDto updateDto) {
         var vacancy = service.update(vacancyId, updateDto);
@@ -68,7 +68,7 @@ public class VacancyController {
      * @param filterDto DTO с параметрами фильтрации.
      * @return Список вакансий {@link VacancyDto}, удовлетворяющих условиям фильтра.
      */
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<List<VacancyDto>> getList(@Valid @ModelAttribute VacancyFilterDto filterDto) {
         var vacancies = service.getList(filterDto);
         return ResponseEntity.ok(vacancies);
@@ -80,7 +80,7 @@ public class VacancyController {
      * @param vacancyId Идентификатор вакансии.
      * @return DTO с информацией о вакансии {@link VacancyDto}.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{vacancyId}")
     public ResponseEntity<VacancyDto> getById(@PathVariable Long vacancyId) {
         var vacancy = service.getById(vacancyId);
         return ResponseEntity.ok(vacancy);
