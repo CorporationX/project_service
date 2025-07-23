@@ -14,6 +14,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.FilterService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,7 @@ public class VacancyServiceImpl implements VacancyService {
      * @throws ForbiddenException      если у пользователя нет прав на создание вакансии
      */
     @Override
+    @Transactional
     public VacancyDto create(VacancyCreateDto createDto) {
         var userId = userContext.getUserId();
         var project = projectRepository.findById(createDto.projectId())
@@ -80,6 +82,7 @@ public class VacancyServiceImpl implements VacancyService {
      * @throws ForbiddenException      если у пользователя нет доступа
      */
     @Override
+    @Transactional
     public VacancyDto update(Long vacancyId, VacancyUpdateDto updateDto) {
         var userId = userContext.getUserId();
         var vacancy = vacancyRepository.findById(vacancyId)
