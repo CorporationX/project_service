@@ -36,7 +36,6 @@ public record VacancyDto(
         String name,
         String description,
         TeamRole position,
-        // TODO: заменить на projectDto
         Long projectId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
