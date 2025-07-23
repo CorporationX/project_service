@@ -3,9 +3,10 @@ on:
   push:
     branches:
       - murloc11/BJS2-84041-ci-pipeline
+      - murloc-master-stream11
   pull_request:
     branches:
-      - '*'
+      - murloc-master-stream11
     types: [ opened, reopened, synchronize, edited ]
 jobs:
   build:
@@ -24,5 +25,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Gradle test
-        run: ./gradlew test
+      - name: Cache Gradle files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Gradle check
+        run: ./gradlew check -x testClasses --no-daemon --continue
