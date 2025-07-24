@@ -14,6 +14,8 @@ public interface TaskMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     Task toEntity(TaskCreateDto taskDto);
 
+    Task toEntity(TaskUpdateDto taskDto);
+
     void update(TaskUpdateDto taskDto, @MappingTarget Task entity);
 
     TaskViewDto toViewDto(Task task);

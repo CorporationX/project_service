@@ -11,8 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableFeignClients
-@EnableJpaAuditing
-@Profile("!test")
+//@EnableJpaAuditing
+//@Profile("!test")
 public class ProjectServiceApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(ProjectServiceApplication.class)
