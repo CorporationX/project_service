@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 @Entity
@@ -28,10 +29,12 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "team")
     @Column(name = "team_member_id")
     private List<TeamMember> teamMembers;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;

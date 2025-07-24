@@ -27,10 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ProjectServiceImp — описание класса.
- * <p>
- * TODO: добавить описание назначения и поведения класса.
- * </p>
+ * ProjectServiceImp — реализация интерфейса сервиса подпроектов {@link SubProjectService}.
  *
  * @author Linempy
  * @since 21.07.2025
@@ -38,7 +35,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class ProjectServiceImpl implements ProjectService {
+public class SubProjectServiceImpl implements SubProjectService {
 
     private final ProjectRepository projectRepository;
     private final SubProjectMapper mapper;
@@ -60,7 +57,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project savedProject = projectRepository.save(project);
         log.info("Создан подпроект ID: {} для родительского ID {}", savedProject.getId(), parent.getId());
-        return mapper.toDto(savedProject);
+        return mapper.toViewDto(savedProject);
     }
 
     @Override
@@ -87,9 +84,9 @@ public class ProjectServiceImpl implements ProjectService {
             updateVisibilityRecursion(project, updateDto.visibility());
         }
 
-        project.setStatus(updateDto.status());
         log.info("Подпроект id: {} был обновлен", project.getId());
-        return mapper.toDto(projectRepository.save(project));
+        project = projectRepository.save(project);
+        return mapper.toViewDto(project);
     }
 
     @Override
@@ -99,7 +96,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> filteredDto = filter.getFilteredList(parentProject.getChildren(), filterDto);
 
         return filteredDto.stream()
-                .map(mapper::toDto)
+                .map(mapper::toViewDto)
                 .toList();
     }
 

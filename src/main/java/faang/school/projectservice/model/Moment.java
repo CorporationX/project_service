@@ -18,6 +18,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -44,6 +45,7 @@ public class Moment {
     )
     private List<Resource> resource;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "moment_project",

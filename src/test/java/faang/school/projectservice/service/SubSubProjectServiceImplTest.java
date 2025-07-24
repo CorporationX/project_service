@@ -17,13 +17,17 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filter.Filter;
+import faang.school.projectservice.service.filter.sub_project.SubProjectFilterServiceImpl;
+import faang.school.projectservice.service.filter.sub_project.SubProjectNameFilter;
+import faang.school.projectservice.service.filter.sub_project.SubProjectStatusFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,22 +40,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * ProjectServiceImplTest — описание класса.
- * <p>
- * TODO: добавить описание назначения и поведения класса.
- * </p>
+ * ProjectServiceImplTest — класс для тестирования функционала
+ * сервиса {@link SubProjectServiceImpl}
  *
  * @author Linempy
  * @since 23.07.2025
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Тест для проверки сервиса для взаимодействием с подпроектами")
-public class ProjectServiceImplTest {
+public class SubSubProjectServiceImplTest {
 
     @Mock
     private UserContext context;
@@ -65,8 +68,25 @@ public class ProjectServiceImplTest {
     @Mock
     private MomentRepository momentRepository;
 
-    @InjectMocks
-    private ProjectServiceImpl service;
+    private SubProjectServiceImpl service;
+
+    @BeforeEach
+    void setUp() {
+        List<Filter<Project, SubProjectFilterDto>> realFilters = List.of(
+                new SubProjectNameFilter(),
+                new SubProjectStatusFilter()
+        );
+        SubProjectFilterServiceImpl filter = new SubProjectFilterServiceImpl(realFilters);
+        filter = Mockito.spy(filter);
+
+        service = new SubProjectServiceImpl(
+                projectRepository,
+                mapper,
+                context,
+                filter,
+                momentRepository
+        );
+    }
 
     @Test
     @DisplayName("Исключение, когда родительского проекта не нашлось в БД")
@@ -101,8 +121,8 @@ public class ProjectServiceImplTest {
 
 
     @Test
-    @DisplayName("")
-    public void shouldThrowException_WhenProjectStatusIsNotCompleted() {
+    @DisplayName("Должен выбросить исключение, когда статус проекта-родителя COMPLETED")
+    public void shouldThrowException_WhenParentStatusIsCompleted() {
         Long parentId = 1L;
         SubProjectCreateDto dto = new SubProjectCreateDto(
                 parentId, "Name", "desc", ProjectVisibility.PUBLIC, null
@@ -121,7 +141,7 @@ public class ProjectServiceImplTest {
 
 
     @Test
-    @DisplayName("")
+    @DisplayName("Успешно вернуть данные при валидных данных")
     public void shouldReturnDto_WhenInputIsValid() {
         Long parentId = 1L;
         SubProjectCreateDto dto = new SubProjectCreateDto(
@@ -165,11 +185,11 @@ public class ProjectServiceImplTest {
         assertEquals(exceptedDto, result);
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(mapper, times(1)).toEntity(any(SubProjectCreateDto.class));
-        verify(mapper, times(1)).toDto(any(Project.class));
+        verify(mapper, times(1)).toViewDto(any(Project.class));
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Выбросить исключение при обновлении несуществующего проекта")
     public void shouldThrowNotFound_WhenProjectIsNotExits() {
         Long id = 1L;
 
@@ -182,7 +202,7 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Выбросить исключение, когда статус обновляемого проекта COMPLETED")
     public void shouldThrowForbidden_WhenProjectStatusIsCompleted() {
         Long id = 1L;
 
@@ -196,7 +216,8 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Выбросить исключение, при обновляемом статусе COMPLETED, когда у проекта" +
+            "статусы подпроектов не COMPLETED")
     public void shouldThrowDataValidation_WhenUpdateCompletedWithIncompleteChildren() {
         Long id = 1L;
         SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
@@ -217,7 +238,7 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("Создает Moment с участниками при завершении проекта")
+    @DisplayName("Создает Moment с участниками при завершении всех подпроектов")
     public void shouldCreateCompletionMoment_WhenAllSubProjectCompleted() {
         Long id = 1L;
         SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
@@ -264,11 +285,12 @@ public class ProjectServiceImplTest {
         assertEquals(parent, savedMoment.getProjects().get(0));
         assertThat(savedMoment.getUserIds()).containsExactly(1L, 2L, 3L);
         assertEquals(1, savedMoment.getProjects().size());
-        verify(projectRepository, times(1)).save(parent);
+
+        verify(projectRepository, times(1)).save(project);
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Выбрасывает исключение при изменении приватного родителя на публичный с публичными детьми ")
     public void shouldThrowForbidden_WhenPrivateParentHavePublicChildren() {
         Long id = 1L;
         SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
@@ -315,7 +337,7 @@ public class ProjectServiceImplTest {
         service.update(id, updateDto);
 
         boolean allChildArePrivate = project.getChildren().stream()
-                        .allMatch(child -> child.getVisibility() == ProjectVisibility.PRIVATE);
+                .allMatch(child -> child.getVisibility() == ProjectVisibility.PRIVATE);
         assertTrue(allChildArePrivate);
         assertEquals(ProjectVisibility.PRIVATE, project.getVisibility());
         assertEquals(ProjectStatus.COMPLETED, project.getStatus());
@@ -357,7 +379,7 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Вернуть DTO при успешном обновлении проекта")
     public void shouldReturnViewDto_WhenUpdateSuccessful() {
         Long id = 1L;
         SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
@@ -387,7 +409,7 @@ public class ProjectServiceImplTest {
         SubProjectViewDto result = service.update(id, updateDto);
 
         verify(projectRepository, times(1)).save(parent);
-        verify(mapper, times(1)).toDto(parent);
+        verify(mapper, times(1)).toViewDto(parent);
         assertEquals(id, result.id());
         assertEquals(ProjectStatus.IN_PROGRESS, result.status());
         assertEquals(ProjectVisibility.PUBLIC, result.visibility());
@@ -398,14 +420,79 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Должен выбросить NotFoundException, когда родительский проект не существует")
     public void shouldNotFound_WhenParentIsNotExist() {
         Long id = 1L;
 
         when(projectRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.getByFilter(id, new SubProjectFilterDto(null, null)));
+        verify(projectRepository, times(1)).findById(id);
     }
 
+    @Test
+    @DisplayName("Фильтрация по имени")
+    public void shouldReturnFilteredDtos_WhenFilterDtoByName() {
+        Long parentId = 1L;
+        SubProjectFilterDto filterDto = new SubProjectFilterDto("Name", null);
+        Project child1 = createProject(2L, "Name1", ProjectStatus.COMPLETED, ProjectVisibility.PRIVATE);
+        Project child2 = createProject(3L, "name2", ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
+        Project child3 = createProject(4L, "NON", ProjectStatus.CANCELLED, ProjectVisibility.PUBLIC);
 
+        Project parent = createParentProject(parentId, "Name Name", List.of(child1, child2, child3));
+        when(projectRepository.findById(parentId)).thenReturn(Optional.of(parent));
+
+        List<SubProjectViewDto> result = service.getByFilter(parentId, filterDto);
+
+        assertEquals(2, result.size());
+        verify(mapper, times(result.size())).toViewDto(any(Project.class));
+        verify(mapper, never()).toViewDto(child3);
+    }
+
+    @Test
+    @DisplayName("Фильтрация по имени и статусу")
+    public void shouldReturnFilteredDtos_WhenFilterDtoByNameAndStatus() {
+        Long parentId = 1L;
+        SubProjectFilterDto filterDto = new SubProjectFilterDto("Name", ProjectStatus.COMPLETED);
+        Project child1 = createProject(2L, "Name1", ProjectStatus.COMPLETED, ProjectVisibility.PRIVATE);
+        Project child2 = createProject(3L, "name2", ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
+        Project child3 = createProject(4L, "NON", ProjectStatus.CANCELLED, ProjectVisibility.PUBLIC);
+        Project parent = createParentProject(parentId, "name name", List.of(child1, child2, child3));
+        SubProjectViewDto dto1 = new SubProjectViewDto(
+                child1.getId(), child1.getName(), child1.getDescription(),
+                child1.getVisibility(), child1.getStatus(), child1.getParentProject().getId(),
+                List.of(), null, null
+        );
+
+        when(projectRepository.findById(parentId)).thenReturn(Optional.of(parent));
+
+        List<SubProjectViewDto> result = service.getByFilter(parentId, filterDto);
+
+        assertEquals(1, result.size());
+        assertEquals(dto1, result.get(0));
+        verify(mapper, times(1)).toViewDto(child1);
+        verify(mapper, never()).toViewDto(child2);
+        verify(mapper, never()).toViewDto(child3);
+    }
+
+    private Project createProject(Long id, String name, ProjectStatus status, ProjectVisibility visibility) {
+        return Project.builder()
+                .id(id)
+                .name(name)
+                .status(status)
+                .visibility(visibility)
+                .build();
+    }
+
+    private Project createParentProject(Long id, String name, List<Project> children) {
+        Project parent = Project.builder()
+                .id(id)
+                .name(name)
+                .status(ProjectStatus.CREATED)
+                .children(children)
+                .build();
+
+        children.forEach(child -> child.setParentProject(parent));
+        return parent;
+    }
 }

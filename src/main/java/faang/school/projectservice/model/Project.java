@@ -94,6 +94,7 @@ public class Project {
     @Column(name = "cover_image_id")
     private String coverImageId;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "project")
     private List<Team> teams;
 
@@ -106,6 +107,7 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Vacancy> vacancies;
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
 

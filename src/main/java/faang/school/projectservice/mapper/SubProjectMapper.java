@@ -25,7 +25,7 @@ public interface SubProjectMapper {
 
     @Mapping(source = "children", target = "childrenId", qualifiedByName = "mapChildrenToIds")
     @Mapping(source = "parentProject", target = "parentId", qualifiedByName = "mapToParentId")
-    SubProjectViewDto toDto(Project project);
+    SubProjectViewDto toViewDto(Project project);
 
     Project update(@MappingTarget Project project, SubProjectUpdateDto updateDto);
 

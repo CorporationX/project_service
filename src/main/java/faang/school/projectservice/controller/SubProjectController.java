@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.sub_project.SubProjectCreateDto;
 import faang.school.projectservice.dto.sub_project.SubProjectFilterDto;
 import faang.school.projectservice.dto.sub_project.SubProjectUpdateDto;
 import faang.school.projectservice.dto.sub_project.SubProjectViewDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.SubProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * SubProjectController — описание класса.
- * <p>
- * TODO: добавить описание назначения и поведения класса.
+ * REST-контроллера для управления подпроектами
+ * Предоставляет API для операций CRUD с подпроектами:
+ * <ul>
+ *   <li>Создание новых подпроектов</li>
+ *   <li>Обновление существующих подпроектов</li>
+ *   <li>Получение отфильтрованных подпроектов</li>
+ * </ul>
  * </p>
  *
  * @author Linempy
@@ -32,7 +36,7 @@ import java.util.List;
 @RequestMapping("/subprojects")
 public class SubProjectController {
 
-    private final ProjectService service;
+    private final SubProjectService service;
 
     @PostMapping()
     public SubProjectViewDto create(
