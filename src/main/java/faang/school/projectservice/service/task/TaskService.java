@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.task;
 
 import faang.school.projectservice.dto.client.task.TaskCreateDto;
+import faang.school.projectservice.dto.client.task.TaskFilterDto;
 import faang.school.projectservice.dto.client.task.TaskUpdateDto;
 import faang.school.projectservice.dto.client.task.TaskViewDto;
 
@@ -12,7 +13,7 @@ public interface TaskService {
 
     TaskViewDto updateTask(TaskUpdateDto updateDto);
 
-    List<TaskViewDto> getByFilter();
+    List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto);
 
-    TaskViewDto getById();
+    TaskViewDto getById(long id);
 }
