@@ -30,6 +30,6 @@ public class TaskUtil {
                     userContext.getUserId(), projectId);
             throw new ForbiddenException("Пользователь не состоит в команде проекта.");
         }
-        return true;
+        return isUserInProjectTeam;
     }
 }

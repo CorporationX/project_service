@@ -11,7 +11,7 @@ public interface TaskService {
 
     TaskViewDto createTask(TaskCreateDto createDto);
 
-    TaskViewDto updateTask(TaskUpdateDto updateDto);
+    TaskViewDto updateTask(long id, TaskUpdateDto updateDto);
 
     List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto);
 

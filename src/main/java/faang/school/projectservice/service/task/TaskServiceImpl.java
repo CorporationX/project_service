@@ -13,12 +13,14 @@ import faang.school.projectservice.util.project.TaskUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class TaskServiceImpl implements TaskService {
 
     private final FilterServiceImpl filterService;
@@ -41,12 +43,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskViewDto updateTask(TaskUpdateDto updateDto) {
+    public TaskViewDto updateTask(long id, TaskUpdateDto updateDto) {
         Long projectId = updateDto.projectId();
-
         taskUtil.isInTeam(projectId);
 
-        Task task = mapper.toEntity(updateDto);
+        Task task = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
+         mapper.update(updateDto, task);
+
         LocalDateTime updateTime = LocalDateTime.now();
         task.setUpdatedAt(updateTime);
 
