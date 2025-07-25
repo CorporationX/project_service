@@ -11,6 +11,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.service.filter.project.FilterServiceImplProject;
 import faang.school.projectservice.util.project.ProjectUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
     private final UserContext userContext;
-    private final FilterService<Project, ProjectFilterDto> filterService;
+    private final FilterServiceImplProject filterService;
 
     @Override
     @Transactional

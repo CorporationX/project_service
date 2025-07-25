@@ -2,26 +2,28 @@ package faang.school.projectservice.dto.client.task;
 
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record TaskUpdateDto (
-    String name,
-
-    String description,
-
-    TaskStatus status,
-
-    Long performerUserId,
-
-    Long reporterUserId,
-
-    Integer minutesTracked,
-
-    List<Long> linkedTasksId,
-
-    Long projectId,
-
-    Stage stage
+public record TaskUpdateDto(
+        @NotNull
+        String name,
+        @NotNull
+        String description,
+        @NotNull
+        TaskStatus status,
+        @NotNull
+        Long performerUserId,
+        @NotNull
+        Long reporterUserId,
+        @NotNull
+        Integer minutesTracked,
+        @NotNull
+        List<Long> linkedTasksId,
+        @NotNull
+        Long projectId,
+        @NotNull
+        Stage stage
 ) {
 }

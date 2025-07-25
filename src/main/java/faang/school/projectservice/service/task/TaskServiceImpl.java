@@ -8,7 +8,8 @@ import faang.school.projectservice.dto.client.task.TaskViewDto;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.filter.task.FilterServiceImpl;
+import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.service.filter.task.FilterServiceImplTask;
 import faang.school.projectservice.util.project.TaskUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.List;
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    private final FilterServiceImpl filterService;
+    private final FilterServiceImplTask filterService;
     private final TaskRepository repository;
     private final TaskMapper mapper;
     private final UserContext userContext;
