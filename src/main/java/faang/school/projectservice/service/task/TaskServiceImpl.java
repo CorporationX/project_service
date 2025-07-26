@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskUtil taskUtil;
 
     @Override
+    @Transactional
     public TaskViewDto createTask(TaskCreateDto createDto) {
         Long projectId = createDto.projectId();
 
@@ -44,6 +46,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskViewDto updateTask(long id, TaskUpdateDto updateDto) {
         Long projectId = updateDto.projectId();
         taskUtil.isInTeam(projectId);
@@ -62,6 +65,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto) {
         List<Task> tasks = repository.findAll();
         List<Task> filteredTasks = filterService.getFilteredList(tasks, taskFilterDto);
@@ -73,6 +77,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskViewDto getById(long id) {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));

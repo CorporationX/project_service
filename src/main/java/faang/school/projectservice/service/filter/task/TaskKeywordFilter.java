@@ -22,7 +22,7 @@ public class TaskKeywordFilter implements Filter<Task, TaskFilterDto> {
 
     @Override
     public Stream<Task> filter(Stream<Task> entities, TaskFilterDto dto) {
-        return entities.filter(task -> task.getName().contains(dto.name()))
+        return entities.filter(task -> task.getName().toLowerCase().contains(dto.name().toLowerCase()))
                 .filter(task -> taskUtil.isInTeam(task.getProject().getId()));
     }
 }
