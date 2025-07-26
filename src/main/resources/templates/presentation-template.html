@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        ul { margin: 0; padding-left: 20px; }
+    </style>
+</head>
+<body>
+
+<div>
+    <h1 th:text="${project.project.name}">Project Name</h1>
+</div>
+
+<p><strong>Description:</strong> <span th:text="${project.project.description}">Description</span></p>
+<p><strong>Status:</strong> <span th:text="${project.project.status}">Status</span></p>
+<p><strong>Created at:</strong> <span th:text="${project.project.createdAt}">2024-01-01</span></p>
+<p><strong>Owner:</strong> <span th:text="${project.project.ownerUsername}">Owner</span></p>
+<p th:if="${project.project.parentProjectName != null}">
+    <strong>Parent Project:</strong> <span th:text="${project.project.parentProjectName}">Parent</span>
+</p>
+
+<div th:if="${project.project.childrenProjectNames != null && !project.project.childrenProjectNames.isEmpty()}">
+    <p><strong>Children Projects:</strong></p>
+    <ul>
+        <li th:each="childName : ${project.project.childrenProjectNames}" th:text="${childName}">Child Name</li>
+    </ul>
+</div>
+
+<h2>Teams</h2>
+<div th:each="team, iterStat : ${project.teams}">
+    <h3 th:text="'Team #' + ${iterStat.count}">Team</h3>
+
+    <p><strong>Avatar:</strong>
+        <img th:if="${team.avatarKey != null}"
+             th:src="'https://cdn.your-bucket.com/images/' + ${team.avatarKey}"
+             alt="Team Avatar" width="50" height="50"/>
+    </p>
+
+    <table>
+        <tr><th>Nickname</th><th>Roles</th></tr>
+        <tr th:each="member : ${team.members}">
+            <td th:text="${member.nickname}">nickname</td>
+            <td th:text="${#strings.arrayJoin(member.roles, ', ')}">roles</td>
+        </tr>
+    </table>
+</div>
+
+<h2>Achievements</h2>
+<ul>
+    <li th:each="task : ${project.tasks}" th:text="${task.name}">Task name</li>
+</ul>
+
+<h2>Statistics</h2>
+<table>
+    <tr><td>Total Tasks:</td><td th:text="${project.stats.totalTasks}">0</td></tr>
+    <tr><td>Completed Tasks:</td><td th:text="${project.stats.completedTasks}">0</td></tr>
+    <tr><td>Active Tasks:</td><td th:text="${project.stats.activeTasks}">0</td></tr>
+    <tr><td>Cancelled Tasks:</td><td th:text="${project.stats.cancelledTasks}">0</td></tr>
+    <tr><td>Total Teams:</td><td th:text="${project.stats.totalTeams}">0</td></tr>
+    <tr><td>Total Members:</td><td th:text="${project.stats.totalMembers}">0</td></tr>
+    <tr><td>Created At:</td><td th:text="${project.stats.createdAt}">2024-01-01</td></tr>
+    <tr><td>Days Since Creation:</td><td th:text="${project.stats.daysSinceCreation}">0</td></tr>
+    <tr><td>Last Updated:</td><td th:text="${project.stats.lastUpdated}">2024-01-01</td></tr>
+</table>
+
+</body>
+</html>
