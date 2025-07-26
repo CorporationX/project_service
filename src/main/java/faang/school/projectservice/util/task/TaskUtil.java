@@ -1,4 +1,4 @@
-package faang.school.projectservice.util.project;
+package faang.school.projectservice.util.task;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.exception.ForbiddenException;

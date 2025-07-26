@@ -3,7 +3,7 @@ package faang.school.projectservice.service.filter.task;
 import faang.school.projectservice.dto.client.task.TaskFilterDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.service.filter.Filter;
-import faang.school.projectservice.util.project.TaskUtil;
+import faang.school.projectservice.util.task.TaskUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
