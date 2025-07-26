@@ -1,9 +1,7 @@
 package faang.school.projectservice.dto.client.task;
 
-import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -14,9 +12,9 @@ public record TaskViewDto(
         Long performerUserId,
         Long reporterUserId,
         Integer minutesTracked,
-        Task parentTask,
+        Long parentTaskId,
         List<Long> linkedTasksId,
         Long projectId,
-        Stage stage
+        Long stageId
 ) {
 }

@@ -3,10 +3,11 @@ package faang.school.projectservice.service.task;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.task.TaskCreateDto;
 import faang.school.projectservice.mapper.TaskMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.filter.task.FilterServiceImplTask;
+import faang.school.projectservice.service.filter.task.TaskFilterServiceImpl;
 import faang.school.projectservice.util.task.TaskUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static faang.school.projectservice.util.project.ProjectUtil.isInTeam;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +30,7 @@ public class TaskServiceImplTest {
     @InjectMocks
     private TaskServiceImpl service;
     @Mock
-    private FilterServiceImplTask filterService;
+    private TaskFilterServiceImpl filterService;
     @Mock
     private TaskRepository repository;
     @Spy
@@ -53,7 +55,10 @@ public class TaskServiceImplTest {
                 1L
         );
         Task task = mapper.toEntity(createDto);
-        when(taskUtil.isInTeam(1L)).thenReturn(true);
+        when(isInTeam(1L, 1L, Project.builder()
+                .id(1L)
+                .build()))
+                .thenReturn(true);
 
         assertEquals(mapper.toViewDto(task), service.createTask(createDto));
     }

@@ -6,10 +6,11 @@ import faang.school.projectservice.dto.client.task.TaskFilterDto;
 import faang.school.projectservice.dto.client.task.TaskUpdateDto;
 import faang.school.projectservice.dto.client.task.TaskViewDto;
 import faang.school.projectservice.mapper.TaskMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.filter.task.FilterServiceImplTask;
-import faang.school.projectservice.util.task.TaskUtil;
+import faang.school.projectservice.service.filter.FilterService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,28 +20,32 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static faang.school.projectservice.util.project.ProjectUtil.isInTeam;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    private final FilterServiceImplTask filterService;
-    private final TaskRepository repository;
+    private final FilterService<Task, TaskFilterDto> filterService;
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
     private final TaskMapper mapper;
     private final UserContext userContext;
-    private final TaskUtil taskUtil;
 
     @Override
     @Transactional
     public TaskViewDto createTask(TaskCreateDto createDto) {
         Long projectId = createDto.projectId();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
 
-        taskUtil.isInTeam(projectId);
+        isInTeam(projectId, userContext.getUserId(), project);
 
         Task task = mapper.toEntity(createDto);
         task.setCreatedAt(LocalDateTime.now());
 
-        Task createdTask = repository.save(task);
+        Task createdTask = taskRepository.save(task);
         return mapper.toViewDto(createdTask);
     }
 
@@ -48,16 +53,18 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskViewDto updateTask(long id, TaskUpdateDto updateDto) {
         Long projectId = updateDto.projectId();
-        taskUtil.isInTeam(projectId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
+        isInTeam(projectId, userContext.getUserId(), project);
 
-        Task task = repository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
          mapper.update(updateDto, task);
 
         LocalDateTime updateTime = LocalDateTime.now();
         task.setUpdatedAt(updateTime);
 
-        Task updatedTask = repository.save(task);
+        Task updatedTask = taskRepository.save(task);
         log.info("Пользователь id = {} изменил задачу id = {}. Дата: {}.",
                 userContext.getUserId(), task.getId(), updateTime);
         return mapper.toViewDto(updatedTask);
@@ -65,8 +72,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto) {
-        List<Task> tasks = repository.findAll();
+    public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto, Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
+        isInTeam(projectId, userContext.getUserId(), project);
+
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
         List<Task> filteredTasks = filterService.getFilteredList(tasks, taskFilterDto);
 
         log.info("Получение списка всех задач проекта с фильтрами.");
@@ -78,11 +89,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskViewDto getById(long id) {
-        Task task = repository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
 
         Long projectId = task.getProject().getId();
-        taskUtil.isInTeam(projectId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
+        isInTeam(projectId, userContext.getUserId(), project);
 
         return mapper.toViewDto(task);
     }

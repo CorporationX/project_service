@@ -8,19 +8,17 @@ import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
-import faang.school.projectservice.service.filter.project.FilterServiceImplProject;
 import faang.school.projectservice.util.project.ProjectUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +30,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
     private final UserContext userContext;
-    private final FilterServiceImplProject filterService;
+    private final FilterService<Project, ProjectFilterDto> filterService;
 
     @Override
     @Transactional

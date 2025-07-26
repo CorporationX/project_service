@@ -11,7 +11,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
-public class FilterServiceImplTask implements FilterService<Task, TaskFilterDto> {
+public class TaskFilterServiceImpl implements FilterService<Task, TaskFilterDto> {
     private final List<Filter<Task, TaskFilterDto>> filters;
 
     @Override

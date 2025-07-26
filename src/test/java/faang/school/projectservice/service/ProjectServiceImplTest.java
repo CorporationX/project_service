@@ -11,7 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 
-import faang.school.projectservice.service.filter.project.FilterServiceImplProject;
+import faang.school.projectservice.service.filter.project.ProjectFilterServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class ProjectServiceImplTest {
     private Project project;
 
     @Mock
-    private FilterServiceImplProject filterService;
+    private ProjectFilterServiceImpl filterService;
 
     @InjectMocks
     private ProjectServiceImpl service;

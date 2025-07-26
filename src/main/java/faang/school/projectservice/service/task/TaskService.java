@@ -13,7 +13,7 @@ public interface TaskService {
 
     TaskViewDto updateTask(long id, TaskUpdateDto updateDto);
 
-    List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto);
+    List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto, Long projectId);
 
     TaskViewDto getById(long id);
 }

@@ -17,14 +17,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Класс для тестирования фильтрации задач по статусу")
 public class TaskStatusFilterTest {
-    @Mock
-    private TaskUtil taskUtil;
 
     @InjectMocks
     private TaskStatusFilter statusFilter;
@@ -33,7 +29,6 @@ public class TaskStatusFilterTest {
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
         TaskFilterDto filterDto = new TaskFilterDto(TaskStatus.DONE, null, null);
-        when(taskUtil.isInTeam(any())).thenReturn(true);
 
         Stream<Task> startedStream = Stream.of(Task.builder()
                         .status(TaskStatus.DONE)
