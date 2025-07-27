@@ -239,5 +239,4 @@ public class ProjectPresentationServiceTest {
     private File createTempFile() throws IOException {
         return File.createTempFile("test", ".pdf");
     }
-
 }
