@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.JSONPObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +85,6 @@ public class TaskControllerTest {
     @Test
     @DisplayName("Проверка успешного получения отфильтрованных задач через контроллер")
     void getProjectsByFilterTest() throws Exception {
-
-
         mockMvc.perform(MockMvcRequestBuilders.get("/tasks/filter/1"))
                 .andExpect(status().isOk());
     }
