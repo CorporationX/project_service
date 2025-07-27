@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.client.task;
 
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.stage.Stage;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -24,6 +23,6 @@ public record TaskUpdateDto(
         @NotNull
         Long projectId,
         @NotNull
-        Stage stage
+        Long stageId
 ) {
 }

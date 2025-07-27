@@ -41,7 +41,6 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskViewDto createTask(TaskCreateDto createDto) {
         Task task = mapper.toEntity(createDto);
-        //task.setCreatedAt(LocalDateTime.now());
 
         Long projectId = createDto.projectId();
         Project project = projectRepository.findById(projectId)
@@ -74,14 +73,28 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskViewDto updateTask(long id, TaskUpdateDto updateDto) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
+        mapper.update(updateDto, task);
+
         Long projectId = updateDto.projectId();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
+
         isInTeam(projectId, userContext.getUserId(), project);
 
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
-         mapper.update(updateDto, task);
+        List<Task> linkedTask = updateDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.findById(aLong)
+                        .orElseThrow(() -> new EntityNotFoundException
+                                (String.valueOf(aLong)))).collect(Collectors.toList());
+
+        Stage stage = stageRepository.findById(updateDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(updateDto.stageId())));
+
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
 
         LocalDateTime updateTime = LocalDateTime.now();
         task.setUpdatedAt(updateTime);
