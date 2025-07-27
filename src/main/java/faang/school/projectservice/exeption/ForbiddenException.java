@@ -3,6 +3,7 @@ package faang.school.projectservice.exeption;
 import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends ApiException {
+
     public ForbiddenException(String message) {
         super(message, message);
     }
@@ -10,7 +11,6 @@ public class ForbiddenException extends ApiException {
     public ForbiddenException(String message, String debugMessage) {
         super(message, debugMessage);
     }
-
 
     @Override
     protected HttpStatus getDefaultStatus() {

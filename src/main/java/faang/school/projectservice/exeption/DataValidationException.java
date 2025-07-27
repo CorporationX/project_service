@@ -3,6 +3,7 @@ package faang.school.projectservice.exeption;
 import org.springframework.http.HttpStatus;
 
 public class DataValidationException extends ApiException {
+
     public DataValidationException(String message) {
         super(message, message);
     }

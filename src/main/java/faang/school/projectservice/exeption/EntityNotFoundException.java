@@ -3,6 +3,7 @@ package faang.school.projectservice.exeption;
 import org.springframework.http.HttpStatus;
 
 public class EntityNotFoundException extends ApiException {
+
     public EntityNotFoundException(String message) {
         super(message, message);
     }
