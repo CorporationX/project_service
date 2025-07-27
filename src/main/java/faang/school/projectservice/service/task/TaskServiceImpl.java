@@ -8,7 +8,9 @@ import faang.school.projectservice.dto.client.task.TaskViewDto;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.filter.FilterService;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static faang.school.projectservice.util.project.ProjectUtil.isInTeam;
 
@@ -32,18 +35,37 @@ public class TaskServiceImpl implements TaskService {
     private final ProjectRepository projectRepository;
     private final TaskMapper mapper;
     private final UserContext userContext;
+    private final StageRepository stageRepository;
 
     @Override
     @Transactional
     public TaskViewDto createTask(TaskCreateDto createDto) {
+        Task task = mapper.toEntity(createDto);
+        //task.setCreatedAt(LocalDateTime.now());
+
         Long projectId = createDto.projectId();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
 
         isInTeam(projectId, userContext.getUserId(), project);
 
-        Task task = mapper.toEntity(createDto);
-        task.setCreatedAt(LocalDateTime.now());
+        Task parentTask = taskRepository.findById(createDto.parentTaskId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(createDto.parentTaskId())));
+
+        List<Task> linkedTask = createDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.findById(aLong)
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(aLong)))).collect(Collectors.toList());
+
+        Stage stage = stageRepository.findById(createDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(createDto.stageId())));
+
+        task.setParentTask(parentTask);
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
 
         Task createdTask = taskRepository.save(task);
         return mapper.toViewDto(createdTask);
