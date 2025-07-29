@@ -99,12 +99,11 @@ public class TeamService {
                         "User id={} is not a member of team id={}", userId, team.getId()));
     }
 
-    private UserDto checkUserExists(long currentUserId) {
+    private void checkUserExists(long currentUserId) {
         UserDto user = userServiceClient.getUser(currentUserId);
         if (user == null) {
             throw new ResourceNotReceivedException("User not received by id={}", currentUserId);
         }
-        return user;
     }
 
     private void checkIsImage(MultipartFile file) {
