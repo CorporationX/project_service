@@ -119,7 +119,6 @@ public class SubSubProjectServiceImplTest {
         assertThrows(DataValidationException.class, () -> service.create(dto));
     }
 
-
     @Test
     @DisplayName("Должен выбросить исключение, когда статус проекта-родителя COMPLETED")
     public void shouldThrowException_WhenParentStatusIsCompleted() {
