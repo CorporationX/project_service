@@ -39,7 +39,7 @@ dependencies {
     /**
      * Amazon S3
      */
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
+    implementation("software.amazon.awssdk:s3:2.32.6")
 
     /**
      * Utils & Logging

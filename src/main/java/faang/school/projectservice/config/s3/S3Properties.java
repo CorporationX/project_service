@@ -9,6 +9,7 @@ public record S3Properties(
         String secretKey,
         String bucketName,
         boolean isMocked,
+        String region,
         String presentationFolder
 ) {
 }

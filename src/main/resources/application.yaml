@@ -53,6 +53,7 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
     presentationFolder: presentations
   payment-service:
     host: http://localhost
