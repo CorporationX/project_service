@@ -50,12 +50,11 @@ spring:
               - https://www.googleapis.com/auth/calendar
             redirect-uri: "http://localhost:8080/login/oauth2/code/google"
 
+  profiles:
+    active: local
+
 server:
   port: 8082
-
-logging:
-  level:
-    root: info
 
 calculations_messages_processing:
   enabled: true
