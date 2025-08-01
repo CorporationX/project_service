@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -40,7 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
                 repository.existsByOwnerIdAndName(userContext.getUserId(), projectDto.name());
 
         if (isHaveProjectWithSameName) {
-            throw new RuntimeException("Пользователь пытается создать уже имеющийся у него проект");
+            throw new DataValidationException("Пользователь пытается создать уже имеющийся у него проект");
         }
 
         Project project = mapper.toEntity(projectDto);
@@ -84,9 +85,9 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectViewDto getProjectById(long id) {
         Optional<Project> project = repository.findById(id);
         if (project.isEmpty()) {
-            throw new RuntimeException("Проекта с указанным айди не существует");
+            throw new EntityNotFoundException("Проекта с указанным айди не существует");
         } else if (!ProjectUtil.isAvailable(project.get(), userContext.getUserId())) {
-            throw new RuntimeException("У пользователя нет доступа к указанному проекту");
+            throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
         }
         log.info("Получение проекта по id = {}", id);
         return mapper.toViewDto(project.get());
