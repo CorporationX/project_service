@@ -19,6 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * TaskController — описание класса.
+ * <p>
+ * Предоставляет эндпоинты для создания, обновления, получения задач по фильтрам и получение
+ * задачи по id
+ * </p>
+ *
+ * @author mrnght
+ * @since 01.08.2025
+ */
+
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor

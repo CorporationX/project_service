@@ -8,6 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+/**
+ * TaskPerformerFilter — описание класса.
+ * <p>
+ * Возвращает отфильтрованные по исполнителю задачи
+ * </p>
+ *
+ * @author mrnght
+ * @since 01.08.2025
+ */
 @RequiredArgsConstructor
 @Component
 public class TaskPerformerFilter implements Filter<Task, TaskFilterDto> {

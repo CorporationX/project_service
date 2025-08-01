@@ -8,6 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+/**
+ * TaskStatusFilter — описание класса.
+ * <p>
+ * Возвращает отфильтрованные по статусу{@link faang.school.projectservice.model.TaskStatus} задачи
+ * </p>
+ *
+ * @author mrnght
+ * @since 01.08.2025
+ */
 @Component
 @RequiredArgsConstructor
 public class TaskStatusFilter implements Filter<Task, TaskFilterDto> {

@@ -8,6 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+/**
+ * TaskKeywordFilter — описание класса.
+ * <p>
+ * Фильтрует на наличие в названии задачи заданного слова
+ * </p>
+ *
+ * @author mrnght
+ * @since 01.08.2025
+ */
 @Component
 @RequiredArgsConstructor
 public class TaskKeywordFilter implements Filter<Task, TaskFilterDto> {
