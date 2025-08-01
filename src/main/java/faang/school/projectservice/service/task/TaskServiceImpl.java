@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static faang.school.projectservice.util.project.ProjectUtil.isInTeam;
+import static faang.school.projectservice.util.project.ProjectUtil.isUserInProjectTeam;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,25 +46,8 @@ public class TaskServiceImpl implements TaskService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
 
-        isInTeam(projectId, userContext.getUserId(), project);
-
-        Task parentTask = taskRepository.findById(createDto.parentTaskId())
-                .orElseThrow(() -> new EntityNotFoundException
-                        (String.valueOf(createDto.parentTaskId())));
-
-        List<Task> linkedTask = createDto.linkedTasksId().stream()
-                .map(aLong -> taskRepository.findById(aLong)
-                .orElseThrow(() -> new EntityNotFoundException
-                        (String.valueOf(aLong)))).collect(Collectors.toList());
-
-        Stage stage = stageRepository.findById(createDto.stageId())
-                .orElseThrow(() -> new EntityNotFoundException
-                        (String.valueOf(createDto.stageId())));
-
-        task.setParentTask(parentTask);
-        task.setLinkedTasks(linkedTask);
-        task.setProject(project);
-        task.setStage(stage);
+        isUserInProjectTeam(projectId, userContext.getUserId(), project);
+        installingRelatedEntitiesForCreate(createDto, task, project);
 
         Task createdTask = taskRepository.save(task);
         return mapper.toViewDto(createdTask);
@@ -81,20 +64,9 @@ public class TaskServiceImpl implements TaskService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
 
-        isInTeam(projectId, userContext.getUserId(), project);
+        isUserInProjectTeam(projectId, userContext.getUserId(), project);
 
-        List<Task> linkedTask = updateDto.linkedTasksId().stream()
-                .map(aLong -> taskRepository.findById(aLong)
-                        .orElseThrow(() -> new EntityNotFoundException
-                                (String.valueOf(aLong)))).collect(Collectors.toList());
-
-        Stage stage = stageRepository.findById(updateDto.stageId())
-                .orElseThrow(() -> new EntityNotFoundException
-                        (String.valueOf(updateDto.stageId())));
-
-        task.setLinkedTasks(linkedTask);
-        task.setProject(project);
-        task.setStage(stage);
+        installingRelatedEntitiesForUpdate(updateDto, task, project);
 
         LocalDateTime updateTime = LocalDateTime.now();
         task.setUpdatedAt(updateTime);
@@ -110,7 +82,7 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto, Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
-        isInTeam(projectId, userContext.getUserId(), project);
+        isUserInProjectTeam(projectId, userContext.getUserId(), project);
 
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
         List<Task> filteredTasks = filterService.getFilteredList(tasks, taskFilterDto);
@@ -130,8 +102,45 @@ public class TaskServiceImpl implements TaskService {
         Long projectId = task.getProject().getId();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
-        isInTeam(projectId, userContext.getUserId(), project);
+        isUserInProjectTeam(projectId, userContext.getUserId(), project);
 
         return mapper.toViewDto(task);
+    }
+
+    private void installingRelatedEntitiesForCreate(TaskCreateDto createDto,
+                                                    Task task, Project project) {
+        Task parentTask = taskRepository.findById(createDto.parentTaskId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(createDto.parentTaskId())));
+
+        List<Task> linkedTask = createDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.findById(aLong)
+                        .orElseThrow(() -> new EntityNotFoundException
+                                (String.valueOf(aLong)))).collect(Collectors.toList());
+
+        Stage stage = stageRepository.findById(createDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(createDto.stageId())));
+
+        task.setParentTask(parentTask);
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
+    }
+
+    private void installingRelatedEntitiesForUpdate(TaskUpdateDto updateDto,
+                                                    Task task, Project project) {
+        List<Task> linkedTask = updateDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.findById(aLong)
+                        .orElseThrow(() -> new EntityNotFoundException
+                                (String.valueOf(aLong)))).collect(Collectors.toList());
+
+        Stage stage = stageRepository.findById(updateDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(updateDto.stageId())));
+
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
     }
 }

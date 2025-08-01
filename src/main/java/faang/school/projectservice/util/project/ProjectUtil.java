@@ -5,10 +5,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Component
 @Slf4j
 public class ProjectUtil {
 
@@ -17,18 +15,18 @@ public class ProjectUtil {
                 project.getTeams().stream()
                         .flatMap(team -> team.getTeamMembers().stream())
                         .findFirst()
-                        .filter(teamMember -> teamMember.getId() == userId)
+                        .filter(teamMember -> teamMember.getId().equals(userId))
                         .isPresent();
     }
-    public static boolean isInTeam(Long projectId, Long userId, Project project) {
+    public static boolean isUserInProjectTeam(Long projectId, Long userId, Project project) {
         boolean isUserInProjectTeam = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> teamMember.getId() == userId);
+                .anyMatch(teamMember -> teamMember.getId().equals(userId));
         if (!isUserInProjectTeam) {
             log.error("Пользователь id = {} не состоит в команде проекта id = {}",
                     userId, projectId);
             throw new ForbiddenException("Пользователь не состоит в команде проекта.");
         }
-        return isUserInProjectTeam;
+        return true;
     }
 }
