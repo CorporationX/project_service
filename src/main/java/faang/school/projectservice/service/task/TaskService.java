@@ -36,7 +36,6 @@ public interface TaskService {
      * Возвращает список задач, соответствующих указанным фильтрам.
      *
      * @param taskFilterDto параметры фильтрации
-     * @param projectId айди проекта, для получения его задач
      * @return список задач в виде List<{@link TaskViewDto}>
      */
     List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto);
