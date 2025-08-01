@@ -41,8 +41,7 @@ public class TeamService {
 
     public void uploadAvatar(long teamId, MultipartFile file) {
         resourceValidator.validateFile(file);
-        String filename = file.getOriginalFilename();
-        log.info("Adding avatar to team {}: file='{}'", teamId, filename);
+        log.info("Adding avatar to team {}: file='{}'", teamId, file.getOriginalFilename());
         checkIsImage(file);
         long currentUserId = userContext.getUserId();
         Team team = findTeamById(teamId);
@@ -58,7 +57,7 @@ public class TeamService {
         team.setAvatarKey(key);
         teamRepository.save(team);
 
-        log.info("Avatar added to team {}; file='{}', key={}", teamId, filename, key);
+        log.info("Avatar added to team {}; file='{}', key={}", teamId, file.getOriginalFilename(), key);
     }
 
     public void deleteAvatar(long teamId) {
