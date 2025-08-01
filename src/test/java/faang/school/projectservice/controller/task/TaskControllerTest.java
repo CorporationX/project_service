@@ -85,7 +85,7 @@ public class TaskControllerTest {
     @Test
     @DisplayName("Проверка успешного получения отфильтрованных задач через контроллер")
     void getProjectsByFilterTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/tasks/filter/1"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/tasks"))
                 .andExpect(status().isOk());
     }
 

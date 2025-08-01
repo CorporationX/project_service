@@ -26,7 +26,7 @@ public class TaskKeywordFilterTest {
     @Test
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
-        TaskFilterDto filterDto = new TaskFilterDto(null, 1L, "some");
+        TaskFilterDto filterDto = new TaskFilterDto(1L,null, 1L, "some");
 
         Stream<Task> startedStream = Stream.of(Task.builder()
                         .name("someName")
@@ -62,7 +62,7 @@ public class TaskKeywordFilterTest {
     @DisplayName("Проверка передачи параметра фильтрации - null")
     void isApplicableTest() {
         TaskFilterDto filterDto =
-                new TaskFilterDto(TaskStatus.IN_PROGRESS, 1L, null);
+                new TaskFilterDto(1L, TaskStatus.IN_PROGRESS, 1L, null);
 
         assertFalse(keywordFilter.isApplicable(filterDto));
     }

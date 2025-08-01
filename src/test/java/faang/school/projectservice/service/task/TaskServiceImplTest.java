@@ -100,10 +100,10 @@ public class TaskServiceImplTest {
         task.setProject(project);
         task.setStage(stage);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(taskRepository.findById(parentTaskId)).thenReturn(Optional.of(parentTask));
-        when(taskRepository.findById(linkedTaskId)).thenReturn(Optional.of(linkedTask));
-        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
+        when(taskRepository.getByIdOrThrow(parentTaskId)).thenReturn(parentTask);
+        when(taskRepository.getByIdOrThrow(linkedTaskId)).thenReturn(linkedTask);
+        when(stageRepository.getByIdOrThrow(stageId)).thenReturn(stage);
         when(userContext.getUserId()).thenReturn(100L);
         when(taskRepository.save(any(Task.class))).thenReturn(task);
 
@@ -138,10 +138,10 @@ public class TaskServiceImplTest {
         task.setProject(project);
         task.setStage(stage);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(taskRepository.findById(linkedTaskId)).thenReturn(Optional.of(linkedTask));
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
+        when(taskRepository.getByIdOrThrow(linkedTaskId)).thenReturn(linkedTask);
+        when(taskRepository.getByIdOrThrow(taskId)).thenReturn(task);
+        when(stageRepository.getByIdOrThrow(stageId)).thenReturn(stage);
         when(userContext.getUserId()).thenReturn(100L);
         when(taskRepository.save(any(Task.class))).thenReturn(task);
 
@@ -155,7 +155,7 @@ public class TaskServiceImplTest {
     @DisplayName("Проверка успешного сценария фильтрации по статусу")
     void getTaskFilteredByStatusTest() {
         TaskFilterDto filterDto =
-                new TaskFilterDto(TaskStatus.IN_PROGRESS, null, null);
+                new TaskFilterDto(1L, TaskStatus.IN_PROGRESS, null, null);
 
         Task task = new Task();
         task.setStatus(TaskStatus.IN_PROGRESS);
@@ -164,21 +164,21 @@ public class TaskServiceImplTest {
         Task taskWithAnotherStatus = new Task();
         taskWithAnotherStatus.setStatus(TaskStatus.DONE);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(taskRepository.findAllByProjectId(projectId))
                 .thenReturn(List.of(task, taskWithAnotherStatus));
         when(filterService.getFilteredList(List.of(task, taskWithAnotherStatus), filterDto))
                 .thenReturn(List.of(task));
         when(userContext.getUserId()).thenReturn(100L);
 
-        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto, projectId));
+        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto));
     }
 
     @Test
     @DisplayName("Проверка успешного сценария фильтрации по исполнителю")
     void getTaskFilteredByPerformerTest() {
         TaskFilterDto filterDto =
-                new TaskFilterDto(null, 1L, null);
+                new TaskFilterDto(1L, null, 1L, null);
 
         Task task = new Task();
         task.setPerformerUserId(1L);
@@ -187,21 +187,21 @@ public class TaskServiceImplTest {
         Task taskWithAnotherPerformer = new Task();
         taskWithAnotherPerformer.setPerformerUserId(7L);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(taskRepository.findAllByProjectId(projectId))
                 .thenReturn(List.of(task, taskWithAnotherPerformer));
         when(filterService.getFilteredList(List.of(task, taskWithAnotherPerformer), filterDto))
                 .thenReturn(List.of(task));
         when(userContext.getUserId()).thenReturn(100L);
 
-        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto, projectId));
+        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto));
     }
 
     @Test
     @DisplayName("Проверка успешного сценария фильтрации по ключевому слову")
     void getTaskFilteredByKeywordTest() {
         TaskFilterDto filterDto =
-                new TaskFilterDto(null, null, "some");
+                new TaskFilterDto(1L, null, null, "some");
 
         Task task = new Task();
         task.setName("someName");
@@ -210,13 +210,13 @@ public class TaskServiceImplTest {
         Task taskWithAnotherName = new Task();
         taskWithAnotherName.setName("nameWithoutKeyword");
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(taskRepository.findAllByProjectId(projectId)).thenReturn(List.of(task, taskWithAnotherName));
         when(filterService.getFilteredList(List.of(task, taskWithAnotherName), filterDto))
                 .thenReturn(List.of(task));
         when(userContext.getUserId()).thenReturn(100L);
 
-        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto, projectId));
+        assertEquals(List.of(taskViewDto), service.getByFilter(filterDto));
     }
 
     @Test
@@ -231,9 +231,9 @@ public class TaskServiceImplTest {
 
         TaskViewDto expectedTaskViewDto = mapper.toViewDto(task);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(userContext.getUserId()).thenReturn(100L);
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(taskRepository.getByIdOrThrow(taskId)).thenReturn(task);
 
         assertEquals(expectedTaskViewDto, service.getById(taskId));
     }

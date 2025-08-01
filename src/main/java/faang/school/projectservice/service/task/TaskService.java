@@ -39,7 +39,7 @@ public interface TaskService {
      * @param projectId айди проекта, для получения его задач
      * @return список задач в виде List<{@link TaskViewDto}>
      */
-    List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto, Long projectId);
+    List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto);
 
     /**
      * Получение задачи по её id

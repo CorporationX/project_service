@@ -25,7 +25,7 @@ public class TaskPerformerFilterTest {
     @Test
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
-        TaskFilterDto filterDto = new TaskFilterDto(null, 1L, null);
+        TaskFilterDto filterDto = new TaskFilterDto(1L, null, 1L, null);
 
         Stream<Task> startedStream = Stream.of(Task.builder()
                         .performerUserId(1L)
@@ -61,7 +61,7 @@ public class TaskPerformerFilterTest {
     @DisplayName("Проверка передачи параметра фильтрации - null")
     void isApplicableTest() {
         TaskFilterDto filterDto =
-                new TaskFilterDto(TaskStatus.IN_PROGRESS, null, "someName");
+                new TaskFilterDto(1L, TaskStatus.IN_PROGRESS, null, "someName");
 
         assertFalse(performerFilter.isApplicable(filterDto));
     }

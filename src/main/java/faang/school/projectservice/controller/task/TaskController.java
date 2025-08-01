@@ -36,10 +36,9 @@ public class TaskController {
         return ResponseEntity.ok(service.updateTask(taskId, updateDto));
     }
 
-    @GetMapping("/filter/{projectId}")
-    public ResponseEntity<List<TaskViewDto>> getTaskByFilter(@PathVariable Long projectId,
-                                                             @ModelAttribute TaskFilterDto filterDto) {
-        return ResponseEntity.ok(service.getByFilter(filterDto, projectId));
+    @GetMapping()
+    public ResponseEntity<List<TaskViewDto>> getTaskByFilter(@ModelAttribute TaskFilterDto filterDto) {
+        return ResponseEntity.ok(service.getByFilter(filterDto));
     }
 
     @GetMapping("/{taskId}")

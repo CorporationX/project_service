@@ -74,7 +74,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto, Long projectId) {
+    public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto) {
+        Long projectId = taskFilterDto.projectId();
         Project project = projectRepository.getByIdOrThrow(projectId);
         validateUserInProjectTeam(projectId, userContext.getUserId(), project);
 
