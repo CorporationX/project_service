@@ -164,6 +164,7 @@ public class TaskServiceImplTest {
         Task taskWithAnotherStatus = new Task();
         taskWithAnotherStatus.setStatus(TaskStatus.DONE);
 
+
         when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(taskRepository.findAllByProjectId(projectId))
                 .thenReturn(List.of(task, taskWithAnotherStatus));
