@@ -3,10 +3,8 @@ package faang.school.projectservice.util.project;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
 @Slf4j
 public class ProjectUtil {
 
