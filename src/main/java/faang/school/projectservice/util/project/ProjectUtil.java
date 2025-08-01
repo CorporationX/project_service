@@ -18,7 +18,7 @@ public class ProjectUtil {
                         .filter(teamMember -> teamMember.getId().equals(userId))
                         .isPresent();
     }
-    public static boolean isUserInProjectTeam(Long projectId, Long userId, Project project) {
+    public static void validateUserInProjectTeam(Long projectId, Long userId, Project project) {
         boolean isUserInProjectTeam = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getId().equals(userId));
@@ -27,6 +27,5 @@ public class ProjectUtil {
                     userId, projectId);
             throw new ForbiddenException("Пользователь не состоит в команде проекта.");
         }
-        return true;
     }
 }
