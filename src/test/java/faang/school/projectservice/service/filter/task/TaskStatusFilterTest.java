@@ -1,9 +1,7 @@
 package faang.school.projectservice.service.filter.task;
 
 import faang.school.projectservice.dto.client.task.TaskFilterDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static faang.school.projectservice.service.filter.task.TaskStatusFilterTestData.getExpectedStream;
+import static faang.school.projectservice.service.filter.task.TaskStatusFilterTestData.getNullStatusFilterDto;
+import static faang.school.projectservice.service.filter.task.TaskStatusFilterTestData.getStartedStream;
+import static faang.school.projectservice.service.filter.task.TaskStatusFilterTestData.getStatusFilterDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -26,29 +28,10 @@ public class TaskStatusFilterTest {
     @Test
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
-        TaskFilterDto filterDto = new TaskFilterDto(1L, TaskStatus.DONE, null, null);
+        TaskFilterDto filterDto = getStatusFilterDto();
 
-        Stream<Task> startedStream = Stream.of(Task.builder()
-                        .status(TaskStatus.DONE)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .status(TaskStatus.IN_PROGRESS)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .status(TaskStatus.DONE)
-                        .project(new Project())
-                        .build());
-
-        Stream<Task> expectedStream = Stream.of(Task.builder()
-                        .status(TaskStatus.DONE)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .status(TaskStatus.DONE)
-                        .project(new Project())
-                        .build());
+        Stream<Task> startedStream = getStartedStream();
+        Stream<Task> expectedStream = getExpectedStream();
 
         Stream<Task> filterdStream = statusFilter.filter(startedStream, filterDto);
 
@@ -61,8 +44,7 @@ public class TaskStatusFilterTest {
     @Test
     @DisplayName("Проверка передачи параметра фильтрации - null")
     void isApplicableTest() {
-        TaskFilterDto filterDto =
-                new TaskFilterDto(1L, null, 1L, "someName");
+        TaskFilterDto filterDto = getNullStatusFilterDto();
 
         assertFalse(statusFilter.isApplicable(filterDto));
     }

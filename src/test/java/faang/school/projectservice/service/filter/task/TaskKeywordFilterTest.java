@@ -1,9 +1,7 @@
 package faang.school.projectservice.service.filter.task;
 
 import faang.school.projectservice.dto.client.task.TaskFilterDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static faang.school.projectservice.service.filter.task.TaskKeywordFilterTestData.getExpectedStream;
+import static faang.school.projectservice.service.filter.task.TaskKeywordFilterTestData.getKeywordFilterDto;
+import static faang.school.projectservice.service.filter.task.TaskKeywordFilterTestData.getNullKeywordFilterDto;
+import static faang.school.projectservice.service.filter.task.TaskKeywordFilterTestData.getStartedStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -26,34 +28,14 @@ public class TaskKeywordFilterTest {
     @Test
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
-        TaskFilterDto filterDto = new TaskFilterDto(1L,null, 1L, "some");
+        TaskFilterDto filterDto = getKeywordFilterDto();
+        Stream<Task> startedStream = getStartedStream();
+        Stream<Task> expectedStream = getExpectedStream();
 
-        Stream<Task> startedStream = Stream.of(Task.builder()
-                        .name("someName")
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .name("without")
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .name("anotherSomeName")
-                        .project(new Project())
-                        .build());
-
-        Stream<Task> expectedStream = Stream.of(Task.builder()
-                        .name("someName")
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .name("anotherSomeName")
-                        .project(new Project())
-                        .build());
-
-        Stream<Task> filterdStream = keywordFilter.filter(startedStream, filterDto);
+        Stream<Task> filteredStream = keywordFilter.filter(startedStream, filterDto);
 
         List<Task> expectedTask = expectedStream.toList();
-        List<Task> filteredTask = filterdStream.toList();
+        List<Task> filteredTask = filteredStream.toList();
 
         assertEquals(expectedTask, filteredTask);
     }
@@ -61,8 +43,7 @@ public class TaskKeywordFilterTest {
     @Test
     @DisplayName("Проверка передачи параметра фильтрации - null")
     void isApplicableTest() {
-        TaskFilterDto filterDto =
-                new TaskFilterDto(1L, TaskStatus.IN_PROGRESS, 1L, null);
+        TaskFilterDto filterDto = getNullKeywordFilterDto();
 
         assertFalse(keywordFilter.isApplicable(filterDto));
     }

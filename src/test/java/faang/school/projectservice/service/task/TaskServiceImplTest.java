@@ -9,8 +9,6 @@ import faang.school.projectservice.mapper.TaskMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
@@ -22,13 +20,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static faang.school.projectservice.service.task.TaskServiceImplTestData.getCreateDto;
+import static faang.school.projectservice.service.task.TaskServiceImplTestData.getLinkedTask;
+import static faang.school.projectservice.service.task.TaskServiceImplTestData.getParentTask;
+import static faang.school.projectservice.service.task.TaskServiceImplTestData.getProject;
+import static faang.school.projectservice.service.task.TaskServiceImplTestData.getStage;
 import static faang.school.projectservice.service.task.TaskServiceImplTestData.getUpdateDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,18 +59,7 @@ public class TaskServiceImplTest {
 
     @BeforeEach
     void init() {
-        TeamMember teamMember = TeamMember.builder()
-                .id(100L)
-                .build();
-
-        Team team = Team.builder()
-                .teamMembers(List.of(teamMember))
-                .build();
-
-        project = Project.builder()
-                .id(projectId)
-                .teams(List.of(team))
-                .build();
+        project = getProject();
     }
 
     @Test
@@ -77,23 +68,14 @@ public class TaskServiceImplTest {
         Long parentTaskId = 5L;
         Long linkedTaskId = 10L;
         Long stageId = 1L;
-        Long projectId = 1L;
 
         TaskCreateDto createDto = getCreateDto(parentTaskId, linkedTaskId, stageId, projectId);
 
         Task task = mapper.toEntity(createDto);
 
-        Task parentTask = Task.builder()
-                .id(parentTaskId)
-                .build();
-
-        Task linkedTask = Task.builder()
-                .id(linkedTaskId)
-                .build();
-
-        Stage stage = Stage.builder()
-                .stageId(stageId)
-                .build();
+        Task parentTask = getParentTask(parentTaskId);
+        Task linkedTask = getLinkedTask(linkedTaskId);
+        Stage stage = getStage(stageId);
 
         task.setParentTask(parentTask);
         task.setLinkedTasks(List.of(linkedTask));
@@ -123,16 +105,10 @@ public class TaskServiceImplTest {
         TaskUpdateDto updateDto = getUpdateDto(linkedTaskId, stageId, projectId);
 
         Task task = new Task();
-
         mapper.update(updateDto, task);
 
-        Task linkedTask = Task.builder()
-                .id(linkedTaskId)
-                .build();
-
-        Stage stage = Stage.builder()
-                .stageId(stageId)
-                .build();
+        Task linkedTask = getLinkedTask(linkedTaskId);
+        Stage stage = getStage(stageId);
 
         task.setLinkedTasks(List.of(linkedTask));
         task.setProject(project);
@@ -163,7 +139,6 @@ public class TaskServiceImplTest {
 
         Task taskWithAnotherStatus = new Task();
         taskWithAnotherStatus.setStatus(TaskStatus.DONE);
-
 
         when(projectRepository.getByIdOrThrow(projectId)).thenReturn(project);
         when(taskRepository.findAllByProjectId(projectId))

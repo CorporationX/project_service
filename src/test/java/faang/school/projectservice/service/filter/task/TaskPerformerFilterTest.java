@@ -1,9 +1,7 @@
 package faang.school.projectservice.service.filter.task;
 
 import faang.school.projectservice.dto.client.task.TaskFilterDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static faang.school.projectservice.service.filter.task.TaskPerformerFilterTestData.getExpectedStream;
+import static faang.school.projectservice.service.filter.task.TaskPerformerFilterTestData.getNullPerformerFilterDto;
+import static faang.school.projectservice.service.filter.task.TaskPerformerFilterTestData.getPerformerFilterDto;
+import static faang.school.projectservice.service.filter.task.TaskPerformerFilterTestData.getStartedStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -25,29 +27,10 @@ public class TaskPerformerFilterTest {
     @Test
     @DisplayName("Тестирование положительного сценария фильтрации")
     void filterTest() {
-        TaskFilterDto filterDto = new TaskFilterDto(1L, null, 1L, null);
+        TaskFilterDto filterDto = getPerformerFilterDto();
 
-        Stream<Task> startedStream = Stream.of(Task.builder()
-                        .performerUserId(1L)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .performerUserId(1L)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .performerUserId(5L)
-                        .project(new Project())
-                        .build());
-
-        Stream<Task> expectedStream = Stream.of(Task.builder()
-                        .performerUserId(1L)
-                        .project(new Project())
-                        .build(),
-                Task.builder()
-                        .performerUserId(1L)
-                        .project(new Project())
-                        .build());
+        Stream<Task> startedStream = getStartedStream();
+        Stream<Task> expectedStream = getExpectedStream();
 
         Stream<Task> filterdStream = performerFilter.filter(startedStream, filterDto);
 
@@ -60,8 +43,7 @@ public class TaskPerformerFilterTest {
     @Test
     @DisplayName("Проверка передачи параметра фильтрации - null")
     void isApplicableTest() {
-        TaskFilterDto filterDto =
-                new TaskFilterDto(1L, TaskStatus.IN_PROGRESS, null, "someName");
+        TaskFilterDto filterDto = getNullPerformerFilterDto();
 
         assertFalse(performerFilter.isApplicable(filterDto));
     }
