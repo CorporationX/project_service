@@ -8,7 +8,6 @@ import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
 import faang.school.projectservice.util.project.ProjectUtil;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 

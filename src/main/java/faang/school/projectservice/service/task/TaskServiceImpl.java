@@ -1,0 +1,131 @@
+package faang.school.projectservice.service.task;
+
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.task.TaskCreateDto;
+import faang.school.projectservice.dto.client.task.TaskFilterDto;
+import faang.school.projectservice.dto.client.task.TaskUpdateDto;
+import faang.school.projectservice.dto.client.task.TaskViewDto;
+import faang.school.projectservice.mapper.TaskMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.service.filter.FilterService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static faang.school.projectservice.util.project.ProjectUtil.validateUserInProjectTeam;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class TaskServiceImpl implements TaskService {
+
+    private final FilterService<Task, TaskFilterDto> filterService;
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final TaskMapper mapper;
+    private final UserContext userContext;
+    private final StageRepository stageRepository;
+
+    @Override
+    @Transactional
+    public TaskViewDto createTask(TaskCreateDto createDto) {
+        Task task = mapper.toEntity(createDto);
+
+        Long projectId = createDto.projectId();
+        Project project = projectRepository.getByIdOrThrow(projectId);
+
+        validateUserInProjectTeam(projectId, userContext.getUserId(), project);
+        installingRelatedEntitiesForCreate(createDto, task, project);
+
+        Task createdTask = taskRepository.save(task);
+        return mapper.toViewDto(createdTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskViewDto updateTask(long id, TaskUpdateDto updateDto) {
+        Task task = taskRepository.getByIdOrThrow(id);
+        mapper.update(updateDto, task);
+
+        Long projectId = updateDto.projectId();
+        Project project = projectRepository.getByIdOrThrow(projectId);
+
+        validateUserInProjectTeam(projectId, userContext.getUserId(), project);
+
+        installingRelatedEntitiesForUpdate(updateDto, task, project);
+
+        LocalDateTime updateTime = LocalDateTime.now();
+        task.setUpdatedAt(updateTime);
+
+        Task updatedTask = taskRepository.save(task);
+        log.info("Пользователь id = {} изменил задачу id = {}. Дата: {}.",
+                userContext.getUserId(), task.getId(), updateTime);
+        return mapper.toViewDto(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public List<TaskViewDto> getByFilter(TaskFilterDto taskFilterDto) {
+        Long projectId = taskFilterDto.projectId();
+        Project project = projectRepository.getByIdOrThrow(projectId);
+        validateUserInProjectTeam(projectId, userContext.getUserId(), project);
+
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        List<Task> filteredTasks = filterService.getFilteredList(tasks, taskFilterDto);
+
+        log.info("Получение списка всех задач проекта с фильтрами.");
+        return filteredTasks.stream()
+                .map(mapper::toViewDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public TaskViewDto getById(long id) {
+        Task task = taskRepository.getByIdOrThrow(id);
+
+        Long projectId = task.getProject().getId();
+        Project project = projectRepository.getByIdOrThrow(projectId);
+        validateUserInProjectTeam(projectId, userContext.getUserId(), project);
+
+        return mapper.toViewDto(task);
+    }
+
+    private void installingRelatedEntitiesForCreate(TaskCreateDto createDto,
+                                                    Task task, Project project) {
+        Task parentTask = taskRepository.getByIdOrThrow(createDto.parentTaskId());
+
+        List<Task> linkedTask = createDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.getByIdOrThrow(aLong))
+                .toList();
+
+        Stage stage = stageRepository.getByIdOrThrow(createDto.stageId());
+
+        task.setParentTask(parentTask);
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
+    }
+
+    private void installingRelatedEntitiesForUpdate(TaskUpdateDto updateDto,
+                                                    Task task, Project project) {
+        List<Task> linkedTask = updateDto.linkedTasksId().stream()
+                .map(aLong -> taskRepository.getByIdOrThrow(aLong))
+                .toList();
+
+        Stage stage = stageRepository.getByIdOrThrow(updateDto.stageId());
+
+        task.setLinkedTasks(linkedTask);
+        task.setProject(project);
+        task.setStage(stage);
+    }
+}

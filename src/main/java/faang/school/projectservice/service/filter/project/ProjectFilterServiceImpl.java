@@ -11,7 +11,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
-public class FilterServiceImpl implements FilterService<Project, ProjectFilterDto> {
+public class ProjectFilterServiceImpl implements FilterService<Project, ProjectFilterDto> {
     private final List<Filter<Project, ProjectFilterDto>> filters;
 
     @Override
