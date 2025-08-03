@@ -14,6 +14,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.validation.vacancy.VacancyFilterDtoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final VacancyMapper mapper;
     private final FilterService<Vacancy, VacancyFilterDto> filterService;
+    private final VacancyFilterDtoValidator filterDtoValidator;
 
     /**
      * Создаёт новую вакансию в проекте.
@@ -108,7 +110,7 @@ public class VacancyServiceImpl implements VacancyService {
      */
     @Override
     public List<VacancyDto> getList(VacancyFilterDto filterDto) {
-        filterDto.validate();
+        filterDtoValidator.validate(filterDto);
         var vacancies = vacancyRepository.findAll();
         vacancies = filterService.getFilteredList(vacancies, filterDto);
         return vacancies.stream()

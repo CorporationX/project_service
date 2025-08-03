@@ -57,17 +57,4 @@ public record VacancyFilterDto(
         @PastOrPresent
         LocalDateTime updatedAtTo
 ) {
-    public void validate() {
-        if (minCount != null && maxCount != null && minCount > maxCount) {
-            throw new DataValidationException("Минимальное количество вакансии не может быть больше максимальной");
-        }
-
-        if (createdAtFrom != null && createdAtTo != null && createdAtFrom.isAfter(createdAtTo)) {
-            throw new DataValidationException("Диапазон даты создания задан не корректно");
-        }
-
-        if (updatedAtFrom != null && updatedAtTo != null & updatedAtFrom.isAfter(updatedAtTo)) {
-            throw new DataValidationException("Диапазон даты обновления задан не корректно");
-        }
-    }
 }
