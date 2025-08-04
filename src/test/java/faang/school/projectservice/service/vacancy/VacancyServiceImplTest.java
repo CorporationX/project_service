@@ -30,6 +30,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
@@ -133,8 +134,7 @@ public class VacancyServiceImplTest {
     @DisplayName("обновление вакансии успешный кейс")
     @MethodSource("faang.school.projectservice.service.vacancy.VacancyServiceTestData#provideUpdateParams")
     void update_success(Long userId, VacancyUpdateDto updateDto, Project project,
-                        Vacancy vacancyFromDb, Vacancy preUpdatedVacancy,
-                        Vacancy updatedVacancy, VacancyDto expected) {
+                        Vacancy vacancyFromDb, Vacancy updatedVacancy, VacancyDto expected) {
         var projectId = project.getId();
         var vacancyId = vacancyFromDb.getId();
 
@@ -151,7 +151,7 @@ public class VacancyServiceImplTest {
             return null;
         }).when(vacancyMapper).update(eq(updateDto), eq(vacancyFromDb));
 
-        when(vacancyRepository.save(eq(preUpdatedVacancy)))
+        when(vacancyRepository.save(same(vacancyFromDb)))
                 .thenReturn(updatedVacancy);
 
         when(vacancyMapper.toViewDto(eq(updatedVacancy)))

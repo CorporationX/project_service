@@ -150,17 +150,6 @@ public class VacancyServiceTestData {
                 WorkSchedule.REMOTE
         );
         var vacancyId = 1L;
-        var preUpdatedVacancy = toEntity(
-                vacancyId,
-                createDto,
-                project,
-                userId,
-                VacancyStatus.OPEN
-        );
-        preUpdatedVacancy.setName("Analyst");
-        preUpdatedVacancy.setDescription("Analyst");
-        preUpdatedVacancy.setPosition(TeamRole.ANALYST);
-        preUpdatedVacancy.setUpdatedBy(userId);
         var updatedVacancy = toEntity(
                 vacancyId,
                 createDto,
@@ -193,7 +182,6 @@ public class VacancyServiceTestData {
                         updateDto,
                         project,
                         vacancyFromDb,
-                        preUpdatedVacancy,
                         updatedVacancy,
                         expected
                 )
