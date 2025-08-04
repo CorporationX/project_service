@@ -14,14 +14,7 @@ import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.filter.vacancy.VacancyCountFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyCreateAtFilter;
 import faang.school.projectservice.service.filter.vacancy.VacancyFilterServiceImpl;
-import faang.school.projectservice.service.filter.vacancy.VacancyNameFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyPositionFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyRequiredSkillsFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyStatusFilter;
-import faang.school.projectservice.service.filter.vacancy.VacancyUpdateAtFilter;
 import faang.school.projectservice.validation.vacancy.VacancyFilterDtoValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,15 +25,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
