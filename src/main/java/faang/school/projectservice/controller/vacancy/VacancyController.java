@@ -68,7 +68,7 @@ public class VacancyController {
      * @param filterDto DTO с параметрами фильтрации.
      * @return Список вакансий {@link VacancyDto}, удовлетворяющих условиям фильтра.
      */
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<List<VacancyDto>> getList(@Valid @ModelAttribute VacancyFilterDto filterDto) {
         var vacancies = service.getList(filterDto);
         return ResponseEntity.ok(vacancies);

@@ -22,6 +22,7 @@ import faang.school.projectservice.service.filter.vacancy.VacancyPositionFilter;
 import faang.school.projectservice.service.filter.vacancy.VacancyRequiredSkillsFilter;
 import faang.school.projectservice.service.filter.vacancy.VacancyStatusFilter;
 import faang.school.projectservice.service.filter.vacancy.VacancyUpdateAtFilter;
+import faang.school.projectservice.validation.vacancy.VacancyFilterDtoValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +65,8 @@ public class VacancyServiceImplTest {
     private VacancyMapper vacancyMapper;
     @InjectMocks
     private VacancyServiceImpl service;
-
+    @Mock
+    private VacancyFilterDtoValidator filterDtoValidator;
 
     @Test
     @DisplayName("создания вакансии успешный кейс")
@@ -94,13 +96,11 @@ public class VacancyServiceImplTest {
                 userId,
                 VacancyStatus.OPEN
         );
-
-        var optional = Optional.of(project);
         var viewDto = VacancyServiceTestData.toVacancyViewDto(createdVacancy);
 
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findById(projectId))
-                .thenReturn(optional);
+        when(projectRepository.getByIdOrThrow(projectId))
+                .thenReturn(project);
         when(teamMemberRepository.isUserHasRole(eq(userId), eq(projectId), eq(TeamRole.MANAGER)))
                 .thenReturn(true);
         when(vacancyMapper.toEntity(eq(createDto)))
@@ -128,11 +128,9 @@ public class VacancyServiceImplTest {
                 WorkSchedule.REMOTE
         );
 
-        var optional = Optional.of(project);
-
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findById(projectId))
-                .thenReturn(optional);
+        when(projectRepository.getByIdOrThrow(projectId))
+                .thenReturn(project);
         when(teamMemberRepository.isUserHasRole(eq(userId), eq(projectId), eq(TeamRole.MANAGER)))
                 .thenReturn(false);
 
@@ -149,10 +147,9 @@ public class VacancyServiceImplTest {
                         Vacancy updatedVacancy, VacancyDto expected) {
         var projectId = project.getId();
         var vacancyId = vacancyFromDb.getId();
-        var optional = Optional.of(vacancyFromDb);
 
         when(userContext.getUserId()).thenReturn(userId);
-        when(vacancyRepository.findById(vacancyId)).thenReturn(optional);
+        when(vacancyRepository.getByIdOrThrow(vacancyId)).thenReturn(vacancyFromDb);
         when(teamMemberRepository.isUserHasRole(eq(userId), eq(projectId), eq(TeamRole.MANAGER)))
                 .thenReturn(true);
         doAnswer(invocation -> {

@@ -95,7 +95,7 @@ class VacancyControllerTest {
         when(vacancyService.getList(eq(filter)))
                 .thenReturn(list);
 
-        mockMvc.perform(get("/vacancies/search"))
+        mockMvc.perform(get("/vacancies"))
                 .andExpect(content().json(objectMapper.writeValueAsString(list)))
                 .andExpect(status().isOk());
 

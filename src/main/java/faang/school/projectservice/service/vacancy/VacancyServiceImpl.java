@@ -57,15 +57,8 @@ public class VacancyServiceImpl implements VacancyService {
     @Transactional
     public VacancyDto create(VacancyCreateDto createDto) {
         var userId = userContext.getUserId();
-        var project = projectRepository.findById(createDto.projectId())
-                .orElseThrow(() -> {
-                    log.warn("Нет проекта с таким projectId {}", createDto.projectId());
-                    return new EntityNotFoundException("Нет проекта с таким projectId " + createDto.projectId());
-                });
-        var isUserManager = teamMemberRepository.isUserHasRole(userId, project.getId(), TeamRole.MANAGER);
-        if (project.getOwnerId() != userId && !isUserManager) {
-            throw new ForbiddenException("У пользователя нет доступа для создания вакансии в этом проекте");
-        }
+        var project = projectRepository.getByIdOrThrow(createDto.projectId());
+        validateMembership(userId, project.getId(), project.getOwnerId());
         var vacancy = mapper.toEntity(createDto);
         vacancy.setCreatedBy(userId);
         vacancy.setProject(project);
@@ -87,15 +80,8 @@ public class VacancyServiceImpl implements VacancyService {
     @Transactional
     public VacancyDto update(Long vacancyId, VacancyUpdateDto updateDto) {
         var userId = userContext.getUserId();
-        var vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> {
-                    log.warn("Нет вакансии с таким id {}", vacancyId);
-                    return new EntityNotFoundException("Нет вакансии с таким id " + vacancyId);
-                });
-        var isUserManager = teamMemberRepository.isUserHasRole(userId, vacancy.getProject().getId(), TeamRole.MANAGER);
-        if (vacancy.getProject().getOwnerId() != userId && !isUserManager) {
-            throw new ForbiddenException("У пользователя нет доступа для редактирования вакансии в этом проекте");
-        }
+        var vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        validateMembership(userId, vacancy.getProject().getId(), vacancy.getProject().getOwnerId());
         mapper.update(updateDto, vacancy);
         vacancy.setUpdatedBy(userId);
         vacancy = vacancyRepository.save(vacancy);
@@ -127,11 +113,14 @@ public class VacancyServiceImpl implements VacancyService {
      */
     @Override
     public VacancyDto getById(Long vacancyId) {
-        var vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> {
-                    log.warn("Вакансия с таким id {} не найдена", vacancyId);
-                    return new EntityNotFoundException("Вакансия с таким id " + vacancyId + " не найдена");
-                });
+        var vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
         return mapper.toViewDto(vacancy);
+    }
+
+    private void validateMembership(long userId, long projectId, long ownerId) {
+        var isUserManager = teamMemberRepository.isUserHasRole(userId, projectId, TeamRole.MANAGER);
+        if (ownerId != userId && !isUserManager) {
+            throw new ForbiddenException("У пользователя нет доступа для создания вакансии в этом проекте");
+        }
     }
 }

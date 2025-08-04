@@ -37,7 +37,7 @@ public interface VacancyMapper {
      * @param createDto входной DTO
      * @return новая сущность вакансии
      */
-    @Mapping(target = "status", expression = "java(faang.school.projectservice.model.VacancyStatus.OPEN)")
+    @Mapping(target = "status", constant = "OPEN")
     Vacancy toEntity(VacancyCreateDto createDto);
 
     /**
