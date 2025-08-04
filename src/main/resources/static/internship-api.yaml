@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: Internship Management API
+  version: 1.0.0
+  description: API для управления стажировками внутри проектов
+
+servers:
+  - url: http://localhost:8082
+
+paths:
+  /projects/{projectId}/internships:
+    get:
+      summary: Получить стажировки проекта
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/InternshipStatus'
+        - name: role
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TeamRole'
+      responses:
+        '200':
+          description: Список стажировок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InternshipDto'
+
+    post:
+      summary: Создать стажировку
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternshipDto'
+      responses:
+        '201':
+          description: Стажировка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternshipDto'
+        '400':
+          description: Ошибка валидации
+
+  /internships:
+    get:
+      summary: Получить все стажировки
+      responses:
+        '200':
+          description: Список всех стажировок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InternshipDto'
+
+  /internships/{id}:
+    get:
+      summary: Получить стажировку по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternshipDto'
+        '404':
+          description: Стажировка не найдена
+
+    put:
+      summary: Обновить или завершить стажировку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternshipDto'
+      responses:
+        '200':
+          description: Успешно обновлено
+        '400':
+          description: Ошибка валидации
+
+components:
+  schemas:
+    InternshipDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        projectId:
+          type: integer
+          example: 101
+        mentorId:
+          type: integer
+          example: 42
+        traineeIds:
+          type: array
+          items:
+            type: integer
+          example: [55, 66]
+        role:
+          $ref: '#/components/schemas/TeamRole'
+        startDate:
+          type: string
+          format: date-time
+          example: 2025-08-01T00:00:00Z
+        endDate:
+          type: string
+          format: date-time
+          example: 2025-09-30T23:59:59Z
+        status:
+          $ref: '#/components/schemas/InternshipStatus'
+        name:
+          type: string
+          example: "Java Backend Internship"
+        description:
+          type: string
+          example: "Стажировка по Java в рамках проекта"
+        createdBy:
+          type: integer
+        updatedBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    InternshipStatus:
+      type: string
+      enum: [IN_PROGRESS, COMPLETED, FAILED]
+
+    TeamRole:
+      type: string
+      enum: [OWNER, MANAGER, DEVELOPER, DESIGNER, TESTER, ANALYST, INTERN]
