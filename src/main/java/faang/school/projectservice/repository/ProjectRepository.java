@@ -15,7 +15,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     default Project getByIdOrThrow(long projectId) {
         return findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(projectId)));
+                .orElseThrow(() -> new EntityNotFoundException("Нет проекта с таким projectId " + projectId));
     }
 }
 
