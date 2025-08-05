@@ -13,5 +13,5 @@ public interface InternshipRepository extends JpaRepository<Internship, Long> {
                 .orElseThrow(() -> new EntityNotFoundException("Internship not found"));
     }
 
-    List<Internship> findAllProjectsId(Long projectId);
+    List<Internship> findAllByProjectId(Long projectId);
 }

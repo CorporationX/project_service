@@ -6,6 +6,9 @@ import faang.school.projectservice.model.Internship;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -33,8 +36,16 @@ public interface InternshipMapper {
 
     List<InternshipDto> toDtoList(List<Internship> entities);
 
-    InternshipStatus map(faang.school.projectservice.model. InternshipStatus status);
+    InternshipStatus map(faang.school.projectservice.model.InternshipStatus status);
 
     faang.school.projectservice.model.InternshipStatus map(InternshipStatus status);
+
+    default OffsetDateTime asOffsetDateTime(LocalDateTime localDateTime) {
+        return localDateTime != null ? localDateTime.atOffset(ZoneOffset.UTC) : null;
+    }
+
+    default LocalDateTime asLocalDateTime(OffsetDateTime offsetDateTime) {
+        return offsetDateTime != null ? offsetDateTime.toLocalDateTime() : null;
+    }
 }
 

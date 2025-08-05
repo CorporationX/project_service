@@ -92,7 +92,7 @@ public class InternshipServiceImpl implements InternshipService {
     public List<InternshipDto> findByProject(InternshipFilterDto filterDto) {
         Long projectId = filterDto.getProjectId();
 
-        List<Internship> internships = internshipRepository.findAllProjectsId(projectId);
+        List<Internship> internships = internshipRepository.findAllByProjectId(projectId);
 
         Stream<Internship> filterStream = internships.stream();
         for (Filter<Internship, InternshipFilterDto> filter : filters) {
