@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query("""
@@ -13,7 +14,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
             WHERE tm.userId = :userId
             AND t.project.id = :projectId
             """)
-    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+    Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 

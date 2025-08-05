@@ -1,14 +1,11 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.apimodel.InternshipDto;
+import faang.school.projectservice.apimodel.InternshipStatus;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -36,22 +33,8 @@ public interface InternshipMapper {
 
     List<InternshipDto> toDtoList(List<Internship> entities);
 
-    default OffsetDateTime map(LocalDateTime localDateTime) {
-        return localDateTime == null ? null : localDateTime.atOffset(ZoneOffset.UTC);
-    }
+    InternshipStatus map(faang.school.projectservice.model. InternshipStatus status);
 
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
-
-    default Long map(TeamMember member) {
-        return member == null ? null : member.getId();
-    }
-
-    default TeamMember map(Integer id) {
-        if (id == null) return null;
-        TeamMember member = new TeamMember();
-        member.setId(Long.valueOf(id));
-        return member;
-    }
+    faang.school.projectservice.model.InternshipStatus map(InternshipStatus status);
 }
+

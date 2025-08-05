@@ -131,7 +131,7 @@ components:
           type: array
           items:
             type: integer
-          example: [55, 66]
+          example: [ 55, 66 ]
         role:
           $ref: '#/components/schemas/TeamRole'
         startDate:
@@ -161,10 +161,30 @@ components:
           type: string
           format: date-time
 
+    InternshipFilterDto:
+      type: object
+      required:
+        - projectId
+      properties:
+        projectId:
+          type: integer
+          format: int64
+        statuses:
+          type: array
+          description: Список статусов
+          items:
+            $ref: '#/components/schemas/InternshipStatus'
+        roles:
+          type: array
+          description: Список ролей
+          items:
+            $ref: '#/components/schemas/TeamRole'
+
+
     InternshipStatus:
       type: string
-      enum: [IN_PROGRESS, COMPLETED, FAILED]
+      enum: [ IN_PROGRESS, COMPLETED, FAILED ]
 
     TeamRole:
       type: string
-      enum: [OWNER, MANAGER, DEVELOPER, DESIGNER, TESTER, ANALYST, INTERN]
+      enum: [ OWNER, MANAGER, DEVELOPER, DESIGNER, TESTER, ANALYST, INTERN ]
