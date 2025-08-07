@@ -29,6 +29,13 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
 server:
   port: 8082
 
@@ -46,9 +53,20 @@ services:
     secretKey: password
     bucketName: projectbucket
     isMocked: false
+    region: us-east-1
+    presentationFolder: presentations
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+pdf:
+  template-name: presentation-template.html
+  temp-file:
+    prefix: project_presentation_
+    suffix: .pdf
+
+uploader:
+  max-file-size: 10MB
