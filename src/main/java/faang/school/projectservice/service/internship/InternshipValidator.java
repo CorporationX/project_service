@@ -163,9 +163,6 @@ public class InternshipValidator {
      * Удаляет стажёра из проекта, если стажировка не завершена успешно
      */
     private void removeMemberFromProject(Long userId, Long projectId) {
-        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
-
-        teamMemberRepository.delete(member);
+        teamMemberRepository.removeMemberFromProjectOrThrow(userId, projectId);
     }
 }
