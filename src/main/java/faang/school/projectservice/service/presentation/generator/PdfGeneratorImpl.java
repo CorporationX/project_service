@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.presentation.generator;
 
 import com.lowagie.text.DocumentException;
+import faang.school.projectservice.config.s3.PdfProperties;
 import faang.school.projectservice.dto.presentation.ProjectPresentationDto;
 import faang.school.projectservice.exeption.PdfGenerationException;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,7 @@ import java.io.OutputStream;
 @RequiredArgsConstructor
 public class PdfGeneratorImpl implements PdfGenerator {
 
-    private static final String TEMPLATE_NAME = "presentation-template.html";
-    private static final String TEMP_FILE_PREFIX = "project_presentation_";
-    private static final String TEMP_FILE_SUFFIX = ".pdf";
+    private final PdfProperties pdfProperties;
 
     private final TemplateEngine templateEngine;
 
@@ -42,11 +41,14 @@ public class PdfGeneratorImpl implements PdfGenerator {
     private String renderHtml(ProjectPresentationDto presentationDto) {
         Context context = new Context();
         context.setVariable("project", presentationDto);
-        return templateEngine.process(TEMPLATE_NAME, context);
+        return templateEngine.process(pdfProperties.templateName(), context);
     }
 
     private File generatePdfFromHtml(String html) throws IOException, DocumentException {
-        File tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX);
+        File tempFile = File.createTempFile(
+                pdfProperties.tempFile().prefix(),
+                pdfProperties.tempFile().suffix()
+        );
         try (OutputStream outputStream = new FileOutputStream(tempFile)) {
             ITextRenderer renderer = new ITextRenderer();
             renderer.setDocumentFromString(html);

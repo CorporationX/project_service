@@ -46,18 +46,31 @@ public class ProjectPresentationServiceImpl implements ProjectPresentationServic
     private final UserService userService;
 
     public static final String PDF_FILE_NAME = "presentation.pdf";
+    private static final String CONTENT_TYPE_PDF = "application/pdf";
 
     @Override
     public void create(Long projectId) {
         Project project = projectService.getProjectById(projectId);
         UserDto owner = userService.getById(project.getOwnerId());
         ProjectPresentationDto dto = buildPresentationDto(project, owner.username());
+
         File pdfFile = pdfGenerator.generateToFile(dto);
         String fileKey = fileKeyGenerator.generateForProject(projectId);
-        uploaderService.uploadPdf(project, pdfFile, fileKey);
-        project.setPresentationFileKey(fileKey);
-        project.setPresentationGeneratedAt(LocalDateTime.now());
-        projectService.save(project);
+
+        try {
+            uploaderService.uploadPdf(project, pdfFile, fileKey, CONTENT_TYPE_PDF);
+            project.setPresentationFileKey(fileKey);
+            project.setPresentationGeneratedAt(LocalDateTime.now());
+            projectService.save(project);
+        } finally {
+            deleteTempFile(pdfFile);
+        }
+    }
+
+    private void deleteTempFile(File file) {
+        if (file != null && file.exists() && !file.delete()) {
+            file.deleteOnExit();
+        }
     }
 
     private ProjectPresentationDto buildPresentationDto(Project project, String username) {

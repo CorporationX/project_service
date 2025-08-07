@@ -5,9 +5,9 @@ import faang.school.projectservice.dto.presentation.ProjectPresentationDto;
 import faang.school.projectservice.dto.resource.S3FileResponse;
 import faang.school.projectservice.exeption.EntityNotFoundException;
 import faang.school.projectservice.exeption.S3DownloadException;
-import faang.school.projectservice.mapper.ProjectInfoMapper;
-import faang.school.projectservice.mapper.TaskMapper;
-import faang.school.projectservice.mapper.TeamMapper;
+import faang.school.projectservice.mapper.ProjectInfoMapperImpl;
+import faang.school.projectservice.mapper.TaskMapperImpl;
+import faang.school.projectservice.mapper.TeamMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.presentation.generator.PdfGenerator;
 import faang.school.projectservice.service.presentation.stats.ProjectPresentationStatsServiceImpl;
@@ -24,24 +24,16 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectPresentationServiceTest {
+class ProjectPresentationServiceTest {
 
     @InjectMocks
     private ProjectPresentationServiceImpl presentationService;
@@ -68,13 +60,13 @@ public class ProjectPresentationServiceTest {
     private UserService userService;
 
     @Spy
-    private ProjectInfoMapper infoMapper;
+    private ProjectInfoMapperImpl infoMapper;
 
     @Spy
-    private TeamMapper teamMapper;
+    private TeamMapperImpl teamMapper;
 
     @Spy
-    private TaskMapper taskMapper;
+    private TaskMapperImpl taskMapper;
 
     private static final Long PROJECT_ID = 1L;
     private static final Long OWNER_ID = 10L;
@@ -100,7 +92,7 @@ public class ProjectPresentationServiceTest {
         verify(userService).getById(OWNER_ID);
         verify(pdfGenerator).generateToFile(any(ProjectPresentationDto.class));
         verify(fileKeyGenerator).generateForProject(PROJECT_ID);
-        verify(uploaderService).uploadPdf(project, file, FILE_KEY);
+        verify(uploaderService).uploadPdf(project, file, FILE_KEY, "application/pdf");
         verify(projectService).save(project);
         verify(statsService).calculate(project);
 
@@ -160,11 +152,12 @@ public class ProjectPresentationServiceTest {
         when(userService.getById(OWNER_ID)).thenReturn(user);
         when(fileKeyGenerator.generateForProject(PROJECT_ID)).thenReturn(FILE_KEY);
         when(pdfGenerator.generateToFile(any())).thenReturn(file);
+
         doThrow(new RuntimeException("S3 error"))
-                .when(uploaderService).uploadPdf(project, file, FILE_KEY);
+                .when(uploaderService).uploadPdf(project, file, FILE_KEY, "application/pdf");
 
         assertThrows(RuntimeException.class, () -> presentationService.create(PROJECT_ID));
-        verify(uploaderService).uploadPdf(project, file, FILE_KEY);
+        verify(uploaderService).uploadPdf(project, file, FILE_KEY, "application/pdf");
     }
 
     @Test

@@ -23,14 +23,12 @@ public class S3ServiceImpl implements S3Service {
     private final S3Client s3Client;
     private final S3Properties s3Properties;
 
-    private static final String CONTENT_TYPE_PDF = "application/pdf";
-
     @Override
-    public void upload(InputStream inputStream, String key, long contentLength) {
+    public void upload(InputStream inputStream, String key, long contentLength, String contentType) {
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(s3Properties.bucketName())
                 .key(key)
-                .contentType(CONTENT_TYPE_PDF)
+                .contentType(contentType)
                 .contentLength(contentLength)
                 .build();
         s3Client.putObject(request, RequestBody.fromInputStream(inputStream, contentLength));

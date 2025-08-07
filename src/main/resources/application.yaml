@@ -61,3 +61,12 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+pdf:
+  template-name: presentation-template.html
+  temp-file:
+    prefix: project_presentation_
+    suffix: .pdf
+
+uploader:
+  max-file-size: 10MB

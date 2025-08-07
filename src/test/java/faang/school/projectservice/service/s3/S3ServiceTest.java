@@ -49,6 +49,7 @@ public class S3ServiceTest {
 
     private static final String BUCKET = "test-bucket";
     private static final String KEY = "test-key";
+    private static final String CONTENT_TYPE = "application/pdf";
 
     @BeforeAll
     static void beforeAll() {
@@ -69,19 +70,19 @@ public class S3ServiceTest {
     }
 
     @Test
-    @DisplayName("Should upload PDF to S3 successfully")
+    @DisplayName("Should upload PDF to S3 successfully with content type")
     void shouldUploadPdfSuccessfully() {
         InputStream inputStream = new ByteArrayInputStream("pdf content".getBytes());
         long contentLength = 11;
 
-        s3Service.upload(inputStream, KEY, contentLength);
+        s3Service.upload(inputStream, KEY, contentLength, CONTENT_TYPE);
 
         verify(s3Client).putObject(putRequestCaptor.capture(), any(RequestBody.class));
         PutObjectRequest actual = putRequestCaptor.getValue();
 
         assertEquals(BUCKET, actual.bucket());
         assertEquals(KEY, actual.key());
-        assertEquals("application/pdf", actual.contentType());
+        assertEquals(CONTENT_TYPE, actual.contentType());
         assertEquals(contentLength, actual.contentLength());
     }
 
@@ -121,9 +122,7 @@ public class S3ServiceTest {
     @DisplayName("Should throw exception when S3 download fails")
     void shouldThrowWhenDownloadFails() {
         when(s3Client.getObject(any(GetObjectRequest.class)))
-                .thenThrow(S3Exception.builder()
-                        .message("error")
-                        .build());
+                .thenThrow(S3Exception.builder().message("error").build());
 
         S3DownloadException exception = assertThrows(S3DownloadException.class,
                 () -> s3Service.download(KEY));
