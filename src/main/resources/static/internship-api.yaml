@@ -8,59 +8,6 @@ servers:
   - url: http://localhost:8082
 
 paths:
-  /projects/{projectId}/internships:
-    get:
-      summary: Получить стажировки проекта
-      parameters:
-        - name: projectId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: status
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/InternshipStatus'
-        - name: role
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/TeamRole'
-      responses:
-        '200':
-          description: Список стажировок
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InternshipDto'
-
-    post:
-      summary: Создать стажировку
-      parameters:
-        - name: projectId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InternshipDto'
-      responses:
-        '201':
-          description: Стажировка создана
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternshipDto'
-        '400':
-          description: Ошибка валидации
-
   /internships:
     get:
       summary: Получить все стажировки
