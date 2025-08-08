@@ -16,7 +16,11 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * InternshipValidator — сервис валидации стажировок
@@ -45,14 +49,16 @@ public class InternshipValidator {
      * @param project проект, в рамках которого проводится стажировка
      * @param dto     DTO с информацией о стажировке
      */
-    public void validateMentorShip(Project project, InternshipDto dto) {
+    public void validateMentorship(Project project, InternshipDto dto) {
         long mentorId = dto.getMentorId();
         List<Integer> traineeIds = dto.getTraineeIds();
 
         for (Integer traineeId : traineeIds) {
             var mentorDto = userServiceClient.getMentor(traineeId);
-            if (mentorDto == null || mentorDto.id() != mentorId) {
-                throw new IllegalArgumentException("Trainee " + traineeId + " has a different mentor");
+            if (mentorDto == null || !mentorDto.id().equals(mentorId)) {
+                throw new IllegalArgumentException(
+                        String.format("Trainee %d has a different mentor", traineeId)
+                );
             }
         }
 
@@ -104,13 +110,21 @@ public class InternshipValidator {
         var existingStatus = existing.getStatus();
 
         if (existingStatus == faang.school.projectservice.model.InternshipStatus.IN_PROGRESS) {
-            if (!existing.getInterns().stream().map(TeamMember::getId)
-                    .map(Long::intValue).toList()
-                    .equals(dto.getTraineeIds())) {
+            Set<Integer> existingTraineeIds = existing.getInterns().stream()
+                    .map(TeamMember::getId)
+                    .map(Long::intValue)
+                    .collect(Collectors.toSet());
+
+            Set<Integer> newTraineeIds = new HashSet<>(dto.getTraineeIds());
+
+            if (!existingTraineeIds.equals(newTraineeIds)) {
                 throw new IllegalArgumentException("Cannot change interns after internship has started");
             }
 
-            if (!existing.getMentorId().getId().equals(dto.getMentorId().longValue())) {
+            Long existingMentorId = existing.getMentorId() != null ? existing.getMentorId().getId() : null;
+            Long newMentorId = dto.getMentorId() != null ? dto.getMentorId().longValue() : null;
+
+            if (!Objects.equals(existingMentorId, newMentorId)) {
                 throw new IllegalArgumentException("Cannot change mentor after internship has started");
             }
         }
@@ -163,6 +177,10 @@ public class InternshipValidator {
      * Удаляет стажёра из проекта, если стажировка не завершена успешно
      */
     private void removeMemberFromProject(Long userId, Long projectId) {
-        teamMemberRepository.removeMemberFromProjectOrThrow(userId, projectId);
+        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Member not found with userId = " + userId + " and projectId = " + projectId
+                ));
+        teamMemberRepository.delete(member);
     }
 }

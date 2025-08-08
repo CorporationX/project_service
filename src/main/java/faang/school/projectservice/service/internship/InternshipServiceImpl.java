@@ -11,6 +11,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.Filter;
 import faang.school.projectservice.service.filter.FilterService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +29,12 @@ public class InternshipServiceImpl implements InternshipService {
     private final FilterService<Internship, InternshipFilterDto> internshipFilterService;
 
     @Override
+    @Transactional
     public InternshipDto create(Long projectId, InternshipDto dto) {
         internshipValidator.validateCreateDto(dto);
 
         Project project = projectRepository.getByIdOrThrow(projectId);
-        internshipValidator.validateMentorShip(project, dto);
+        internshipValidator.validateMentorship(project, dto);
 
         Internship internship = internshipMapper.toEntity(dto);
         internship.setProject(project);
@@ -90,15 +92,14 @@ public class InternshipServiceImpl implements InternshipService {
         mentor.setId(dto.getMentorId().longValue());
         internship.setMentorId(mentor);
 
-        List<TeamMember> interns = dto.getTraineeIds().stream()
-                .map(id -> {
-                    TeamMember member = new TeamMember();
-                    member.setId(id.longValue());
-                    return member;
-                })
-                .toList();
-
-        internship.setInterns(interns);
+        internship.setInterns(
+                dto.getTraineeIds().stream()
+                        .map(id -> {
+                            TeamMember member = new TeamMember();
+                            member.setId(id.longValue());
+                            return member;
+                        })
+                        .toList()
+        );
     }
-
 }

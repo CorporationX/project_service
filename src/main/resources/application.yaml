@@ -48,7 +48,3 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
-springdoc:
-  swagger-ui:
-    url: /internship-api.yaml

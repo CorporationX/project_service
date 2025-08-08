@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.apimodel.InternshipDto;
 import faang.school.projectservice.apimodel.InternshipStatus;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
