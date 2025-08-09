@@ -56,6 +56,10 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
 
+    annotationProcessor("org.hibernate.orm:hibernate-jpamodelgen:6.5.2.Final")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+
+
     /**
      * Tests
      */

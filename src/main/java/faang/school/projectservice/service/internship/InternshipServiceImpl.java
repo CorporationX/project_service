@@ -9,8 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.Filter;
-import faang.school.projectservice.service.filter.FilterService;
+import faang.school.projectservice.service.filter.intership.InternshipSpecifications;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,6 @@ public class InternshipServiceImpl implements InternshipService {
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
     private final InternshipValidator internshipValidator;
-    private final List<Filter<Internship, InternshipFilterDto>> filters;
-    private final FilterService<Internship, InternshipFilterDto> internshipFilterService;
 
     @Override
     @Transactional
@@ -75,16 +72,10 @@ public class InternshipServiceImpl implements InternshipService {
         return internshipMapper.toDto(internship);
     }
 
-    @Override
-    public List<InternshipDto> findByProject(InternshipFilterDto filterDto) {
-        Long projectId = filterDto.getProjectId();
-        List<Internship> internships = internshipRepository.findAllByProjectId(projectId);
-
-        List<Internship> filtered = internshipFilterService.getFilteredList(internships, filterDto);
-
-        return filtered.stream()
-                .map(internshipMapper::toDto)
-                .toList();
+    public List<Internship> getFilteredInternships(InternshipFilterDto dto) {
+        return internshipRepository.findAll(
+                InternshipSpecifications.byFilter(dto)
+        );
     }
 
     private void initializeMembers(Internship internship, InternshipDto dto) {
