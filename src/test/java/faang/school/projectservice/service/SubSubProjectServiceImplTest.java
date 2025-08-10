@@ -161,6 +161,11 @@ public class SubSubProjectServiceImplTest {
                 .parentProject(parent)
                 .build();
 
+        when(context.getUserId()).thenReturn(1L);
+        when(projectRepository.findById(dto.parentId())).thenReturn(Optional.ofNullable(parent));
+        when(mapper.toEntity(dto)).thenReturn(exceptedProject);
+        when(projectRepository.save(exceptedProject)).thenReturn(exceptedProject);
+
         SubProjectViewDto exceptedDto = new SubProjectViewDto(
                 2L,
                 dto.name(),
@@ -172,11 +177,6 @@ public class SubSubProjectServiceImplTest {
                 null,
                 null
         );
-
-        when(context.getUserId()).thenReturn(1L);
-        when(projectRepository.findById(dto.parentId())).thenReturn(Optional.ofNullable(parent));
-        when(mapper.toEntity(dto)).thenReturn(exceptedProject);
-        when(projectRepository.save(exceptedProject)).thenReturn(exceptedProject);
 
         SubProjectViewDto result = service.create(dto);
 
@@ -215,8 +215,7 @@ public class SubSubProjectServiceImplTest {
     }
 
     @Test
-    @DisplayName("Выбросить исключение, при обновляемом статусе COMPLETED, когда у проекта" +
-            "статусы подпроектов не COMPLETED")
+    @DisplayName("Исключение, при обновляемом статусе COMPLETED, когда статусы у подпроектов не COMPLETED")
     public void shouldThrowDataValidation_WhenUpdateCompletedWithIncompleteChildren() {
         Long id = 1L;
         SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
@@ -240,7 +239,6 @@ public class SubSubProjectServiceImplTest {
     @DisplayName("Создает Moment с участниками при завершении всех подпроектов")
     public void shouldCreateCompletionMoment_WhenAllSubProjectCompleted() {
         Long id = 1L;
-        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
         Project project = Project.builder()
                 .id(id)
                 .children(List.of(
@@ -266,13 +264,13 @@ public class SubSubProjectServiceImplTest {
 
         project.setParentProject(parent);
 
-
         when(projectRepository.findById(id)).thenReturn(Optional.of(project));
         when(momentRepository.save(any())).thenAnswer(inv -> {
             Moment moment = inv.getArgument(0);
             moment.setId(1L);
             return moment;
         });
+        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.COMPLETED, ProjectVisibility.PUBLIC);
 
         service.update(id, updateDto);
 
@@ -346,7 +344,6 @@ public class SubSubProjectServiceImplTest {
     @DisplayName("Изменяет видимость только проекта-родителя на PUBLIC при обновлении на PUBLIC")
     public void shouldUpdateProjectOnPublic_WhenParentWasPrivate() {
         Long id = 1L;
-        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
         Project parent = Project.builder()
                 .id(id)
                 .status(ProjectStatus.IN_PROGRESS)
@@ -363,11 +360,12 @@ public class SubSubProjectServiceImplTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
-        parent.setChildren(List.of(child1, child2));
         child2.setParentProject(parent);
         child1.setParentProject(parent);
+        parent.setChildren(List.of(child1, child2));
 
         when(projectRepository.findById(id)).thenReturn(Optional.of(parent));
+        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
 
         service.update(id, updateDto);
 
@@ -381,7 +379,6 @@ public class SubSubProjectServiceImplTest {
     @DisplayName("Вернуть DTO при успешном обновлении проекта")
     public void shouldReturnViewDto_WhenUpdateSuccessful() {
         Long id = 1L;
-        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
         Project parent = Project.builder()
                 .id(id)
                 .status(ProjectStatus.IN_PROGRESS)
@@ -404,6 +401,7 @@ public class SubSubProjectServiceImplTest {
 
         when(projectRepository.findById(id)).thenReturn(Optional.of(parent));
         when(projectRepository.save(parent)).thenReturn(parent);
+        SubProjectUpdateDto updateDto = new SubProjectUpdateDto(ProjectStatus.IN_PROGRESS, ProjectVisibility.PUBLIC);
 
         SubProjectViewDto result = service.update(id, updateDto);
 
