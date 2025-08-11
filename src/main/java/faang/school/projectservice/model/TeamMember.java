@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -45,6 +46,7 @@ public class TeamMember {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> roles;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
