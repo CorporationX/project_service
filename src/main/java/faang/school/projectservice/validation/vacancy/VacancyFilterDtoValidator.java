@@ -3,6 +3,7 @@ package faang.school.projectservice.validation.vacancy;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.validation.Validator;
+import org.springframework.stereotype.Component;
 
 /**
  * Валидатор для {@link VacancyFilterDto}.
@@ -19,6 +20,7 @@ import faang.school.projectservice.validation.Validator;
  * @author Myrza
  * @since 03.08.2025
  */
+@Component
 public class VacancyFilterDtoValidator implements Validator<VacancyFilterDto> {
     public void validate(VacancyFilterDto dto) {
         if (dto == null) {

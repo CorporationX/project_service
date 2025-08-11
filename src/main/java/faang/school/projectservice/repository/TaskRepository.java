@@ -9,6 +9,8 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByProjectId(Long projectId);
 
+    List<Task> findAllByProjectIdAndPerformerUserId(Long projectId, Long performerId);
+
     default Task getByIdOrThrow(long id) {
         return findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));

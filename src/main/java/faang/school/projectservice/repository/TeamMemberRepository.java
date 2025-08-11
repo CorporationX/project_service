@@ -1,11 +1,13 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     @Query("""
@@ -13,7 +15,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
             WHERE tm.userId = :userId
             AND t.project.id = :projectId
             """)
-    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+    Optional<TeamMember> findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
 
@@ -26,4 +28,12 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
                 AND :role MEMBER OF tm.roles
             """)
     boolean isUserHasRole(long userId, long projectId, TeamRole role);
+
+    default void deleteByUserIdAndProjectIdOrThrow(Long userId, Long projectId) {
+        TeamMember member = findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Member not found with userId = " + userId + " and projectId = " + projectId
+                ));
+        delete(member);
+    }
 }
