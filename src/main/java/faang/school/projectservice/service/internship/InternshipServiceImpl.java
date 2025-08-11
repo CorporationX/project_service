@@ -2,14 +2,19 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.apimodel.InternshipDto;
 import faang.school.projectservice.apimodel.InternshipFilterDto;
-import faang.school.projectservice.apimodel.InternshipStatus;
+import faang.school.projectservice.apimodel.InternshipStatusDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filter.Filter;
+import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.filter.FilterService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +30,8 @@ public class InternshipServiceImpl implements InternshipService {
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
     private final InternshipValidator internshipValidator;
-    private final List<Filter<Internship, InternshipFilterDto>> filters;
+    private final TaskRepository taskRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final FilterService<Internship, InternshipFilterDto> internshipFilterService;
 
     @Override
@@ -36,8 +42,7 @@ public class InternshipServiceImpl implements InternshipService {
         Project project = projectRepository.getByIdOrThrow(projectId);
         internshipValidator.validateMentorship(project, dto);
 
-        Internship internship = internshipMapper.toEntity(dto);
-        internship.setProject(project);
+        Internship internship = internshipMapper.toEntityWithProject(dto, project);
 
         initializeMembers(internship, dto);
 
@@ -46,6 +51,7 @@ public class InternshipServiceImpl implements InternshipService {
     }
 
     @Override
+    @Transactional
     public InternshipDto update(Long id, InternshipDto dto) {
         Internship existing = internshipRepository.getRequiredById(id);
 
@@ -54,8 +60,8 @@ public class InternshipServiceImpl implements InternshipService {
         existing.setStatus(internshipMapper.map(dto.getStatus()));
         existing.setEndDate(dto.getEndDate().toLocalDateTime());
 
-        if (dto.getStatus() == InternshipStatus.COMPLETED || dto.getStatus() == InternshipStatus.FAILED) {
-            internshipValidator.applyCompletionLogic(existing);
+        if (dto.getStatus() == InternshipStatusDto.COMPLETED || dto.getStatus() == InternshipStatusDto.FAILED) {
+            applyCompletionLogic(existing);
         }
 
         Internship saved = internshipRepository.save(existing);
@@ -87,6 +93,56 @@ public class InternshipServiceImpl implements InternshipService {
                 .toList();
     }
 
+    /**
+     * Применяет логику завершения стажировки
+     * <p>
+     * Для каждого стажёра:
+     * - Если все задачи выполнены, то повышаем роль до разработчика
+     * - Иначе удаляем стажёра из проекта
+     * <p>
+     *
+     * @param internship объект стажировки
+     */
+    private void applyCompletionLogic(Internship internship) {
+        for (TeamMember intern : internship.getInterns()) {
+            boolean completed = hasCompletedAllTasks(intern.getId(), internship.getId());
+
+            InternshipStatusDto status = internshipMapper.map(internship.getStatus());
+            if (status == InternshipStatusDto.COMPLETED && completed) {
+                promoteIntern(intern.getId(), internship.getProject().getId());
+            } else {
+                removeMemberFromProject(intern.getId(), internship.getProject().getId());
+            }
+        }
+    }
+
+    /**
+     * Проверяет, выполнены ли все задачи для стажёра в рамках проекта
+     */
+    private boolean hasCompletedAllTasks(Long userId, Long projectId) {
+        List<Task> tasks = taskRepository.findAllByProjectIdAndPerformerUserId(projectId, userId);
+        return tasks.stream().allMatch(task -> task.getStatus() == TaskStatus.DONE);
+    }
+
+    /**
+     * Повышает роль стажёра до разработчика
+     */
+    private void promoteIntern(Long userId, Long projectId) {
+        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+        member.getRoles().remove(TeamRole.INTERN);
+        member.getRoles().add(TeamRole.DEVELOPER);
+        teamMemberRepository.save(member);
+    }
+
+    /**
+     * Удаляет стажёра из проекта, если стажировка не завершена успешно
+     */
+    private void removeMemberFromProject(Long userId, Long projectId) {
+        teamMemberRepository.deleteByUserIdAndProjectIdOrThrow(userId, projectId);
+    }
+
     private void initializeMembers(Internship internship, InternshipDto dto) {
         TeamMember mentor = new TeamMember();
         mentor.setId(dto.getMentorId().longValue());
@@ -94,11 +150,7 @@ public class InternshipServiceImpl implements InternshipService {
 
         internship.setInterns(
                 dto.getTraineeIds().stream()
-                        .map(id -> {
-                            TeamMember member = new TeamMember();
-                            member.setId(id.longValue());
-                            return member;
-                        })
+                        .map(id -> new TeamMember(id.longValue()))
                         .toList()
         );
     }

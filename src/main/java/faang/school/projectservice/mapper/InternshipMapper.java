@@ -1,8 +1,9 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.apimodel.InternshipDto;
-import faang.school.projectservice.apimodel.InternshipStatus;
+import faang.school.projectservice.apimodel.InternshipStatusDto;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,6 +25,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface InternshipMapper {
 
+    @Mapping(target = "interns", ignore = true)
+    @Mapping(target = "schedule", ignore = true)
+    @Mapping(target = "mentorId.id", source = "mentorId")
+    Internship toEntityWithProject(InternshipDto dto, Project project);
+
     @Mapping(target = "projectId", ignore = true)
     @Mapping(target = "traineeIds", ignore = true)
     @Mapping(target = "mentorId", source = "mentorId.id")
@@ -37,9 +43,9 @@ public interface InternshipMapper {
 
     List<InternshipDto> toDtoList(List<Internship> entities);
 
-    InternshipStatus map(faang.school.projectservice.model.InternshipStatus status);
+    InternshipStatus map(InternshipStatusDto dtoStatus);
 
-    faang.school.projectservice.model.InternshipStatus map(InternshipStatus status);
+    InternshipStatusDto map(InternshipStatus entityStatus);
 
     default OffsetDateTime asOffsetDateTime(LocalDateTime localDateTime) {
         return localDateTime != null ? localDateTime.atOffset(ZoneOffset.UTC) : null;

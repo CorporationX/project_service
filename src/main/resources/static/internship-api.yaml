@@ -90,7 +90,7 @@ components:
           format: date-time
           example: 2025-09-30T23:59:59Z
         status:
-          $ref: '#/components/schemas/InternshipStatus'
+          $ref: '#/components/schemas/InternshipStatusDto'
         name:
           type: string
           example: "Java Backend Internship"
@@ -120,7 +120,7 @@ components:
           type: array
           description: Список статусов
           items:
-            $ref: '#/components/schemas/InternshipStatus'
+            $ref: '#/components/schemas/InternshipStatusDto'
         roles:
           type: array
           description: Список ролей
@@ -128,7 +128,7 @@ components:
             $ref: '#/components/schemas/TeamRole'
 
 
-    InternshipStatus:
+    InternshipStatusDto:
       type: string
       enum: [ IN_PROGRESS, COMPLETED, FAILED ]
 
