@@ -28,4 +28,12 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
                 AND :role MEMBER OF tm.roles
             """)
     boolean isUserHasRole(long userId, long projectId, TeamRole role);
+
+    default void deleteByUserIdAndProjectIdOrThrow(Long userId, Long projectId) {
+        TeamMember member = findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Member not found with userId = " + userId + " and projectId = " + projectId
+                ));
+        delete(member);
+    }
 }

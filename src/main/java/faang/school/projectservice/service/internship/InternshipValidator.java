@@ -1,16 +1,12 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.apimodel.InternshipDto;
-import faang.school.projectservice.apimodel.InternshipStatus;
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -109,7 +105,7 @@ public class InternshipValidator {
 
         var existingStatus = existing.getStatus();
 
-        if (existingStatus == faang.school.projectservice.model.InternshipStatus.IN_PROGRESS) {
+        if (existingStatus == InternshipStatus.IN_PROGRESS) {
             Set<Integer> existingTraineeIds = existing.getInterns().stream()
                     .map(TeamMember::getId)
                     .map(Long::intValue)
@@ -117,7 +113,7 @@ public class InternshipValidator {
 
             Set<Integer> newTraineeIds = new HashSet<>(dto.getTraineeIds());
 
-            if (!existingTraineeIds.equals(newTraineeIds)) {
+            if (!(newTraineeIds.containsAll(existingTraineeIds) && existingTraineeIds.containsAll(newTraineeIds))) {
                 throw new IllegalArgumentException("Cannot change interns after internship has started");
             }
 
@@ -128,59 +124,5 @@ public class InternshipValidator {
                 throw new IllegalArgumentException("Cannot change mentor after internship has started");
             }
         }
-    }
-
-    /**
-     * Применяет логику завершения стажировки
-     * <p>
-     * Для каждого стажёра:
-     * - Если все задачи выполнены, то повышаем роль до разработчика
-     * - Иначе удаляем стажёра из проекта
-     * <p>
-     *
-     * @param internship объект стажировки
-     */
-    public void applyCompletionLogic(Internship internship) {
-        for (TeamMember intern : internship.getInterns()) {
-            boolean completed = hasCompletedAllTasks(intern.getId(), internship.getId());
-
-            InternshipStatus status = internshipMapper.map(internship.getStatus());
-            if (status == InternshipStatus.COMPLETED && completed) {
-                promoteIntern(intern.getId(), internship.getProject().getId());
-            } else {
-                removeMemberFromProject(intern.getId(), internship.getProject().getId());
-            }
-        }
-    }
-
-    /**
-     * Проверяет, выполнены ли все задачи для стажёра в рамках проекта
-     */
-    private boolean hasCompletedAllTasks(Long userId, Long projectId) {
-        List<Task> tasks = taskRepository.findAllByProjectIdAndPerformerUserId(projectId, userId);
-        return tasks.stream().allMatch(task -> task.getStatus() == TaskStatus.DONE);
-    }
-
-    /**
-     * Повышает роль стажёра до разработчика
-     */
-    private void promoteIntern(Long userId, Long projectId) {
-        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
-
-        member.getRoles().remove(TeamRole.INTERN);
-        member.getRoles().add(TeamRole.DEVELOPER);
-        teamMemberRepository.save(member);
-    }
-
-    /**
-     * Удаляет стажёра из проекта, если стажировка не завершена успешно
-     */
-    private void removeMemberFromProject(Long userId, Long projectId) {
-        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Member not found with userId = " + userId + " and projectId = " + projectId
-                ));
-        teamMemberRepository.delete(member);
     }
 }
