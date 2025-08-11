@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.filter.intership;
 
 import faang.school.projectservice.apimodel.InternshipFilterDto;
+import faang.school.projectservice.apimodel.InternshipStatusDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Internship_;
@@ -36,26 +37,10 @@ public class InternshipSpecifications {
      * @return спецификация {@link Specification} для фильтрации сущностей Internship
      */
     public static Specification<Internship> byFilter(InternshipFilterDto dto) {
-        List<faang.school.projectservice.model.InternshipStatus> modelStatuses = null;
-        if (dto.getStatuses() != null) {
-            modelStatuses = dto.getStatuses().stream()
-                    .map(status -> faang
-                            .school.projectservice.model.InternshipStatus.valueOf(status.name()))
-                    .toList();
-        }
-
-        List<faang.school.projectservice.model.TeamRole> modelRoles = null;
-        if (dto.getRoles() != null) {
-            modelRoles = dto.getRoles().stream()
-                    .map(role -> faang
-                            .school.projectservice.model.TeamRole.valueOf(role.name()))
-                    .toList();
-        }
-
         return Specification
                 .where(hasProjectId(dto.getProjectId()))
-                .and(hasStatuses(modelStatuses))
-                .and(hasRoles(modelRoles));
+                .and(hasStatuses(dto.getStatuses()))
+                .and(hasRoles(dto.getRoles()));
     }
 
     /**
@@ -85,13 +70,14 @@ public class InternshipSpecifications {
      * @param statuses список статусов для фильтрации
      * @return спецификация {@link Specification} по статусам
      */
-    public static Specification<Internship> hasStatuses(List<InternshipStatus> statuses) {
-        return (root, query, cb) -> {
-            if (statuses == null || statuses.isEmpty()) {
-                return cb.conjunction();
-            }
-            return root.get(Internship_.status).in(statuses);
-        };
+    public static Specification<Internship> hasStatuses(List<InternshipStatusDto> statuses) {
+        if (statuses == null || statuses.isEmpty()) {
+            return null;
+        }
+        List<InternshipStatus> modelStatuses = statuses.stream()
+                .map(status -> InternshipStatus.valueOf(status.name()))
+                .toList();
+        return (root, query, cb) -> root.get(Internship_.status).in(modelStatuses);
     }
 
     /**
@@ -103,12 +89,13 @@ public class InternshipSpecifications {
      * @param roles список ролей для фильтрации
      * @return спецификация {@link Specification} по ролям
      */
-    public static Specification<Internship> hasRoles(List<TeamRole> roles) {
-        return (root, query, cb) -> {
-            if (roles == null || roles.isEmpty()) {
-                return cb.conjunction();
-            }
-            return root.get(Internship_.role).in(roles);
-        };
+    public static Specification<Internship> hasRoles(List<faang.school.projectservice.apimodel.TeamRole> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return null;
+        }
+        List<TeamRole> modelRoles = roles.stream()
+                .map(role -> TeamRole.valueOf(role.name()))
+                .toList();
+        return (root, query, cb) -> root.get(Internship_.role).in(modelRoles);
     }
 }
