@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.apimodel.InternshipDto;
-import faang.school.projectservice.apimodel.InternshipFilterDto;
 
 import java.util.List;
 
@@ -57,12 +56,4 @@ public interface InternshipService {
      * @return найденная стажировка
      */
     InternshipDto findById(Long id);
-
-    /**
-     * Выполняет фильтрацию стажировок по проекту и дополнительным параметрам.
-     *
-     * @param filterDto фильтр с параметрами проекта
-     * @return список подходящих стажировок
-     */
-    List<InternshipDto> findByProject(InternshipFilterDto filterDto);
 }
