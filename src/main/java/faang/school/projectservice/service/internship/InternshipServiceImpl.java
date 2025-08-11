@@ -15,7 +15,6 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.filter.FilterService;
 import faang.school.projectservice.service.filter.intership.InternshipSpecifications;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ public class InternshipServiceImpl implements InternshipService {
     private final InternshipValidator internshipValidator;
     private final TaskRepository taskRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final FilterService<Internship, InternshipFilterDto> internshipFilterService;
 
     @Override
     @Transactional
