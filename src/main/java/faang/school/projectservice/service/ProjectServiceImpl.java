@@ -3,23 +3,33 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectFilterDto;
-import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
 import faang.school.projectservice.util.project.ProjectUtil;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +40,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper mapper;
     private final UserContext userContext;
     private final FilterService<Project, ProjectFilterDto> filterService;
+    private final S3Client s3Client;
+    @Value("${services.s3.bucketName}")
+    private String bucketName;
 
     @Override
     @Transactional
@@ -52,11 +65,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectViewDto updateProject(long id, ProjectUpdateDto projectDto) {
-        Project project = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.valueOf(id)));
-
+        Project project = repository.getByIdOrThrow(id);
         if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
-            throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
+            throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
 
         project.setUpdatedAt(LocalDateTime.now());
@@ -80,14 +91,101 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectViewDto getProjectById(long id) {
-        Optional<Project> project = repository.findById(id);
-        if (project.isEmpty()) {
-            throw new RuntimeException("Проекта с указанным айди не существует");
-        } else if (!ProjectUtil.isAvailable(project.get(), userContext.getUserId())) {
+        Project project = repository.getByIdOrThrow(id);
+        if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
         log.info("Получение проекта по id = {}", id);
-        return mapper.toViewDto(project.get());
+        return mapper.toViewDto(project);
     }
 
+    @Override
+    public ProjectViewDto linkCover(Long id, MultipartFile file) {
+        final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new DataValidationException("Размер файла не должен превышать 5 Мб");
+        }
+
+        Project project = repository.getByIdOrThrow(id);
+        if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
+            throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(file.getInputStream());
+            if (image == null) {
+                throw new DataValidationException("Некорректный формат изображения");
+            }
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            boolean isSquare = Math.abs(width - height) <= 1;
+            int targetWidth;
+            int targetHeight;
+
+            targetWidth = 1080;
+            if (isSquare) {
+                targetHeight = 1080;
+            } else {
+                targetHeight = 566;
+            }
+
+            if (width > targetWidth || height > targetHeight) {
+                double widthRatio = (double) targetWidth / width;
+                double heightRatio = (double) targetHeight / height;
+                double scaleFactor = Math.min(widthRatio, heightRatio);
+
+                int newWidth = (int) (width * scaleFactor);
+                int newHeight = (int) (height * scaleFactor);
+
+                BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, image.getType());
+                Graphics2D g2d = scaledImage.createGraphics();
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2d.drawImage(image, 0, 0, newWidth, newHeight, null);
+                g2d.dispose();
+
+                image = scaledImage;
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            String formatName = getFormatName(file.getOriginalFilename());
+            ImageIO.write(image, formatName, baos);
+            byte[] imageBytes = baos.toByteArray();
+
+            String fileId = UUID.randomUUID().toString();
+
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileId)
+                            .contentType(file.getContentType())
+                            .build(),
+                    RequestBody.fromBytes(imageBytes)
+            );
+
+            project.setCoverImageId(fileId);
+            return mapper.toViewDto(repository.save(project));
+
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при обработке файла", e);
+        }
+    }
+
+    private String getFormatName(String filename) {
+        String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+        switch (ext) {
+            case "jpg":
+            case "jpeg":
+                return "jpg";
+            case "png":
+                return "png";
+            case "bmp":
+                return "bmp";
+            case "gif":
+                return "gif";
+            default:
+                throw new DataValidationException("Не поддерживаемый формат изображения");
+        }
+    }
 }
