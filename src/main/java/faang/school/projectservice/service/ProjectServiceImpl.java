@@ -112,80 +112,76 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         try {
-            BufferedImage image = ImageIO.read(file.getInputStream());
-            if (image == null) {
-                throw new DataValidationException("Некорректный формат изображения");
-            }
+            BufferedImage image = correctFormat(file);
+            saveImageInS3(file, image, project);
 
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-            boolean isSquare = Math.abs(width - height) <= 1;
-            int targetWidth;
-            int targetHeight;
-
-            targetWidth = 1080;
-            if (isSquare) {
-                targetHeight = 1080;
-            } else {
-                targetHeight = 566;
-            }
-
-            if (width > targetWidth || height > targetHeight) {
-                double widthRatio = (double) targetWidth / width;
-                double heightRatio = (double) targetHeight / height;
-                double scaleFactor = Math.min(widthRatio, heightRatio);
-
-                int newWidth = (int) (width * scaleFactor);
-                int newHeight = (int) (height * scaleFactor);
-
-                BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, image.getType());
-                Graphics2D g2d = scaledImage.createGraphics();
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                g2d.drawImage(image, 0, 0, newWidth, newHeight, null);
-                g2d.dispose();
-
-                image = scaledImage;
-            }
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            String formatName = getFormatName(file.getOriginalFilename());
-            ImageIO.write(image, formatName, baos);
-            byte[] imageBytes = baos.toByteArray();
-
-            String fileId = UUID.randomUUID().toString();
-
-            s3Client.putObject(
-                    PutObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(fileId)
-                            .contentType(file.getContentType())
-                            .build(),
-                    RequestBody.fromBytes(imageBytes)
-            );
-
-            project.setCoverImageId(fileId);
             return mapper.toViewDto(repository.save(project));
-
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при обработке файла", e);
         }
     }
 
-    private String getFormatName(String filename) {
-        String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        switch (ext) {
-            case "jpg":
-            case "jpeg":
-                return "jpg";
-            case "png":
-                return "png";
-            case "bmp":
-                return "bmp";
-            case "gif":
-                return "gif";
-            default:
-                throw new DataValidationException("Не поддерживаемый формат изображения");
+    private BufferedImage correctFormat(MultipartFile file) throws IOException {
+        BufferedImage image = ImageIO.read(file.getInputStream());
+        if (image == null) {
+            throw new DataValidationException("Некорректный формат изображения");
         }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        boolean isSquare = Math.abs(width - height) <= 1;
+        int targetWidth = 1080;
+        int targetHeight = isSquare ? 1080 : 566;
+
+        if (width > targetWidth || height > targetHeight) {
+            double widthRatio = (double) targetWidth / width;
+            double heightRatio = (double) targetHeight / height;
+            double scaleFactor = Math.min(widthRatio, heightRatio);
+
+            int newWidth = (int) (width * scaleFactor);
+            int newHeight = (int) (height * scaleFactor);
+
+            BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, image.getType());
+            Graphics2D g2d = scaledImage.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.drawImage(image, 0, 0, newWidth, newHeight, null);
+            g2d.dispose();
+
+            image = scaledImage;
+            return image;
+        }
+        return image;
+    }
+
+    private void saveImageInS3(MultipartFile file, BufferedImage image, Project project) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        String formatName = getExtension(file.getOriginalFilename());
+        ImageIO.write(image, formatName, baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        String fileId = UUID.randomUUID().toString();
+
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(fileId)
+                        .contentType(file.getContentType())
+                        .build(),
+                RequestBody.fromBytes(imageBytes)
+        );
+
+        project.setCoverImageId(fileId);
+    }
+
+    private String getExtension(String filename) {
+        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+        return switch (extension) {
+            case "jpg", "jpeg" -> "jpg";
+            case "png" -> "png";
+            case "bmp" -> "bmp";
+            case "gif" -> "gif";
+            default -> throw new DataValidationException("Не поддерживаемый формат изображения");
+        };
     }
 }
