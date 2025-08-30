@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -58,10 +59,12 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ToString.Exclude
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
     private List<Project> children;
 
@@ -91,6 +94,7 @@ public class Project {
     @Column(name = "cover_image_id")
     private String coverImageId;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "project")
     private List<Team> teams;
 
@@ -103,6 +107,7 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Vacancy> vacancies;
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "projects")
     private List<Moment> moments;
 
