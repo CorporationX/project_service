@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
-    private final static int DESCRIPTION_LENGTH = 4096;
+    private static final int DESCRIPTION_LENGTH = 4096;
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;

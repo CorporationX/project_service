@@ -42,8 +42,6 @@ public class ProjectControllerTest {
     void testCreateProject() {
         ProjectService projectService = mock(ProjectService.class);
 
-        ProjectController controller = new ProjectController(projectService);
-
         ProjectDto inputDto = new ProjectDto();
         inputDto.setName("Test project");
 
@@ -51,6 +49,8 @@ public class ProjectControllerTest {
         outputDto.setName("Test project");
 
         when(projectService.createProject(inputDto)).thenReturn(outputDto);
+
+        ProjectController controller = new ProjectController(projectService);
 
         ProjectDto result = controller.createProject(inputDto).getBody();
 
@@ -61,7 +61,6 @@ public class ProjectControllerTest {
     @Test
     void testUpdateProject() {
         ProjectService projectService = mock(ProjectService.class);
-        ProjectController controller = new ProjectController(projectService);
 
         ProjectDto inputDto = new ProjectDto();
         inputDto.setDescription("Old description");
@@ -70,6 +69,8 @@ public class ProjectControllerTest {
         updatedProject.setDescription("New description");
 
         when(projectService.updateProject(1L, inputDto)).thenReturn(updatedProject);
+
+        ProjectController controller = new ProjectController(projectService);
 
         ProjectDto result = controller.updateProject(1L, inputDto).getBody();
 
@@ -80,7 +81,6 @@ public class ProjectControllerTest {
     @Test
     void testGetProjectsByFilter() {
         ProjectService projectService = mock(ProjectService.class);
-        ProjectController controller = new ProjectController(projectService);
 
         ProjectDto filter = new ProjectDto();
         filter.setName("Project");
@@ -89,6 +89,8 @@ public class ProjectControllerTest {
         expectedProject.setName("Project");
 
         when(projectService.getProjectsByFilter(filter)).thenReturn(List.of(expectedProject));
+
+        ProjectController controller = new ProjectController(projectService);
 
         List<ProjectDto> result = controller.getProjectsByFilter(filter).getBody();
 
@@ -99,8 +101,6 @@ public class ProjectControllerTest {
 
     @Test
     void testGetAllProjects() {
-        ProjectService projectService = mock(ProjectService.class);
-        ProjectController controller = new ProjectController(projectService);
 
         ProjectDto project1 = new ProjectDto();
         ProjectDto project2 = new ProjectDto();
@@ -109,8 +109,10 @@ public class ProjectControllerTest {
         project1.setName("firstProject");
         project2.setName("secondProject");
         project3.setName("thirdProject");
+        ProjectService projectService = mock(ProjectService.class);
 
         when(projectService.getAllProjects()).thenReturn(List.of(project1, project2, project3));
+        ProjectController controller = new ProjectController(projectService);
 
         List<ProjectDto> result = controller.getAllProjects().getBody();
 
