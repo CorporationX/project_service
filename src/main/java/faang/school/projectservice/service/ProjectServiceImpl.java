@@ -105,16 +105,13 @@ public class ProjectServiceImpl implements ProjectService {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new DataValidationException("Размер файла не должен превышать 5 Мб");
         }
-
         Project project = repository.getByIdOrThrow(id);
         if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
             throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
         }
-
         try {
             BufferedImage image = correctFormat(file);
             saveImageInS3(file, image, project);
-
             return mapper.toViewDto(repository.save(project));
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при обработке файла", e);
@@ -126,7 +123,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (image == null) {
             throw new DataValidationException("Некорректный формат изображения");
         }
-
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -159,7 +155,6 @@ public class ProjectServiceImpl implements ProjectService {
         String formatName = getExtension(file.getOriginalFilename());
         ImageIO.write(image, formatName, baos);
         byte[] imageBytes = baos.toByteArray();
-
         String fileId = UUID.randomUUID().toString();
 
         s3Client.putObject(
@@ -170,7 +165,6 @@ public class ProjectServiceImpl implements ProjectService {
                         .build(),
                 RequestBody.fromBytes(imageBytes)
         );
-
         project.setCoverImageId(fileId);
     }
 
