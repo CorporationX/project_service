@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.s3.ProjectCoverService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class ProjectControllerTest {
 
     @MockBean
     private ProjectService projectService;
+
+    @MockBean
+    private ProjectCoverService coverService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -115,7 +119,7 @@ public class ProjectControllerTest {
                 imageBytes
         );
 
-        when(projectService.linkCover(anyLong(), any())).thenReturn(ProjectViewDto.builder().build());
+        when(coverService.linkCover(anyLong(), any())).thenReturn(ProjectViewDto.builder().build());
 
         mockMvc.perform(multipart("/projects/1/cover")
                         .file(mockFile)

@@ -48,6 +48,4 @@ public interface ProjectService {
      * @return {@link ProjectViewDto} возвращаемый проект
      */
     ProjectViewDto getProjectById(long id);
-
-    ProjectViewDto linkCover(Long id, MultipartFile file);
 }

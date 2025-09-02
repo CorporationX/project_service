@@ -24,7 +24,6 @@ import java.net.URI;
  * @since 26.08.2025
  */
 @Configuration
-@Profile("!test")
 public class S3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
