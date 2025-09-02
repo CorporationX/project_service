@@ -3,23 +3,22 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectFilterDto;
-import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
-import faang.school.projectservice.exception.ForbiddenException;
+import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
 import faang.school.projectservice.util.project.ProjectUtil;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,11 +51,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectViewDto updateProject(long id, ProjectUpdateDto projectDto) {
-        Project project = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.valueOf(id)));
-
+        Project project = repository.getByIdOrThrow(id);
         if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
-            throw new ForbiddenException("У пользователя нет доступа к указанному проекту");
+            throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
 
         project.setUpdatedAt(LocalDateTime.now());
@@ -80,14 +77,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectViewDto getProjectById(long id) {
-        Optional<Project> project = repository.findById(id);
-        if (project.isEmpty()) {
-            throw new RuntimeException("Проекта с указанным айди не существует");
-        } else if (!ProjectUtil.isAvailable(project.get(), userContext.getUserId())) {
+        Project project = repository.getByIdOrThrow(id);
+        if (!ProjectUtil.isAvailable(project, userContext.getUserId())) {
             throw new RuntimeException("У пользователя нет доступа к указанному проекту");
         }
         log.info("Получение проекта по id = {}", id);
-        return mapper.toViewDto(project.get());
+        return mapper.toViewDto(project);
     }
-
 }

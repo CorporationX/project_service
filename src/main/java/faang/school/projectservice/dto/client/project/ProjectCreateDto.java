@@ -19,14 +19,11 @@ public record ProjectCreateDto(
         BigInteger maxStorageSize,
         @NotNull
         Long ownerId,
-        @NotNull
         Project parentProject,
         @NotNull
         ProjectVisibility visibility,
         @NotNull
         ProjectStatus status,
-        @NotNull
-        String coverImageId,
         @NotNull
         List<String> galleryFileKeys
 ) {

@@ -19,12 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.verify;
@@ -69,7 +72,6 @@ public class ProjectServiceImplTest {
                 project,
                 ProjectVisibility.PUBLIC,
                 ProjectStatus.CREATED,
-                "randomText",
                 List.of("randomText")
         );
 
@@ -97,11 +99,11 @@ public class ProjectServiceImplTest {
                 List.of("randomText")
         );
 
-        when(repository.findById(5L)).thenReturn(Optional.of(project));
+        when(repository.getByIdOrThrow(5L)).thenReturn(project);
         project.setVisibility(ProjectVisibility.PUBLIC);
 
         service.updateProject(5L, projectUpdateDto);
-        verify(repository).findById(5L);
+        verify(repository).getByIdOrThrow(5L);
         verify(mapper).update(projectUpdateDto, project);
         verify(repository).save(project);
     }
@@ -169,7 +171,7 @@ public class ProjectServiceImplTest {
         project.setId(5L);
         ProjectViewDto projectViewDto = mapper.toViewDto(project);
 
-        when(repository.findById(5L)).thenReturn(Optional.of(project));
+        when(repository.getByIdOrThrow(5L)).thenReturn(project);
 
         assertEquals(projectViewDto, service.getProjectById(5L));
     }

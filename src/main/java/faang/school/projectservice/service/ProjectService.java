@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectFilterDto;
 import faang.school.projectservice.dto.client.project.ProjectViewDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
