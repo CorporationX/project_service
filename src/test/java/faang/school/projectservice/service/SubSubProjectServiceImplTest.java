@@ -15,6 +15,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.SubProjectCreatedEventPublisher;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.Filter;
@@ -66,6 +67,9 @@ public class SubSubProjectServiceImplTest {
     private ProjectRepository projectRepository;
 
     @Mock
+    private SubProjectCreatedEventPublisher publisher;
+
+    @Mock
     private MomentRepository momentRepository;
 
     private SubProjectServiceImpl service;
@@ -84,7 +88,8 @@ public class SubSubProjectServiceImplTest {
                 mapper,
                 context,
                 filter,
-                momentRepository
+                momentRepository,
+                publisher
         );
     }
 

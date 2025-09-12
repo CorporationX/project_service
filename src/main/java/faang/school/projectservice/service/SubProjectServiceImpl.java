@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.sub_project.SubProjectCreateDto;
+import faang.school.projectservice.dto.sub_project.SubProjectCreatedEvent;
 import faang.school.projectservice.dto.sub_project.SubProjectFilterDto;
 import faang.school.projectservice.dto.sub_project.SubProjectUpdateDto;
 import faang.school.projectservice.dto.sub_project.SubProjectViewDto;
@@ -14,6 +15,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.SubProjectCreatedEventPublisher;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.FilterService;
@@ -42,6 +44,7 @@ public class SubProjectServiceImpl implements SubProjectService {
     private final UserContext context;
     private final FilterService<Project, SubProjectFilterDto> filter;
     private final MomentRepository momentRepository;
+    private final SubProjectCreatedEventPublisher publisher;
 
     @Override
     @Transactional
@@ -57,6 +60,12 @@ public class SubProjectServiceImpl implements SubProjectService {
 
         Project savedProject = projectRepository.save(project);
         log.info("Создан подпроект ID: {} для родительского ID {}", savedProject.getId(), parent.getId());
+
+        publisher.publishAfterCommit(new SubProjectCreatedEvent(
+                parent.getId(),
+                savedProject.getId(),
+                project.getOwnerId())
+        );
         return mapper.toViewDto(savedProject);
     }
 

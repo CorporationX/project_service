@@ -4,10 +4,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import jakarta.annotation.Nullable;
 
 /**
- * SubProjectFilterDto — описание класса.
- * <p>
- * TODO: добавить описание назначения и поведения класса.
- * </p>
+ * Класс с параметрами фильтрации подпроектов
  *
  * @author Linempy
  * @since 21.07.2025
