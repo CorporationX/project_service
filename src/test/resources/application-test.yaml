@@ -1,0 +1,31 @@
+calculations_messages_processing:
+  enabled: false
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: testuser
+    password: testpassword
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/test-liquibase-changelog.yaml
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      channels:
+        subproject-created-topic:
+          name: subproject_created_topic
+        calculations_channel:
+          name: calculations_channel

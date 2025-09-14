@@ -22,6 +22,8 @@ spring:
       port: 6379
       host: localhost
       channels:
+        subproject-created-topic:
+          name: subproject_created_topic
         calculations_channel:
           name: calculations_channel
 
@@ -48,3 +50,10 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+retry:
+  config:
+    max-attempts: 3
+    initial-interval-ms: 1000
+    multiplier: 2.0
+    max-interval-ms: 10_000
