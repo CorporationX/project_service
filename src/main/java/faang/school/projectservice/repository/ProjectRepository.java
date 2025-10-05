@@ -1,8 +1,12 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("""
@@ -11,6 +15,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             WHERE p.ownerId = :ownerId AND p.name = :name
             """
     )
+
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 }
-
