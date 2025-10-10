@@ -16,7 +16,7 @@ public class VacancyValidator {
     public static void validateUserAccessToCreateVacancy(TeamMember teamMember) {
         List<TeamRole> roles = teamMember.getRoles();
         if (!roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
-            throw new IllegalArgumentException("Insufficient rights to create a vacancy");
+            throw new ForbiddenException("Insufficient rights to create a vacancy");
         }
     }
 
