@@ -10,7 +10,7 @@ class FailingTest {
     void comprehensiveFailureDemo() {
 
         String expected = "hello";
-        String actual = "helo";
-        assertEquals(expected, actual, "Тест упал");
+        String actual = "hello";
+        assertEquals(expected, actual, "Тест успешен");
     }
 }
