@@ -16,5 +16,9 @@ public interface MomentService {
 
     List<MomentDto> getAllMoments();
 
+    List<MomentDto> getMomentsByProjectId(long projectId);
+
+
+
     void deleteById(long momentId);
 }

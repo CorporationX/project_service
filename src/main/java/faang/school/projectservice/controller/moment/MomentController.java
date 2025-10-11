@@ -31,6 +31,8 @@ public class MomentController {
         return momentService.getAllMoments();
     }
 
+    List<MomentDto> getMomentsByProjectId(long projectId) { return momentService.getMomentsByProjectId(projectId); }
+
     void deleteById(long momentId){
         momentService.deleteById(momentId);
     }

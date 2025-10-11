@@ -166,6 +166,14 @@ public class MomentServiceImplTest {
     }
 
     @Test
+    public void getAllMomentsByProjectIdReturnsMoments() {
+        long projectId = 1;
+        momentServiceImpl.getMomentsByProjectId(projectId);
+
+        verify(momentRepository, times(1)).findAllByProjectId(projectId);
+    }
+
+    @Test
     public void deleteByIdNonexistentMoment() {
         long momentId = 2;
 

@@ -78,6 +78,15 @@ public class MomentServiceImpl {
         return momentDtos;
     }
 
+    public List<MomentDto> getMomentsByProjectId(long projectId) {
+        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
+        List<MomentDto> momentDtos = new ArrayList<>();
+        for (Moment moment : moments) {
+            momentDtos.add(momentMapper.toMomentDto(moment));
+        }
+        return momentDtos;
+    }
+
     public void deleteById(long momentId) {
         try {
             momentRepository.deleteById(momentId);
