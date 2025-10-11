@@ -60,6 +60,12 @@ jobs:
       - name: Wait for services
         run: sleep 10
 
+      - name: Build test classes
+        run: ./gradlew testClasses --no-daemon
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon
+
       - name: Run tests
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/postgres
