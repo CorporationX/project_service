@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class VacancyMapping {
+public class VacancyFacade {
 
     private final VacancyService vacancyService;
     private final VacancyMapper vacancyMapper;

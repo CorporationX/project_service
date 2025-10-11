@@ -1,13 +1,15 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
-import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.List;
 
 import static org.mapstruct.ReportingPolicy.IGNORE;
 
@@ -19,22 +21,13 @@ public interface VacancyMapper {
     Vacancy toVacancy(CreateVacancyDto createVacancyDto);
 
     @Mapping(target = "projectId", source = "project.id")
+    @Mapping(target = "candidatesIds", source = "candidates", qualifiedByName = "mapCandidatesId")
     VacancyDto toVacancyDto(Vacancy vacancy);
 
-    static void update(Vacancy vacancy, UpdateVacancyDto updateVacancyDto) {
-        VacancyStatus vacancyStatus = updateVacancyDto.vacancyStatus();
-        if (vacancyStatus != null) {
-            vacancy.setStatus(vacancyStatus);
-        }
-
-        String name = updateVacancyDto.name();
-        if (name != null) {
-            vacancy.setName(name);
-        }
-
-        String description = updateVacancyDto.description();
-        if (description != null) {
-            vacancy.setName(description);
-        }
+    @Named("mapCandidatesId")
+    default List<Long> mapCandidatesId(List<Candidate> candidates) {
+        return candidates.stream()
+                .map(Candidate::getId)
+                .toList();
     }
 }

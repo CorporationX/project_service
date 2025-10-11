@@ -1,8 +1,13 @@
 package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
+import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.CandidateRepository;
@@ -16,12 +21,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import static faang.school.projectservice.model.TeamRole.DESIGNER;
 import static faang.school.projectservice.model.TeamRole.DEVELOPER;
 import static faang.school.projectservice.model.TeamRole.MANAGER;
 import static faang.school.projectservice.model.TeamRole.OWNER;
 import static faang.school.projectservice.model.TeamRole.TESTER;
+import static faang.school.projectservice.model.VacancyStatus.CLOSED;
 import static faang.school.projectservice.model.VacancyStatus.OPEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,7 +53,7 @@ class VacancyServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private CandidateRepository candidateRepository;
-    
+
     @InjectMocks
     private VacancyService vacancyService;
 
@@ -64,7 +73,7 @@ class VacancyServiceTest {
                 .id(1L)
                 .userId(111L)
                 .build();
-        
+
         vacancy = Vacancy.builder()
                 .id(1L)
                 .name("TestVacancy1")
@@ -73,10 +82,10 @@ class VacancyServiceTest {
                 .position(MANAGER)
                 .status(OPEN)
                 .build();
-        
+
         userId = 111L;
     }
-    
+
     @Test
     public void create_shouldCreateVacancy_successfully() {
         teamMember.setRoles(Arrays.asList(OWNER, MANAGER));
@@ -119,6 +128,232 @@ class VacancyServiceTest {
         verify(projectRepository, times(0)).getReferenceById(projectId);
         verify(userContext, times(1)).getUserId();
         verify(vacancyRepository, times(0)).save(any(Vacancy.class));
+    }
+
+    @Test
+    public void filter_findAllVacancies_returnNull() {
+        List<Vacancy> vacancies = new ArrayList<>();
+
+        when((vacancyRepository.findAll())).thenReturn(vacancies);
+
+        assertThrows(EntityNotFoundException.class, () ->
+                vacancyService.filterGet(new FilterVacancyDto(DEVELOPER, "Test")));
+    }
+
+    @Test
+    public void filter_findVacancies_returnSuccessfully() {
+        Vacancy vacancy2 = Vacancy.builder()
+                .id(2L)
+                .name("TestUpdate")
+                .position(DEVELOPER)
+                .build();
+        Vacancy vacancy3 = Vacancy.builder()
+                .id(3L)
+                .name("TESt1")
+                .position(DEVELOPER)
+                .build();
+        Vacancy vacancy4 = Vacancy.builder()
+                .id(4L)
+                .name("TestUpdate2")
+                .position(MANAGER)
+                .build();
+        Vacancy vacancy5 = Vacancy.builder()
+                .id(5L)
+                .name("peek")
+                .position(DESIGNER)
+                .build();
+        Vacancy vacancy6 = Vacancy.builder()
+                .id(6L)
+                .name("twin")
+                .position(TESTER)
+                .build();
+        List<Vacancy> vacancies = Arrays.asList(vacancy, vacancy5, vacancy2, vacancy3, vacancy4, vacancy6);
+        FilterVacancyDto filterVacancyDto = new FilterVacancyDto(DEVELOPER, "test");
+
+        when((vacancyRepository.findAll())).thenReturn(vacancies);
+
+        List<Vacancy> result = vacancyService.filterGet(filterVacancyDto);
+
+        assertEquals(2, result.size());
+
+    }
+
+    @Test
+    public void filter_findVacanciesDtoNull_returnSuccessfully() {
+        Vacancy vacancy2 = Vacancy.builder()
+                .id(2L)
+                .name("TestUpdate")
+                .position(DEVELOPER)
+                .build();
+        Vacancy vacancy3 = Vacancy.builder()
+                .id(3L)
+                .name("TESt1")
+                .position(DEVELOPER)
+                .build();
+        Vacancy vacancy4 = Vacancy.builder()
+                .id(4L)
+                .name("TestUpdate2")
+                .position(MANAGER)
+                .build();
+        Vacancy vacancy5 = Vacancy.builder()
+                .id(5L)
+                .name("peek")
+                .position(DESIGNER)
+                .build();
+        Vacancy vacancy6 = Vacancy.builder()
+                .id(6L)
+                .name("twin")
+                .position(TESTER)
+                .build();
+        List<Vacancy> vacancies = Arrays.asList(vacancy, vacancy5, vacancy2, vacancy3, vacancy4, vacancy6);
+        FilterVacancyDto filterVacancyDto = new FilterVacancyDto(null, null);
+
+        when((vacancyRepository.findAll())).thenReturn(vacancies);
+
+        List<Vacancy> result = vacancyService.filterGet(filterVacancyDto);
+
+        assertEquals(6, result.size());
+    }
+
+    @Test
+    public void update_shouldUpdateVacancy_successfully() {
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+        project.setTeams(Arrays.asList(team));
+        teamMember.setTeam(team);
+        teamMember.setRoles(Arrays.asList(OWNER));
+        vacancy.setProject(project);
+
+        UpdateVacancyDto updateVacancyDto = new UpdateVacancyDto("Update",
+                "Update",
+                null,
+                null,
+                null);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+        Vacancy result = vacancyService.update(vacancy.getId(), updateVacancyDto);
+
+        assertNotNull(result);
+        assertEquals(result.getName(), "Update");
+        assertEquals(result.getDescription(), "Update");
+    }
+
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    @Test
+    public void update_userPositionEqualsDeveloper_exception() {
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+        project.setTeams(Arrays.asList(team));
+        teamMember.setTeam(team);
+        teamMember.setRoles(Arrays.asList(DEVELOPER));
+        vacancy.setProject(project);
+
+        UpdateVacancyDto updateVacancyDto = new UpdateVacancyDto("Update",
+                "Update",
+                null,
+                null,
+                null);
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
+        assertThrows(ForbiddenException.class, () -> vacancyService.update(vacancy.getId(), updateVacancyDto));
+    }
+
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    @Test
+    public void update_vacancyStatusClosed_exception() {
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+        project.setTeams(Arrays.asList(team));
+        teamMember.setTeam(team);
+        teamMember.setRoles(Arrays.asList(MANAGER));
+        vacancy.setProject(project);
+        vacancy.setStatus(CLOSED);
+
+        UpdateVacancyDto updateVacancyDto = new UpdateVacancyDto("Update",
+                "Update",
+                null,
+                null,
+                null);
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
+        assertThrows(ForbiddenException.class, () -> vacancyService.update(vacancy.getId(), updateVacancyDto));
+    }
+
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    @Test
+    public void update_vacancyCandidatesLessNeedToCount_exception() {
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+        project.setTeams(Arrays.asList(team));
+        teamMember.setTeam(team);
+        teamMember.setRoles(Arrays.asList(MANAGER));
+        vacancy.setProject(project);
+        vacancy.setCount(5);
+        vacancy.setCandidates(Arrays.asList(new Candidate(), new Candidate(), new Candidate()));
+
+        UpdateVacancyDto updateVacancyDto = new UpdateVacancyDto("Update",
+                "Update",
+                CLOSED,
+                null,
+                1L);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
+        ForbiddenException exception = assertThrows(ForbiddenException.class,
+                () -> vacancyService.update(vacancy.getId(), updateVacancyDto));
+
+        assertEquals(exception.getMessage(), "We haven't yet recruited enough candidates to fill the vacancy.");
+    }
+
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    @Test
+    public void update_vacancyCandidatesMoreNeedToCount_success() {
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+        project.setTeams(Arrays.asList(team));
+        teamMember.setTeam(team);
+        teamMember.setRoles(Arrays.asList(MANAGER));
+        vacancy.setProject(project);
+        vacancy.setCount(2);
+        vacancy.setCandidates(Arrays.asList(new Candidate(), new Candidate(), new Candidate()));
+
+        UpdateVacancyDto updateVacancyDto = new UpdateVacancyDto("Update",
+                "Update",
+                CLOSED,
+                null,
+                1L);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
+        Vacancy result = vacancyService.update(vacancy.getId(), updateVacancyDto);
+
+        assertNotNull(result);
+        assertEquals(result.getName(), "Update");
+        assertEquals(result.getDescription(), "Update");
+
+        verify(teamMemberRepository, times(vacancy.getCount())).save(any(TeamMember.class));
+        verify(vacancyRepository, times(1)).save(any(Vacancy.class));
+
     }
 
 }

@@ -11,6 +11,8 @@ public record UpdateVacancyDto(
         @Nullable
         VacancyStatus vacancyStatus,
         @Nullable
-        Long candidateId
+        Long candidateId,
+        @Nullable
+        Long teamId
 ) {
 }

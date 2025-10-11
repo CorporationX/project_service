@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller.vacancy;
 
-import faang.school.projectservice.controller.vacancy.facade.VacancyMapping;
+import faang.school.projectservice.controller.vacancy.facade.VacancyFacade;
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyController {
 
-    private final VacancyMapping vacancyMapping;
+    private final VacancyFacade vacancyMapping;
 
     @PostMapping
     public VacancyDto create(@Valid @RequestBody CreateVacancyDto createVacancyDto) {
