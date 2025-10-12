@@ -25,6 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class StageServiceImpl implements StageService {
+    private static final TaskStatus TRANSFER_TASK_STATUS = TaskStatus.IN_PROGRESS;
     private final StageMapper stageMapper;
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
@@ -46,24 +47,24 @@ public class StageServiceImpl implements StageService {
     @Override
     public void deleteStage(StageRequestDeleteDto stageRequestDeleteDto) {
         Project project = stageRequestDeleteDto.project();
-        List<Task> tasks = project.getTasks();
         Optional<Stage> stageForDelete = project.getStages().stream()
                 .filter(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()))
                 .findFirst();
         if (stageForDelete.isEmpty()) {
             throw new EntityNotFoundException("Такого этапа не существует!");
         }
-        stageForDelete.stream()
-                .map(stage -> stage.getTasks().stream()
-                        .peek(task -> task.setStatus(TaskStatus.CANCELLED)));
+        List<Task> tasks = stageForDelete.get().getTasks();
         stageRepository.delete(stageForDelete.get());
         project.getStages()
                 .removeIf(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()));
-        project.getStages().stream()
-                .filter(stage -> stage.getTasks().stream()
-                        .anyMatch(taskList -> tasks.stream()
-
-                )
+        Stage stage = project.getStages().stream()
+                .filter(stages -> stages.getTasks().stream()
+                        .anyMatch(taskList -> taskList.getStatus().equals(TRANSFER_TASK_STATUS)))
+                .findFirst()
+                .orElseThrow();
+        stage.getTasks().addAll(tasks);
+        project.getStages().add(stage);
+        projectRepository.save(project);
     }
 
     @Transactional

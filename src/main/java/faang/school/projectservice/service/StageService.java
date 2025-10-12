@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageCreateDto;
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
@@ -12,9 +12,9 @@ public interface StageService {
 
     void createStage(StageCreateDto stageCreateDto);
 
-    public List<Stage> getAllStageByFilter(StageCreateDto stageCreateDto, TeamRole teamRole, TaskStatus taskStatus);
+    List<Stage> getAllStageByFilter(StageCreateDto stageCreateDto, TeamRole teamRole, TaskStatus taskStatus);
 
-    void deleteStage();
+    void deleteStage(StageRequestDeleteDto stageRequestDeleteDto);
 
     void updateStage();
 
