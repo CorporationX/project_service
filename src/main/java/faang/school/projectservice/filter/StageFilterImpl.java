@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageRequestCreateDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -15,8 +15,8 @@ import java.util.List;
 public class StageFilterImpl implements StageFilter {
 
     @Override
-    public boolean isApplicable(StageCreateDto stageCreateDto) {
-        return stageCreateDto.project() != null;
+    public boolean isApplicable(StageRequestCreateDto stageRequestCreateDto) {
+        return stageRequestCreateDto.project() != null;
     }
 
     @Override

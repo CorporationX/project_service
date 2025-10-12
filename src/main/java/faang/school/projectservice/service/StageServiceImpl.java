@@ -1,7 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.StageRequestCreateDto;
 import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
-import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.filter.StageFilterImpl;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 
 @RequiredArgsConstructor
@@ -33,14 +36,14 @@ public class StageServiceImpl implements StageService {
 
     @Transactional
     @Override
-    public void createStage(StageCreateDto stageCreateDto) {
-        validateStageCreateDto(stageCreateDto);
-        stageMapper.toEntity(stageCreateDto);
+    public void createStage(StageRequestCreateDto stageRequestCreateDto) {
+        validateStageCreateDto(stageRequestCreateDto);
+        stageMapper.toEntity(stageRequestCreateDto);
     }
 
     @Override
-    public List<Stage> getAllStageByFilter(StageCreateDto stageCreateDto, TeamRole teamRole, TaskStatus taskStatus) {
-        return stageFilter.applyByRoleAndStatus(stageCreateDto.project(), teamRole, taskStatus);
+    public List<Stage> getAllStageByFilter(StageRequestCreateDto stageRequestCreateDto, TeamRole teamRole, TaskStatus taskStatus) {
+        return stageFilter.applyByRoleAndStatus(stageRequestCreateDto.project(), teamRole, taskStatus);
     }
 
     @Transactional
@@ -69,7 +72,15 @@ public class StageServiceImpl implements StageService {
 
     @Transactional
     @Override
-    public void updateStage() {
+    public void updateStage(StageRequestUpdateDto stageRequestUpdateDto) {
+        List<TeamMember> teamMembers = stageRequestUpdateDto.stage().getExecutors();
+        boolean hasExecutorRole = teamMembers.stream()
+                .anyMatch(executor -> executor.getRoles().stream()
+                        .anyMatch(teamRole -> teamRole.equals(stageRequestUpdateDto.teamRole())));
+        if (hasExecutorRole) {
+            teamMembers.stream()
+                    .anyMatch()
+        }
     }
 
     @Override
@@ -82,14 +93,14 @@ public class StageServiceImpl implements StageService {
 
     }
 
-    private void validateStageCreateDto(StageCreateDto stageCreateDto) {
-        if (stageCreateDto.teamRoles().isEmpty()) {
+    private void validateStageCreateDto(StageRequestCreateDto stageRequestCreateDto) {
+        if (stageRequestCreateDto.teamRoles().isEmpty()) {
             throw new EntityNotFoundException("Необходимо указать список ролей!");
         }
-        if (stageCreateDto.executors().isEmpty()) {
+        if (stageRequestCreateDto.executors().isEmpty()) {
             throw new EntityNotFoundException("Необходимо указать участников этапа!");
         }
-        Project project = stageCreateDto.project();
+        Project project = stageRequestCreateDto.project();
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new ForbiddenException("Нельзя создать этап к отмененному или завершенному проекту!");
         }

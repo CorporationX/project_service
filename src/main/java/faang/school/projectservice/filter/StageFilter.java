@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageRequestCreateDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface StageFilter {
 
-    boolean isApplicable(StageCreateDto stageCreateDto);
+    boolean isApplicable(StageRequestCreateDto stageRequestCreateDto);
 
     List<Stage> applyByRoleAndStatus(Project project, TeamRole TeamRolefilter, TaskStatus taskStatusFilter);
 

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record StageCreateDto(
+public record StageRequestCreateDto(
         @NotNull Project project,
         @NotNull @NotBlank String stageName,
         @NotNull List<TeamRole> teamRoles,
