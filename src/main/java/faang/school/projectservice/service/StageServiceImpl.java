@@ -33,7 +33,7 @@ public class StageServiceImpl implements StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageFilterImpl stageFilter;
-
+    private final StageInvitationServiceImpl stageInvitationService;
     @Transactional
     @Override
     public void createStage(StageRequestCreateDto stageRequestCreateDto) {
@@ -79,7 +79,9 @@ public class StageServiceImpl implements StageService {
                         .anyMatch(teamRole -> teamRole.equals(stageRequestUpdateDto.teamRole())));
         if (hasExecutorRole) {
             teamMembers.stream()
-                    .anyMatch()
+                    .filter(teamMember -> teamMember.getRoles().stream()
+                            .anyMatch(executorRole -> executorRole.equals(stageRequestUpdateDto.teamRole())))
+                    .map()
         }
     }
 
