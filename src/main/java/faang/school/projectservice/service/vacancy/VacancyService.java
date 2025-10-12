@@ -76,7 +76,7 @@ public class VacancyService {
             vacanciesStream = vacanciesStream.filter(vacancy -> vacancy.getName() != null
                     && vacancy.getName().toLowerCase().contains(finalName));
         }
-
+        log.info("A filtered list of vacancies was received");
         return vacanciesStream.toList();
     }
 
@@ -97,7 +97,7 @@ public class VacancyService {
         closedVacancy(vacancy, updateVacancyDto, project);
 
         vacancyRepository.save(vacancy);
-
+        log.info("The vacancy {} has been updated", vacancy.getId());
         return vacancy;
     }
 

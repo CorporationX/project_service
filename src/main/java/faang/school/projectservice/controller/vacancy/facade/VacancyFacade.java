@@ -29,6 +29,8 @@ public class VacancyFacade {
 
     public VacancyDto getById(Long vacancyId) {
         Vacancy vacancy = vacancyService.getById(vacancyId);
+
+        log.info("the vacancy {} was received", vacancy.getId());
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
