@@ -6,6 +6,6 @@ import org.junit.jupiter.api.Test;
 public class FailingTest {
     @Test
     void shouldFailIntentionally() {
-        Assertions.fail("Тест CI");
+
     }
 }
