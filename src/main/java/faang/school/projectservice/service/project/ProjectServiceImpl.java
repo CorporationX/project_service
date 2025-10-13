@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,11 @@ public class ProjectServiceImpl implements ProjectService {
         long userId = userContext.getUserId();
 
         validateUserId(userId, requesterId);
-        validateString(createProjectDto.name(), "title");
+        validateString(createProjectDto.name(), "name");
         validateName(requesterId, createProjectDto.name());
 
         Project project = mapper.toProject(createProjectDto);
+        project.setStatus(ProjectStatus.CREATED);
         project = projectRepository.save(project);
         log.info("Project {} created", project.getId());
 
@@ -49,15 +51,30 @@ public class ProjectServiceImpl implements ProjectService {
         long userId = userContext.getUserId();
 
         validateUserId(userId, requesterId);
-        validateNotNull(updateProjectDto.name(), "title");
-        validateNotNull(updateProjectDto.status(), "status");
-        validateNotNull(updateProjectDto.visibility(), "isPrivate");
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> {
                     log.warn("project fetch failed: not found");
                     return new NotFoundException("Project not found: id=" + projectId);
                 });
+
+        if (updateProjectDto.name() != null) {
+            String trimmed = updateProjectDto.name().trim();
+            validateString(trimmed, "name");
+            if (!trimmed.equals(project.getName())) {
+                validateName(userId, trimmed);
+            }
+            project.setName(trimmed);
+        }
+
+        if (updateProjectDto.status() != null) {
+            project.setStatus(updateProjectDto.status());
+        }
+
+        if (updateProjectDto.visibility() != null) {
+            project.setVisibility(updateProjectDto.visibility());
+        }
+
 
         Project savedProject = projectRepository.save(project);
         log.info("project {} updated", savedProject.getId());
@@ -83,7 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAll(long requesterId) {
-        log.info("get all projects requested: userId={}, projectId={}", requesterId);
+        log.info("get all projects requested: userId={}", requesterId);
         List<Project> all = projectRepository.findAll();
 
         return all.stream()
@@ -93,21 +110,21 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateString(String value, String paramName) {
-        if (StringUtils.isNotBlank(value)) {
-            log.warn("project name validation failed: is empty");
+        if (StringUtils.isBlank(value)) {
+            log.warn("Validation failed: {} is blank", paramName);
             throw new RuntimeException(paramName + " should be present!");
         }
     }
 
     private void validateUserId(long userId, long requesterId) {
         if (userId != requesterId) {
-            log.warn("userId validation failed: doest match profile");
+            log.warn("userId validation failed: doesn't match profile");
             throw new RuntimeException("User " + requesterId + " doesn't match profile owner!");
         }
     }
 
-    private void validateName(long userId, String title) {
-        if (projectRepository.existsByOwnerIdAndName(userId, title.trim())) {
+    private void validateName(long userId, String name) {
+        if (projectRepository.existsByOwnerIdAndName(userId, name.trim())) {
             log.warn("project name validation failed: already exists");
             throw new RuntimeException("You already have a project with this name");
         }
