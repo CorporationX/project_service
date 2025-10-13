@@ -5,7 +5,7 @@ import faang.school.projectservice.model.stage.Stage;
 import jakarta.validation.constraints.NotNull;
 
 public record StageRequestDeleteDto(
-        @NotNull Project project,
+        @NotNull Long projectId,
         @NotNull Stage stage
 ){
 }

@@ -1,8 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.stage.StageRequestAllStageDto;
 import faang.school.projectservice.dto.stage.StageRequestCreateDto;
 import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
 import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.filter.StageFilterImpl;
@@ -14,6 +16,7 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executor;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -34,22 +38,28 @@ public class StageServiceImpl implements StageService {
     private final ProjectRepository projectRepository;
     private final StageFilterImpl stageFilter;
     private final StageInvitationServiceImpl stageInvitationService;
+    private final StageInvitationMapper stageInvitationMapper;
+
     @Transactional
     @Override
     public void createStage(StageRequestCreateDto stageRequestCreateDto) {
-        validateStageCreateDto(stageRequestCreateDto);
-        stageMapper.toEntity(stageRequestCreateDto);
+        isProjectExist(stageRequestCreateDto.project().getId());
+        isApplicableProject(stageRequestCreateDto.project());
+        ///  Сохранение не произойдет, ибо Маппинг, не сможет найти поля, добавить в маппер таргеты
+        stageRepository.save(stageMapper.toEntity(stageRequestCreateDto));
     }
 
     @Override
-    public List<Stage> getAllStageByFilter(StageRequestCreateDto stageRequestCreateDto, TeamRole teamRole, TaskStatus taskStatus) {
-        return stageFilter.applyByRoleAndStatus(stageRequestCreateDto.project(), teamRole, taskStatus);
+    public List<Stage> getAllStageByFilter(StageRequestAllStageDto stageRequestAllStageDto) {
+        isProjectExist(stageRequestAllStageDto.projectId());
+        return stageFilter.applyByRoleAndStatus(stageRequestAllStageDto);
     }
 
     @Transactional
     @Override
     public void deleteStage(StageRequestDeleteDto stageRequestDeleteDto) {
-        Project project = stageRequestDeleteDto.project();
+        isProjectExist(stageRequestDeleteDto.projectId());
+        Project project = projectRepository.findById(stageRequestDeleteDto.projectId()).get();
         Optional<Stage> stageForDelete = project.getStages().stream()
                 .filter(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()))
                 .findFirst();
@@ -85,27 +95,44 @@ public class StageServiceImpl implements StageService {
         }
     }
 
+    @Transactional
     @Override
-    public void getAllStage() {
-
+    public List<Stage> getAllStage(long projectId) {
+        List<Stage> stages = stageRepository.findAll();
+        return stages.stream()
+                .filter(stage -> stage.getProject().getId().equals(projectId))
+                .toList();
     }
 
     @Override
-    public void getStageById() {
-
+    public Stage getStageById(long stageId) {
+        return stageRepository.findById(stageId).orElseThrow(
+                () -> new EntityNotFoundException("По такому id этапа нет!"));
     }
 
-    private void validateStageCreateDto(StageRequestCreateDto stageRequestCreateDto) {
-        if (stageRequestCreateDto.teamRoles().isEmpty()) {
-            throw new EntityNotFoundException("Необходимо указать список ролей!");
+    private void isProjectExist(long projectId) {
+        projectRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException("Такого проекта не существует!"));
+    }
+
+    //Валидация не лишний ли участник в Этапе
+    private void executorSuperfluous(Stage stage) {
+        Set<TeamRole> requiredRoles = stage.getStageRoles().stream()
+                .map(StageRoles::getTeamRole)
+                .collect(Collectors.toSet());
+
+        boolean isExtra = stage.getExecutors().stream()
+                .anyMatch(executor ->
+                        executor.getRoles().stream()
+                                .anyMatch(role -> !requiredRoles.contains(role)));
+        if (isExtra) {
+            throw new DataValidationException("В этапе находяться лишние пользователи!");
         }
-        if (stageRequestCreateDto.executors().isEmpty()) {
-            throw new EntityNotFoundException("Необходимо указать участников этапа!");
-        }
-        Project project = stageRequestCreateDto.project();
+    }
+
+    private void isApplicableProject(Project project) {
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new ForbiddenException("Нельзя создать этап к отмененному или завершенному проекту!");
         }
-        //Валидация что в списке участников этапа нет лишних (не задействованных) пользователей.
     }
 }
