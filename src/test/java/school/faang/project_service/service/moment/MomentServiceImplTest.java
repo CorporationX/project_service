@@ -1,15 +1,18 @@
 package school.faang.project_service.service.moment;
 
 import faang.school.projectservice.dto.moment.CreateMomentDto;
+import faang.school.projectservice.dto.moment.SearchMomentDto;
 import faang.school.projectservice.dto.moment.UpdateMomentDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.iterators.LazyIteratorChain;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -22,8 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,6 +52,9 @@ public class MomentServiceImplTest {
 
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private List<MomentFilter> momentFilters;
 
     @Captor
     private ArgumentCaptor<Moment> captorMoment;
@@ -171,6 +179,42 @@ public class MomentServiceImplTest {
         momentServiceImpl.getMomentsByProjectId(projectId);
 
         verify(momentRepository, times(1)).findAllByProjectId(projectId);
+    }
+
+    @Test
+    public void getAllMomentsByMonthReturnsMoments() {
+        SearchMomentDto searchMomentDto = new SearchMomentDto(
+                1L,
+                "name",
+                "description",
+                LocalDateTime.of(2026, Month.JANUARY, 3, 21,0),
+                List.of(1L, 2L, 3L),
+                List.of(100L, 101L, 102L),
+                LocalDateTime.of(2026, Month.JANUARY, 4, 12,0),
+                LocalDateTime.of(2026, Month.JANUARY, 5, 12,0),
+                100L,
+                101L
+        );
+        Moment moment = new Moment();
+        moment.setCreatedAt(LocalDateTime.of(2026, Month.JANUARY, 5, 12,0));
+        when(momentRepository.findAll()).thenReturn(List.of(moment));
+        Iterator<MomentFilter> momentFilterIterator = new LazyIteratorChain<>() {
+            @Override
+            protected Iterator<? extends MomentFilter> nextIterator(int i) {
+                return null;
+            }
+        };
+        when(momentFilters.iterator()).thenReturn(momentFilterIterator);
+
+        momentServiceImpl.getMomentsByMonth(searchMomentDto);
+
+        verify(momentRepository, times(1)).findAll();
+        for (MomentFilter momentFilter : momentFilters) {
+            verify(momentFilter, times(1)).isAplicable(searchMomentDto);
+        }
+        for (MomentFilter momentFilter : momentFilters) {
+            verify(momentFilter, times(1)).apply(Stream.of(moment), searchMomentDto);
+        }
     }
 
     @Test

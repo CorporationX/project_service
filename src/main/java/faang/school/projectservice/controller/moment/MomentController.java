@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.moment;
 
 import faang.school.projectservice.dto.moment.CreateMomentDto;
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.SearchMomentDto;
 import faang.school.projectservice.dto.moment.UpdateMomentDto;
 import faang.school.projectservice.service.moment.MomentService;
 import lombok.NonNull;
@@ -15,25 +16,31 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    MomentDto createMoment(@NonNull CreateMomentDto momentDto) {
+    public MomentDto createMoment(@NonNull CreateMomentDto momentDto) throws Exception {
         return momentService.createMoment(momentDto);
     }
 
-    MomentDto updateMoment(@NonNull UpdateMomentDto momentDto) {
-        return momentService.updateMoment(momentDto);
+    public MomentDto updateMoment(long momentId, @NonNull UpdateMomentDto momentDto) throws Exception {
+        return momentService.updateMoment(momentId, momentDto);
     }
 
-    MomentDto getById(long momentId) {
+    public MomentDto getById(long momentId) {
         return momentService.getById(momentId);
     }
 
-    List<MomentDto> getAllMoments() {
+    public List<MomentDto> getAllMoments() {
         return momentService.getAllMoments();
     }
 
-    List<MomentDto> getMomentsByProjectId(long projectId) { return momentService.getMomentsByProjectId(projectId); }
+    public List<MomentDto> getMomentsByProjectId(long projectId) {
+        return momentService.getMomentsByProjectId(projectId);
+    }
 
-    void deleteById(long momentId){
+    public List<MomentDto> getMomentsByMonth(SearchMomentDto searchMomentDto) {
+        return momentService.getMomentsByMonth(searchMomentDto);
+    }
+
+    public void deleteById(long momentId){
         momentService.deleteById(momentId);
     }
 }

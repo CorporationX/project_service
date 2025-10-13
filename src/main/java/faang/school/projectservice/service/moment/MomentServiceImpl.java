@@ -3,9 +3,12 @@ package faang.school.projectservice.service.moment;
 import com.amazonaws.util.StringUtils;
 import faang.school.projectservice.dto.moment.CreateMomentDto;
 import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.SearchMomentDto;
 import faang.school.projectservice.dto.moment.UpdateMomentDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.moment.MomentMonthFilter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -19,40 +22,44 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MomentServiceImpl {
+public class MomentServiceImpl implements MomentService{
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final ProjectRepository projectRepository;
+    private final List<MomentFilter> momentFilters = List.of(new MomentMonthFilter());
 
-    public MomentDto createMoment(@NonNull CreateMomentDto momentDto) throws Exception {
-        validateCreateMomentDto(momentDto);
-        Moment moment = momentMapper.toMoment(momentDto);
+    @Override
+    public MomentDto createMoment(@NonNull CreateMomentDto createMomentDto) throws Exception {
+        validateCreateMomentDto(createMomentDto);
+        Moment moment = momentMapper.toMoment(createMomentDto);
         List<Project> projects = new ArrayList<>();
-        for (int i = 0; i < momentDto.projectIds().size(); i++) {
-            Optional<Project> project = projectRepository.findById(momentDto.projectIds().get(i));
+        for (int i = 0; i < createMomentDto.projectIds().size(); i++) {
+            Optional<Project> project = projectRepository.findById(createMomentDto.projectIds().get(i));
             project.ifPresent(projects::add);
         }
         moment.setProjects(projects);
-        log.info("Новый Moment c названием: {} успешно добавлен", momentDto.name());
+        log.info("Новый Moment c названием: {} успешно добавлен", createMomentDto.name());
         return momentMapper.toMomentDto(momentRepository.save(moment));
     }
 
-    public MomentDto updateMoment(long momentId, @NonNull UpdateMomentDto momentDto) throws Exception {
-        validateUpdateMomentDto(momentDto);
+    @Override
+    public MomentDto updateMoment(long momentId, @NonNull UpdateMomentDto updateMomentDto) throws Exception {
+        validateUpdateMomentDto(updateMomentDto);
         Optional<Moment> optionalMoment = momentRepository.findById(momentId);
         if (optionalMoment.isEmpty()) {
             log.error("Moment c id: {} не найден.", momentId);
             throw new EntityNotFoundException("Этот Moment невозможно обновить, он не существует.");
         }
         Moment moment = optionalMoment.get();
-        momentMapper.update(momentDto, moment);
+        momentMapper.update(updateMomentDto, moment);
         List<Project> projects = new ArrayList<>();
-        for (int i = 0; i < momentDto.projectIds().size(); i++) {
-            Optional<Project> project = projectRepository.findById(momentDto.projectIds().get(i));
+        for (int i = 0; i < updateMomentDto.projectIds().size(); i++) {
+            Optional<Project> project = projectRepository.findById(updateMomentDto.projectIds().get(i));
             project.ifPresent(projects::add);
         }
         moment.setProjects(projects);
@@ -60,6 +67,7 @@ public class MomentServiceImpl {
         return momentMapper.toMomentDto(momentRepository.save(moment));
     }
 
+    @Override
     public MomentDto getById(long momentId) {
         Optional<Moment> optionalMoment = momentRepository.findById(momentId);
         if (optionalMoment.isEmpty()) {
@@ -69,24 +77,29 @@ public class MomentServiceImpl {
         return momentMapper.toMomentDto(optionalMoment.get());
     }
 
+    @Override
     public List<MomentDto> getAllMoments() {
-        List<Moment> moments = momentRepository.findAll();
-        List<MomentDto> momentDtos = new ArrayList<>();
-        for (Moment moment : moments) {
-            momentDtos.add(momentMapper.toMomentDto(moment));
-        }
-        return momentDtos;
+        return momentMapper.toListMomentDto(momentRepository.findAll());
     }
 
+    @Override
     public List<MomentDto> getMomentsByProjectId(long projectId) {
-        List<Moment> moments = momentRepository.findAllByProjectId(projectId);
-        List<MomentDto> momentDtos = new ArrayList<>();
-        for (Moment moment : moments) {
-            momentDtos.add(momentMapper.toMomentDto(moment));
-        }
-        return momentDtos;
+        return momentMapper.toListMomentDto(momentRepository.findAllByProjectId(projectId));
     }
 
+    @Override
+    public List<MomentDto> getMomentsByMonth(SearchMomentDto searchMomentDto) {
+        Stream<Moment> allMoments = momentRepository.findAll().stream();
+        for (MomentFilter momentFilter : momentFilters) {
+            if (momentFilter.isAplicable(searchMomentDto)) {
+                allMoments = momentFilter.apply(allMoments, searchMomentDto);
+            }
+        }
+        return allMoments.map(momentMapper::toMomentDto)
+                .toList();
+    }
+
+    @Override
     public void deleteById(long momentId) {
         try {
             momentRepository.deleteById(momentId);
