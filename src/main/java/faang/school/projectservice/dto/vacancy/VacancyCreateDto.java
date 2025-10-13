@@ -4,7 +4,7 @@ import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateVacancyDto(
+public record VacancyCreateDto(
         @NotBlank
         String name,
         @NotBlank

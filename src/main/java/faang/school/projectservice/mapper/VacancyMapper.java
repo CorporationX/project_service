@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -18,7 +18,7 @@ import static org.mapstruct.ReportingPolicy.IGNORE;
 public interface VacancyMapper {
 
     @Mapping(target = "project", ignore = true)
-    Vacancy toVacancy(CreateVacancyDto createVacancyDto);
+    Vacancy toVacancy(VacancyCreateDto vacancyCreateDto);
 
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "candidatesIds", source = "candidates", qualifiedByName = "mapCandidatesId")
@@ -31,3 +31,4 @@ public interface VacancyMapper {
                 .toList();
     }
 }
+

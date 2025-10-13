@@ -3,7 +3,7 @@ package faang.school.projectservice.dto.vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.annotation.Nullable;
 
-public record UpdateVacancyDto(
+public record VacancyUpdateDto(
         @Nullable
         String name,
         @Nullable

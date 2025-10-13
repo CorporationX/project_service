@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.vacancy;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.annotation.Nullable;
@@ -14,6 +15,7 @@ public record VacancyDto(
         Integer count,
         Long projectId,
         VacancyStatus status,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt,
         @Nullable
         List<Long> candidatesIds

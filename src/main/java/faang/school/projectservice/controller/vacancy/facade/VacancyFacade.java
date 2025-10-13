@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.vacancy.facade;
 
-import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
-import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
-import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
@@ -13,17 +13,17 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@Component
 public class VacancyFacade {
 
     private final VacancyService vacancyService;
     private final VacancyMapper vacancyMapper;
 
-    public VacancyDto create(CreateVacancyDto createVacancyDto) {
-        Vacancy vacancy = vacancyMapper.toVacancy(createVacancyDto);
-        Vacancy result = vacancyService.create(vacancy, createVacancyDto.projectId());
+    public VacancyDto create(VacancyCreateDto vacancyCreateDto) {
+        Vacancy vacancy = vacancyMapper.toVacancy(vacancyCreateDto);
+        Vacancy result = vacancyService.create(vacancy, vacancyCreateDto.projectId());
         return vacancyMapper.toVacancyDto(result);
     }
 
@@ -34,15 +34,15 @@ public class VacancyFacade {
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
-    public List<VacancyDto> filterGet(FilterVacancyDto filterVacancyDto) {
-        List<Vacancy> vacancies = vacancyService.filterGet(filterVacancyDto);
+    public List<VacancyDto> filterGet(VacancyFilterDto vacancyFilterDto) {
+        List<Vacancy> vacancies = vacancyService.filterGet(vacancyFilterDto);
         return vacancies.stream()
                 .map(vacancyMapper::toVacancyDto)
                 .toList();
     }
 
-    public VacancyDto update(Long vacancyId, UpdateVacancyDto updateVacancyDto) {
-        Vacancy vacancy = vacancyService.update(vacancyId, updateVacancyDto);
+    public VacancyDto update(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
+        Vacancy vacancy = vacancyService.updateFilter(vacancyId, vacancyUpdateDto);
         return vacancyMapper.toVacancyDto(vacancy);
     }
 }
