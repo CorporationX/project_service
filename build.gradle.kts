@@ -89,6 +89,17 @@ tasks.jacocoTestReport {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
     }
+
+    classDirectories.setFrom(
+            files(classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                            "faang/school/projectservice/controller/**",
+                            "faang/school/projectservice/repository/**"
+                    )
+                }
+            })
+    )
 }
 
 /**
@@ -96,10 +107,22 @@ tasks.jacocoTestReport {
  */
 tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+            files(classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                            "faang/school/projectservice/controller/**",
+                            "faang/school/projectservice/repository/**"
+                    )
+                }
+            })
+    )
+
     violationRules {
         rule {
             limit {
-                minimum = "0.6".toBigDecimal() // не меньше 60% покрытия
+                minimum = "0.7".toBigDecimal() // не меньше 60% покрытия
             }
         }
     }
