@@ -1,10 +1,12 @@
 package faang.school.projectservice.service.project;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,10 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
 
 @Slf4j
 @Service
@@ -29,42 +32,63 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserContext userContext;
 
     @Override
+    @Transactional
     public ProjectDto create(long requesterId, CreateProjectDto createProjectDto) {
-        log.info("create project requested: userId={}", requesterId);
-        long userId = userContext.getUserId();
+        log.info("create project requested: requesterId={}", requesterId);
 
+        long userId = userContext.getUserId();
         validateUserId(userId, requesterId);
+
         validateString(createProjectDto.name(), "name");
-        validateName(requesterId, createProjectDto.name());
+        validateString(createProjectDto.description(), "description");
+
+        String name = createProjectDto.name().trim();
+        String description = createProjectDto.description().trim();
+
+        validateNameUniqueForOwner(requesterId, name);
 
         Project project = mapper.toProject(createProjectDto);
+        project.setOwnerId(requesterId);
+        project.setName(name);
+        project.setDescription(description);
         project.setStatus(ProjectStatus.CREATED);
+
         project = projectRepository.save(project);
-        log.info("Project {} created", project.getId());
+        log.info("project created: id={}, ownerId={}", project.getId(), project.getOwnerId());
 
         return mapper.toProjectDto(project);
     }
 
     @Override
+    @Transactional
     public ProjectDto update(long requesterId, long projectId, UpdateProjectDto updateProjectDto) {
-        log.info("create project requested: userId={}, projectId={}", requesterId, projectId);
-        long userId = userContext.getUserId();
+        log.info("update project requested: requesterId={}, projectId={}", requesterId, projectId);
 
+        long userId = userContext.getUserId();
         validateUserId(userId, requesterId);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> {
-                    log.warn("project fetch failed: not found");
-                    return new NotFoundException("Project not found: id=" + projectId);
+                    log.warn("project fetch failed: not found, id={}", projectId);
+                    return new EntityNotFoundException("Project not found: id=" + projectId);
                 });
+
+        ensureOwner(project, requesterId);
 
         if (updateProjectDto.name() != null) {
             String trimmed = updateProjectDto.name().trim();
             validateString(trimmed, "name");
+
             if (!trimmed.equals(project.getName())) {
-                validateName(userId, trimmed);
+                validateNameUniqueForOwner(project.getOwnerId(), trimmed);
+                project.setName(trimmed);
             }
-            project.setName(trimmed);
+        }
+
+        if (updateProjectDto.description() != null) {
+            String trimmed = updateProjectDto.description().trim();
+            validateString(trimmed, "description");
+            project.setDescription(trimmed);
         }
 
         if (updateProjectDto.status() != null) {
@@ -75,65 +99,91 @@ public class ProjectServiceImpl implements ProjectService {
             project.setVisibility(updateProjectDto.visibility());
         }
 
+        Project saved = projectRepository.save(project);
+        log.info("project updated: id={}", saved.getId());
 
-        Project savedProject = projectRepository.save(project);
-        log.info("project {} updated", savedProject.getId());
-
-        return mapper.toProjectDto(savedProject);
+        return mapper.toProjectDto(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProjectDto getById(long requesterId, long projectId) {
-        log.info("get project requested: userId={}, projectId={}", requesterId, projectId);
+        log.info("get project requested: requesterId={}, projectId={}", requesterId, projectId);
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> {
-                    log.warn("project fetch failed: not found");
-                    return new NotFoundException("Project not found: id=" + projectId);
+                    log.warn("project fetch failed: not found, id={}", projectId);
+                    return new EntityNotFoundException("Project not found: id=" + projectId);
                 });
 
-        if (project.getVisibility() == ProjectVisibility.PRIVATE && project.getOwnerId() != requesterId) {
-            throw new RuntimeException("You don't have access to this private project");
+        if (project.getVisibility() == ProjectVisibility.PRIVATE && !isOwner(project, requesterId)) {
+            log.warn("access denied to private project: projectId={}, requesterId={}", projectId, requesterId);
+            throw new ForbiddenException("You don't have access to this private project");
         }
 
         return mapper.toProjectDto(project);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProjectDto> getAll(long requesterId) {
-        log.info("get all projects requested: userId={}", requesterId);
+        log.info("get all projects requested: requesterId={}", requesterId);
+
         List<Project> all = projectRepository.findAll();
 
         return all.stream()
-                .filter(p -> p.getVisibility() == ProjectVisibility.PUBLIC || p.getOwnerId() == requesterId)
+                .filter(p -> p.getVisibility() == ProjectVisibility.PUBLIC || isOwner(p, requesterId))
                 .map(mapper::toProjectDto)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<ProjectDto> search(long requesterId, String name, ProjectStatus status) {
+        log.info("search projects requested: requesterId={}, nameFilter='{}', statusFilter={}",
+                requesterId, name, status);
+
+        String nameFilter = StringUtils.trimToNull(name);
+
+        List<Project> source = projectRepository.findAll();
+
+        return source.stream()
+                .filter(p -> nameFilter == null || StringUtils.containsIgnoreCase(p.getName(), nameFilter))
+                .filter(p -> status == null || p.getStatus() == status)
+                .filter(p -> p.getVisibility() == ProjectVisibility.PUBLIC || isOwner(p, requesterId))
+                .map(mapper::toProjectDto)
+                .collect(Collectors.toList());
+    }
+
+
     private void validateString(String value, String paramName) {
         if (StringUtils.isBlank(value)) {
-            log.warn("Validation failed: {} is blank", paramName);
-            throw new RuntimeException(paramName + " should be present!");
+            log.warn("validation failed: {} is blank", paramName);
+            throw new DataValidationException(paramName + " should be present");
         }
     }
 
     private void validateUserId(long userId, long requesterId) {
         if (userId != requesterId) {
-            log.warn("userId validation failed: doesn't match profile");
-            throw new RuntimeException("User " + requesterId + " doesn't match profile owner!");
+            log.warn("userId validation failed: contextUserId={} != requesterId={}", userId, requesterId);
+            throw new ForbiddenException("User " + requesterId + " doesn't match profile owner");
         }
     }
 
-    private void validateName(long userId, String name) {
-        if (projectRepository.existsByOwnerIdAndName(userId, name.trim())) {
-            log.warn("project name validation failed: already exists");
-            throw new RuntimeException("You already have a project with this name");
+    private void validateNameUniqueForOwner(long ownerId, String name) {
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
+            log.warn("project name validation failed: already exists for ownerId={}, name='{}'", ownerId, name);
+            throw new DataValidationException("You already have a project with this name");
         }
     }
 
-    private void validateNotNull(Object value, String paramName) {
-        if (value == null) {
-            log.warn("Validation failed: missing " + paramName);
-            throw new RuntimeException(paramName + " should be present!");
+    private void ensureOwner(Project project, long requesterId) {
+        if (!isOwner(project, requesterId)) {
+            log.warn("update forbidden: projectId={}, requesterId={}", project.getId(), requesterId);
+            throw new ForbiddenException("You are not allowed to modify this project");
         }
+    }
+
+    private boolean isOwner(Project project, long userId) {
+        return Objects.equals(project.getOwnerId(), userId);
     }
 }

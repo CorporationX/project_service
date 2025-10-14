@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -33,4 +34,8 @@ public class ProjectController {
         return projectService.getAll(userContext.getUserId());
     }
 
+    public List<ProjectDto> search(String name, ProjectStatus status) {
+        return projectService.search(userContext.getUserId(), name, status);
+    }
+    
 }
