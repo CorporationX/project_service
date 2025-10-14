@@ -1,6 +1,6 @@
-package faang.school.projectservice.facade;
+package faang.school.projectservice.controller.facade.project;
 
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

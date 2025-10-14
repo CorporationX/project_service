@@ -1,9 +1,9 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
-import faang.school.projectservice.facade.ProjectFacade;
+import faang.school.projectservice.controller.facade.project.ProjectFacade;
 import faang.school.projectservice.model.ProjectStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

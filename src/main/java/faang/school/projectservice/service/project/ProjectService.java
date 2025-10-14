@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
