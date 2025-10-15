@@ -4,6 +4,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,18 +18,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProjectFilterDto {
     private String name;
+
+    @Positive(message = "Project owner id must be positive")
     private Long ownerId;
+
+    @Positive(message = "Parent project id must be positive")
     private Long parentProjectId;
+
     private ProjectStatus status;
     private ProjectVisibility visibility;
     private LocalDateTime createdAfter;
     private LocalDateTime createdBefore;
 
-    // Параметры пагинации
+    @Min(value = 0, message = "Page number cannot be negative")
     private Integer page;
+
+    @Min(value = 1, message = "Page size must be positive")
+    @Max(value = 100, message = "Page size cannot exceed 100")
     private Integer size;
 
-    // Параметры сортировки
     private String sortBy;
     private String sortDirection;
 
