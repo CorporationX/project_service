@@ -34,15 +34,15 @@ public class VacancyFacade {
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
-    public List<VacancyDto> filterGet(VacancyFilterDto vacancyFilterDto) {
-        List<Vacancy> vacancies = vacancyService.filterGet(vacancyFilterDto);
+    public List<VacancyDto> getByFilter(VacancyFilterDto vacancyFilterDto) {
+        List<Vacancy> vacancies = vacancyService.getVacancyByFilters(vacancyFilterDto);
         return vacancies.stream()
                 .map(vacancyMapper::toVacancyDto)
                 .toList();
     }
 
     public VacancyDto update(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
-        Vacancy vacancy = vacancyService.updateFilter(vacancyId, vacancyUpdateDto);
+        Vacancy vacancy = vacancyService.updateVacancy(vacancyId, vacancyUpdateDto);
         return vacancyMapper.toVacancyDto(vacancy);
     }
 }

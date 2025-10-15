@@ -37,8 +37,8 @@ public class VacancyController {
     }
 
     @PostMapping("/filters")
-    public List<VacancyDto> filterGet(@RequestBody VacancyFilterDto vacancyFilterDto) {
-        return vacancyMapping.filterGet(vacancyFilterDto);
+    public List<VacancyDto> getByFilter(@RequestBody VacancyFilterDto vacancyFilterDto) {
+        return vacancyMapping.getByFilter(vacancyFilterDto);
     }
 
     @PatchMapping("/{vacancyId}")

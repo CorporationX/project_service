@@ -3,14 +3,14 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -38,16 +38,23 @@ public class VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
     private final CandidateRepository candidateRepository;
+    private final VacancyMapper vacancyMapper;
+    private final CampaignRepository campaignRepository;
 
     public Vacancy create(Vacancy vacancy, Long projectId) {
         Long userId = userContext.getUserId();
+
         TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-        VacancyValidator.validateUserAccessToCreateVacancy(teamMember);
+
+        VacancyValidator.validateRoleForVacancyCreation(teamMember);
+
         Project project = projectRepository.getReferenceById(projectId);
+
         vacancy.setStatus(OPEN);
         vacancy.setProject(project);
         vacancyRepository.save(vacancy);
-        log.info("a vacancy was created {} {}", vacancy.getId(), vacancy.getName());
+        log.info("The vacancy was created {} {} for project {} by user {}",
+                vacancy.getId(), vacancy.getName(), projectId, userId);
         return vacancy;
     }
 
@@ -55,38 +62,24 @@ public class VacancyService {
         return vacancyRepository.getReferenceById(vacancyId);
     }
 
-    public List<Vacancy> filterGet(VacancyFilterDto vacancyFilterDto) {
+    public List<Vacancy> getVacancyByFilters(VacancyFilterDto vacancyFilterDto) {
         List<Vacancy> vacancies = vacancyRepository.findAll();
         if (vacancies.isEmpty()) {
-            throw new EntityNotFoundException("The vacancy list is empty");
+            log.warn("The vacancy list is empty");
+            return List.of();
         }
-        Predicate<Vacancy> predicate = vacancy -> {
-            boolean matches = true;
-
-            TeamRole teamRole = vacancyFilterDto.position();
-            if (Objects.nonNull(teamRole)) {
-                matches = matches && Objects.equals(vacancy.getPosition(), teamRole);
-            }
-
-            String name = vacancyFilterDto.name();
-            if (name != null && !name.isBlank()) {
-                String finalName = name.toLowerCase();
-                matches = matches && vacancy.getName() != null
-                        && vacancy.getName().toLowerCase().contains(finalName);
-            }
-
-            return matches;
-        };
 
         List<Vacancy> filteredVacancies = vacancies.stream()
-                .filter(predicate)
+                .filter(byPosition(vacancyFilterDto.position()))
+                .filter(byName(vacancyFilterDto.name()))
                 .toList();
 
-        log.info("A filtered list of vacancies was received");
+        log.info("Filtered {} vacancies from total {}", filteredVacancies.size(), vacancies.size());
         return filteredVacancies;
     }
 
-    public Vacancy updateFilter(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
+
+    public Vacancy updateVacancy(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
 
         Long userId = userContext.getUserId();
         Vacancy vacancy = vacancyRepository.getReferenceById(vacancyId);
@@ -94,70 +87,64 @@ public class VacancyService {
         Long projectId = project.getId();
         TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        VacancyValidator.validateUserAccessToCreateVacancy(teamMember);
+        VacancyValidator.validateRoleForVacancyCreation(teamMember);
 
-        VacancyValidator.checkStatusVacancyOnCloser(vacancy.getStatus());
+        VacancyValidator.guardAgainstUpdatingClosedVacancy(vacancy.getStatus());
+        Candidate candidate = null;
+        Long candidateId = vacancyUpdateDto.candidateId();
+        if (candidateId != null) {
+            candidate = candidateRepository.getReferenceById(candidateId);
+        }
 
-        updateFilter(vacancy, vacancyUpdateDto);
+        vacancyMapper.mappingVacancyUpdateDto(vacancy, vacancyUpdateDto, candidate);
 
-        closedVacancy(vacancy, vacancyUpdateDto, project);
+        if (vacancyUpdateDto.vacancyStatus() != null && vacancyUpdateDto.vacancyStatus().equals(CLOSED)) {
+            processVacancyClosure(vacancy, project);
+        }
 
         vacancyRepository.save(vacancy);
         log.info("The vacancy {} has been updated", vacancy.getId());
         return vacancy;
     }
 
-    private void updateFilter(Vacancy vacancy, VacancyUpdateDto vacancyUpdateDto) {
-        VacancyStatus vacancyStatus = vacancyUpdateDto.vacancyStatus();
-        if (vacancyStatus != null) {
-            vacancy.setStatus(vacancyStatus);
-        }
-
-        String name = vacancyUpdateDto.name();
-        if (name != null && !name.isBlank()) {
-            vacancy.setName(name);
-        }
-
-        String description = vacancyUpdateDto.description();
-        if (description != null && !description.isBlank()) {
-            vacancy.setDescription(description);
-        }
-
-        Long candidateId = vacancyUpdateDto.candidateId();
-        if (candidateId != null) {
-            Candidate candidate = candidateRepository.getReferenceById(candidateId);
-            vacancy.getCandidates().add(candidate);
-        }
-
-        Long teamId = vacancyUpdateDto.teamId();
-        if (teamId != null) {
-            vacancy.setTeamId(teamId);
-        }
-    }
-
-    private void closedVacancy(Vacancy vacancy,
-                               VacancyUpdateDto vacancyUpdateDto,
-                               Project project) {
+    private void processVacancyClosure(Vacancy vacancy,
+                                       Project project) {
         List<TeamMember> teamMemberList = new ArrayList<>();
         int limitCandidate = vacancy.getCount();
-        VacancyStatus vacancyStatus = vacancyUpdateDto.vacancyStatus();
-        if (vacancyUpdateDto.vacancyStatus() != null) {
-            if (vacancyStatus.equals(CLOSED)) {
-                Team team = VacancyValidator.validateAccessTeamInTheProject(vacancy, project);
-                VacancyValidator.checkCountCandidates(vacancy);
-                vacancy.getCandidates().stream()
-                        .limit(limitCandidate)
-                        .forEach(candidate -> {
-                            TeamMember teamMemberNew = TeamMember.builder()
-                                    .userId(candidate.getUserId())
-                                    .nickname(candidate.getUsername())
-                                    .team(team)
-                                    .roles(Arrays.asList(vacancy.getPosition()))
-                                    .build();
-                            teamMemberList.add(teamMemberNew);
-                        });
-            }
-        }
+
+        Team team = VacancyValidator.validateVacancyTeamInProject(vacancy, project);
+        VacancyValidator.checkCountCandidates(vacancy);
+        vacancy.getCandidates().stream()
+                .limit(limitCandidate)
+                .forEach(candidate -> {
+                    TeamMember teamMemberNew = createTeamMember(candidate, team, vacancy.getPosition());
+                    teamMemberList.add(teamMemberNew);
+                });
+
         teamMemberRepository.saveAll(teamMemberList);
+    }
+
+    private TeamMember createTeamMember(Candidate candidate, Team team, TeamRole position) {
+        return TeamMember.builder()
+                .userId(candidate.getUserId())
+                .nickname(candidate.getUsername())
+                .team(team)
+                .roles(Arrays.asList(position))
+                .build();
+    }
+
+
+    private Predicate<Vacancy> byPosition(TeamRole position) {
+        return vacancy -> position == null || Objects.equals(vacancy.getPosition(), position);
+    }
+
+    private Predicate<Vacancy> byName(String name) {
+        return vacancy -> {
+            if (name == null || name.isBlank()) {
+                return true;
+            }
+            return vacancy.getName() != null
+                    && vacancy.getName().toLowerCase().contains(name.toLowerCase());
+        };
     }
 }

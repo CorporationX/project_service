@@ -3,8 +3,8 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
+import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ class VacancyServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private CandidateRepository candidateRepository;
+    @Spy
+    private VacancyMapper vacancyMapper;
 
     @InjectMocks
     private VacancyService vacancyService;
@@ -127,8 +130,9 @@ class VacancyServiceTest {
 
         when((vacancyRepository.findAll())).thenReturn(vacancies);
 
-        assertThrows(EntityNotFoundException.class, () ->
-                vacancyService.filterGet(new VacancyFilterDto(DEVELOPER, "Test")));
+        List<Vacancy> result = vacancyService.getVacancyByFilters(new VacancyFilterDto(DEVELOPER, "Test"));
+
+        assertEquals(0, result.size());
     }
 
     @Test
@@ -163,7 +167,7 @@ class VacancyServiceTest {
 
         when((vacancyRepository.findAll())).thenReturn(vacancies);
 
-        List<Vacancy> result = vacancyService.filterGet(vacancyFilterDto);
+        List<Vacancy> result = vacancyService.getVacancyByFilters(vacancyFilterDto);
 
         assertEquals(2, result.size());
 
@@ -201,13 +205,13 @@ class VacancyServiceTest {
 
         when((vacancyRepository.findAll())).thenReturn(vacancies);
 
-        List<Vacancy> result = vacancyService.filterGet(vacancyFilterDto);
+        List<Vacancy> result = vacancyService.getVacancyByFilters(vacancyFilterDto);
 
         assertEquals(6, result.size());
     }
 
     @Test
-    public void update_shouldUpdateFilterVacancy_successfully() {
+    public void update_shouldUpdateVacancyVacancy_successfully() {
 
         Team team = Team.builder()
                 .id(1L)
@@ -229,14 +233,15 @@ class VacancyServiceTest {
         when(userContext.getUserId()).thenReturn(userId);
         when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
-        Vacancy result = vacancyService.updateFilter(vacancy.getId(), vacancyUpdateDto);
+
+        Vacancy result = vacancyService.updateVacancy(vacancy.getId(), vacancyUpdateDto);
 
         assertNotNull(result);
         assertEquals(result.getName(), "Update");
         assertEquals(result.getDescription(), "Update");
     }
 
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+
     @Test
     public void update_userPositionEqualsDeveloper_exception() {
         Team team = Team.builder()
@@ -248,19 +253,20 @@ class VacancyServiceTest {
         teamMember.setRoles(Arrays.asList(DEVELOPER));
         vacancy.setProject(project);
 
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
         VacancyUpdateDto vacancyUpdateDto = new VacancyUpdateDto("Update",
                 "Update",
                 null,
                 null,
                 null);
-        when(userContext.getUserId()).thenReturn(userId);
-        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
-        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
-
-        assertThrows(ForbiddenException.class, () -> vacancyService.updateFilter(vacancy.getId(), vacancyUpdateDto));
+        assertThrows(ForbiddenException.class, () -> vacancyService.updateVacancy(vacancy.getId(), vacancyUpdateDto));
     }
 
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+
     @Test
     public void update_vacancyStatusClosed_exception() {
         Team team = Team.builder()
@@ -273,19 +279,21 @@ class VacancyServiceTest {
         vacancy.setProject(project);
         vacancy.setStatus(CLOSED);
 
+        when(userContext.getUserId()).thenReturn(userId);
+        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
+        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
+
+
         VacancyUpdateDto vacancyUpdateDto = new VacancyUpdateDto("Update",
                 "Update",
                 null,
                 null,
                 null);
-        when(userContext.getUserId()).thenReturn(userId);
-        when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
-        when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
 
-        assertThrows(ForbiddenException.class, () -> vacancyService.updateFilter(vacancy.getId(), vacancyUpdateDto));
+        assertThrows(ForbiddenException.class, () -> vacancyService.updateVacancy(vacancy.getId(), vacancyUpdateDto));
     }
 
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+
     @Test
     public void update_vacancyCandidatesLessNeedToCount_exception() {
         Team team = Team.builder()
@@ -295,6 +303,7 @@ class VacancyServiceTest {
         project.setTeams(Arrays.asList(team));
         teamMember.setTeam(team);
         teamMember.setRoles(Arrays.asList(MANAGER));
+        vacancy.setTeamId(1L);
         vacancy.setProject(project);
         vacancy.setCount(5);
         vacancy.setCandidates(Arrays.asList(new Candidate(), new Candidate(), new Candidate()));
@@ -311,12 +320,12 @@ class VacancyServiceTest {
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
 
         ForbiddenException exception = assertThrows(ForbiddenException.class,
-                () -> vacancyService.updateFilter(vacancy.getId(), vacancyUpdateDto));
+                () -> vacancyService.updateVacancy(vacancy.getId(), vacancyUpdateDto));
 
         assertEquals(exception.getMessage(), "We haven't yet recruited enough candidates to fill the vacancy.");
     }
 
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+
     @Test
     public void update_vacancyCandidatesMoreNeedToCount_success() {
         Team team = Team.builder()
@@ -327,6 +336,7 @@ class VacancyServiceTest {
         teamMember.setTeam(team);
         teamMember.setRoles(Arrays.asList(MANAGER));
         vacancy.setProject(project);
+        vacancy.setTeamId(1L);
         vacancy.setCount(2);
         vacancy.setCandidates(Arrays.asList(new Candidate(), new Candidate(), new Candidate()));
         vacancy.setStatus(OPEN);
@@ -341,7 +351,7 @@ class VacancyServiceTest {
         when(vacancyRepository.getReferenceById(vacancy.getId())).thenReturn(vacancy);
         when(teamMemberRepository.findByUserIdAndProjectId(userId, project.getId())).thenReturn(teamMember);
 
-        Vacancy result = vacancyService.updateFilter(vacancy.getId(), vacancyUpdateDto);
+        Vacancy result = vacancyService.updateVacancy(vacancy.getId(), vacancyUpdateDto);
 
         assertNotNull(result);
         assertEquals(result.getName(), "Update");

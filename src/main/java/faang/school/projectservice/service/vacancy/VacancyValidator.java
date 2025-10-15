@@ -17,17 +17,17 @@ import static faang.school.projectservice.model.VacancyStatus.CLOSED;
 
 public class VacancyValidator {
 
-    public static void validateUserAccessToCreateVacancy(TeamMember teamMember) {
+    public static void validateRoleForVacancyCreation(TeamMember teamMember) {
         List<TeamRole> roles = teamMember.getRoles();
         if (!roles.contains(TeamRole.OWNER) && !roles.contains(TeamRole.MANAGER)) {
             throw new ForbiddenException("Insufficient rights to create a vacancy");
         }
     }
 
-    public static Team validateAccessTeamInTheProject(Vacancy vacancy, Project project) {
+    public static Team validateVacancyTeamInProject(Vacancy vacancy, Project project) {
         List<Team> teams = project.getTeams();
         if (teams == null) {
-            throw new ForbiddenException("There is no team on the project");
+            throw new ForbiddenException(String.format("There is no team on the project %d", project.getId()));
         }
         Optional<Team> optionalTeam = teams.stream()
                 .filter(team -> Objects.equals(team.getId(), vacancy.getTeamId()))
@@ -41,7 +41,7 @@ public class VacancyValidator {
         }
     }
 
-    public static void checkStatusVacancyOnCloser(VacancyStatus vacancyStatus) {
+    public static void guardAgainstUpdatingClosedVacancy(VacancyStatus vacancyStatus) {
         if (vacancyStatus.equals(CLOSED)) {
             throw new ForbiddenException("The vacancy is already closed and cannot be changed");
         }
