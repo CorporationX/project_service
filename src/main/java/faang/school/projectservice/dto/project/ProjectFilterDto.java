@@ -1,4 +1,4 @@
 package faang.school.projectservice.dto.project;
 
-public record ProjectDto() {
+public record ProjectFilterDto() {
 }

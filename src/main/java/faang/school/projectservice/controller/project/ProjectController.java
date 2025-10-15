@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.controller.facade.project.ProjectFacade;
 import faang.school.projectservice.model.ProjectStatus;
@@ -36,13 +38,16 @@ return projectFacade.updateProject(projectId, projectUpdateDto);
     }
 
     @GetMapping("/filtered")
-    public List<ProjectDto> getProjectsByFilter(@RequestParam("name") String name, @RequestParam("status") ProjectStatus projectStatus) {
-return projectFacade.getProjectsByFilter(name, projectStatus);
+    public List<ProjectDto> getProjectsByFilter(@RequestParam(required = false) String name,
+                                                @RequestParam(required = false) ProjectStatus projectStatus,
+                                                long userId) {
+        ProjectFilterDto filter = new ProjectFilterDto();
+return projectFacade.getProjectsByFilter(filter, userId);
     }
 
     @GetMapping
-    public List<ProjectDto> getAllProjects() {
-return projectFacade.getAllProjects();
+    public List<ProjectDto> getAllProjects(long userId) {
+return projectFacade.getAllProjects(userId);
     }
 
     @GetMapping("/{id}")
