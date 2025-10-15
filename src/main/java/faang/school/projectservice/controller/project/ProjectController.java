@@ -26,31 +26,31 @@ public class ProjectController {
 
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectCreateDto projectCreateDto) {
-return projectFacade.createProject(projectCreateDto);
+        return projectFacade.createProject(projectCreateDto);
     }
 
     @PatchMapping("/{id}")
     public ProjectDto updateProject(@PathVariable("id") long projectId, @Valid @RequestBody ProjectUpdateDto projectUpdateDto) {
-return projectFacade.updateProject(projectId, projectUpdateDto);
+        return projectFacade.updateProject(projectId, projectUpdateDto);
     }
 
     @PostMapping("/filtered")
     public List<ProjectDto> getProjectsByFilter(@Valid @RequestBody ProjectFilterDto projectFilterDto, long userId) {
-return projectFacade.getProjectsByFilter(projectFilterDto, userId);
+        return projectFacade.getProjectsByFilter(projectFilterDto, userId);
     }
 
     @GetMapping
     public List<ProjectDto> getAllProjects(long userId) {
-return projectFacade.getAllProjects(userId);
+        return projectFacade.getAllProjects(userId);
     }
 
     @GetMapping("/{id}")
-    public ProjectDto getProjectById(@PathVariable ("id") long projectId) {
-return projectFacade.getProjectById(projectId);
+    public ProjectDto getProjectById(@PathVariable("id") long projectId) {
+        return projectFacade.getProjectById(projectId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProject(@PathVariable ("id") long projectId) {
+    public void deleteProject(@PathVariable("id") long projectId) {
         projectFacade.deleteProject(projectId);
     }
 }
