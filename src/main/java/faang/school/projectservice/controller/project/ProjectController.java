@@ -1,12 +1,10 @@
 package faang.school.projectservice.controller.project;
 
-import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.controller.facade.project.ProjectFacade;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
-import faang.school.projectservice.controller.facade.project.ProjectFacade;
-import faang.school.projectservice.model.ProjectStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,12 +34,9 @@ return projectFacade.createProject(projectCreateDto);
 return projectFacade.updateProject(projectId, projectUpdateDto);
     }
 
-    @GetMapping("/filtered")
-    public List<ProjectDto> getProjectsByFilter(@RequestParam(required = false) String name,
-                                                @RequestParam(required = false) ProjectStatus projectStatus,
-                                                long userId) {
-        ProjectFilterDto filter = new ProjectFilterDto();
-return projectFacade.getProjectsByFilter(filter, userId);
+    @PostMapping("/filtered")
+    public List<ProjectDto> getProjectsByFilter(@Valid @RequestBody ProjectFilterDto projectFilterDto, long userId) {
+return projectFacade.getProjectsByFilter(projectFilterDto, userId);
     }
 
     @GetMapping

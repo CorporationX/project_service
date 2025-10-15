@@ -1,4 +1,15 @@
 package faang.school.projectservice.dto.project;
 
-public record ProjectCreateDto() {
+import jakarta.validation.constraints.NotNull;
+
+public record ProjectCreateDto(
+        @NotNull
+        String name,
+
+        @NotNull
+        String description,
+
+        @NotNull
+        Long ownerId
+) {
 }
