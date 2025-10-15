@@ -4,21 +4,17 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record ProjectUpdateDto(
-        @NotNull
-        String name,
-
-        @NotNull
+        @Nullable
         String description,
 
         @Nullable
-        Long ownerId,
-
-        @NotNull
         ProjectStatus status,
 
-        @NotNull
+        @Nullable
         ProjectVisibility visibility
 ) {
 }

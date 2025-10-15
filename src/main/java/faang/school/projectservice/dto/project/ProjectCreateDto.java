@@ -1,7 +1,10 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record ProjectCreateDto(
         @NotNull
         String name,
@@ -10,6 +13,9 @@ public record ProjectCreateDto(
         String description,
 
         @NotNull
-        Long ownerId
+        Long ownerId,
+
+        @NotNull
+        ProjectVisibility visibility
 ) {
 }
