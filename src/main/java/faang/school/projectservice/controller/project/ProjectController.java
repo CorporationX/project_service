@@ -40,8 +40,8 @@ public class ProjectController {
     }
 
     @GetMapping
-    public List<ProjectDto> getAllProjects(long userId) {
-        return projectFacade.getAllProjects(userId);
+    public List<ProjectDto> getAllProjects() {
+        return projectFacade.getAllProjects();
     }
 
     @GetMapping("/{id}")

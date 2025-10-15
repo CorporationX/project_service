@@ -38,8 +38,8 @@ public class ProjectFacade {
                 .toList();
     }
 
-    public List<ProjectDto> getAllProjects(long userId) {
-        List<Project> projects = projectService.getAllProjects(userId);
+    public List<ProjectDto> getAllProjects() {
+        List<Project> projects = projectService.getAllProjects();
 
         return projects.stream()
                 .map(projectMapper::toProjectDto)
