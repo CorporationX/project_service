@@ -35,7 +35,6 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationFilter stageInvitationFilter;
     private final StageRepository stageRepository;
 
-    @Transactional
     @Override
     public StageInvitationDto sendInvitation(StageInvitationCreateDto stageInvitationCreateDto) {
         validateUserId(stageInvitationCreateDto.author().getUserId());
@@ -62,13 +61,13 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         stageInvitation.getStage().getExecutors().add(stageInvitation.getInvited());
     }
 
-    @Transactional
     @Override
     public void declineInvitation(StageInvitationDeclineDto stageInvitationDeclineDto) {
         StageInvitation stageInvitation = getStageInvitationByIdOrThrow(stageInvitationDeclineDto.stageInvitationId());
         validateUserId(stageInvitation.getInvited().getUserId());
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(stageInvitationDeclineDto.description());
+        stageInvitationRepository.save(stageInvitation);
     }
 
     @Override

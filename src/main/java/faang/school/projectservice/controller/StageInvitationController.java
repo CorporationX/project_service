@@ -1,14 +1,13 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationAcceptDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationCreateDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDeclineDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.StageInvitationServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,7 +26,6 @@ import java.util.List;
 public class StageInvitationController {
     private final StageInvitationServiceImpl stageInvitationServiceImpl;
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public StageInvitationDto sendInvitation(@Valid @RequestBody StageInvitationCreateDto stageInvitationCreateDto) {
         return stageInvitationServiceImpl.sendInvitation(stageInvitationCreateDto);
@@ -49,6 +46,4 @@ public class StageInvitationController {
             @Valid @ModelAttribute StageInvitationFilterDto stageInvitationFilterDto) {
         return stageInvitationServiceImpl.viewAllInvitationsByFilter(stageInvitationFilterDto);
     }
-
-
 }
