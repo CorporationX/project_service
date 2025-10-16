@@ -5,7 +5,7 @@ import faang.school.projectservice.model.Project;
 
 import java.util.stream.Stream;
 
-public interface FilterProjects {
+public interface FilterProject {
     boolean isApplication(ProjectFilterDto projectFilterDto);
 
     Stream<Project> apply(Stream<Project> projects , ProjectFilterDto projectFilterDto);

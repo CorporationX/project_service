@@ -30,8 +30,8 @@ public class ProjectFacade {
         return projectMapper.toProjectDto(project);
     }
 
-    public List<ProjectDto> getProjectsByFilter(ProjectFilterDto projectFilterDto, long userId) {
-        List<Project> projects = projectService.getProjectsByFilter(projectFilterDto, userId);
+    public List<ProjectDto> getProjectsByFilter(ProjectFilterDto projectFilterDto) {
+        List<Project> projects = projectService.getProjectsByFilter(projectFilterDto);
 
         return projects.stream()
                 .map(projectMapper::toProjectDto)

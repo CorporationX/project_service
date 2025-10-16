@@ -13,9 +13,6 @@ public record ProjectCreateDto(
         String description,
 
         @NotNull
-        Long ownerId,
-
-        @NotNull
         ProjectVisibility visibility
 ) {
 }

@@ -35,8 +35,8 @@ public class ProjectController {
     }
 
     @PostMapping("/filtered")
-    public List<ProjectDto> getProjectsByFilter(@Valid @RequestBody ProjectFilterDto projectFilterDto, long userId) {
-        return projectFacade.getProjectsByFilter(projectFilterDto, userId);
+    public List<ProjectDto> getProjectsByFilter(@Valid @RequestBody ProjectFilterDto projectFilterDto) {
+        return projectFacade.getProjectsByFilter(projectFilterDto);
     }
 
     @GetMapping
