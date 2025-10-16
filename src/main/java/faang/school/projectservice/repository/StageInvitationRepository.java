@@ -13,6 +13,4 @@ public interface StageInvitationRepository extends JpaRepository<StageInvitation
     boolean existsByAuthorAndInvitedAndStage(TeamMember author, TeamMember invited, Stage stage);
 
     boolean existsByInvitedAndStage(TeamMember invited, Stage stage);
-
-    List<StageInvitation> findAllByInvited_Id(Long invitedId);
 }

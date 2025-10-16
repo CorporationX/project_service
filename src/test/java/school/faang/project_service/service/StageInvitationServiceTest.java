@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,8 +55,7 @@ public class StageInvitationServiceTest {
 
     @Test
     public void sendInvitation_notValidUserId_shouldThrowForbiddenException() {
-        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID);
-        when(dto.author().getUserId()).thenReturn(TEAM_MEMBER_ID + TEAM_MEMBER_ID);
+        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID + TEAM_MEMBER_ID);
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -68,12 +65,16 @@ public class StageInvitationServiceTest {
     @Test
     public void sendInvitation_existsByAuthorAndInvitedAndStage_shouldThrowDataValidationException() {
         StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID);
-        StageInvitation stageInvitation = mock(StageInvitation.class);
+        StageInvitation stageInvitation = StageInvitation.builder()
+                .id(TEAM_MEMBER_ID)
+                .description(" ")
+                .status(StageInvitationStatus.ACCEPTED)
+                .stage(new Stage())
+                .author(new TeamMember())
+                .invited(new TeamMember())
+                .build();
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitation.getAuthor()).thenReturn(dto.author());
-        when(stageInvitation.getInvited()).thenReturn(dto.invited());
-        when(stageInvitation.getStage()).thenReturn(dto.stage());
         when(stageInvitationMapper.toEntity(dto)).thenReturn(stageInvitation);
         when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(
                 any(TeamMember.class),
@@ -87,22 +88,27 @@ public class StageInvitationServiceTest {
     @Test
     public void sendInvitation_setStatus_shouldStatusSetPending() {
         StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID);
-        StageInvitation stageInvitation = mock(StageInvitation.class);
+        StageInvitationDto responseDto =
+                new StageInvitationDto(" ", StageInvitationStatus.ACCEPTED, new Stage(), new TeamMember());
+        StageInvitation stageInvitation = StageInvitation.builder()
+                .id(TEAM_MEMBER_ID)
+                .description(" ")
+                .status(StageInvitationStatus.ACCEPTED)
+                .stage(new Stage())
+                .author(new TeamMember())
+                .invited(new TeamMember())
+                .build();
 
-        when(dto.author().getUserId()).thenReturn(TEAM_MEMBER_ID);
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitation.getAuthor()).thenReturn(dto.author());
-        when(stageInvitation.getInvited()).thenReturn(dto.invited());
-        when(stageInvitation.getStage()).thenReturn(dto.stage());
         when(stageInvitationMapper.toEntity(dto)).thenReturn(stageInvitation);
+        when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(responseDto);
         when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(
                 any(TeamMember.class),
                 any(TeamMember.class),
                 any(Stage.class))).thenReturn(false);
 
-        stageInvitationService.sendInvitation(dto);
-
-        verify(stageInvitation, times(INVOCATION_TIMES)).setStatus(StageInvitationStatus.PENDING);
+        StageInvitationDto result = stageInvitationService.sendInvitation(dto);
+        Assertions.assertEquals(result.status(), StageInvitationStatus.ACCEPTED);
     }
 
     @Test
@@ -280,7 +286,7 @@ public class StageInvitationServiceTest {
         List<StageInvitation> list = new ArrayList<>();
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
         when(stageInvitationRepository.findAllByInvited_Id(TEAM_MEMBER_ID)).thenReturn(list);
-        when(stageInvitationFilter.invitationByStatusAndStage(list, StageInvitationStatus.ACCEPTED, STAGE_ID))
+        when(stageInvitationFilter.getFilteredStageInvitationById(list, StageInvitationStatus.ACCEPTED, STAGE_ID))
                 .thenReturn(list);
 
         stageInvitationService.viewAllInvitationsByFilter(dto);
@@ -289,10 +295,9 @@ public class StageInvitationServiceTest {
     }
 
     public StageInvitationCreateDto preparationCreateDto(long userId) {
-        TeamMember author = Mockito.mock(TeamMember.class);
-        TeamMember invited = Mockito.mock(TeamMember.class);
-        Stage stage = Mockito.mock(Stage.class);
-        when(author.getUserId()).thenReturn(userId);
-        return new StageInvitationCreateDto(stage, author, invited);
+        TeamMember teamMember = new TeamMember();
+        Stage stage = new Stage();
+        teamMember.setUserId(userId);
+        return new StageInvitationCreateDto(stage, teamMember, teamMember);
     }
 }

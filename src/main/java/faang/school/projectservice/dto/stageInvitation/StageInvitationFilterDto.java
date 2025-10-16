@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record StageInvitationFilterDto(
         @NotNull Long teamMemberId,
-        @NotNull StageInvitationStatus status,
-        @NotNull Long stageId
+        StageInvitationStatus status,
+        Long stageId
 ) {
 }

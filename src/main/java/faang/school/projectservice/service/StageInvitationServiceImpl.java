@@ -14,8 +14,10 @@ import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final UserContext userContext;
     private final StageInvitationFilter stageInvitationFilter;
+    private final StageRepository stageRepository;
 
     @Transactional
     @Override
@@ -50,7 +53,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Override
     public void acceptInvitation(StageInvitationAcceptDto stageInvitationAcceptDto) {
         validateUserId(stageInvitationAcceptDto.idInvited());
-        StageInvitation stageInvitation = stageInvitationByIdOrThrow(stageInvitationAcceptDto.idInvitation());
+        StageInvitation stageInvitation = getStageInvitationByIdOrThrow(stageInvitationAcceptDto.idInvitation());
         if (!stageInvitationRepository.existsByAuthorAndInvitedAndStage(stageInvitation.getAuthor(),
                 stageInvitation.getInvited(), stageInvitation.getStage())) {
             throw new EntityNotFoundException("Такого автора, приглашенного участника или этапа не существует");
@@ -62,7 +65,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Transactional
     @Override
     public void declineInvitation(StageInvitationDeclineDto stageInvitationDeclineDto) {
-        StageInvitation stageInvitation = stageInvitationByIdOrThrow(stageInvitationDeclineDto.stageInvitationId());
+        StageInvitation stageInvitation = getStageInvitationByIdOrThrow(stageInvitationDeclineDto.stageInvitationId());
         validateUserId(stageInvitation.getInvited().getUserId());
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(stageInvitationDeclineDto.description());
@@ -72,12 +75,18 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     public List<StageInvitationDto> viewAllInvitationsByFilter(StageInvitationFilterDto stageInvitationFilterDto) {
         long teamMemberId = stageInvitationFilterDto.teamMemberId();
         validateUserId(teamMemberId);
-        StageInvitationStatus statusInvitation = stageInvitationFilterDto.status();
-        long stageId = stageInvitationFilterDto.stageId();
-        List<StageInvitation> stageInvitationList = stageInvitationRepository.findAllByInvited_Id(teamMemberId);
-        stageInvitationList =
-                stageInvitationFilter.invitationByStatusAndStage(stageInvitationList, statusInvitation, stageId);
-        return stageInvitationMapper.toInvitationListDto(stageInvitationList);
+        Specification<StageInvitation> specification =
+                stageInvitationFilter.specificationStageInvitationByTeamMemberId(teamMemberId);
+        if (stageInvitationFilterDto.stageId() != null) {
+            StageInvitationStatus status = stageInvitationFilterDto.status();
+            specification = specification.and(stageInvitationFilter.specificationStatus(status));
+        }
+        if (stageInvitationFilterDto.stageId() != null) {
+            long stageId = stageInvitationFilterDto.stageId();
+            specification = specification.and(stageInvitationFilter.specificationStageId(stageId));
+        }
+        List<StageInvitation> stageInvitations =  stageInvitationRepository.findAll(specification);
+        return stageInvitationMapper.toInvitationListDto(stageInvitations);
     }
 
     private void validateUserId(long verifyUserId) {
@@ -88,7 +97,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         }
     }
 
-    private StageInvitation stageInvitationByIdOrThrow(long stageInvitationId) {
+    private StageInvitation getStageInvitationByIdOrThrow(long stageInvitationId) {
         return stageInvitationRepository.findById(stageInvitationId)
                 .orElseThrow(() -> new EntityNotFoundException("Такого приглашения не существует!"));
     }

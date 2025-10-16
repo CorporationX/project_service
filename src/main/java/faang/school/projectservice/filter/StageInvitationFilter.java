@@ -1,20 +1,25 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class StageInvitationFilter {
 
-    public List<StageInvitation> invitationByStatusAndStage(List<StageInvitation> stageInvitations,
-                                           StageInvitationStatus statusFilter, long stageId) {
-        return stageInvitations.stream()
-                .filter(stageInvitation -> stageInvitation.getStatus().equals(statusFilter))
-                .filter(stageInvitation -> stageInvitation.getStage().getStageId().equals(stageId))
-                .toList();
+    public Specification<StageInvitation> specificationStageInvitationByTeamMemberId(Long teamMemberId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("teamMember").get("id"), teamMemberId);
+    }
+
+    public Specification<StageInvitation> specificationStatus(StageInvitationStatus status) {
+        return (root, query, cb) ->
+                cb.equal(root.get("status"), status);
+    }
+
+    public Specification<StageInvitation> specificationStageId(Long stageId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("stage").get("id"), stageId);
     }
 }
