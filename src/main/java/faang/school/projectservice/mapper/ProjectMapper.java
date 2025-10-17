@@ -5,10 +5,13 @@ import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.function.Consumer;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     ProjectDto toProjectDto(Project project);
 
