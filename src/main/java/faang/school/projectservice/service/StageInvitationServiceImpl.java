@@ -76,7 +76,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         validateUserId(teamMemberId);
         Specification<StageInvitation> specification =
                 stageInvitationFilter.specificationStageInvitationByTeamMemberId(teamMemberId);
-        if (stageInvitationFilterDto.stageId() != null) {
+        if (stageInvitationFilterDto.status() != null) {
             StageInvitationStatus status = stageInvitationFilterDto.status();
             specification = specification.and(stageInvitationFilter.specificationStatus(status));
         }
