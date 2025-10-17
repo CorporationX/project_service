@@ -18,6 +18,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "internship")
 public class Internship {
 
@@ -48,7 +50,7 @@ public class Internship {
     @ManyToOne
     @JoinColumn(name = "mentor_id")
     @NotNull
-    private TeamMember mentorId;
+    private TeamMember mentor;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
