@@ -22,7 +22,7 @@ import java.util.List;
 public class VacancyController {
     final VacancyServiceImpl vacancyService;
 
-    @PostMapping("/create")
+    @PostMapping
     VacancyDto createVacancy(@RequestBody CreateVacancyDto vacancyDto) {
         return vacancyService.create(vacancyDto);
     }

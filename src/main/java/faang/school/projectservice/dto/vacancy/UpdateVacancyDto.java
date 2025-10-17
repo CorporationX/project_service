@@ -11,7 +11,8 @@ public record UpdateVacancyDto(
         String name,
         String description,
         Long projectId,
-        @JsonProperty("status") String vacancyStatus,
+        @JsonProperty("status")
+        String vacancyStatus,
         String workSchedule,
         int count,
         String position,
