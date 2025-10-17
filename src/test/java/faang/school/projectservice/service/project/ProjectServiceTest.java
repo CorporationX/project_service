@@ -151,7 +151,6 @@ public class ProjectServiceTest {
         projectId = 999L;
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(IllegalArgumentException.class,
                 () -> projectService.updateProject(projectId, projectUpdateDto));
     }
@@ -231,7 +230,6 @@ projectId = 999L;
         List<Project> accessibleProjects = List.of(publicProject, userPrivateProject, otherPrivateProject);
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findAll()).thenReturn(accessibleProjects);
-
 
         List<Project> result = projectService.getAllProjects();
 
