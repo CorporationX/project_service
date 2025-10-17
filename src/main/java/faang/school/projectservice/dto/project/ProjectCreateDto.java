@@ -26,7 +26,7 @@ public class ProjectCreateDto {
     @Size(max = 4096, message = "Description cannot exceed 4096 characters")
     private String description;
 
-    @Positive(message = "Description cannot exceed 4096 characters")
+    @Positive(message = "Storage size cannot be negative")
     private BigInteger maxStorageSize;
 
     @NotNull(message = "You must specify the project owner")
@@ -41,6 +41,5 @@ public class ProjectCreateDto {
     @NotNull(message = "Project visibility must be specified")
     private ProjectVisibility visibility;
 
-    @Size(max = 255, message = "Cover image id cannot exceed 255 characters")
     private String coverImageId;
 }

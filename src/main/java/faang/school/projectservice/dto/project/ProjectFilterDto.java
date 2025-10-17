@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectFilterDto {
+    private Long projectId;
+
     private String name;
 
     @Positive(message = "Project owner id must be positive")

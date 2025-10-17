@@ -52,7 +52,6 @@ public class ProjectServiceTest {
     @InjectMocks
     private ProjectServiceImpl projectService;
 
-    // Tests for ProjectServiceImpl.create()
     @Test
     public void shouldCreateProjectSuccessfully() {
         ProjectCreateDto dto = createValidProjectCreateDto();
@@ -86,7 +85,6 @@ public class ProjectServiceTest {
         assertThrows(IllegalArgumentException.class, () -> projectService.create(dto));
     }
 
-    // Tests for ProjectServiceImpl.update()
     @Test
     public void shouldUpdateProjectSuccessfully() {
         ProjectUpdateDto updateDto = createValidProjectUpdateDto();
@@ -101,7 +99,7 @@ public class ProjectServiceTest {
         verify(projectRepository).findById(PROJECT_ID);
         verify(projectMapper).updateModel(updateDto, project);
 
-        assertNotNull(project.getName()); // из-за политики IGNORE в маппере, null значения из updateDto не должны записаться
+        assertNotNull(project.getName());
         assertNotNull(project.getDescription());
         assertEquals(updateDto.getMaxStorageSize(), project.getMaxStorageSize());
         assertEquals(updateDto.getStatus(), project.getStatus());
@@ -133,7 +131,6 @@ public class ProjectServiceTest {
         assertThrows(IllegalArgumentException.class, () -> projectService.update(updateDto, PROJECT_ID));
     }
 
-    // Tests for ProjectServiceImpl.getByFilter()
     @Test
     public void shouldReturnAllWhenNoFiltersApplied() {
         List<ProjectDto> result = executeFilter(filterDto -> {

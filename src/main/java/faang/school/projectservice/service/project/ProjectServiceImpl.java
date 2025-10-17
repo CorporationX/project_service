@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +34,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = projectMapper.toModel(projectDto);
         project.setStatus(ProjectStatus.CREATED);
-        project.setCreatedAt(LocalDateTime.now());
         Project savedProject = projectRepository.save(project);
 
         log.info("Project created: id={}, name='{}'", savedProject.getId(), savedProject.getName());
@@ -44,15 +42,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     @Override
-    public void update(ProjectUpdateDto newProjectDto, long projectId) {
+    public ProjectDto update(ProjectUpdateDto newProjectDto, long projectId) {
         log.info("Updating project: id={}", projectId);
 
         Project project = findProjectById(projectId);
         validateUpdate(newProjectDto, project);
         projectMapper.updateModel(newProjectDto, project);
-        project.setUpdatedAt(LocalDateTime.now());
 
         log.info("Project updated: id={}", projectId);
+
+        return projectMapper.toDto(project);
     }
 
     @Override
@@ -63,25 +62,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getAll() {
-        log.debug("Fetching all projects");
-        List<Project> projects = projectRepository.findAll();
-        log.debug("Found {} projects", projects.size());
-        return projectMapper.toDtoList(projects);
-    }
-
-    @Override
     public List<ProjectDto> getByFilter(ProjectFilterDto filtersDto) {
         log.debug("Filtering projects: {}", filtersDto);
-
         Pageable pageable = PageRequest.of(
                 filtersDto.getPage(),
                 filtersDto.getSize(),
                 Sort.by(Sort.Direction.fromString(filtersDto.getSortDirection()), filtersDto.getSortBy()));
         Page<Project> projectPage = projectRepository.findAll(pageable);
 
-        List<ProjectDto> result = projectPage.map(projectMapper::toDto)
-                .getContent()
+        List<ProjectDto> result = projectPage.map(projectMapper::toDto).getContent()
                 .stream()
                 .filter(projectDto -> applyFilters(projectDto, filtersDto))
                 .toList();
@@ -124,7 +113,7 @@ public class ProjectServiceImpl implements ProjectService {
                 throw new IllegalArgumentException("Max storage size cannot be less than current usage");
             }
         }
-   }
+    }
 
     private Project findProjectById(long projectId) {
         return projectRepository.findById(projectId)
@@ -135,6 +124,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean applyFilters(ProjectDto projectDto, ProjectFilterDto filters) {
+        if (filters.getProjectId() != null
+                && !filters.getProjectId().equals(projectDto.getId())) {
+            return false;
+        }
+
         if (filters.getName() != null
                 && !projectDto.getName().equals(filters.getName())) {
             return false;
@@ -147,7 +141,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (filters.getParentProjectId() != null
                 && (projectDto.getParentProjectId() == null
-                ||  !Objects.equals(projectDto.getParentProjectId(), filters.getParentProjectId()))) {
+                || !Objects.equals(projectDto.getParentProjectId(), filters.getParentProjectId()))) {
             return false;
         }
 
