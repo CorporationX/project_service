@@ -10,9 +10,13 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record StageRequestCreateDto(
-        @NotNull Project project,
-        @NotNull @NotBlank String stageName,
-        @NotNull @NotEmpty List<TeamRole> teamRoles,
-        @NotNull @NotEmpty List<TeamMember> executors
-        ) {
+        @NotNull
+        Long projectId,
+        @NotNull @NotBlank
+        String stageName,
+        @NotNull @NotEmpty
+        List<@NotNull TeamRole> teamRoles,
+        @NotNull @NotEmpty
+        List<@NotNull Long> executorsId
+) {
 }

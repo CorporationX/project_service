@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
-import faang.school.projectservice.filter.StageFilterImpl;
+import faang.school.projectservice.filter.StageFilter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -19,11 +19,15 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,29 +40,39 @@ public class StageServiceImpl implements StageService {
     private final StageMapper stageMapper;
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
-    private final StageFilterImpl stageFilter;
-    private final StageInvitationServiceImpl stageInvitationService;
-    private final StageInvitationMapper stageInvitationMapper;
+    private final StageFilter stageFilter;
+    private final TeamMemberRepository teamMemberRepository;
+    //private final StageInvitationServiceImpl stageInvitationService;
+    //private final StageInvitationMapper stageInvitationMapper;
 
     @Transactional
     @Override
     public void createStage(StageRequestCreateDto stageRequestCreateDto) {
-        isProjectExist(stageRequestCreateDto.project().getId());
-        isApplicableProject(stageRequestCreateDto.project());
-        ///  Сохранение не произойдет, ибо Маппинг, не сможет найти поля, добавить в маппер таргеты
-        stageRepository.save(stageMapper.toEntity(stageRequestCreateDto));
+        Project project = getProjectOrThrow(stageRequestCreateDto.projectId());
+        isApplicableProject(project);
+        List<TeamMember> executors = stageRequestCreateDto.executorsId().stream()
+                .filter(Objects::nonNull)
+                .map(teamMemberId -> teamMemberRepository.findByUserIdAndProjectId(teamMemberId, project.getId()))
+                .filter(Objects::nonNull)
+                .toList();
+        List<Task> tasks = new ArrayList<>();
+
+        stageRepository.save(stageMapper.toEntityCreate(stageRequestCreateDto, executors, project, tasks));
     }
 
     @Override
     public List<Stage> getAllStageByFilter(StageRequestAllStageDto stageRequestAllStageDto) {
-        isProjectExist(stageRequestAllStageDto.projectId());
-        return stageFilter.applyByRoleAndStatus(stageRequestAllStageDto);
+        Specification specification = stageFilter
+
+        /*
+        getProjectOrThrow(stageRequestAllStageDto.projectId());
+        return stageFilter.applyByRoleAndStatus(stageRequestAllStageDto);*/
     }
 
     @Transactional
     @Override
     public void deleteStage(StageRequestDeleteDto stageRequestDeleteDto) {
-        isProjectExist(stageRequestDeleteDto.projectId());
+        getProjectOrThrow(stageRequestDeleteDto.projectId());
         Project project = projectRepository.findById(stageRequestDeleteDto.projectId()).get();
         Optional<Stage> stageForDelete = project.getStages().stream()
                 .filter(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()))
@@ -110,8 +124,8 @@ public class StageServiceImpl implements StageService {
                 () -> new EntityNotFoundException("По такому id этапа нет!"));
     }
 
-    private void isProjectExist(long projectId) {
-        projectRepository.findById(projectId).orElseThrow(
+    private Project getProjectOrThrow(long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(
                 () -> new EntityNotFoundException("Такого проекта не существует!"));
     }
 
