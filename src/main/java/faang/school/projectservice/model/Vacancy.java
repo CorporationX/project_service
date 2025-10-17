@@ -96,4 +96,6 @@ public class Vacancy {
 
     @Column(name = "cover_image_key")
     private String coverImageKey;
+
+    private Long teamId;
 }
