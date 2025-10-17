@@ -2,6 +2,9 @@ package faang.school.projectservice.dto.vacancy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.WorkSchedule;
 import lombok.Builder;
 
 import java.util.List;
@@ -12,10 +15,10 @@ public record UpdateVacancyDto(
         String description,
         Long projectId,
         @JsonProperty("status")
-        String vacancyStatus,
-        String workSchedule,
+        VacancyStatus vacancyStatus,
+        WorkSchedule workSchedule,
         int count,
-        String position,
+        TeamRole position,
         List<Candidate> candidates
 ) {
 }

@@ -30,7 +30,7 @@ public class VacancyValidatorImpl implements VacancyValidator {
         if (!isAllowedRole(userId, updateVacancyDto.projectId())) {
             throw new VacancyValidationException("User has incorrect role for this action (update vacancy)");
         }
-        VacancyStatus newVacancyStatus = VacancyStatus.valueOf(updateVacancyDto.vacancyStatus());
+        VacancyStatus newVacancyStatus = updateVacancyDto.vacancyStatus();
         if (newVacancyStatus != VacancyStatus.CLOSED) {
             return;
         }
