@@ -33,7 +33,6 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final UserContext userContext;
     private final StageInvitationFilter stageInvitationFilter;
-    private final StageRepository stageRepository;
 
     @Override
     public StageInvitationDto sendInvitation(StageInvitationCreateDto stageInvitationCreateDto) {
