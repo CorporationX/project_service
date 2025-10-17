@@ -13,6 +13,7 @@ public interface ProjectMapper {
     ProjectDto toProjectDto(Project project);
 
     static void updateProjectFields(Project project, ProjectUpdateDto dto) {
+        updateIfNotNull(dto.name(), project::setName);
         updateIfNotNull(dto.description(), project::setDescription);
         updateIfNotNull(dto.status(), project::setStatus);
         updateIfNotNull(dto.visibility(), project::setVisibility);

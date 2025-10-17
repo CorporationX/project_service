@@ -8,6 +8,9 @@ import lombok.Builder;
 @Builder
 public record  ProjectUpdateDto(
         @Nullable
+        String name,
+
+        @Nullable
         String description,
 
         @Nullable
