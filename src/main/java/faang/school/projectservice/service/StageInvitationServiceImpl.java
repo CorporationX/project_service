@@ -40,7 +40,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationCreateDto);
         if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(stageInvitation.getAuthor(),
                 stageInvitation.getInvited(), stageInvitation.getStage())) {
-            throw new DataValidationException("Приглашение уже было создано!");
+            throw new DataValidationException("The invitation has already been created!");
         }
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
         stageInvitationRepository.save(stageInvitation);
@@ -54,7 +54,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         StageInvitation stageInvitation = getStageInvitationByIdOrThrow(stageInvitationAcceptDto.idInvitation());
         if (!stageInvitationRepository.existsByAuthorAndInvitedAndStage(stageInvitation.getAuthor(),
                 stageInvitation.getInvited(), stageInvitation.getStage())) {
-            throw new EntityNotFoundException("Такого автора, приглашенного участника или этапа не существует");
+            throw new EntityNotFoundException("This author, guest contributor or stage does not exist");
         }
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         stageInvitation.getStage().getExecutors().add(stageInvitation.getInvited());
@@ -89,14 +89,14 @@ public class StageInvitationServiceImpl implements StageInvitationService {
 
     private void validateUserId(long verifyUserId) {
         if (!Objects.equals(userContext.getUserId(), verifyUserId)) {
-            log.warn("{} - Пользователь пытается изменить чужие данные, {} - id Оригинального пользователя",
+            log.warn("{} - The user is trying to change someone else's data, {} - id Original user",
                     userContext.getUserId(), verifyUserId);
-            throw new ForbiddenException("Вы не можете изменять чужие данные!");
+            throw new ForbiddenException("You cannot change someone else's data!");
         }
     }
 
     private StageInvitation getStageInvitationByIdOrThrow(long stageInvitationId) {
         return stageInvitationRepository.findById(stageInvitationId)
-                .orElseThrow(() -> new EntityNotFoundException("Такого приглашения не существует!"));
+                .orElseThrow(() -> new EntityNotFoundException("There is no such invitation!"));
     }
 }
