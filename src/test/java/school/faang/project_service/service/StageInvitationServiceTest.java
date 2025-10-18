@@ -16,19 +16,26 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.StageInvitationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,7 +46,6 @@ import static org.mockito.Mockito.when;
 public class StageInvitationServiceTest {
     private final static long TEAM_MEMBER_ID = 1;
     private final static long USER_CONTEXT_ID = 1;
-    private final static int INVOCATION_TIMES = 1;
     private final static long STAGE_ID = 1;
     private final static String DESCRIPTION = "description";
     @Mock
@@ -50,12 +56,19 @@ public class StageInvitationServiceTest {
     private UserContext userContext;
     @Mock
     private StageInvitationFilter stageInvitationFilter;
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
+    @Mock
+    private StageRepository stageRepository;
     @InjectMocks
     private StageInvitationServiceImpl stageInvitationService;
 
+    @Captor
+    private ArgumentCaptor<StageInvitation> invitationCaptor;
+
     @Test
     public void sendInvitation_notValidUserId_shouldThrowForbiddenException() {
-        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID + TEAM_MEMBER_ID);
+        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID + TEAM_MEMBER_ID, TEAM_MEMBER_ID);
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
 
         Assertions.assertThrows(ForbiddenException.class,
@@ -63,23 +76,35 @@ public class StageInvitationServiceTest {
     }
 
     @Test
+    public void sendInvitation_existsByAuthorAndInvitedAndStage_shouldThrowEntityNotFoundException() {
+        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID, TEAM_MEMBER_ID);
+        when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
+
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> stageInvitationService.sendInvitation(dto));
+    }
+
+    @Test
     public void sendInvitation_existsByAuthorAndInvitedAndStage_shouldThrowDataValidationException() {
-        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID);
-        StageInvitation stageInvitation = StageInvitation.builder()
-                .id(TEAM_MEMBER_ID)
-                .description(" ")
-                .status(StageInvitationStatus.ACCEPTED)
-                .stage(new Stage())
-                .author(new TeamMember())
-                .invited(new TeamMember())
-                .build();
+        Long authorId = TEAM_MEMBER_ID;
+        Long invitedId = TEAM_MEMBER_ID + 1;
+
+        TeamMember author = new TeamMember();
+        author.setId(authorId);
+        TeamMember invited = new TeamMember();
+        invited.setId(invitedId);
+        Stage stage = new Stage();
+        stage.setStageId(STAGE_ID);
+
+        StageInvitationCreateDto dto = new StageInvitationCreateDto(STAGE_ID, authorId, invitedId, " ");
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitationMapper.toEntity(dto)).thenReturn(stageInvitation);
-        when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(
-                any(TeamMember.class),
-                any(TeamMember.class),
-                any(Stage.class))).thenReturn(true);
+        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+        when(stageRepository.findById(STAGE_ID)).thenReturn(Optional.of(stage));
+
+        when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage))
+                .thenReturn(true);
 
         Assertions.assertThrows(DataValidationException.class,
                 () -> stageInvitationService.sendInvitation(dto));
@@ -87,68 +112,102 @@ public class StageInvitationServiceTest {
 
     @Test
     public void sendInvitation_setStatus_shouldStatusSetPending() {
-        StageInvitationCreateDto dto = preparationCreateDto(TEAM_MEMBER_ID);
-        StageInvitationDto responseDto =
-                new StageInvitationDto(" ", StageInvitationStatus.ACCEPTED, new Stage(), new TeamMember());
-        StageInvitation stageInvitation = StageInvitation.builder()
-                .id(TEAM_MEMBER_ID)
-                .description(" ")
-                .status(StageInvitationStatus.ACCEPTED)
-                .stage(new Stage())
-                .author(new TeamMember())
-                .invited(new TeamMember())
-                .build();
+        Long authorId = TEAM_MEMBER_ID;
+        Long invitedId = TEAM_MEMBER_ID + TEAM_MEMBER_ID;
+        Long stageId = STAGE_ID;
+
+        StageInvitationCreateDto dto = new StageInvitationCreateDto(stageId, authorId, invitedId, " ");
+        TeamMember author = new TeamMember();
+        author.setId(authorId);
+        author.setUserId(1L);
+
+        TeamMember invited = new TeamMember();
+        invited.setId(invitedId);
+        invited.setUserId(2L);
+
+        Stage stage = new Stage();
+        stage.setStageId(stageId);
+
+        StageInvitationDto responseDto = new StageInvitationDto(
+                "1",
+                StageInvitationStatus.PENDING,
+                stageId,
+                invitedId
+        );
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitationMapper.toEntity(dto)).thenReturn(stageInvitation);
-        when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(responseDto);
+
+        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+
+        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
+
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(responseDto);
         when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(
                 any(TeamMember.class),
                 any(TeamMember.class),
                 any(Stage.class))).thenReturn(false);
 
         StageInvitationDto result = stageInvitationService.sendInvitation(dto);
-        Assertions.assertEquals(result.status(), StageInvitationStatus.ACCEPTED);
+
+        assertEquals(StageInvitationStatus.PENDING, result.status());
+
+        verify(stageInvitationRepository).save(any(StageInvitation.class));
     }
 
     @Test
     public void sendInvitation_responseMethod_shouldResponseDto() {
+        Long authorId = TEAM_MEMBER_ID;
+        Long invitedId = TEAM_MEMBER_ID + TEAM_MEMBER_ID;
+        Long stageId = STAGE_ID + STAGE_ID + STAGE_ID;
+
         TeamMember author = new TeamMember();
-        author.setId(TEAM_MEMBER_ID);
+        author.setId(authorId);
         author.setUserId(1L);
 
         TeamMember invited = new TeamMember();
-        invited.setId(TEAM_MEMBER_ID);
+        invited.setId(invitedId);
         invited.setUserId(2L);
 
         Stage stage = new Stage();
+        stage.setStageId(stageId);
 
-        StageInvitationCreateDto dto = new StageInvitationCreateDto(stage, author, invited);
-        StageInvitation stageInvitation = new StageInvitation();
-
-        when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitationMapper.toEntity(dto)).thenReturn(stageInvitation);
-        when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(any(), any(), any()))
-                .thenReturn(false);
-        when(stageInvitationRepository.save(stageInvitation)).thenReturn(stageInvitation);
+        StageInvitationCreateDto dto = new StageInvitationCreateDto(stageId, authorId, invitedId, " ");
 
         StageInvitationDto expectedResponseDto = new StageInvitationDto(
-                null,
+                "1",
                 StageInvitationStatus.PENDING,
-                stage,
-                invited
+                stageId,
+                invitedId
         );
 
-        when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(expectedResponseDto);
+        when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
+
+        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+
+        when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
+
+        when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(any(TeamMember.class), any(TeamMember.class), any(Stage.class)))
+                .thenReturn(false);
+
+        when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(expectedResponseDto);
 
         StageInvitationDto responseDto = stageInvitationService.sendInvitation(dto);
 
-        Assertions.assertNotNull(responseDto, "Response DTO should not be null");
-        Assertions.assertEquals(StageInvitationStatus.PENDING, responseDto.status());
-        Assertions.assertEquals(TEAM_MEMBER_ID, responseDto.invited().getId());
-        Assertions.assertEquals(stage, responseDto.stage());
+        assertNotNull(responseDto, "Response DTO should not be null");
+        assertEquals(StageInvitationStatus.PENDING, responseDto.status());
+        assertEquals(invitedId, responseDto.invitedId());
+        assertEquals(stageId, responseDto.stageId());
 
-        verify(stageInvitationRepository).save(stageInvitation);
+        verify(stageInvitationRepository).save(invitationCaptor.capture());
+        StageInvitation responseInvitation = invitationCaptor.getValue();
+
+        assertNotNull(responseInvitation);
+        assertEquals(author, responseInvitation.getAuthor());
+        assertEquals(invited, responseInvitation.getInvited());
+        assertEquals(stage, responseInvitation.getStage());
+        assertEquals(StageInvitationStatus.PENDING, responseInvitation.getStatus());
     }
 
     @Test
@@ -284,20 +343,17 @@ public class StageInvitationServiceTest {
     public void viewAllInvitationsByFilter_responseDto_shouldResponseDtoList() {
         StageInvitationFilterDto dto = new StageInvitationFilterDto(TEAM_MEMBER_ID, StageInvitationStatus.ACCEPTED, STAGE_ID);
         List<StageInvitation> list = new ArrayList<>();
+        Specification<StageInvitation> specification = (root, query, criteriaBuilder) -> null;
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(stageInvitationRepository.findAllByInvited_Id(TEAM_MEMBER_ID)).thenReturn(list);
-        when(stageInvitationFilter.getFilteredStageInvitationById(list, StageInvitationStatus.ACCEPTED, STAGE_ID))
-                .thenReturn(list);
+        when(stageInvitationFilter.specificationStageInvitationByTeamMemberId(TEAM_MEMBER_ID)).thenReturn(specification);
+
 
         stageInvitationService.viewAllInvitationsByFilter(dto);
 
         verify(stageInvitationMapper).toInvitationListDto(list);
     }
 
-    public StageInvitationCreateDto preparationCreateDto(long userId) {
-        TeamMember teamMember = new TeamMember();
-        Stage stage = new Stage();
-        teamMember.setUserId(userId);
-        return new StageInvitationCreateDto(stage, teamMember, teamMember);
+    public StageInvitationCreateDto preparationCreateDto(long authorId, long invitedId) {
+        return new StageInvitationCreateDto(STAGE_ID, authorId, invitedId, "");
     }
 }

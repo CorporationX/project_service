@@ -5,8 +5,9 @@ import faang.school.projectservice.model.stage.Stage;
 import jakarta.validation.constraints.NotNull;
 
 public record StageInvitationCreateDto(
-        @NotNull Stage stage,
-        @NotNull TeamMember author,
-        @NotNull TeamMember invited
+        @NotNull Long stageId,
+        @NotNull Long authorId,
+        @NotNull Long invitedId,
+        String description
 ) {
 }

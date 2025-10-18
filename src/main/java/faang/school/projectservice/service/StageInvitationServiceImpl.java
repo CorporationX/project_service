@@ -11,10 +11,13 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,19 +33,30 @@ import java.util.Objects;
 public class StageInvitationServiceImpl implements StageInvitationService {
 
     private final StageInvitationRepository stageInvitationRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final StageRepository stageRepository;
     private final StageInvitationMapper stageInvitationMapper;
     private final UserContext userContext;
     private final StageInvitationFilter stageInvitationFilter;
 
     @Override
     public StageInvitationDto sendInvitation(StageInvitationCreateDto stageInvitationCreateDto) {
-        validateUserId(stageInvitationCreateDto.author().getUserId());
-        StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationCreateDto);
-        if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(stageInvitation.getAuthor(),
-                stageInvitation.getInvited(), stageInvitation.getStage())) {
+        validateUserId(stageInvitationCreateDto.authorId());
+        TeamMember author = teamMemberRepository.findByUserId(stageInvitationCreateDto.authorId());
+        TeamMember invited = teamMemberRepository.findByUserId(stageInvitationCreateDto.invitedId());
+        Stage stage = stageRepository.findById(stageInvitationCreateDto.stageId())
+                .orElseThrow(() -> new EntityNotFoundException("Entity not found for this id"));
+        String description = stageInvitationCreateDto.description() != null ?stageInvitationCreateDto.description() : " ";
+        if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage)) {
             throw new DataValidationException("The invitation has already been created!");
         }
-        stageInvitation.setStatus(StageInvitationStatus.PENDING);
+        StageInvitation stageInvitation = StageInvitation.builder()
+                .description(description)
+                .status(StageInvitationStatus.PENDING)
+                .stage(stage)
+                .author(author)
+                .invited(invited)
+                .build();
         stageInvitationRepository.save(stageInvitation);
         return stageInvitationMapper.toDto(stageInvitation);
     }
@@ -60,6 +74,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         stageInvitation.getStage().getExecutors().add(stageInvitation.getInvited());
     }
 
+    @Transactional
     @Override
     public void declineInvitation(StageInvitationDeclineDto stageInvitationDeclineDto) {
         StageInvitation stageInvitation = getStageInvitationByIdOrThrow(stageInvitationDeclineDto.stageInvitationId());
@@ -83,7 +98,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
             long stageId = stageInvitationFilterDto.stageId();
             specification = specification.and(stageInvitationFilter.specificationStageId(stageId));
         }
-        List<StageInvitation> stageInvitations =  stageInvitationRepository.findAll(specification);
+        List<StageInvitation> stageInvitations = stageInvitationRepository.findAll(specification);
         return stageInvitationMapper.toInvitationListDto(stageInvitations);
     }
 

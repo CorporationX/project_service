@@ -10,7 +10,7 @@ public class StageInvitationFilter {
 
     public Specification<StageInvitation> specificationStageInvitationByTeamMemberId(Long teamMemberId) {
         return (root, query, cb) ->
-                cb.equal(root.get("teamMember").get("id"), teamMemberId);
+                cb.equal(root.get("invited").get("id"), teamMemberId);
     }
 
     public Specification<StageInvitation> specificationStatus(StageInvitationStatus status) {
