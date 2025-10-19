@@ -21,7 +21,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "api/v1/stage-invitation", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "api/v1/stage-invitations", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationServiceImpl stageInvitationServiceImpl;
