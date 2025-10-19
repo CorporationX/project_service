@@ -43,16 +43,9 @@ public class ProjectServiceImpl implements ProjectService {
         validateString(createProjectDto.description(), "description");
 
         String name = createProjectDto.name().trim();
-        String description = createProjectDto.description().trim();
-
         validateNameUniqueForOwner(requesterId, name);
 
-        Project project = mapper.toProject(createProjectDto);
-        project.setOwnerId(requesterId);
-        project.setName(name);
-        project.setDescription(description);
-        project.setStatus(ProjectStatus.CREATED);
-
+        Project project = mapper.toProject(createProjectDto, requesterId, ProjectStatus.CREATED);
         project = projectRepository.save(project);
         log.info("project created: id={}, ownerId={}", project.getId(), project.getOwnerId());
 
@@ -85,24 +78,12 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
 
-        if (updateProjectDto.description() != null) {
-            String trimmed = updateProjectDto.description().trim();
-            validateString(trimmed, "description");
-            project.setDescription(trimmed);
-        }
+        mapper.updateProjectFromDto(updateProjectDto, project);
 
-        if (updateProjectDto.status() != null) {
-            project.setStatus(updateProjectDto.status());
-        }
+        Project savedProject = projectRepository.save(project);
+        log.info("project updated: id={}", savedProject.getId());
 
-        if (updateProjectDto.visibility() != null) {
-            project.setVisibility(updateProjectDto.visibility());
-        }
-
-        Project saved = projectRepository.save(project);
-        log.info("project updated: id={}", saved.getId());
-
-        return mapper.toProjectDto(saved);
+        return mapper.toProjectDto(savedProject);
     }
 
     @Override
@@ -129,12 +110,12 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectDto> getAll(long requesterId) {
         log.info("get all projects requested: requesterId={}", requesterId);
 
-        List<Project> all = projectRepository.findAll();
+        List<Project> allProjects = projectRepository.findAll();
 
-        return all.stream()
+        return allProjects.stream()
                 .filter(p -> p.getVisibility() == ProjectVisibility.PUBLIC || isOwner(p, requesterId))
                 .map(mapper::toProjectDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -151,7 +132,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(p -> status == null || p.getStatus() == status)
                 .filter(p -> p.getVisibility() == ProjectVisibility.PUBLIC || isOwner(p, requesterId))
                 .map(mapper::toProjectDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
