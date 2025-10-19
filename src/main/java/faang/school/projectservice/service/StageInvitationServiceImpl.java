@@ -42,10 +42,11 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     @Override
     public StageInvitationDto sendInvitation(StageInvitationCreateDto stageInvitationCreateDto) {
         validateUserId(stageInvitationCreateDto.authorId());
-        TeamMember author = teamMemberRepository.findByUserId(stageInvitationCreateDto.authorId());
-        TeamMember invited = teamMemberRepository.findByUserId(stageInvitationCreateDto.invitedId());
         Stage stage = stageRepository.findById(stageInvitationCreateDto.stageId())
                 .orElseThrow(() -> new EntityNotFoundException("Entity not found for this id"));
+        long projectId = stage.getProject().getId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(projectId, stageInvitationCreateDto.authorId());
+        TeamMember invited = teamMemberRepository.findByUserIdAndProjectId(projectId, stageInvitationCreateDto.invitedId());
         String description = stageInvitationCreateDto.description() != null ?stageInvitationCreateDto.description() : " ";
         if (stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage)) {
             throw new DataValidationException("The invitation has already been created!");
