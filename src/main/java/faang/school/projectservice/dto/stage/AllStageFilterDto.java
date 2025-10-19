@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record StageRequestAllStageDto(
+public record AllStageFilterDto(
         @NotNull Long projectId,
         List<@NotNull TeamRole> teamRoleList,
         TaskStatus taskStatus

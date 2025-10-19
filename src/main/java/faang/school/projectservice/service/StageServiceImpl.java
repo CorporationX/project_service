@@ -1,9 +1,10 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageRequestAllStageDto;
-import faang.school.projectservice.dto.stage.StageRequestCreateDto;
-import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
-import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
+import faang.school.projectservice.dto.stage.AllStageFilterDto;
+import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
@@ -21,7 +22,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,79 +47,55 @@ public class StageServiceImpl implements StageService {
 
     @Transactional
     @Override
-    public void createStage(StageRequestCreateDto stageRequestCreateDto) {
-        Project project = getProjectOrThrow(stageRequestCreateDto.projectId());
+    public void createStage(StageCreateDto stageCreateDto) {
+        Project project = getProjectOrThrow(stageCreateDto.projectId());
         isApplicableProject(project);
-        List<TeamMember> executors = stageRequestCreateDto.executorsId().stream()
-                .filter(Objects::nonNull)
-                .map(teamMemberId -> teamMemberRepository.findByUserIdAndProjectId(teamMemberId, project.getId()))
-                .filter(Objects::nonNull)
-                .toList();
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByTeamMembersId(stageCreateDto.executorsId());
         List<Task> tasks = new ArrayList<>();
-
-        stageRepository.save(stageMapper.toEntityCreate(stageRequestCreateDto, executors, project, tasks));
+        stageRepository.save(stageMapper.toEntityCreate(stageCreateDto, teamMembers, project, tasks));
     }
 
     @Override
-    public List<Stage> getAllStageByFilter(StageRequestAllStageDto stageRequestAllStageDto) {
-        Specification specification = stageFilter
-
-        /*
-        getProjectOrThrow(stageRequestAllStageDto.projectId());
-        return stageFilter.applyByRoleAndStatus(stageRequestAllStageDto);*/
+    public List<StageDto> getAllStageByFilter(AllStageFilterDto allStageFilterDto) {
+        List <Stage> stageList = stageFilter.applyByRoleAndStatus(allStageFilterDto);
+        return stageMapper.toListDto(stageList);
     }
+
+    @Override
+    public void deleteStage(StageDeleteDto stageDeleteDto) {
+        Stage stage = getStageOrThrow(stageDeleteDto.stageId());
+        stageRepository.delete(stage);
+    }
+
 
     @Transactional
     @Override
-    public void deleteStage(StageRequestDeleteDto stageRequestDeleteDto) {
-        getProjectOrThrow(stageRequestDeleteDto.projectId());
-        Project project = projectRepository.findById(stageRequestDeleteDto.projectId()).get();
-        Optional<Stage> stageForDelete = project.getStages().stream()
-                .filter(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()))
-                .findFirst();
-        if (stageForDelete.isEmpty()) {
-            throw new EntityNotFoundException("Такого этапа не существует!");
-        }
-        List<Task> tasks = stageForDelete.get().getTasks();
-        stageRepository.delete(stageForDelete.get());
-        project.getStages()
-                .removeIf(stage -> stage.getStageId().equals(stageRequestDeleteDto.stage().getStageId()));
-        Stage stage = project.getStages().stream()
-                .filter(stages -> stages.getTasks().stream()
-                        .anyMatch(taskList -> taskList.getStatus().equals(TRANSFER_TASK_STATUS)))
-                .findFirst()
-                .orElseThrow();
-        stage.getTasks().addAll(tasks);
-        project.getStages().add(stage);
-        projectRepository.save(project);
-    }
-
-    @Transactional
-    @Override
-    public void updateStage(StageRequestUpdateDto stageRequestUpdateDto) {
-        List<TeamMember> teamMembers = stageRequestUpdateDto.stage().getExecutors();
+    public void updateStage(StageUpdateDto stageUpdateDto) {
+     /*   Stage stage = getStageOrThrow(stageUpdateDto.stageId());
+        List<TeamMember> teamMembers = stage.getExecutors();
         boolean hasExecutorRole = teamMembers.stream()
                 .anyMatch(executor -> executor.getRoles().stream()
-                        .anyMatch(teamRole -> teamRole.equals(stageRequestUpdateDto.teamRole())));
+                        .anyMatch(teamRole -> teamRole.equals(stageUpdateDto.teamRole())));
         if (hasExecutorRole) {
             teamMembers.stream()
                     .filter(teamMember -> teamMember.getRoles().stream()
-                            .anyMatch(executorRole -> executorRole.equals(stageRequestUpdateDto.teamRole())))
+                            .anyMatch(executorRole -> executorRole.equals(stageUpdateDto.teamRole())))
                     .map()
-        }
-    }
-
-    @Transactional
-    @Override
-    public List<Stage> getAllStage(long projectId) {
-        List<Stage> stages = stageRepository.findAll();
-        return stages.stream()
-                .filter(stage -> stage.getProject().getId().equals(projectId))
-                .toList();
+        }*/
     }
 
     @Override
-    public Stage getStageById(long stageId) {
+    public List<StageDto> getStages(long projectId) {
+        Project project = getProjectOrThrow(projectId);
+        return stageMapper.toListDto(project.getStages());
+    }
+
+    @Override
+    public StageDto getStage(long stageId) {
+        return stageMapper.toDto(getStageOrThrow(stageId));
+    }
+
+    private Stage getStageOrThrow(long stageId) {
         return stageRepository.findById(stageId).orElseThrow(
                 () -> new EntityNotFoundException("По такому id этапа нет!"));
     }

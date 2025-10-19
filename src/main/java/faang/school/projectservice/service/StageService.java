@@ -1,24 +1,27 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stage.StageRequestAllStageDto;
-import faang.school.projectservice.dto.stage.StageRequestCreateDto;
-import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
-import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
+import faang.school.projectservice.dto.stage.AllStageFilterDto;
+import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.model.stage.Stage;
 
 import java.util.List;
 
 public interface StageService {
 
-    void createStage(StageRequestCreateDto stageRequestCreateDto);
+    void createStage(StageCreateDto stageCreateDto);
 
-    List<Stage> getAllStageByFilter(StageRequestAllStageDto stageRequestAllStageDto);
+    List<StageDto> getAllStageByFilter(AllStageFilterDto allStageFilterDto);
 
-    void deleteStage(StageRequestDeleteDto stageRequestDeleteDto);
+    void deleteStage(StageDeleteDto stageDeleteDto);
 
-    void updateStage(StageRequestUpdateDto stageRequestUpdateDto);
+    void updateStage(StageUpdateDto stageUpdateDto);
 
-    List<Stage> getAllStage(long projectId);
+    List<StageDto> getStages(long projectId);
 
-    Stage getStageById(long stageId);
+    StageDto getStage(long stageId);
+
+
 }

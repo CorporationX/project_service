@@ -1,9 +1,10 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.stage.StageRequestAllStageDto;
-import faang.school.projectservice.dto.stage.StageRequestCreateDto;
-import faang.school.projectservice.dto.stage.StageRequestDeleteDto;
-import faang.school.projectservice.dto.stage.StageRequestUpdateDto;
+import faang.school.projectservice.dto.stage.AllStageFilterDto;
+import faang.school.projectservice.dto.stage.StageCreateDto;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageServiceImpl;
@@ -32,36 +33,36 @@ public class StageController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createStage(@RequestBody @Valid StageRequestCreateDto stageRequestCreateDto) {
-        stageServiceImpl.createStage(stageRequestCreateDto);
+    public void createStage(@RequestBody @Valid StageCreateDto stageCreateDto) {
+        stageServiceImpl.createStage(stageCreateDto);
     }
 
     @GetMapping("/filter-stages")
-    public List<Stage> getAllStageByFilter(@Valid @RequestBody StageRequestAllStageDto stageRequestAllStageDto) {
-        return stageServiceImpl.getAllStageByFilter(stageRequestAllStageDto);
+    public List<StageDto> getAllStageByFilter(@Valid @RequestBody AllStageFilterDto allStageFilterDto) {
+        return stageServiceImpl.getAllStageByFilter(allStageFilterDto);
     }
 
 
     @DeleteMapping
-    public void deleteStage(@Valid StageRequestDeleteDto stageRequestDeleteDto) {
-        stageServiceImpl.deleteStage(stageRequestDeleteDto);
+    public void deleteStage(@Valid StageDeleteDto stageDeleteDto) {
+        stageServiceImpl.deleteStage(stageDeleteDto);
     }
 
     @PutMapping
-    public void updateStage(@Valid @RequestBody StageRequestUpdateDto stageRequestUpdateDto) {
-        stageServiceImpl.updateStage(stageRequestUpdateDto);
+    public void updateStage(@Valid @RequestBody StageUpdateDto stageUpdateDto) {
+        stageServiceImpl.updateStage(stageUpdateDto);
     }
 
     @GetMapping("/id-stages/{projectId}")
-    public List<Stage> getAllStage(@PathVariable Long projectId) {
+    public List<StageDto> getStages(@PathVariable Long projectId) {
         validateOrThrow(projectId);
-        return stageServiceImpl.getAllStage(projectId);
+        return stageServiceImpl.getStages(projectId);
     }
 
     @GetMapping("/{stageId}")
-    public Stage getStageById(@PathVariable Long stageId) {
+    public StageDto getStageById(@PathVariable Long stageId) {
         validateOrThrow(stageId);
-        return stageServiceImpl.getStageById(stageId);
+        return stageServiceImpl.getStage(stageId);
     }
 
     private void validateOrThrow(Long id) {
