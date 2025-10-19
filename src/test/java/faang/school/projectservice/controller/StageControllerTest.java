@@ -1,141 +1,121 @@
 package faang.school.projectservice.controller;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.dto.client.CreateStageDto;
-import faang.school.projectservice.dto.client.ProjectIdDto;
 import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.StageIdDto;
 import faang.school.projectservice.dto.client.StageRoleDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.dto.client.UpdateStageDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class StageControllerTest {
+@ExtendWith(MockitoExtension.class)
+public class StageControllerTest {
 
-    private MockMvc mockMvc;
+    @Mock
     private StageService stageService;
-    private ObjectMapper objectMapper;
+    @InjectMocks
     private StageController stageController;
-
     private StageDto stageDto;
+    private UpdateStageDto updateStageDto;
+    private Long stageId = 1L;
+    private Long projectId = 100L;
 
     @BeforeEach
     void setUp() {
-        stageService = mock(StageService.class);
-
-        stageController = new StageController(stageService);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(stageController).build();
-
-        objectMapper = new ObjectMapper();
+        StageRoleDto stageRoleDto = new StageRoleDto(TeamRole.ANALYST, 1);
+        TeamMemberDto teamMemberDto = new TeamMemberDto(2L, "John", TeamRole.ANALYST);
 
         stageDto = new StageDto(
-                1L,
-                "Stage 1",
-                100L,
-                List.of(new StageRoleDto(TeamRole.DEVELOPER, 2)),
-                List.of(),
-                0
+                stageId,
+                "stageName",
+                projectId,
+                List.of(stageRoleDto),
+                List.of(teamMemberDto),
+                3
+        );
+
+        TeamMemberDto requiredRole = new TeamMemberDto(3L, "Mike", TeamRole.DEVELOPER);
+        List<Long> executorIds = List.of(4L, 5L, 6L);
+
+        updateStageDto = new UpdateStageDto(
+                stageId,
+                "Updated Stage Name",
+                projectId,
+                requiredRole,
+                executorIds
         );
     }
 
     @Test
-    void testCreateStage() throws Exception {
-        CreateStageDto createStageDto = new CreateStageDto(
-                stageDto.stageName(),
-                stageDto.projectId(),
-                stageDto.requiredRoles(),
-                null
+    void testCreateStage() {
+        when(stageService.createStage(stageDto)).thenReturn(stageDto);
+
+        StageDto result = stageController.createStage(stageDto);
+
+        assertEquals(stageDto, result);
+        verify(stageService).createStage(stageDto);
+    }
+
+    @Test
+    void testGetAllStagesOfProject() {
+        List<StageDto> stages = List.of(stageDto);
+        when(stageService.getAllStagesOfProject(projectId)).thenReturn(stages);
+
+        List<StageDto> result = stageController.getAllStagesOfProject(projectId);
+
+        assertEquals(1, result.size());
+        assertSame(stageDto, result.get(0));
+        verify(stageService).getAllStagesOfProject(projectId);
+    }
+
+    @Test
+    void testGetStageById() {
+        when(stageService.getById(stageId)).thenReturn(stageDto);
+
+        StageDto result = stageController.getStageById(stageId);
+
+        assertEquals(stageDto, result);
+        verify(stageService).getById(stageId);
+    }
+
+    @Test
+    void testUpdateStage() {
+        StageRoleDto updatedStageRoleDto = new StageRoleDto(TeamRole.DEVELOPER, 2);
+        TeamMemberDto updatedTeamMemberDto = new TeamMemberDto(3L, "Mike", TeamRole.DEVELOPER);
+
+        StageDto updatedStageDto = new StageDto(
+                stageId,
+                "Updated Stage Name",
+                projectId,
+                List.of(updatedStageRoleDto),
+                List.of(updatedTeamMemberDto),
+                4
         );
 
-        Mockito.when(stageService.createStage(any(CreateStageDto.class))).thenReturn(stageDto);
+        when(stageService.updateStage(stageId, updateStageDto)).thenReturn(updatedStageDto);
 
-        mockMvc.perform(post("/stages/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createStageDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.stageId()))
-                .andExpect(jsonPath("$.stageName").value(stageDto.stageName()));
+        StageDto result = stageController.updateStage(stageId, updateStageDto);
+
+        assertEquals(updatedStageDto, result);
+        verify(stageService).updateStage(stageId, updateStageDto);
     }
 
     @Test
-    void testGetAllStagesOfProject() throws Exception {
-        ProjectIdDto projectIdDto = new ProjectIdDto(stageDto.projectId());
-        Mockito.when(stageService.getAllStagesOfProject(any(ProjectIdDto.class)))
-                .thenReturn(List.of(stageDto));
+    void testDeleteStage() {
+        stageController.deleteStage(stageId);
 
-        mockMvc.perform(post("/stages/get-all")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(projectIdDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].stageId").value(stageDto.stageId()))
-                .andExpect(jsonPath("$[0].stageName").value(stageDto.stageName()));
-    }
-
-    @Test
-    void testGetStageById() throws Exception {
-        StageIdDto stageIdDto = new StageIdDto(stageDto.stageId());
-        Mockito.when(stageService.getById(any(StageIdDto.class))).thenReturn(stageDto);
-
-        mockMvc.perform(post("/stages/get")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(stageIdDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.stageId()))
-                .andExpect(jsonPath("$.stageName").value(stageDto.stageName()));
-    }
-
-    @Test
-    void testUpdateStage() throws Exception {
-        UpdateStageDto updateStageDto = new UpdateStageDto(
-                stageDto.stageId(),
-                "Updated Stage",
-                stageDto.requiredRoles(),
-                List.of()
-        );
-
-        StageDto updatedStage = new StageDto(
-                stageDto.stageId(),
-                "Updated Stage",
-                stageDto.projectId(),
-                stageDto.requiredRoles(),
-                stageDto.executors(),
-                stageDto.tasksCount()
-        );
-
-        Mockito.when(stageService.updateStage(any(UpdateStageDto.class))).thenReturn(updatedStage);
-
-        mockMvc.perform(post("/stages/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateStageDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.stageId()))
-                .andExpect(jsonPath("$.stageName").value("Updated Stage"));
-    }
-
-    @Test
-    void testDeleteStage() throws Exception {
-        StageIdDto stageIdDto = new StageIdDto(stageDto.stageId());
-        Mockito.doNothing().when(stageService).deleteById(any(StageIdDto.class));
-
-        mockMvc.perform(post("/stages/delete")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(stageIdDto)))
-                .andExpect(status().isOk());
+        verify(stageService).deleteById(stageId);
     }
 }

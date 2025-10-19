@@ -1,21 +1,18 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.CreateStageDto;
-import faang.school.projectservice.dto.client.ProjectIdDto;
 import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.StageIdDto;
 import faang.school.projectservice.dto.client.UpdateStageDto;
 
 import java.util.List;
 
 public interface StageService {
-    StageDto createStage(CreateStageDto stageDto);
+    StageDto createStage(StageDto stageDto);
 
-    List<StageDto> getAllStagesOfProject(ProjectIdDto projectIdDto);
+    List<StageDto> getAllStagesOfProject(Long projectId);
 
-    void deleteById(StageIdDto stageIdDto);
+    void deleteById(Long stageId);
 
-    StageDto updateStage(UpdateStageDto stageDto);
+    StageDto updateStage(Long stageId, UpdateStageDto updateStageDto);
 
-    StageDto getById(StageIdDto stageIdDto);
+    StageDto getById(Long stageId);
 }

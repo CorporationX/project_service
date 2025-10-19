@@ -12,5 +12,5 @@ public record StageDto(
         @NotNull Long projectId,
         @NotNull @Size(min = 1) List<StageRoleDto> requiredRoles,
         List<TeamMemberDto> executors,
-        Integer tasksCount) {
+        int tasksCount) {
 }

@@ -1,14 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.CreateStageDto;
-import faang.school.projectservice.dto.client.ProjectIdDto;
+import faang.school.projectservice.client.NotificationServiceClient;
 import faang.school.projectservice.dto.client.StageDto;
-import faang.school.projectservice.dto.client.StageIdDto;
+import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.dto.client.UpdateStageDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -27,9 +28,10 @@ public class StageServiceImpl implements StageService {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
     private final StageMapper stageMapper;
+    private final NotificationServiceClient notificationService;
 
     @Override
-    public StageDto createStage(CreateStageDto stageDto) {
+    public StageDto createStage(StageDto stageDto) {
         log.info("Create stage for project id={}", stageDto.projectId());
         validateCreateStageDto(stageDto);
         Project project = projectRepository.findById(stageDto.projectId())
@@ -50,51 +52,46 @@ public class StageServiceImpl implements StageService {
     }
 
     @Override
-    public List<StageDto> getAllStagesOfProject(ProjectIdDto projectIdDto) {
-        log.info("Getting all stages of project id={}", projectIdDto.projectId());
-        List<Stage> stages = stageRepository.findAllByProjectId(projectIdDto.projectId());
-        List<StageDto> result = new ArrayList<>();
-        for (Stage stage : stages) {
-            result.add(stageMapper.toStageDto(stage));
-        }
-        return result;
+    public List<StageDto> getAllStagesOfProject(Long projectId) {
+        log.info("Getting all stages of project id={}", projectId);
+        List<Stage> stages = stageRepository.findByProjectId(projectId);
+        return stageMapper.toListStageDto(stages);
     }
 
     @Override
-    public void deleteById(StageIdDto stageIdDto) {
-        log.info("Delete stage id={}", stageIdDto.stageId());
-        Stage stage = stageRepository.findById(stageIdDto.stageId())
-                .orElseThrow(() -> {
-                    log.debug("Stage with id={} is not found", stageIdDto.stageId());
-                    return new EntityNotFoundException("Этап с id " + stageIdDto.stageId() + " не найден");
-                });
-        stageRepository.delete(stage);
-        log.info("Stage '{}' was deleted ", stage.getStageName());
+    public void deleteById(Long stageId) {
+        log.info("Delete stage id={}", stageId);
+        stageRepository.deleteById(stageId);
+        log.info("Stage '{}' was deleted ", stageId);
     }
 
     @Override
-    public StageDto updateStage(UpdateStageDto stageDto) {
-        Stage stage = stageRepository.findById(stageDto.stageId())
+    public StageDto updateStage(Long stageId, UpdateStageDto updateStageDto) {
+        Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException("Stage with id "
-                        + stageDto.stageId() + " is not found"));
+                        + stageId + " is not found"));
 
+        stageMapper.updateStage(updateStageDto, stage);
+        TeamMemberDto teamMemberDto = updateStageDto.requiredRoles();
+        boolean isRoleInStage = haveRoleInStage(stage, teamMemberDto.role());
+        if (!isRoleInStage) {
+            TeamMember memberWithRoleInProject = getMemberWithRoleInProject(updateStageDto.projectId()
+                    , teamMemberDto.role());
+            sendInvitation(memberWithRoleInProject, stage);
+        }
         Stage updatedStage = stageRepository.save(stage);
         return stageMapper.toStageDto(updatedStage);
     }
 
     @Override
-    public StageDto getById(StageIdDto stageIdDto) {
-        log.info("Getting Stage id={}", stageIdDto.stageId());
-        Stage stage = stageRepository.findById(stageIdDto.stageId())
-                .orElseThrow(() -> {
-                    log.debug("Stage with id={} is not found", stageIdDto.stageId());
-                    return new EntityNotFoundException("Stage with id "
-                            + stageIdDto.stageId() + " is not found");
-                });
+    public StageDto getById(Long stageId) {
+        log.info("Getting Stage id={}", stageId);
+        Stage stage = stageRepository.findById(stageId).orElseThrow(() -> new EntityNotFoundException("Stage with id "
+                + stageId + " is not found"));
         return stageMapper.toStageDto(stage);
     }
 
-    private void validateCreateStageDto(CreateStageDto stageDto) {
+    private void validateCreateStageDto(StageDto stageDto) {
         log.info("Validation CreateStageDto for project id={}", stageDto.projectId());
         if (stageDto.stageName() == null || stageDto.stageName().isBlank()) {
             log.error("Validation error: stageName is empty for project id={}", stageDto.projectId());
@@ -107,7 +104,7 @@ public class StageServiceImpl implements StageService {
         log.info("Validation CreateStageDto done for project id={}", stageDto.projectId());
     }
 
-    private void buildStageRoles(CreateStageDto stageDto, Stage stage) {
+    private void buildStageRoles(StageDto stageDto, Stage stage) {
         log.info("Creation StageRoles for stage '{}' of project id={}", stage.getStageName(), stageDto.projectId());
         List<StageRoles> stageRoles = new ArrayList<>();
         stageDto.requiredRoles().forEach(roleDto -> {
@@ -121,5 +118,30 @@ public class StageServiceImpl implements StageService {
         });
         stage.setStageRoles(stageRoles);
         log.info("All StageRoles were created for the stage '{}'", stage.getStageName());
+    }
+
+    private TeamMember getMemberWithRoleInProject(Long projectId, TeamRole teamRole) {
+        return projectRepository.findById(projectId)
+                .flatMap(project -> project.getTeams().stream()
+                        .flatMap(team -> team.getTeamMembers().stream())
+                        .filter(teamMember -> teamMember.getRoles().contains(teamRole))
+                        .findFirst()).orElseThrow(() -> new DataValidationException(
+                        "No team member with role " + teamRole + " found in project " + projectId
+                ));
+    }
+
+    private boolean haveRoleInStage(Stage stage, TeamRole teamRole) {
+        return stage.getExecutors().stream().anyMatch(teamMember -> teamMember.getRoles().stream()
+                .anyMatch(role -> role.equals(teamRole)));
+    }
+
+
+    private void sendInvitation(TeamMember member, Stage stage) {
+        try {
+            notificationService.sendStageInvitation(member.getId());
+            log.info("Invitation sent to user {} for stage {}", member.getId(), stage.getStageId());
+        } catch (Exception e) {
+            log.error("Failed to send invitation to user {}: {}", member.getId(), e.getMessage());
+        }
     }
 }

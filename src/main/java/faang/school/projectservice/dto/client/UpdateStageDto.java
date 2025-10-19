@@ -7,6 +7,7 @@ import java.util.List;
 
 public record UpdateStageDto(@NotNull Long stageId,
                              @NotBlank String stageName,
-                             List<StageRoleDto> requiredRoles,
+                             @NotNull Long projectId,
+                             TeamMemberDto requiredRoles,
                              List<Long> executorIds) {
 }
