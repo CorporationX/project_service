@@ -11,6 +11,7 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -93,14 +94,17 @@ public class StageInvitationServiceTest {
         author.setId(authorId);
         TeamMember invited = new TeamMember();
         invited.setId(invitedId);
+        Project project = new Project();
+        project.setId(3L);
         Stage stage = new Stage();
         stage.setStageId(STAGE_ID);
+        stage.setProject(project);
 
         StageInvitationCreateDto dto = new StageInvitationCreateDto(STAGE_ID, authorId, invitedId, " ");
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
-        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
-        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, invitedId)).thenReturn(invited);
         when(stageRepository.findById(STAGE_ID)).thenReturn(Optional.of(stage));
 
         when(stageInvitationRepository.existsByAuthorAndInvitedAndStage(author, invited, stage))
@@ -125,8 +129,11 @@ public class StageInvitationServiceTest {
         invited.setId(invitedId);
         invited.setUserId(2L);
 
+        Project project = new Project();
+        project.setId(3L);
         Stage stage = new Stage();
         stage.setStageId(stageId);
+        stage.setProject(project);
 
         StageInvitationDto responseDto = new StageInvitationDto(
                 "1",
@@ -137,8 +144,8 @@ public class StageInvitationServiceTest {
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
 
-        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
-        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, invitedId)).thenReturn(invited);
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
 
@@ -169,8 +176,12 @@ public class StageInvitationServiceTest {
         invited.setId(invitedId);
         invited.setUserId(2L);
 
+        Project project = new Project();
+        project.setId(3L);
+
         Stage stage = new Stage();
         stage.setStageId(stageId);
+        stage.setProject(project);
 
         StageInvitationCreateDto dto = new StageInvitationCreateDto(stageId, authorId, invitedId, " ");
 
@@ -183,8 +194,8 @@ public class StageInvitationServiceTest {
 
         when(userContext.getUserId()).thenReturn(USER_CONTEXT_ID);
 
-        when(teamMemberRepository.findByUserId(authorId)).thenReturn(author);
-        when(teamMemberRepository.findByUserId(invitedId)).thenReturn(invited);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, authorId)).thenReturn(author);
+        when(teamMemberRepository.findByUserIdAndProjectId(3L, invitedId)).thenReturn(invited);
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
 
