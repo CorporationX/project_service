@@ -1,26 +1,36 @@
 package faang.school.projectservice.dto.subproject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-public record CreateSubProjectDto(
-        @NotBlank(message = "Нельзя создать подпроект с пустым полем name.")
+public record SubProjectDto(
+        @Min(1)
+        @JsonProperty("id") Long id,
         @JsonProperty("name") String name,
         @JsonProperty("description") String description,
-        @Min(1)
+        @JsonProperty("ownerId") Long ownerId,
         @JsonProperty("parentProjectId") Long parentProjectId,
+        @JsonProperty("childrenIds") List<Long> childrenIds,
+        @JsonProperty("tasksIds") List<Long> taskIds,
+        @JsonProperty("resourceIds") List<String> resourceIds,
+        @JsonProperty("createdAt") LocalDateTime createdAt,
+        @JsonProperty("updatedAt") LocalDateTime updatedAt,
+        @JsonProperty("status") ProjectStatus status,
         @JsonProperty("visibility") ProjectVisibility visibility,
         @JsonProperty("coverImageId") String coverImageId,
         @JsonProperty("teamIds") List<Long> teamIds,
         @JsonProperty("scheduleId") Long scheduleId,
-        @JsonProperty("stageIds") List<Long> stageIds,
-        @JsonProperty("vacancyIds") List<Long> vacancyIds,
+        @JsonProperty("stageIds") List<Long> stages,
+        @JsonProperty("vacancieIds") List<Long> vacancieIds,
+        @JsonProperty("momentIds") List<Long> momentIds,
         @JsonProperty("meetIds") List<Long> meetIds,
         @JsonProperty("presentationFileKey") String presentationFileKey,
+        @JsonProperty("presentationGeneratedAt") LocalDateTime presentationGeneratedAt,
         @JsonProperty("galleryFileKeys") List<String> galleryFileKeys
 ) {
 }
