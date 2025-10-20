@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.FilterProject;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -32,19 +33,11 @@ public class ProjectService {
                 .filter(project -> Objects.equals(project.getOwnerId(), userId))
                 .forEach(project -> {
                     if (Objects.equals(project.getName(), projectCreateDto.name())) {
-                        throw new IllegalArgumentException("Project with the same name already exists for this user");
+                        throw new DataValidationException(String.format("Project with the same name already exists for user %d", userId));
                     }
                 });
 
-        Project project = Project.builder()
-                .name(projectCreateDto.name())
-                .description(projectCreateDto.description())
-                .status(ProjectStatus.CREATED)
-                .ownerId(userId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .visibility(projectCreateDto.visibility())
-                    .build();
+        Project project = ProjectMapper.toEntity(projectCreateDto, userId);
 
         return projectRepository.save(project);
     }
@@ -60,7 +53,7 @@ public class ProjectService {
         ProjectMapper.updateProjectFields(project, projectUpdateDto);
         project.setUpdatedAt(LocalDateTime.now());
 
-        return  projectRepository.save(project);
+        return projectRepository.save(project);
     }
 
     public List<Project> getProjectsByFilter(ProjectFilterDto projectFilterDto) {
@@ -100,6 +93,6 @@ public class ProjectService {
 
         return projects
                 .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
-                (project.getVisibility() == ProjectVisibility.PRIVATE && project.getOwnerId() == userId));
+                        (project.getVisibility() == ProjectVisibility.PRIVATE && project.getOwnerId() == userId));
     }
 }

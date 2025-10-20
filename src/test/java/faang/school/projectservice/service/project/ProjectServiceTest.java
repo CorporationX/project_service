@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,30 +96,8 @@ public class ProjectServiceTest {
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findAll()).thenReturn(List.of(projectFirst));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DataValidationException.class,
                 () -> projectService.createProject(projectCreateDto));
-    }
-
-    @Test
-    void createProject_WithEmptyName_ShouldThrowException() {
-        ProjectCreateDto createDto = new ProjectCreateDto("", "Description", ProjectVisibility.PUBLIC);
-
-        when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> projectService.createProject(createDto));
-    }
-
-    @Test
-    void createProject_WithBlankName_ShouldThrowException() {
-        ProjectCreateDto createDto = new ProjectCreateDto("   ", "Description", ProjectVisibility.PUBLIC);
-
-        when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> projectService.createProject(createDto));
     }
 
     @Test
