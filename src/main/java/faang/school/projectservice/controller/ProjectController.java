@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/projects")
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
 
     private final ProjectFacade projectFacade;
@@ -52,8 +52,6 @@ public class ProjectController {
 
         ProjectStatus projectStatus = status != null ? ProjectStatus.valueOf(status) : null;
         return projectFacade.getByFilter(name, projectStatus, userId);
-
-
     }
 
     @GetMapping("/{id}")

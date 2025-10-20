@@ -6,4 +6,4 @@ public record ProjectUpdateDto(
         String description,
         String status,
         ProjectVisibility visibility
-) {}
+){}
