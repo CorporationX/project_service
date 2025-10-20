@@ -8,6 +8,8 @@ import faang.school.projectservice.service.subproject.SubProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,33 +23,36 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 public class SubProjectController {
-    private UserContext userContext;
-    private SubProjectService subProjectService;
+    private final UserContext userContext;
+    private final SubProjectService subProjectService;
 
     @PostMapping("/")
-    public SubProjectDto create(long creatorId, @Valid CreateSubProjectDto createSubProjectDto) {
+    public SubProjectDto create(@Valid CreateSubProjectDto createSubProjectDto) {
         return subProjectService.create(userContext.getUserId(), createSubProjectDto);
     }
 
     @PutMapping("/")
-    public SubProjectDto update(long requesterId, @Valid UpdateSubProjectDto updateSubProjectDto) {
-        return subProjectService.update(requesterId, updateSubProjectDto);
+    public SubProjectDto update(@Valid UpdateSubProjectDto updateSubProjectDto) {
+        return subProjectService.update(userContext.getUserId(), updateSubProjectDto);
     }
 
-    @PutMapping("/complete/{id}")
+    @PutMapping("/{id}/complete")
     public boolean complete(@PathVariable("id") long subprojectId) {
-        return subProjectService.complete(subprojectId);
+        return subProjectService.complete(userContext.getUserId(), subprojectId);
     }
 
+    @GetMapping("/{id}")
     public SubProjectDto getById(long subprojectId) {
         return subProjectService.getById(subprojectId);
     }
 
+    @GetMapping("/{id}")
     public List<SubProjectDto> getAllByParentProject(long parentProjectId) {
         return subProjectService.getAllByParentProject(parentProjectId);
     }
 
+    @DeleteMapping("/{id}")
     public boolean delete(long subprojectId) {
-        return subProjectService.delete(subprojectId);
+        return subProjectService.delete(userContext.getUserId(), subprojectId);
     }
 }
