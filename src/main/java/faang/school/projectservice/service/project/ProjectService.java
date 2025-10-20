@@ -8,7 +8,6 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.FilterProject;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

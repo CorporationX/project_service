@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,16 +67,19 @@ public class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
-        projectUpdateDto = new ProjectUpdateDto("Updated Name", "Updated Description", ProjectStatus.IN_PROGRESS, ProjectVisibility.PRIVATE);
+        projectUpdateDto = new ProjectUpdateDto("Updated Name", "Updated Description",
+                ProjectStatus.IN_PROGRESS, ProjectVisibility.PRIVATE);
     }
 
     @Test
     void createProject_WithValidData_ShouldCreateProject() {
-        projectCreateDto = new ProjectCreateDto("Test create Project", "Test Description", ProjectVisibility.PUBLIC);
+        projectCreateDto = new ProjectCreateDto("Test create Project",
+                "Test Description", ProjectVisibility.PUBLIC);
 
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
-        when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectRepository.save(any(Project.class))).thenAnswer(
+                invocation -> invocation.getArgument(0));
 
         Project result = projectService.createProject(projectCreateDto);
 
@@ -91,7 +93,8 @@ public class ProjectServiceTest {
 
     @Test
     void createProject_WhenProjectWithSameNameExists_ShouldThrowException() {
-        projectCreateDto = new ProjectCreateDto("Test Project", "Test Description", ProjectVisibility.PUBLIC);
+        projectCreateDto = new ProjectCreateDto("Test Project",
+                "Test Description", ProjectVisibility.PUBLIC);
 
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findAll()).thenReturn(List.of(projectFirst));
@@ -104,7 +107,8 @@ public class ProjectServiceTest {
     void updateProject_WithValidData_ShouldUpdateProject() {
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(projectFirst));
-        when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectRepository.save(any(Project.class))).thenAnswer(
+                invocation -> invocation.getArgument(0));
 
         Project result = projectService.updateProject(projectId, projectUpdateDto);
 
