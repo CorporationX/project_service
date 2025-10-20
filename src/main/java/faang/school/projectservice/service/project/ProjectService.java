@@ -35,12 +35,6 @@ public class ProjectService {
                         throw new IllegalArgumentException("Project with the same name already exists for this user");
                     }
                 });
-        if (projectCreateDto.name().isEmpty() || projectCreateDto.name().isBlank()) {
-            throw new IllegalArgumentException("Project name cannot be empty");
-        }
-        if (projectCreateDto.description().isEmpty() || projectCreateDto.description().isBlank()) {
-            throw new IllegalArgumentException("Project description cannot be empty");
-        }
 
         Project project = Project.builder()
                 .name(projectCreateDto.name())
