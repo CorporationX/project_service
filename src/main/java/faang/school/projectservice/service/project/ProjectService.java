@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.project.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,12 +46,9 @@ public class ProjectService {
         Project project = getProjectById(projectId);
         Long userId = userContext.getUserId();
 
-        if (!Objects.equals(userId, project.getOwnerId())) {
-            throw new IllegalArgumentException("You can only update your own projects");
-        }
+        ProjectValidator.validateProjectOwner(userId, project);
 
         ProjectMapper.updateProjectFields(project, projectUpdateDto);
-        project.setUpdatedAt(LocalDateTime.now());
 
         return projectRepository.save(project);
     }
@@ -67,31 +65,26 @@ public class ProjectService {
         return filterProjectsByAccess(projects).toList();
     }
 
-    public List<Project> getAllProjects() {
-        return filterProjectsByAccess(projectRepository.findAll().stream())
-                .toList();
-    }
-
     public Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
     }
 
     public void deleteProject(long projectId) {
-        Project projectToDelete = filterProjectsByAccess(projectRepository.findAll().stream())
-                .filter(project -> project.getId().equals(projectId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        long userId = userContext.getUserId();
+        Project project = projectRepository.getById(projectId);
 
-        projectRepository.delete(projectToDelete);
+        ProjectValidator.validateProjectExist(projectId, project);
+        ProjectValidator.validateProjectOwner(userId, project);
 
+        projectRepository.delete(project);
     }
 
     private Stream<Project> filterProjectsByAccess(Stream<Project> projects) {
         long userId = userContext.getUserId();
 
         return projects
-                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC ||
+                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC || // 2 predicate -
                         (project.getVisibility() == ProjectVisibility.PRIVATE && project.getOwnerId() == userId));
     }
 }

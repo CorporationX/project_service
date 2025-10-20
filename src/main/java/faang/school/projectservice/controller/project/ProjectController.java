@@ -39,11 +39,6 @@ public class ProjectController {
         return projectFacade.getProjectsByFilter(projectFilterDto);
     }
 
-    @GetMapping
-    public List<ProjectDto> getAllProjects() {
-        return projectFacade.getAllProjects();
-    }
-
     @GetMapping("/{id}")
     public ProjectDto getProjectById(@PathVariable("id") long projectId) {
         return projectFacade.getProjectById(projectId);
