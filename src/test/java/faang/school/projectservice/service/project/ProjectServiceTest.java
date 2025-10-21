@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,6 @@ public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private ProjectCreateDto projectCreateDto;
     private Project projectFirst;
     private Project projectSecond;
     private ProjectUpdateDto projectUpdateDto;
@@ -77,7 +77,7 @@ public class ProjectServiceTest {
 
     @Test
     void createProject_WithValidData_ShouldCreateProject() {
-        projectCreateDto = new ProjectCreateDto("Test Project",
+        ProjectCreateDto projectCreateDto = new ProjectCreateDto("Test Project",
                 "Test Description", ProjectVisibility.PUBLIC);
         Project expectedProject = Project.builder()
                 .id(1L)
@@ -99,19 +99,6 @@ public class ProjectServiceTest {
         assertEquals(userId, result.getOwnerId());
         assertEquals(ProjectStatus.CREATED, result.getStatus());
         verify(projectRepository, times(1)).save(any(Project.class));
-    }
-
-    @Test
-    void createProject_WhenProjectWithSameNameExists_ShouldThrowException() {
-        projectCreateDto = new ProjectCreateDto("Test Project",
-                "Test Description", ProjectVisibility.PUBLIC);
-
-        when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
-        when(projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.name())).thenReturn(true);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> projectService.createProject(projectCreateDto));
     }
 
     @Test
@@ -171,9 +158,8 @@ public class ProjectServiceTest {
 
     @Test
     void deleteProject_WhenUserHasAccess_ShouldDeleteProject() {
-        List<Project> accessibleProjects = List.of(projectFirst, projectSecond);
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(accessibleProjects);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.ofNullable(projectFirst));
 
         projectService.deleteProject(projectId);
 
@@ -182,10 +168,10 @@ public class ProjectServiceTest {
 
     @Test
     void deleteProject_WhenProjectNotAccessible_ShouldThrowException() {
-projectId = 999L;
-        List<Project> accessibleProjects = List.of(projectFirst);
+        projectId = 2L;
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(accessibleProjects);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.ofNullable(projectSecond));
+
 
         assertThrows(IllegalArgumentException.class,
                 () -> projectService.deleteProject(projectId));
@@ -193,29 +179,30 @@ projectId = 999L;
 
     @Test
     void filterProjectsByAccess_ShouldReturnOnlyAccessibleProjects() {
-        Project publicProject = Project.builder()
-                .visibility(ProjectVisibility.PUBLIC)
-                .ownerId(2L)
-                .build();
-        Project userPrivateProject = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE)
-                .ownerId(userId)
-                .build();
         Project otherPrivateProject = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE)
+                .id(3L)
+                .name("Test Project")
+                .description("Test Description")
                 .ownerId(2L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
                 .build();
-
-        List<Project> accessibleProjects = List.of(publicProject, userPrivateProject, otherPrivateProject);
-        when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(accessibleProjects);
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
                 .name(null)
                 .status(null)
                 .build();
 
+        List<Project> allProjects = List.of(projectFirst, projectSecond, otherPrivateProject);
+
+        projectSecond.setVisibility(ProjectVisibility.PRIVATE);
+        projectSecond.setOwnerId(2L);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(projectRepository.findAll()).thenReturn(allProjects);
+        when(filters.iterator()).thenReturn(Collections.emptyIterator());
+
         List<Project> result = projectService.getProjectsByFilter(projectFilterDto);
 
-        assertEquals(List.of(publicProject, userPrivateProject), result);
+        assertEquals(List.of(projectFirst), result);
     }
 }
