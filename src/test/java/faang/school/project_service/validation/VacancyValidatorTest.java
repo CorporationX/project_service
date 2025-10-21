@@ -91,20 +91,20 @@ public class VacancyValidatorTest {
 
         openVacancyDto = UpdateVacancyDto.builder()
                 .name("VacancyForUnitTest")
-                .vacancyStatus("OPEN")
+                .vacancyStatus(VacancyStatus.OPEN)
                 .count(5)
                 .description("VacancyForUnitTest")
-                .position("TESTER")
-                .workSchedule("ROTATING")
+                .position(TeamRole.TESTER)
+                .workSchedule(WorkSchedule.ROTATING)
                 .projectId(projectId).
                 build();
         closedVacancyDto = UpdateVacancyDto.builder()
                 .name("ClosedVacancyForUnitTest")
-                .vacancyStatus("CLOSED")
+                .vacancyStatus(VacancyStatus.CLOSED)
                 .count(1)
                 .description("ClosedVacancyForUnitTest")
-                .position("ANALYST")
-                .workSchedule("ON_CALL")
+                .position(TeamRole.ANALYST)
+                .workSchedule(WorkSchedule.ON_CALL)
                 .projectId(projectId).
                 build();
     }

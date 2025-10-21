@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -12,10 +14,12 @@ import static org.mockito.Mockito.when;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.SearchVacancyDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.VacancyValidationException;
+import faang.school.projectservice.filter.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -25,18 +29,19 @@ import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.VacancyServiceImpl;
 import faang.school.projectservice.validation.vacancy.VacancyValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
@@ -80,14 +85,16 @@ public class VacancyServiceTest {
             .name("VacancyForTest")
             .description("VacancyForTest")
             .projectId(projectId)
-            .position("DESIGNER")
-            .vacancyStatus("OPEN")
+            .position(TeamRole.DESIGNER)
+            .vacancyStatus(VacancyStatus.OPEN)
             .count(DEFAULT_VACANCY_COUNT)
-            .workSchedule("FULL_TIME")
+            .workSchedule(WorkSchedule.FULL_TIME)
             .build();
 
-    @InjectMocks
-    private VacancyServiceImpl vacancyService;
+    private final SearchVacancyDto searchVacancyDto = SearchVacancyDto.builder()
+            .position(TeamRole.DESIGNER)
+            .vacancyName("Test VacancyForTest")
+            .build();
 
     @Mock
     private VacancyValidator vacancyValidator;
@@ -98,11 +105,28 @@ public class VacancyServiceTest {
     @Mock
     private UserContext userContext;
 
+    @Mock
+    private VacancyFilter nameFilter;
+
+    @Mock
+    private VacancyFilter positionFilter;
+
     @Spy
     private final VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
 
+    private VacancyServiceImpl vacancyService;
+
     @Captor
     private ArgumentCaptor<Vacancy> vacancyCaptor;
+
+    @BeforeEach
+    void prepareData() {
+        vacancyService = new VacancyServiceImpl(vacancyRepository,
+                vacancyMapper,
+                vacancyValidator,
+                userContext,
+                List.of(nameFilter, positionFilter));
+    }
 
     @Test
     void testVacancyCreateValidationError() {
@@ -176,10 +200,13 @@ public class VacancyServiceTest {
     @Test
     void testVacanciesFilteredAllStream() {
         when(vacancyRepository.findAll()).thenReturn(List.of(vacancy));
+        when(nameFilter.isApplicable(searchVacancyDto)).thenReturn(true);
+        when(positionFilter.isApplicable(searchVacancyDto)).thenReturn(true);
+        when(nameFilter.apply(any(), eq(searchVacancyDto))).thenReturn(Stream.of(vacancy));
+        when(positionFilter.apply(any(), eq(searchVacancyDto))).thenReturn(Stream.of(vacancy));
         List<VacancyDto> vacancies = List.of(vacancyMapper.toVacancyDto(vacancy));
 
-        List<VacancyDto> resultVacancies = vacancyService.filterVacancies(TeamRole.DESIGNER,
-                "Test VacancyForTest");
+        List<VacancyDto> resultVacancies = vacancyService.filterVacancies(searchVacancyDto);
 
         assertEquals(vacancies, resultVacancies);
         assertEquals(1, resultVacancies.size());
@@ -195,7 +222,7 @@ public class VacancyServiceTest {
     void testVacancyNotFound() {
         when(vacancyRepository.findById(vacancyId)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
-                ()-> vacancyService.getVacancyById(vacancyId));
+                () -> vacancyService.getVacancyById(vacancyId));
     }
 
     @Test

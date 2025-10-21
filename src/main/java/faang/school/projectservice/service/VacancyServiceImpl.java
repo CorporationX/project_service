@@ -2,11 +2,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.CreateVacancyDto;
+import faang.school.projectservice.dto.vacancy.SearchVacancyDto;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validation.vacancy.VacancyValidator;
@@ -14,14 +15,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
-    final VacancyRepository vacancyRepository;
-    final VacancyMapper vacancyMapper;
-    final VacancyValidator vacancyValidation;
-    final UserContext userContext;
+    private final VacancyRepository vacancyRepository;
+    private final VacancyMapper vacancyMapper;
+    private final VacancyValidator vacancyValidation;
+    private final UserContext userContext;
+    private final List<VacancyFilter> vacancyFilters;
 
     @Override
     public VacancyDto create(CreateVacancyDto vacancyDto) {
@@ -42,10 +45,16 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public List<VacancyDto> filterVacancies(TeamRole position, String vacancyName) {
-        return vacancyRepository.findAll().stream()
-                .filter(vacancy -> position != null && vacancy.getPosition() == position)
-                .filter(vacancy -> vacancy.getName().toLowerCase().contains(vacancyName.toLowerCase()))
+    public List<VacancyDto> filterVacancies(SearchVacancyDto searchVacancyDto) {
+        Stream<Vacancy> filteredVacancies = vacancyRepository.findAll().stream();
+
+        for (VacancyFilter vacancyFilter : vacancyFilters) {
+            if (vacancyFilter.isApplicable(searchVacancyDto)) {
+                filteredVacancies = vacancyFilter.apply(filteredVacancies, searchVacancyDto);
+            }
+        }
+
+        return filteredVacancies
                 .map(vacancyMapper::toVacancyDto)
                 .toList();
     }
