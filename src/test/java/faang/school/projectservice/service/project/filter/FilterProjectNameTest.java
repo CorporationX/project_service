@@ -1,7 +1,8 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.service.project.filter;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.service.project.filter.FilterProjectName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
