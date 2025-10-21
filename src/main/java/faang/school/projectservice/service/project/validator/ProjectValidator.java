@@ -10,10 +10,4 @@ public class ProjectValidator {
             throw new IllegalArgumentException("You can only update your own projects");
         }
     }
-
-    public static void validateProjectExist(long projectId, Project project) {
-        if (project == null) {
-            throw new IllegalArgumentException("Project not found");
-        }
-    }
 }

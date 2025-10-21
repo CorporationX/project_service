@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.FilterProject;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -78,13 +79,19 @@ public class ProjectServiceTest {
 
     @Test
     void createProject_WithValidData_ShouldCreateProject() {
-        projectCreateDto = new ProjectCreateDto("Test create Project",
+        projectCreateDto = new ProjectCreateDto("Test Project",
                 "Test Description", ProjectVisibility.PUBLIC);
-
+        Project expectedProject = Project.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("Test Description")
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .ownerId(userId)
+                .build();
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
-        when(projectRepository.save(any(Project.class))).thenAnswer(
-                invocation -> invocation.getArgument(0));
+        when(projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.name())).thenReturn(false);
+        when(projectRepository.save(any(Project.class))).thenReturn(expectedProject);
 
         Project result = projectService.createProject(projectCreateDto);
 
@@ -102,9 +109,10 @@ public class ProjectServiceTest {
                 "Test Description", ProjectVisibility.PUBLIC);
 
         when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(List.of(projectFirst));
+        when(projectRepository.findAll()).thenReturn(List.of(projectFirst, projectSecond));
+        when(projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.name())).thenReturn(true);
 
-        assertThrows(DataValidationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> projectService.createProject(projectCreateDto));
     }
 

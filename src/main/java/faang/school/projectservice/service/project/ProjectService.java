@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.filter.FilterProject;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.validator.ProjectValidator;
@@ -27,7 +28,9 @@ public class ProjectService {
     public Project createProject(ProjectCreateDto projectCreateDto) {
         Long userId = userContext.getUserId();
 
-        projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.name());
+        if (projectRepository.existsByOwnerIdAndName(userId, projectCreateDto.name())) {
+            throw new IllegalArgumentException("Project with the same name already exists for this user");
+        }
 
         Project project = ProjectMapper.toEntity(projectCreateDto, userId);
 
