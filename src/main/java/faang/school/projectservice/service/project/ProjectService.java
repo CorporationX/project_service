@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -65,7 +66,6 @@ public class ProjectService {
         long userId = userContext.getUserId();
         Project project = getProjectById(projectId);
 
-        ProjectValidator.validateProjectExist(projectId, project);
         ProjectValidator.validateProjectOwner(userId, project);
 
         projectRepository.delete(project);
@@ -75,7 +75,19 @@ public class ProjectService {
         long userId = userContext.getUserId();
 
         return projects
-                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC || // 2 predicate -
-                        (project.getVisibility() == ProjectVisibility.PRIVATE && project.getOwnerId() == userId));
+                .filter(project -> hasAccessToProject(userId, project));
+    }
+
+    private boolean hasAccessToProject(long userId, Project project) {
+        return isPublicProject(project) ||
+                isUsersPrivateProject(userId, project);
+    }
+
+    private boolean isPublicProject(Project project) {
+        return project.getVisibility() == ProjectVisibility.PUBLIC;
+    }
+
+    private boolean isUsersPrivateProject(long userId, Project project) {
+        return project.getVisibility() == ProjectVisibility.PRIVATE && Objects.equals(project.getOwnerId(), userId);
     }
 }

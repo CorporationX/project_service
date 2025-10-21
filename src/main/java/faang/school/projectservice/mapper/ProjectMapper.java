@@ -24,8 +24,6 @@ public interface ProjectMapper {
                 .description(projectCreateDto.description())
                 .status(ProjectStatus.CREATED)
                 .ownerId(userId)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .visibility(projectCreateDto.visibility())
                 .build();
     }

@@ -2,8 +2,10 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.FilterProject;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -33,6 +35,9 @@ public class ProjectServiceTest {
 
     @Mock
     private UserContext userContext;
+
+    @Mock
+    private List<FilterProject> filters;
 
     @InjectMocks
     private ProjectService projectService;
@@ -140,22 +145,6 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getAllProjects_ShouldReturnAllAccessibleProjects() {
-        List<Project> allProjects = List.of(projectFirst, projectSecond);
-        when(userContext.getUserId()).thenReturn(userId);
-        when(projectRepository.findAll()).thenReturn(allProjects);
-        projectSecond.setVisibility(ProjectVisibility.PRIVATE);
-
-        List<Project> result = projectService.getAllProjects();
-
-        assertNotNull(result);
-        verify(projectRepository).findAll();
-        assertEquals(List.of(projectFirst), result);
-
-
-    }
-
-    @Test
     void getProjectById_WhenProjectExists_ShouldReturnProject() {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(projectFirst));
 
@@ -214,8 +203,12 @@ projectId = 999L;
         List<Project> accessibleProjects = List.of(publicProject, userPrivateProject, otherPrivateProject);
         when(userContext.getUserId()).thenReturn(userId);
         when(projectRepository.findAll()).thenReturn(accessibleProjects);
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
+                .name(null)
+                .status(null)
+                .build();
 
-        List<Project> result = projectService.getAllProjects();
+        List<Project> result = projectService.getProjectsByFilter(projectFilterDto);
 
         assertEquals(List.of(publicProject, userPrivateProject), result);
     }
