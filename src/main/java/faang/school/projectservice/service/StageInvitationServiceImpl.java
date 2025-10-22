@@ -122,7 +122,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                 .filter(invitation -> invitation.getInvited().getUserId().equals(userId))
                 .filter(invitation -> status == null || invitation.getStatus() == status)
                 .map(stageInvitationMapper::toInvitationDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
