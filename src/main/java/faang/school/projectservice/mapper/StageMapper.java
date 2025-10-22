@@ -6,12 +6,10 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.data.repository.query.parser.Part;
 
 import java.util.List;
 
@@ -39,7 +37,7 @@ public interface StageMapper {
                 .toList();
     }
 
-    default List<Long> mapTeamMemberToExecutorsIds(List<TeamMember> teamMemberList){
+    default List<Long> mapTeamMemberToExecutorsIds(List<TeamMember> teamMemberList) {
         return teamMemberList.stream()
                 .map(TeamMember::getUserId)
                 .toList();

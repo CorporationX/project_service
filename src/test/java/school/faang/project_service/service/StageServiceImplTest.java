@@ -9,8 +9,6 @@ import faang.school.projectservice.dto.stageInvitation.StageInvitationCreateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
-import faang.school.projectservice.filter.StageFilter;
-import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -58,8 +56,6 @@ public class StageServiceImplTest {
     private TeamMemberRepository teamMemberRepository;
     @Mock
     private StageRolesRepository stageRolesRepository;
-    @Mock
-    private StageFilter stageFilter;
     @Mock
     private UserContext userContext;
 

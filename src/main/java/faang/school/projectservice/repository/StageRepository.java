@@ -8,17 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface StageRepository extends JpaRepository<Stage, Long> {
     @Query("""
-    SELECT DISTINCT stage
-    FROM Stage stage
-    LEFT JOIN stage.tasks task
-    LEFT JOIN stage.stageRoles stageRole
-    WHERE stage.project.id = :projectId
-      AND (task.status = :taskStatus OR stageRole.teamRole IN :teamRolesList)
-""")
+                SELECT DISTINCT stage
+                FROM Stage stage
+                LEFT JOIN stage.tasks task
+                LEFT JOIN stage.stageRoles stageRole
+                WHERE stage.project.id = :projectId
+                  AND (task.status = :taskStatus OR stageRole.teamRole IN :teamRolesList)
+            """)
     List<Stage> getAllStageByTaskStatusAndTeamRole(
             @Param("projectId") long projectId,
             @Param("taskStatus") TaskStatus taskStatus,
