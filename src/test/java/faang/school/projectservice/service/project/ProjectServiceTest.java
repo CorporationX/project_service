@@ -1,26 +1,28 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.project.DuplicateResourceException;
+import faang.school.projectservice.helpers.TestUtils;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,135 +31,129 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private ProjectMapper projectMapper;
-    @Mock
-    private ProjectValidator projectValidator;
-
     @InjectMocks
     private ProjectService projectService;
 
+    private static final Long ID = 1L;
+    private static final Long OWNER_ID = 10L;
     private Project project;
-    private ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
         project = Project.builder()
-                .id(1L)
-                .name("Test Project")
-                .description("Test description")
-                .ownerId(10L)
+                .id(ID)
+                .name("TestProject")
+                .description("Description")
+                .ownerId(OWNER_ID)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-
-        projectDto = ProjectDto.builder()
-                .id(1L)
-                .name("Test Project")
-                .description("Test description")
-                .ownerId(10L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .createdAt(project.getCreatedAt())
-                .updatedAt(project.getUpdatedAt())
-                .build();
     }
 
     @Test
-    void createProject_success() {
-        Long ownerId = 10L;
+    void createProject_Success() {
+        ProjectCreateDto dto = new ProjectCreateDto("NewProject",
+                "Some description",
+                ProjectVisibility.PUBLIC);
 
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
-        when(projectRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
+        when(projectRepository.existsByOwnerIdAndName(OWNER_ID, "NewProject")).thenReturn(false);
+        when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> {
+            Project saved = invocation.getArgument(0);
+            saved.setId(ID);
+            return saved;
+        });
 
-        ProjectDto result = projectService.createProject(projectDto, ownerId);
+        Project result = projectService.create(dto, OWNER_ID);
 
-        verify(projectValidator).validateUniqueProjectNameForOwner(projectDto.name(), ownerId);
+        assertNotNull(result);
+        assertEquals("NewProject", result.getName());
+        assertEquals(ProjectStatus.CREATED, result.getStatus());
         verify(projectRepository).save(any(Project.class));
-        assertThat(result).isEqualTo(projectDto);
     }
 
     @Test
-    void updateProject_success() {
-        Project updatedProject = Project.builder()
-                .id(1L)
-                .name("Test Project")
-                .description("Updated description")
-                .ownerId(10L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PUBLIC)
-                .createdAt(project.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
-                .build();
+    void createProject_NameAlreadyExists_ThrowsException() {
+        ProjectCreateDto dto = new ProjectCreateDto("DuplicateProject",
+                "Desc",
+                ProjectVisibility.PUBLIC);
+        when(projectRepository.existsByOwnerIdAndName(OWNER_ID, "DuplicateProject")).thenReturn(true);
 
-        ProjectDto updateDto = ProjectDto.builder()
-                .id(1L)
-                .description("Updated description")
-                .status(ProjectStatus.IN_PROGRESS)
-                .build();
+        Executable executable = () -> projectService.create(dto, OWNER_ID);
 
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(projectRepository.save(any(Project.class))).thenReturn(updatedProject);
-        when(projectMapper.toDto(updatedProject)).thenReturn(updateDto);
+        TestUtils.assertThrowsWithMessage(
+                DuplicateResourceException.class,
+                "Project with this name already exists for this user",
+                executable
+        );
+    }
 
-        ProjectDto result = projectService.updateProject(1L, updateDto);
+    @Test
+    void updateProject_Success() {
+        ProjectUpdateDto dto = new ProjectUpdateDto("Updated description",
+                "COMPLETED",
+                ProjectVisibility.PRIVATE);
+        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
 
-        verify(projectValidator).validateUpdate(project, updateDto.status(), updateDto.description());
+        Project updated = projectService.update(ID, dto);
+
+        assertEquals("Updated description", updated.getDescription());
+        assertEquals(ProjectStatus.COMPLETED, updated.getStatus());
         verify(projectRepository).save(project);
-        assertThat(result.status()).isEqualTo(ProjectStatus.IN_PROGRESS);
-        assertThat(result.description()).isEqualTo("Updated description");
     }
 
     @Test
-    void getAllProjects_success() {
+    void updateProject_InvalidStatus_ThrowsException() {
+        ProjectUpdateDto dto = new ProjectUpdateDto("Updated description",
+                "INVALID",
+                ProjectVisibility.PUBLIC);
+        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+
+        Executable executable = () -> projectService.update(ID, dto);
+
+        TestUtils.assertThrowsWithMessage(
+                IllegalArgumentException.class,
+                "No enum constant faang.school.projectservice.model.ProjectStatus.INVALID",
+                executable
+        );
+    }
+
+    @Test
+    void getAllProjects_ReturnsList() {
         when(projectRepository.findAll()).thenReturn(List.of(project));
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
         List<ProjectDto> result = projectService.getAllProjects();
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).name()).isEqualTo("Test Project");
-    }
-
-    @Test
-    void getProjectById_success() {
-        Long userId = 10L;
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
-
-        ProjectDto result = projectService.getProjectById(1L, userId);
-
-        verify(projectValidator).validateAccessToProject(project, userId);
-        assertThat(result).isEqualTo(projectDto);
-    }
-
-    @Test
-    void getProjectsByFilter_withNameAndStatus() {
-        Project project2 = Project.builder()
-                .id(2L)
-                .name("Another Project")
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        when(projectRepository.findAll()).thenReturn(List.of(project, project2));
-        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
-
-        List<ProjectDto> result = projectService.getProjectsByFilter("Test", ProjectStatus.CREATED, 10L);
-
-        assertThat(result).hasSize(1);
+        assertEquals(1, result.size());
+        assertEquals("TestProject", result.get(0).name());
         verify(projectRepository).findAll();
     }
 
     @Test
-    void getProjectById_notFound() {
-        when(projectRepository.findById(999L)).thenReturn(Optional.empty());
+    void getProjectsByFilter_FiltersByNameAndStatus() {
+        Project project2 = Project.builder()
+                .id(2L)
+                .name("Another")
+                .status(ProjectStatus.COMPLETED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
 
-        assertThatThrownBy(() -> projectService.getProjectById(999L, 10L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Project not found");
+        when(projectRepository.findAll()).thenReturn(List.of(project, project2));
+
+        List<ProjectDto> result = projectService.getProjectsByFilter("Test", ProjectStatus.CREATED, OWNER_ID);
+
+        assertEquals(1, result.size());
+        assertEquals("TestProject", result.get(0).name());
+    }
+
+    @Test
+    void getProjectById_Success() {
+        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+
+        Project result = projectService.getProjectById(ID, OWNER_ID);
+
+        assertEquals(project, result);
     }
 }

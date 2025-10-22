@@ -9,6 +9,7 @@ public record ProjectCreateDto (
         @Size(max = 128)
         String name,
         @Size(max = 4096)
+        @NotBlank
         String description,
         ProjectVisibility visibility
 ) {}

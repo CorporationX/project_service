@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.controller.facade.project.ProjectFacade;
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.model.ProjectStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,32 +32,31 @@ public class ProjectController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto createProject(Long ownerId,
-                                    @Valid @RequestBody ProjectDto projectDto) {
+    public ProjectDto createProject(@RequestHeader("x-user-id") Long ownerId,
+                                    @Valid @RequestBody ProjectCreateDto projectCreateDto) {
         log.info("Create project request: {}", ownerId);
-        return projectFacade.create(projectDto, ownerId);
+        return projectFacade.create(projectCreateDto, ownerId);
     }
 
     @PatchMapping("/{id}")
     public ProjectDto updateProject(@PathVariable Long id,
-                                    @Valid @RequestBody ProjectDto projectDto) {
+                                    @Valid @RequestBody ProjectUpdateDto projectUpdateDto) {
         log.info("Update project id={}", id);
-        return projectFacade.update(id, projectDto);
+        return projectFacade.update(projectUpdateDto, id);
     }
 
     @GetMapping("/filter")
     public List<ProjectDto> getProjectsByFilter(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) ProjectStatus status,
             @RequestHeader("x-user-id") Long userId) {
         log.info("Filter projects request: name='{}', status='{}'", name, status);
-
-        ProjectStatus projectStatus = status != null ? ProjectStatus.valueOf(status) : null;
-        return projectFacade.getByFilter(name, projectStatus, userId);
+        return projectFacade.getByFilter(name, status, userId);
     }
 
     @GetMapping("/{id}")
-    public ProjectDto getProjectById(@PathVariable Long id, Long userId) {
+    public ProjectDto getProjectById(@PathVariable Long id,
+                                     @RequestHeader("x-user-id") Long userId) {
         log.info("Get project id={} by user {}", id, userId);
         return projectFacade.getById(id, userId);
     }

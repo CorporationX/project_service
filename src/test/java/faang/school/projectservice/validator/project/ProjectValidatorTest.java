@@ -1,121 +1,151 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.exception.project.DuplicateResourceException;
+import faang.school.projectservice.helpers.TestUtils;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class ProjectValidatorTest {
 
-    private ProjectRepository projectRepository;
-    private ProjectValidator validator;
+    @Test
+    void validateUniqueProjectNameForOwner_NameExists_ThrowsException() {
+        String projectName = "Test";
+        Long ownerId = 1L;
+        boolean nameExists = true;
 
-    @BeforeEach
-    void setup() {
-        projectRepository = mock(ProjectRepository.class);
-        validator = new ProjectValidator(projectRepository);
+        Executable executable = () ->
+                ProjectValidator.validateUniqueProjectNameForOwner(projectName, ownerId, nameExists);
+
+        TestUtils.assertThrowsWithMessage(
+                DuplicateResourceException.class,
+                "Project with this name already exists for this user",
+                executable
+        );
     }
 
     @Test
-    void validateUniqueProjectNameForOwner_Throws_WhenNameExists() {
-        when(projectRepository.existsByOwnerIdAndName(1L, "TestProject")).thenReturn(true);
+    void validateUniqueProjectNameForOwner_NameNotExists_NoException() {
+        String projectName = "Unique";
+        Long ownerId = 1L;
+        boolean nameExists = false;
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> validator.validateUniqueProjectNameForOwner("TestProject", 1L));
-        assertEquals("Project with this name already exists for user", ex.getMessage());
+        assertDoesNotThrow(() ->
+                ProjectValidator.validateUniqueProjectNameForOwner(projectName, ownerId, nameExists)
+        );
     }
 
     @Test
-    void validateUniqueProjectNameForOwner_Passes_WhenNameDoesNotExist() {
-        when(projectRepository.existsByOwnerIdAndName(1L, "TestProject")).thenReturn(false);
+    void validateProjectExists_Null_ThrowsException() {
+        Project project = null;
 
-        assertDoesNotThrow(() -> validator.validateUniqueProjectNameForOwner("TestProject", 1L));
+        Executable executable = () -> ProjectValidator.validateProjectExists(project);
+
+        TestUtils.assertThrowsWithMessage(
+                IllegalArgumentException.class,
+                "Project not found",
+                executable
+        );
     }
 
     @Test
-    void validateProjectExists_Throws_WhenProjectNull() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> validator.validateProjectExists(null));
-        assertEquals("Project not found", ex.getMessage());
+    void validateProjectExists_NotNull_NoException() {
+        Project project = new Project();
+        project.setId(1L);
+
+        assertDoesNotThrow(() -> ProjectValidator.validateProjectExists(project));
     }
 
     @Test
-    void validateProjectExists_Passes_WhenProjectNotNull() {
-        Project project = mock(Project.class);
-        assertDoesNotThrow(() -> validator.validateProjectExists(project));
+    void validateAccessToProject_PrivateNotParticipant_ThrowsException() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PRIVATE);
+
+        Team team = new Team();
+        TeamMember member = new TeamMember();
+        member.setId(2L);
+        team.setTeamMembers(List.of(member));
+        project.setTeams(List.of(team));
+
+        Long userId = 3L;
+
+        Executable executable = () -> ProjectValidator.validateAccessToProject(project, userId);
+
+        TestUtils.assertThrowsWithMessage(
+                IllegalArgumentException.class,
+                "Access denied to private project",
+                executable
+        );
     }
 
     @Test
-    void validateAccessToProject_Throws_WhenPrivateAndUserNotParticipant() {
-        Project project = mock(Project.class);
-        Team team = mock(Team.class);
-        TeamMember member = mock(TeamMember.class);
+    void validateAccessToProject_PrivateParticipant_NoException() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PRIVATE);
 
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
-        when(project.getTeams()).thenReturn(List.of(team));
+        TeamMember member = new TeamMember();
+        member.setId(1L);
 
-        when(team.getTeamMembers()).thenReturn(List.of(member));
-        when(member.getId()).thenReturn(2L);
+        Team team = new Team();
+        team.setTeamMembers(List.of(member));
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> validator.validateAccessToProject(project, 1L));
+        project.setTeams(List.of(team));
 
-        assertEquals("Access denied to private project", ex.getMessage());
+        Long userId = 1L;
+
+        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, userId));
     }
 
     @Test
-    void validateAccessToProject_Passes_WhenPublicProject() {
-        Project project = mock(Project.class);
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PUBLIC);
+    void validateAccessToProject_Public_NoException() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PUBLIC);
 
-        assertDoesNotThrow(() -> validator.validateAccessToProject(project, 1L));
+        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, 99L));
     }
 
     @Test
-    void validateAccessToProject_Passes_WhenUserIsParticipant() {
-        Project project = mock(Project.class);
-        Team team = mock(Team.class);
-        TeamMember member = mock(TeamMember.class);
+    void validateUpdate_NothingToUpdate_ThrowsException() {
+        Project project = new Project();
+        project.setId(1L);
 
-        when(project.getVisibility()).thenReturn(ProjectVisibility.PRIVATE);
-        when(project.getTeams()).thenReturn(List.of(team));
+        Executable executable = () -> ProjectValidator.validateUpdate(project, null, null);
 
-        when(team.getTeamMembers()).thenReturn(List.of(member));
-        when(member.getId()).thenReturn(1L);
-
-        assertDoesNotThrow(() -> validator.validateAccessToProject(project, 1L));
+        TestUtils.assertThrowsWithMessage(
+                IllegalArgumentException.class,
+                "Nothing to update",
+                executable
+        );
     }
 
     @Test
-    void validateUpdate_Throws_WhenNothingToUpdate() {
-        Project project = mock(Project.class);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> validator.validateUpdate(project, null, null));
-        assertEquals("Nothing to update", ex.getMessage());
+    void validateUpdate_ProjectNotFound_ThrowsException() {
+        Project project = null;
+
+        Executable executable = () -> ProjectValidator.validateUpdate(project, ProjectStatus.CANCELLED, "desc");
+
+        TestUtils.assertThrowsWithMessage(
+                IllegalArgumentException.class,
+                "Project not found",
+                executable
+        );
     }
 
     @Test
-    void validateUpdate_CallsValidateProjectExists() {
-        Project project = mock(Project.class);
-        ProjectValidator spyValidator = spy(validator);
+    void validateUpdate_Valid_NoException() {
+        Project project = new Project();
+        project.setId(1L);
 
-        doNothing().when(spyValidator).validateProjectExists(project);
-        spyValidator.validateUpdate(project, ProjectStatus.IN_PROGRESS, null);
-        verify(spyValidator).validateProjectExists(project);
+        assertDoesNotThrow(() ->
+                ProjectValidator.validateUpdate(project, ProjectStatus.CANCELLED, "Updated")
+        );
     }
 }

@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -12,10 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
+
 
 @Slf4j
 @Service
@@ -23,47 +24,47 @@ import java.util.function.Predicate;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
-    private final ProjectValidator projectValidator;
 
     @Transactional
-    public ProjectDto createProject(ProjectDto projectDto, Long ownerId) {
-        log.info("Создание проекта пользователем {}", ownerId);
+    public Project create(ProjectCreateDto projectCreateDto, Long ownerId) {
+        log.info("Creating a project by a user {}", ownerId);
 
-        projectValidator.validateUniqueProjectNameForOwner(projectDto.name(), ownerId);
+        boolean nameExists = projectRepository.existsByOwnerIdAndName(ownerId, projectCreateDto.name());
+        ProjectValidator.validateUniqueProjectNameForOwner(projectCreateDto.name(), ownerId, nameExists);
 
-        Project project = projectMapper.toEntity(projectDto);
+        Project project = ProjectMapper.toEntity(projectCreateDto);
         project.setOwnerId(ownerId);
         project.setStatus(ProjectStatus.CREATED);
-        LocalDateTime now = LocalDateTime.now();
-        project.setCreatedAt(now);
-        project.setUpdatedAt(now);
 
-        Project saved = projectRepository.save(project);
-        log.info("Проект {} успешно создан c ID={}", saved.getName(), saved.getId());
-        return projectMapper.toDto(saved);
+        projectRepository.save(project);
+        log.info("Project {} successfully created with ID={}", project.getName(), project.getId());
+
+        return project;
     }
 
     @Transactional
-    public ProjectDto updateProject(Long id, ProjectDto dto) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+    public Project update(Long id, ProjectUpdateDto projectUpdateDto) {
+        Project project = projectRepository.getReferenceById(id);
 
-        projectValidator.validateUpdate(project, dto.status(), dto.description());
+        ProjectValidator.validateUpdate(project,
+                ProjectStatus.valueOf(projectUpdateDto.status()),
+                projectUpdateDto.description());
 
-        Optional.ofNullable(dto.status()).ifPresent(project::setStatus);
-        Optional.ofNullable(dto.description()).ifPresent(project::setDescription);
+        if (projectUpdateDto.status() != null) {
+            project.setStatus(ProjectStatus.valueOf(projectUpdateDto.status()));
+        }
+        if (projectUpdateDto.description() != null) {
+            project.setDescription(projectUpdateDto.description());
+        }
 
-        project.setUpdatedAt(LocalDateTime.now());
-
-        Project saved = projectRepository.save(project);
-        log.info("Проект '{}' (id={}) обновлён", saved.getName(), saved.getId());
-        return projectMapper.toDto(saved);
+        projectRepository.save(project);
+        log.info("Project '{}' (id={}) has been updated", project.getName(), project.getId());
+        return project;
     }
 
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAll().stream()
-                .map(projectMapper::toDto)
+                .map(ProjectMapper::toDto)
                 .toList();
     }
 
@@ -81,15 +82,13 @@ public class ProjectService {
 
         return projectRepository.findAll().stream()
                 .filter(matchesName.and(matchesStatus).and(isVisible))
-                .map(projectMapper::toDto)
+                .map(ProjectMapper::toDto)
                 .toList();
     }
 
-    public ProjectDto getProjectById(Long id, Long userId) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
-
-        projectValidator.validateAccessToProject(project, userId);
-        return projectMapper.toDto(project);
+    public Project getProjectById(Long id, Long userId) {
+        Project project = projectRepository.getReferenceById(id);
+        ProjectValidator.validateAccessToProject(project, userId);
+        return project;
     }
 }

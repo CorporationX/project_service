@@ -1,6 +1,10 @@
 package faang.school.projectservice.controller.facade.project;
 
+import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +18,19 @@ public class ProjectFacade {
 
     private final ProjectService projectService;
 
-    public ProjectDto create(ProjectDto projectDto, Long ownerId) {
-        return projectService.createProject(projectDto, ownerId);
+    public ProjectDto create(ProjectCreateDto projectCreateDto, Long ownerId) {
+        Project project = projectService.create(projectCreateDto, ownerId);
+        return ProjectMapper.toDto(project);
     }
 
-    public ProjectDto update(Long id, ProjectDto projectDto) {
-        return projectService.updateProject(id, projectDto);
+    public ProjectDto update(ProjectUpdateDto projectUpdateDto, Long id) {
+        Project project = projectService.update(id, projectUpdateDto);
+        return ProjectMapper.toDto(project);
     }
 
     public ProjectDto getById(Long id, Long userId) {
-        return projectService.getProjectById(id, userId);
+        Project project = projectService.getProjectById(id, userId);
+        return ProjectMapper.toDto(project);
     }
 
     public List<ProjectDto> getAll() {
