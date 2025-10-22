@@ -2,13 +2,11 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.stage.AllStageFilterDto;
 import faang.school.projectservice.dto.stage.StageCreateDto;
-import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageUpdateDto;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageServiceImpl;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -42,32 +40,29 @@ public class StageController {
         return stageServiceImpl.getAllStageByFilter(allStageFilterDto);
     }
 
+    @DeleteMapping("/{stageId}/{projectId}")
+    public void deleteStage(@PathVariable @NotNull (message = "Specify stage")
+                            Long stageId,
+                            @NotNull(message = "Specify project")
+                            @PathVariable Long projectId) {
 
-    @DeleteMapping
-    public void deleteStage(@Valid StageDeleteDto stageDeleteDto) {
-        stageServiceImpl.deleteStage(stageDeleteDto);
+        stageServiceImpl.deleteStage(projectId, stageId);
     }
 
-    @PutMapping
-    public void updateStage(@Valid @RequestBody StageUpdateDto stageUpdateDto) {
-        stageServiceImpl.updateStage(stageUpdateDto);
+    @PutMapping("/{stageId}/stage")
+    public StageDto updateStage(@Valid @RequestBody StageUpdateDto stageUpdateDto,
+                                @PathVariable @NotNull Long stageId) {
+        return stageServiceImpl.updateStage(stageUpdateDto, stageId);
     }
 
-    @GetMapping("/id-stages/{projectId}")
-    public List<StageDto> getStages(@PathVariable Long projectId) {
-        validateOrThrow(projectId);
+    @GetMapping("/project-stages/{projectId}")
+    public List<StageDto> getStages(@PathVariable @NotNull Long projectId) {
         return stageServiceImpl.getStages(projectId);
     }
 
     @GetMapping("/{stageId}")
-    public StageDto getStageById(@PathVariable Long stageId) {
-        validateOrThrow(stageId);
+    public StageDto getStage(@PathVariable @NotNull Long stageId) {
         return stageServiceImpl.getStage(stageId);
     }
 
-    private void validateOrThrow(Long id) {
-        if (id == null) {
-            throw new DataValidationException("Id - не может быть пустым!");
-        }
-    }
 }

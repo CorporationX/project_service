@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StageRepository extends JpaRepository<Stage, Long> {
     @Query("""
@@ -23,5 +24,4 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
             @Param("taskStatus") TaskStatus taskStatus,
             @Param("teamRolesList") List<TeamRole> teamRolesList
     );
-    Stage getStageByStageId(long stageId);
 }
