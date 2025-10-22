@@ -49,18 +49,18 @@ public class StageController {
         stageServiceImpl.deleteStage(projectId, stageId);
     }
 
-    @PutMapping("/{stageId}/stage")
+    @PutMapping("/{stageId}")
     public StageDto updateStage(@Valid @RequestBody StageUpdateDto stageUpdateDto,
                                 @PathVariable @NotNull Long stageId) {
         return stageServiceImpl.updateStage(stageUpdateDto, stageId);
     }
 
-    @GetMapping("/project-stages/{projectId}")
+    @GetMapping("/project/{projectId}/stages")
     public List<StageDto> getStages(@PathVariable @NotNull Long projectId) {
         return stageServiceImpl.getStages(projectId);
     }
 
-    @GetMapping("/{stageId}")
+    @GetMapping("/project/{stageId}/stage")
     public StageDto getStage(@PathVariable @NotNull Long stageId) {
         return stageServiceImpl.getStage(stageId);
     }
