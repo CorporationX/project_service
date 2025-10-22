@@ -1,6 +1,10 @@
 spring:
   config:
     import: optional:classpath:application.properties
+
+  jackson:
+    default-property-inclusion: non_null
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
