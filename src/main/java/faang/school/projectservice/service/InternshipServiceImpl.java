@@ -122,12 +122,6 @@ public class InternshipServiceImpl implements InternshipService {
 
     private void validateCreate(Project project, CreateInternshipDto internshipDto) {
 
-        if (internshipDto.interns().isEmpty()) {
-            String message = "Список стажеров пуст";
-            log.warn(message);
-            throw new DataValidationException(message);
-        }
-
         if (internshipDto.startDate().plusMonths(INTERNSHIP_DURATION_MONTHS)
                 .isBefore(internshipDto.endDate())) {
             String message = "Стажировка не может быть дольше " + INTERNSHIP_DURATION_MONTHS +
