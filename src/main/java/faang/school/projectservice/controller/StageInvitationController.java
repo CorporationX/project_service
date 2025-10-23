@@ -31,25 +31,49 @@ public class StageInvitationController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public StageInvitationDto sendInvitation(@Valid @RequestBody CreateStageInvitationDto createStageInvitationDto) {
-        return stageInvitationService.sendInvitation(createStageInvitationDto);
+        log.info("Received request to send stage invitation: inviterId={}, invitedId={}, stageId={}",
+                createStageInvitationDto.stageId(),
+                createStageInvitationDto.stageId(),
+                createStageInvitationDto.stageId());
+        StageInvitationDto result = stageInvitationService.sendInvitation(createStageInvitationDto);
+
+        log.info("Stage invitation successfully sent: invitationId={}", result.id());
+        return result;
     }
 
     @PutMapping("/{invitationId}/accept")
     public StageInvitationDto acceptInvitation(@PathVariable Long invitationId) {
-        return stageInvitationService.acceptInvitation(invitationId);
+        log.info("Received request to accept stage invitation with id={}", invitationId);
+
+        StageInvitationDto result = stageInvitationService.acceptInvitation(invitationId);
+
+        log.info("Stage invitation accepted successfully: invitationId={}, status={}",
+                result.id(), result.status());
+        return result;
     }
 
     @PutMapping("/{invitationId}/reject")
     public StageInvitationDto rejectInvitation(
             @PathVariable Long invitationId,
             @Valid @RequestBody String reason) {
-        return stageInvitationService.rejectInvitation(invitationId, reason);
+        log.info("Received request to reject stage invitation with id={}, reason={}", invitationId, reason);
+
+        StageInvitationDto result = stageInvitationService.rejectInvitation(invitationId, reason);
+
+        log.info("Stage invitation rejected successfully: invitationId={}, status={}",
+                result.id(), result.status());
+        return result;
     }
 
     @GetMapping
     public List<StageInvitationDto> getInvitationsForUser(
             @RequestParam Long userId,
             @RequestParam(required = false) StageInvitationStatus status) {
-        return stageInvitationService.getInvitationsForUser(userId, status);
+        log.info("Received request to get stage invitations for userId={}, statusFilter={}", userId, status);
+
+        List<StageInvitationDto> invitations = stageInvitationService.getInvitationsForUser(userId, status);
+
+        log.info("Retrieved {} stage invitations for userId={}", invitations.size(), userId);
+        return invitations;
     }
 }
