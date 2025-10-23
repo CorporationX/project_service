@@ -20,6 +20,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.subproject.SubProjectServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -70,12 +71,21 @@ public class SubProjectServiceImplTest {
     @Captor
     private ArgumentCaptor<Project> subProjectCaptor;
 
+    private long anyLong;
+    private long differentAnyLong;
+
+    @BeforeEach
+    public void setUp() {
+        anyLong = 1L;
+        differentAnyLong = 2L;
+    }
+
     @Test
     public void createFromAlienProject() {
-        long creatorId = 2L;
+        long creatorId = anyLong;
         CreateSubProjectDto createSubProjectDto = createCreateSubProjectDtoForTest();
         Project parentProject = new Project();
-        parentProject.setOwnerId(3L);
+        parentProject.setOwnerId(differentAnyLong);
         when(projectRepository.findById(createSubProjectDto.parentProjectId())).thenReturn(Optional.of(parentProject));
 
         assertThrows(ForbiddenException.class, () -> subProjectServiceImpl.create(creatorId, createSubProjectDto));
@@ -83,10 +93,10 @@ public class SubProjectServiceImplTest {
 
     @Test
     public void createPublicSubProjectFromPrivateProject() {
-        long creatorId = 2L;
+        long creatorId = anyLong;
         CreateSubProjectDto createSubProjectDto = createCreateSubProjectDtoForTest();
         Project parentProject = new Project();
-        parentProject.setOwnerId(2L);
+        parentProject.setOwnerId(anyLong);
         parentProject.setVisibility(ProjectVisibility.PRIVATE);
         when(projectRepository.findById(createSubProjectDto.parentProjectId())).thenReturn(Optional.of(parentProject));
 
@@ -95,14 +105,14 @@ public class SubProjectServiceImplTest {
 
     @Test
     public void createCreates() {
-        long creatorId = 2L;
+        long creatorId = anyLong;
         CreateSubProjectDto createSubProjectDto = createCreateSubProjectDtoForTest();
         Project parentProject = new Project();
-        parentProject.setOwnerId(2L);
-        parentProject.setId(1L);
+        parentProject.setOwnerId(anyLong);
+        parentProject.setId(differentAnyLong);
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
         Project subProjectToCreate = new Project();
-        subProjectToCreate.setId(1L);
+        subProjectToCreate.setId(differentAnyLong);
         subProjectToCreate.setName("1");
 
         when(projectRepository.findById(createSubProjectDto.parentProjectId())).thenReturn(Optional.of(parentProject));
@@ -312,14 +322,14 @@ public class SubProjectServiceImplTest {
         return new CreateSubProjectDto(
                 "1",
                 "1",
-                1L,
+                anyLong,
                 ProjectVisibility.PUBLIC,
                 "coveredImageId",
-                List.of(1L, 2L),
-                1L,
-                List.of(1L, 2L),
-                List.of(1L, 2L),
-                List.of(1L, 2L),
+                List.of(anyLong, differentAnyLong),
+                anyLong,
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
                 "presentationFileKey",
                 List.of("1", "2")
         );
@@ -327,21 +337,21 @@ public class SubProjectServiceImplTest {
 
     private UpdateSubProjectDto createUpdateSubProjectDtoForTest() {
         return new UpdateSubProjectDto(
-                1L,
+                anyLong,
                 "1",
                 "1",
-                List.of(1L, 2L),
-                List.of(1L, 2L),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
                 List.of("1", "2"),
                 ProjectStatus.IN_PROGRESS,
                 ProjectVisibility.PUBLIC,
                 "coveredImageId",
-                List.of(1L, 2L),
-                1L,
-                List.of(1L, 2L),
-                List.of(1L, 2L),
-                List.of(1L, 2L),
-                List.of(1L, 2L),
+                List.of(anyLong, differentAnyLong),
+                anyLong,
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
                 "presentationFileKey",
                 LocalDateTime.of(2025, 10, 10, 15, 23),
                 List.of("1", "2")
@@ -350,21 +360,21 @@ public class SubProjectServiceImplTest {
 
     private UpdateSubProjectDto createPrivateUpdateSubProjectDtoForTest() {
         return new UpdateSubProjectDto(
-                1L,
+                anyLong,
                 "1",
                 "1",
-                List.of(1L, 2L),
-                List.of(1L, 2L),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
                 List.of("1", "2"),
                 ProjectStatus.IN_PROGRESS,
                 ProjectVisibility.PRIVATE,
                 "coveredImageId",
-                List.of(1L, 2L),
-                1L,
-                List.of(1L, 2L),
-                List.of(1L, 2L),
-                List.of(1L, 2L),
-                List.of(1L, 2L),
+                List.of(anyLong, differentAnyLong),
+                anyLong,
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
+                List.of(anyLong, differentAnyLong),
                 "presentationFileKey",
                 LocalDateTime.of(2025, 10, 10, 15, 23),
                 List.of("1", "2")

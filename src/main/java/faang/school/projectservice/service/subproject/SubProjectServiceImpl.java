@@ -45,13 +45,13 @@ public class SubProjectServiceImpl implements SubProjectService {
             log.error("Пользователь с id: {} не является владельцем проекта с id: {}, " +
                     "он не может создавать от него подпроекты.",
                     creatorId, parentProject.getId());
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя создать подпроект от чужого проекта.");
         }
         if (parentProject.getVisibility() == ProjectVisibility.PRIVATE
                 && createSubProjectDto.visibility() == ProjectVisibility.PUBLIC) {
             log.error("Проект с id: {} не может быть публичным, он создан от приватного проекта с id: {}.",
                     subProjectToCreate.getId(), parentProject.getId());
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя создать публичный подпроект от приватного проекта.");
         }
         subProjectToCreate.setParentProject(parentProject);
         subProjectToCreate.setTeams(teamRepository.findAllById(createSubProjectDto.teamIds()));
@@ -72,14 +72,14 @@ public class SubProjectServiceImpl implements SubProjectService {
             log.error(
                     "Пользователь с id: {} не может редактировать проект с id: {}, он не является его владельцем",
                     requesterId, updateSubProjectDto.id());
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя редактировать чужие подпроекты.");
         }
         Project parentProject = subProjectToUpdate.getParentProject();
         if (parentProject.getVisibility() == ProjectVisibility.PRIVATE
                 && updateSubProjectDto.visibility() == ProjectVisibility.PUBLIC) {
             log.error("Проект с id: {} нельзя сделать публичным, он создан от приватного проекта с id: {}.",
                     subProjectToUpdate.getId(), parentProject.getId());
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя сделать публичным подпроект, созданный от приватного проекта.");
         }
         if (updateSubProjectDto.visibility() == ProjectVisibility.PRIVATE
                 && !subProjectToUpdate.getChildren().isEmpty()) {
@@ -107,13 +107,13 @@ public class SubProjectServiceImpl implements SubProjectService {
                     && child.getStatus() != ProjectStatus.CANCELLED) {
                 log.error("Подпроект с id: {} не может быть закрыт, у него есть незакрытые подпроекты.",
                         subprojectId);
-                throw new ForbiddenException("");
+                throw new ForbiddenException("Данный подпроект нельзя закрыть, у него есть незакрытые подпроекты.");
             }
         }
         if (subProjectToComplete.getOwnerId() != requesterId) {
             log.error("Пользователь с id: {} не может закрыть проект с id: {}, он не является его владельцем",
                     requesterId, subprojectId);
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя закрыть чужой подпроект.");
         }
         subProjectToComplete.setStatus(ProjectStatus.COMPLETED);
         return true;
@@ -126,7 +126,7 @@ public class SubProjectServiceImpl implements SubProjectService {
             return subProjectMapper.toSubProjectDto(optionalSubProject.get());
         }
         log.warn("Проект с id: {} не найден.", subprojectId);
-        throw new EntityNotFoundException("");
+        throw new EntityNotFoundException("Такого подпроекта нет.");
     }
 
     @Override
@@ -145,12 +145,12 @@ public class SubProjectServiceImpl implements SubProjectService {
         if (subProjectToDelete.getOwnerId() != requesterId) {
             log.error("У пользователя с id: {} нет прав на удаление проекта c id: {}.",
                     requesterId, subprojectId);
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Нельзя удалить чужой подпроект.");
         }
         if (!subProjectToDelete.getChildren().isEmpty()) {
             log.error("Подпроект с id: {} не может быть удален, у него есть подпроекты.",
                     subprojectId);
-            throw new ForbiddenException("");
+            throw new ForbiddenException("Данный проект нельзя удалить, у него есть подпроекты.");
         }
         projectRepository.deleteById(subprojectId);
         log.info("Подпроект с id: {} успешно удален.", subprojectId);

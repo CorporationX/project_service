@@ -26,33 +26,33 @@ public class SubProjectController {
     private final UserContext userContext;
     private final SubProjectService subProjectService;
 
-    @PostMapping("/")
+    @PostMapping
     public SubProjectDto create(@Valid CreateSubProjectDto createSubProjectDto) {
         return subProjectService.create(userContext.getUserId(), createSubProjectDto);
     }
 
-    @PutMapping("/")
+    @PutMapping
     public SubProjectDto update(@Valid UpdateSubProjectDto updateSubProjectDto) {
         return subProjectService.update(userContext.getUserId(), updateSubProjectDto);
     }
 
-    @PutMapping("/{id}/complete")
-    public boolean complete(@PathVariable("id") long subprojectId) {
-        return subProjectService.complete(userContext.getUserId(), subprojectId);
+    @PutMapping("/{subProjectId}/complete")
+    public boolean complete(@PathVariable long subProjectId) {
+        return subProjectService.complete(userContext.getUserId(), subProjectId);
     }
 
-    @GetMapping("/{id}")
-    public SubProjectDto getById(long subprojectId) {
-        return subProjectService.getById(subprojectId);
+    @GetMapping("/{subProjectId}")
+    public SubProjectDto getById(@PathVariable long subProjectId) {
+        return subProjectService.getById(subProjectId);
     }
 
-    @GetMapping("/{id}")
-    public List<SubProjectDto> getAllByParentProject(long parentProjectId) {
+    @GetMapping("/by-parent-project/{parentProjectId}")
+    public List<SubProjectDto> getAllByParentProject(@PathVariable long parentProjectId) {
         return subProjectService.getAllByParentProject(parentProjectId);
     }
 
-    @DeleteMapping("/{id}")
-    public boolean delete(long subprojectId) {
+    @DeleteMapping("/{subProjectId}")
+    public boolean delete(@PathVariable long subprojectId) {
         return subProjectService.delete(userContext.getUserId(), subprojectId);
     }
 }
