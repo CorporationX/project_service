@@ -147,8 +147,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public StageInvitation findInvitation(Long invitationId) {
+    private StageInvitation findInvitation(Long invitationId) {
         log.debug("Looking up StageInvitation with id={}", invitationId);
         return invitationRepository.findById(invitationId)
                 .orElseThrow(() -> {
