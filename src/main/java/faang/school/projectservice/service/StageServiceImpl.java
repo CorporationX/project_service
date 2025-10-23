@@ -98,12 +98,6 @@ public class StageServiceImpl implements StageService {
                         .anyMatch(teamRole -> teamRole.equals(stageUpdateDto.teamRole())))
                 .limit(countParticipant)
                 .toList();
-        if (!memberOriginStage.isEmpty() && memberOriginStage.size() == countParticipant) {
-            log.info("Sending Invitations to the participants of the stage, stage id {}, stage name {}",
-                    stage.getStageId(), stage.getStageName());
-            return sendingInvitation(memberOriginStage, stage);
-        }
-
         if (memberOriginStage.size() != countParticipant) {
             long lastParticipants = countParticipant - memberOriginStage.size();
             return addAnotherParticipantStages(project, stage, memberOriginStage, lastParticipants, stageUpdateDto.teamRole());
