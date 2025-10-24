@@ -12,6 +12,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,25 +40,23 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                             + " is not found");
                 });
 
-        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(
-                stageInvitationDto.authorUserId(), stage.getProject().getId());
+        TeamMember author = Optional.ofNullable(teamMemberRepository.findByUserIdAndProjectId(
+                        stageInvitationDto.authorUserId(), stage.getProject().getId()))
+                .orElseThrow(() -> {
+                    log.error("Author team member not found for userId={} in projectId={}",
+                            stageInvitationDto.authorUserId(), stage.getProject().getId());
+                    return new EntityNotFoundException("Author team member not found for user: "
+                            + stageInvitationDto.authorUserId());
+                });
 
-        if (author == null) {
-            log.error("Author team member not found for userId={} in projectId={}",
-                    stageInvitationDto.authorUserId(), stage.getProject().getId());
-            throw new EntityNotFoundException("Author team member not found for user: " +
-                    stageInvitationDto.authorUserId());
-        }
-
-        TeamMember invited = teamMemberRepository.findByUserIdAndProjectId(
-                stageInvitationDto.invitedUserId(), stage.getProject().getId());
-
-        if (invited == null) {
+        TeamMember invited = Optional.ofNullable(teamMemberRepository.findByUserIdAndProjectId(
+                stageInvitationDto.invitedUserId(), stage.getProject().getId())).orElseThrow(() -> {
             log.error("Invited team member not found for userId={} in projectId={}",
                     stageInvitationDto.invitedUserId(), stage.getProject().getId());
-            throw new EntityNotFoundException("Invited team member not found for user: "
+            return new EntityNotFoundException("Invited team member not found for user: "
                     + stageInvitationDto.invitedUserId());
-        }
+        });
+
 
         StageInvitation invitation = StageInvitation.builder()
                 .author(author)

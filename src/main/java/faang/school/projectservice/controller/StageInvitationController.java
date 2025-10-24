@@ -35,21 +35,15 @@ public class StageInvitationController {
                 createStageInvitationDto.stageId(),
                 createStageInvitationDto.stageId(),
                 createStageInvitationDto.stageId());
-        StageInvitationDto result = stageInvitationService.sendInvitation(createStageInvitationDto);
 
-        log.info("Stage invitation successfully sent: invitationId={}", result.id());
-        return result;
+        return stageInvitationService.sendInvitation(createStageInvitationDto);
     }
 
     @PutMapping("/{invitationId}/accept")
     public StageInvitationDto acceptInvitation(@PathVariable Long invitationId) {
         log.info("Received request to accept stage invitation with id={}", invitationId);
 
-        StageInvitationDto result = stageInvitationService.acceptInvitation(invitationId);
-
-        log.info("Stage invitation accepted successfully: invitationId={}, status={}",
-                result.id(), result.status());
-        return result;
+        return stageInvitationService.acceptInvitation(invitationId);
     }
 
     @PutMapping("/{invitationId}/reject")
@@ -58,11 +52,7 @@ public class StageInvitationController {
             @Valid @RequestBody String reason) {
         log.info("Received request to reject stage invitation with id={}, reason={}", invitationId, reason);
 
-        StageInvitationDto result = stageInvitationService.rejectInvitation(invitationId, reason);
-
-        log.info("Stage invitation rejected successfully: invitationId={}, status={}",
-                result.id(), result.status());
-        return result;
+        return stageInvitationService.rejectInvitation(invitationId, reason);
     }
 
     @GetMapping
@@ -71,9 +61,6 @@ public class StageInvitationController {
             @RequestParam(required = false) StageInvitationStatus status) {
         log.info("Received request to get stage invitations for userId={}, statusFilter={}", userId, status);
 
-        List<StageInvitationDto> invitations = stageInvitationService.getInvitationsForUser(userId, status);
-
-        log.info("Retrieved {} stage invitations for userId={}", invitations.size(), userId);
-        return invitations;
+        return stageInvitationService.getInvitationsForUser(userId, status);
     }
 }
