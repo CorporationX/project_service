@@ -9,5 +9,6 @@ import java.util.List;
 public record CreateStageDto(@NotBlank String stageName,
                              @NotNull Long projectId,
                              @NotNull @Size(min = 1) List<StageRoleDto> requiredRoles,
-                             List<Long> executorIds) {
+                             List<Long> executorIds
+) {
 }
