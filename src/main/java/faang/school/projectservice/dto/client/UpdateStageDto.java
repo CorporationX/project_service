@@ -9,5 +9,6 @@ public record UpdateStageDto(@NotNull Long stageId,
                              @NotBlank String stageName,
                              @NotNull Long projectId,
                              TeamMemberDto requiredRoles,
-                             List<Long> executorIds) {
+                             List<Long> executorIds
+) {
 }

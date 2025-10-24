@@ -15,20 +15,21 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,7 @@ public class StageServiceImplTest {
     private ProjectRepository projectRepository;
 
     @Spy
-    private StageMapper stageMapper;
+    private StageMapper stageMapper = Mappers.getMapper(StageMapper.class);
 
     @Mock
     private NotificationServiceClient notificationService;
@@ -62,23 +63,27 @@ public class StageServiceImplTest {
                 List.of(new StageRoleDto(TeamRole.ANALYST, 1)),
                 List.of(new TeamMemberDto(memberId, "John", TeamRole.ANALYST)), 3
         );
+
         Project project = new Project();
         project.setId(projectId);
-        Stage stage = new Stage();
-        stage.setStageId(stageId);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(stageMapper.toStage(stageDto)).thenReturn(stage);
-        when(stageRepository.save(stage)).thenReturn(stage);
-        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+        when(stageRepository.save(any(Stage.class))).thenAnswer(invocation -> {
+            Stage stage = invocation.getArgument(0);
+            stage.setStageId(stageId);
+            stage.setStageName("stageName");
+            stage.setProject(project);
+            return stage;
+        });
 
         StageDto result = service.createStage(stageDto);
 
-        assertEquals(stageDto, result);
+        assertNotNull(result);
+        assertEquals(stageId, result.stageId());
+        assertEquals("stageName", result.stageName());
+
         verify(projectRepository).findById(projectId);
-        verify(stageMapper).toStage(stageDto);
-        verify(stageRepository).save(stage);
-        verify(stageMapper).toStageDto(stage);
+        verify(stageRepository).save(any(Stage.class));
     }
 
     @Test
@@ -124,22 +129,25 @@ public class StageServiceImplTest {
 
     @Test
     public void checkGetAllStagesOfProjectSuccess() {
+
+        Project project = new Project();
+        project.setId(projectId);
+
         Stage stage = new Stage();
-        StageDto stageDto = new StageDto(
-                stageId, "stageName", projectId,
-                List.of(new StageRoleDto(TeamRole.ANALYST, 1)),
-                List.of(new TeamMemberDto(memberId, "John", TeamRole.ANALYST)), 3
-        );
+        stage.setStageId(stageId);
+        stage.setStageName("stageName");
+        stage.setProject(project);
 
         when(stageRepository.findByProjectId(projectId)).thenReturn(List.of(stage));
-        when(stageMapper.toListStageDto(List.of(stage))).thenReturn(List.of(stageDto));
 
         List<StageDto> result = service.getAllStagesOfProject(projectId);
 
+        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(stageDto, result.get(0));
+        assertEquals(stageId, result.get(0).stageId());
+        assertEquals("stageName", result.get(0).stageName());
+
         verify(stageRepository).findByProjectId(projectId);
-        verify(stageMapper).toListStageDto(List.of(stage));
     }
 
     @Test
@@ -156,13 +164,10 @@ public class StageServiceImplTest {
                 new TeamMemberDto(memberId, "John", TeamRole.ANALYST),
                 List.of(4L, 5L)
         );
+
         Stage stage = new Stage();
+        stage.setStageId(stageId);
         stage.setExecutors(List.of());
-        StageDto stageDto = new StageDto(
-                stageId, "Updated Stage", projectId,
-                List.of(new StageRoleDto(TeamRole.ANALYST, 1)),
-                List.of(new TeamMemberDto(memberId, "John", TeamRole.ANALYST)), 3
-        );
 
         Project project = new Project();
         Team team = new Team();
@@ -174,16 +179,18 @@ public class StageServiceImplTest {
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(stageRepository.save(stage)).thenReturn(stage);
-        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+        when(stageRepository.save(any(Stage.class))).thenAnswer(invocation -> {
+            Stage savedStage = invocation.getArgument(0);
+            return savedStage;
+        });
 
         StageDto result = service.updateStage(stageId, updateStageDto);
 
-        assertEquals(stageDto, result);
+        assertNotNull(result);
+        assertEquals(stageId, result.stageId());
+
         verify(stageRepository).findById(stageId);
-        verify(stageMapper).updateStage(updateStageDto, stage);
-        verify(stageRepository).save(stage);
-        verify(stageMapper).toStageDto(stage);
+        verify(stageRepository).save(any(Stage.class));
         verify(projectRepository).findById(projectId);
     }
 
@@ -209,7 +216,9 @@ public class StageServiceImplTest {
                 new TeamMemberDto(memberId, "John", TeamRole.DEVELOPER),
                 List.of(4L, 5L)
         );
+
         Stage stage = new Stage();
+        stage.setStageId(stageId);
         stage.setExecutors(List.of());
 
         Project project = new Project();
@@ -222,7 +231,7 @@ public class StageServiceImplTest {
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageRepository.save(any(Stage.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         service.updateStage(stageId, updateStageDto);
 
@@ -236,13 +245,15 @@ public class StageServiceImplTest {
                 new TeamMemberDto(memberId, "John", TeamRole.DEVELOPER),
                 List.of(4L, 5L)
         );
+
         Stage stage = new Stage();
+        stage.setStageId(stageId);
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.DEVELOPER));
         stage.setExecutors(List.of(teamMember));
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
-        when(stageRepository.save(stage)).thenReturn(stage);
+        when(stageRepository.save(any(Stage.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         service.updateStage(stageId, updateStageDto);
 
@@ -251,21 +262,23 @@ public class StageServiceImplTest {
 
     @Test
     public void checkGetByIdSuccess() {
+        Project project = new Project();
+        project.setId(projectId);
+
         Stage stage = new Stage();
-        StageDto stageDto = new StageDto(
-                stageId, "stageName", projectId,
-                List.of(new StageRoleDto(TeamRole.ANALYST, 1)),
-                List.of(new TeamMemberDto(memberId, "John", TeamRole.ANALYST)), 3
-        );
+        stage.setStageId(stageId);
+        stage.setStageName("stageName");
+        stage.setProject(project);
 
         when(stageRepository.findById(stageId)).thenReturn(Optional.of(stage));
-        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
 
         StageDto result = service.getById(stageId);
 
-        assertEquals(stageDto, result);
+        assertNotNull(result);
+        assertEquals(stageId, result.stageId());
+        assertEquals("stageName", result.stageName());
+
         verify(stageRepository).findById(stageId);
-        verify(stageMapper).toStageDto(stage);
     }
 
     @Test

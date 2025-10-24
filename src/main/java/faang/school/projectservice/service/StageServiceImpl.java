@@ -74,6 +74,7 @@ public class StageServiceImpl implements StageService {
         stageMapper.updateStage(updateStageDto, stage);
         TeamMemberDto teamMemberDto = updateStageDto.requiredRoles();
         boolean isRoleInStage = haveRoleInStage(stage, teamMemberDto.role());
+
         if (!isRoleInStage) {
             TeamMember memberWithRoleInProject = getMemberWithRoleInProject(updateStageDto.projectId()
                     , teamMemberDto.role());

@@ -6,5 +6,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record StageRoleDto(
         @NotNull TeamRole role,
-        @Min(1) int count) {
+        @Min(1) int count
+) {
 }
