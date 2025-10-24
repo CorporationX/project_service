@@ -24,7 +24,7 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    @PostMapping("/")
+    @PostMapping
     public MomentDto createMoment(@RequestBody @NonNull CreateMomentDto momentDto) throws Exception {
         return momentService.createMoment(momentDto);
     }
@@ -40,17 +40,17 @@ public class MomentController {
         return momentService.getById(momentId);
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<MomentDto> getAllMoments() {
         return momentService.getAllMoments();
     }
 
     @GetMapping("/by-project-id/{projectId}")
-    public List<MomentDto> getMomentsByProjectId(@PathVariable("projectId") long projectId) {
+    public List<MomentDto> getMomentsByProjectId(@PathVariable long projectId) {
         return momentService.getMomentsByProjectId(projectId);
     }
 
-    @PostMapping("/moments/bymonth")
+    @PostMapping("/by-month")
     public List<MomentDto> getMomentsByMonth(@RequestBody SearchMomentDto searchMomentDto) {
         return momentService.getMomentsByMonth(searchMomentDto);
     }
