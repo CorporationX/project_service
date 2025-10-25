@@ -48,43 +48,12 @@ public class InternshipServiceImpl implements InternshipService {
 
     @Override
     public InternshipDto create(CreateInternshipDto createInternshipDto) {
-
         Project project = projectRepository.getByIdOrThrow(createInternshipDto.projectId());
         TeamMember mentorTeamMember = teamMemberRepository.getByIdOrThrow(createInternshipDto.mentorId());
         List<TeamMember> interns = teamMemberRepository.findAllById(createInternshipDto.internsIds());
         List<Long> internsIds = interns.stream().map(TeamMember::getId).toList();
 
-        if (interns.size() != createInternshipDto.internsIds().size()) {
-            List<Long> notFoundInterns = new ArrayList<>(createInternshipDto.internsIds());
-            notFoundInterns.removeAll(internsIds);
-            final String errorMessage = "Some interns not found. Found: %s Not found: %s".formatted(internsIds,
-                    notFoundInterns);
-            log.error(errorMessage);
-            throw new EntityNotFoundException(errorMessage);
-        }
-
-        if (!createInternshipDto.projectId().equals(mentorTeamMember.getTeam().getProject().getId())) {
-            final String errorMessage = "Mentor %d is not from current project %d".formatted(
-                    createInternshipDto.mentorId(), createInternshipDto.projectId());
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
-        }
-
-        if (createInternshipDto.endDate().minusMonths(maxInternshipDuration).isAfter(createInternshipDto.startDate())) {
-            final String errorMessage = "Duration of internship is more than %d months. Start date %s, end date %s"
-                    .formatted(maxInternshipDuration, createInternshipDto.startDate(), createInternshipDto.endDate());
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
-        }
-
-        boolean areInternsFromCurrentProject = interns.stream().allMatch(intern
-                -> intern.getTeam().getProject().getId().equals(createInternshipDto.projectId()));
-
-        if (!areInternsFromCurrentProject) {
-            final String errorMessage = "Some interns are not from current project. Interns: " + internsIds;
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
-        }
+        createValidation(interns, createInternshipDto, internsIds, mentorTeamMember);
 
         Internship internship = internshipMapper.toInternship(createInternshipDto);
         internship.setProject(project);
@@ -171,7 +140,7 @@ public class InternshipServiceImpl implements InternshipService {
                 }
             }
 
-            if (!internsToRemove.isEmpty()){
+            if (!internsToRemove.isEmpty()) {
                 internship.getInterns().removeAll(internsToRemove);
                 removeTeamMembersFromProject(internsToRemove);
             }
@@ -213,7 +182,8 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public InternshipDto getById(long internshipId) {
         log.debug("Fetching internship request by id={}", internshipId);
-        InternshipDto internshipDto = internshipMapper.toInternshipDto(internshipRepository.getByIdOrThrow(internshipId));
+        InternshipDto internshipDto = internshipMapper.toInternshipDto(internshipRepository
+                .getByIdOrThrow(internshipId));
         log.debug("Internship request found: id={}, status={}, name={}, role={}",
                 internshipDto.id(), internshipDto.status(), internshipDto.name(), internshipDto.role());
         return internshipDto;
@@ -239,5 +209,40 @@ public class InternshipServiceImpl implements InternshipService {
                 teamRepository.save(team);
             }
         });
+    }
+
+    private void createValidation(List<TeamMember> interns, CreateInternshipDto createInternshipDto,
+                                  List<Long> internsIds, TeamMember mentorTeamMember) {
+        if (interns.size() != createInternshipDto.internsIds().size()) {
+            List<Long> notFoundInterns = new ArrayList<>(createInternshipDto.internsIds());
+            notFoundInterns.removeAll(internsIds);
+            final String errorMessage = "Some interns not found. Found: %s Not found: %s".formatted(internsIds,
+                    notFoundInterns);
+            log.error(errorMessage);
+            throw new EntityNotFoundException(errorMessage);
+        }
+
+        if (!createInternshipDto.projectId().equals(mentorTeamMember.getTeam().getProject().getId())) {
+            final String errorMessage = "Mentor %d is not from current project %d".formatted(
+                    createInternshipDto.mentorId(), createInternshipDto.projectId());
+            log.error(errorMessage);
+            throw new DataValidationException(errorMessage);
+        }
+
+        if (createInternshipDto.endDate().minusMonths(maxInternshipDuration).isAfter(createInternshipDto.startDate())) {
+            final String errorMessage = "Duration of internship is more than %d months. Start date %s, end date %s"
+                    .formatted(maxInternshipDuration, createInternshipDto.startDate(), createInternshipDto.endDate());
+            log.error(errorMessage);
+            throw new DataValidationException(errorMessage);
+        }
+
+        boolean areInternsFromCurrentProject = interns.stream().allMatch(intern
+                -> intern.getTeam().getProject().getId().equals(createInternshipDto.projectId()));
+
+        if (!areInternsFromCurrentProject) {
+            final String errorMessage = "Some interns are not from current project. Interns: " + internsIds;
+            log.error(errorMessage);
+            throw new DataValidationException(errorMessage);
+        }
     }
 }
