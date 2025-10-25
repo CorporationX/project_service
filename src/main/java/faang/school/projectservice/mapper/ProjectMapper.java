@@ -7,7 +7,6 @@ import faang.school.projectservice.model.TeamMember;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class ProjectMapper {
@@ -22,16 +21,16 @@ public class ProjectMapper {
                         .distinct()
                         .toList();
 
-        return new ProjectDto(
-                project.getId(),
-                project.getName(),
-                project.getDescription(),
-                project.getOwnerId(),
-                project.getStatus(),
-                project.getVisibility(),
-                project.getCreatedAt(),
-                project.getUpdatedAt()
-        );
+        return ProjectDto.builder()
+                .id(project.getId())
+                .name(project.getName())
+                .description(project.getDescription())
+                .ownerId(project.getOwnerId())
+                .status(project.getStatus())
+                .visibility(project.getVisibility())
+                .createdAt(project.getCreatedAt())
+                .updatedAt(project.getUpdatedAt())
+                .build();
     }
 
     public static Project toEntity(ProjectCreateDto dto) {

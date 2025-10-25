@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.project.ResourceNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -29,8 +31,11 @@ public class ProjectService {
     public Project create(ProjectCreateDto projectCreateDto, Long ownerId) {
         log.info("Creating a project by a user {}", ownerId);
 
-        boolean nameExists = projectRepository.existsByOwnerIdAndName(ownerId, projectCreateDto.name());
-        ProjectValidator.validateUniqueProjectNameForOwner(projectCreateDto.name(), ownerId, nameExists);
+        ProjectValidator.validateUniqueProjectNameForOwner(
+                projectCreateDto.name(),
+                ownerId,
+                () -> projectRepository.existsByOwnerIdAndName(ownerId, projectCreateDto.name())
+        );
 
         Project project = ProjectMapper.toEntity(projectCreateDto);
         project.setOwnerId(ownerId);
@@ -43,11 +48,13 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project update(Long id, ProjectUpdateDto projectUpdateDto) {
-        Project project = projectRepository.getReferenceById(id);
+    public Project update(Long id, ProjectUpdateDto projectUpdateDto, Long ownerId) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
+        ProjectValidator.validateAccessToProject(project, ownerId);
         ProjectValidator.validateUpdate(project,
-                ProjectStatus.valueOf(projectUpdateDto.status()),
+                projectUpdateDto.status() != null ? ProjectStatus.valueOf(projectUpdateDto.status()) : null,
                 projectUpdateDto.description());
 
         if (projectUpdateDto.status() != null) {
@@ -57,9 +64,9 @@ public class ProjectService {
             project.setDescription(projectUpdateDto.description());
         }
 
-        projectRepository.save(project);
+        project.setUpdatedAt(LocalDateTime.now());
         log.info("Project '{}' (id={}) has been updated", project.getName(), project.getId());
-        return project;
+        return projectRepository.save(project);
     }
 
     public List<ProjectDto> getAllProjects() {
@@ -71,14 +78,9 @@ public class ProjectService {
     public List<ProjectDto> getProjectsByFilter(String name, ProjectStatus status, Long userId) {
         Predicate<Project> matchesName = project -> name == null || project.getName().contains(name);
         Predicate<Project> matchesStatus = project -> status == null || project.getStatus() == status;
-        Predicate<Project> isVisible = project -> {
-            if (project.getVisibility() == null || project.getVisibility() != ProjectVisibility.PRIVATE) {
-                return true;
-            }
-            return project.getTeams() != null && project.getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .anyMatch(member -> member.getId().equals(userId));
-        };
+        Predicate<Project> isVisible = project ->
+                project.getVisibility() != ProjectVisibility.PRIVATE ||
+                        ProjectValidator.isUserParticipant(project, userId);
 
         return projectRepository.findAll().stream()
                 .filter(matchesName.and(matchesStatus).and(isVisible))
@@ -87,7 +89,8 @@ public class ProjectService {
     }
 
     public Project getProjectById(Long id, Long userId) {
-        Project project = projectRepository.getReferenceById(id);
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         ProjectValidator.validateAccessToProject(project, userId);
         return project;
     }

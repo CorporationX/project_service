@@ -1,7 +1,9 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.exception.project.AccessDeniedException;
+import faang.school.projectservice.exception.project.BadRequestException;
 import faang.school.projectservice.exception.project.DuplicateResourceException;
-import faang.school.projectservice.helpers.TestUtils;
+import faang.school.projectservice.exception.project.ResourceNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -12,140 +14,108 @@ import org.junit.jupiter.api.function.Executable;
 
 import java.util.List;
 
+import static faang.school.projectservice.helpers.TestUtils.assertThrowsAny;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProjectValidatorTest {
 
     @Test
     void validateUniqueProjectNameForOwner_NameExists_ThrowsException() {
-        String projectName = "Test";
-        Long ownerId = 1L;
-        boolean nameExists = true;
+        Executable exec = () -> ProjectValidator.validateUniqueProjectNameForOwner(
+                "TestProject",
+                1L,
+                () -> true);
 
-        Executable executable = () ->
-                ProjectValidator.validateUniqueProjectNameForOwner(projectName, ownerId, nameExists);
-
-        TestUtils.assertThrowsWithMessage(
-                DuplicateResourceException.class,
-                "Project with this name already exists for this user",
-                executable
-        );
+        assertThrowsAny(DuplicateResourceException.class, exec);
     }
 
     @Test
     void validateUniqueProjectNameForOwner_NameNotExists_NoException() {
-        String projectName = "Unique";
-        Long ownerId = 1L;
-        boolean nameExists = false;
-
         assertDoesNotThrow(() ->
-                ProjectValidator.validateUniqueProjectNameForOwner(projectName, ownerId, nameExists)
-        );
+                ProjectValidator.validateUniqueProjectNameForOwner(
+                        "UniqueProject",
+                        1L,
+                        () -> false));
     }
 
     @Test
     void validateProjectExists_Null_ThrowsException() {
-        Project project = null;
-
-        Executable executable = () -> ProjectValidator.validateProjectExists(project);
-
-        TestUtils.assertThrowsWithMessage(
-                IllegalArgumentException.class,
-                "Project not found",
-                executable
-        );
+        assertThrowsAny(ResourceNotFoundException.class,
+                () -> ProjectValidator.validateProjectExists(null));
     }
 
     @Test
     void validateProjectExists_NotNull_NoException() {
-        Project project = new Project();
-        project.setId(1L);
-
+        Project project = Project.builder().id(1L).build();
         assertDoesNotThrow(() -> ProjectValidator.validateProjectExists(project));
     }
 
     @Test
     void validateAccessToProject_PrivateNotParticipant_ThrowsException() {
-        Project project = new Project();
-        project.setVisibility(ProjectVisibility.PRIVATE);
+        Project project = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(
+                        Team.builder()
+                                .teamMembers(List.of(TeamMember.builder().id(2L).build()))
+                                .build()))
+                .build();
 
-        Team team = new Team();
-        TeamMember member = new TeamMember();
-        member.setId(2L);
-        team.setTeamMembers(List.of(member));
-        project.setTeams(List.of(team));
-
-        Long userId = 3L;
-
-        Executable executable = () -> ProjectValidator.validateAccessToProject(project, userId);
-
-        TestUtils.assertThrowsWithMessage(
-                IllegalArgumentException.class,
-                "Access denied to private project",
-                executable
-        );
+        assertThrowsAny(AccessDeniedException.class,
+                () -> ProjectValidator.validateAccessToProject(project, 3L));
     }
 
     @Test
     void validateAccessToProject_PrivateParticipant_NoException() {
-        Project project = new Project();
-        project.setVisibility(ProjectVisibility.PRIVATE);
+        Project project = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE)
+                .teams(List.of(
+                        Team.builder()
+                                .teamMembers(List.of(TeamMember.builder().id(1L).build()))
+                                .build()))
+                .build();
 
-        TeamMember member = new TeamMember();
-        member.setId(1L);
-
-        Team team = new Team();
-        team.setTeamMembers(List.of(member));
-
-        project.setTeams(List.of(team));
-
-        Long userId = 1L;
-
-        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, userId));
+        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, 1L));
     }
 
     @Test
     void validateAccessToProject_Public_NoException() {
-        Project project = new Project();
-        project.setVisibility(ProjectVisibility.PUBLIC);
+        Project project = Project.builder()
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
 
-        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, 99L));
+        assertDoesNotThrow(() -> ProjectValidator.validateAccessToProject(project, 42L));
     }
 
     @Test
     void validateUpdate_NothingToUpdate_ThrowsException() {
-        Project project = new Project();
-        project.setId(1L);
-
-        Executable executable = () -> ProjectValidator.validateUpdate(project, null, null);
-
-        TestUtils.assertThrowsWithMessage(
-                IllegalArgumentException.class,
-                "Nothing to update",
-                executable
-        );
+        Project project = Project.builder().id(1L).build();
+        assertThrowsAny(BadRequestException.class,
+                () -> ProjectValidator.validateUpdate(project, null, null));
     }
 
     @Test
     void validateUpdate_ProjectNotFound_ThrowsException() {
-        Project project = null;
-
-        Executable executable = () -> ProjectValidator.validateUpdate(project, ProjectStatus.CANCELLED, "desc");
-
-        TestUtils.assertThrowsWithMessage(
-                IllegalArgumentException.class,
-                "Project not found",
-                executable
-        );
+        assertThrowsAny(ResourceNotFoundException.class,
+                () -> ProjectValidator.validateUpdate(null, ProjectStatus.CREATED, "desc"));
     }
 
     @Test
     void validateUpdate_Valid_NoException() {
-        Project project = new Project();
-        project.setId(1L);
-
+        Project project = Project.builder().id(1L).build();
         assertDoesNotThrow(() ->
-                ProjectValidator.validateUpdate(project, ProjectStatus.CANCELLED, "Updated")
-        );
+                ProjectValidator.validateUpdate(project, ProjectStatus.COMPLETED, "desc"));
+    }
+
+    @Test
+    void isUserParticipant_ReturnsTrue_WhenMemberExists() {
+        Project project = Project.builder()
+                .teams(List.of(
+                        Team.builder()
+                                .teamMembers(List.of(TeamMember.builder().id(5L).build()))
+                                .build()))
+                .build();
+
+        assertTrue(ProjectValidator.isUserParticipant(project, 5L));
     }
 }

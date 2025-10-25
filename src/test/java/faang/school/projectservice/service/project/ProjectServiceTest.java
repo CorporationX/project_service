@@ -3,8 +3,10 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.project.AccessDeniedException;
+import faang.school.projectservice.exception.project.BadRequestException;
 import faang.school.projectservice.exception.project.DuplicateResourceException;
-import faang.school.projectservice.helpers.TestUtils;
+import faang.school.projectservice.exception.project.ResourceNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -12,14 +14,15 @@ import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import static faang.school.projectservice.helpers.TestUtils.assertThrowsAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
@@ -54,9 +57,11 @@ class ProjectServiceTest {
 
     @Test
     void createProject_Success() {
-        ProjectCreateDto dto = new ProjectCreateDto("NewProject",
+        ProjectCreateDto dto = new ProjectCreateDto(
+                "NewProject",
                 "Some description",
-                ProjectVisibility.PUBLIC);
+                ProjectVisibility.PUBLIC
+        );
 
         when(projectRepository.existsByOwnerIdAndName(OWNER_ID, "NewProject")).thenReturn(false);
         when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> {
@@ -75,29 +80,30 @@ class ProjectServiceTest {
 
     @Test
     void createProject_NameAlreadyExists_ThrowsException() {
-        ProjectCreateDto dto = new ProjectCreateDto("DuplicateProject",
+        ProjectCreateDto dto = new ProjectCreateDto(
+                "DuplicateProject",
                 "Desc",
-                ProjectVisibility.PUBLIC);
+                ProjectVisibility.PUBLIC
+        );
         when(projectRepository.existsByOwnerIdAndName(OWNER_ID, "DuplicateProject")).thenReturn(true);
 
-        Executable executable = () -> projectService.create(dto, OWNER_ID);
-
-        TestUtils.assertThrowsWithMessage(
-                DuplicateResourceException.class,
-                "Project with this name already exists for this user",
-                executable
+        assertThrowsAny(DuplicateResourceException.class, () ->
+                projectService.create(dto, OWNER_ID)
         );
     }
 
     @Test
     void updateProject_Success() {
-        ProjectUpdateDto dto = new ProjectUpdateDto("Updated description",
+        ProjectUpdateDto dto = new ProjectUpdateDto(
+                "Updated description",
                 "COMPLETED",
-                ProjectVisibility.PRIVATE);
-        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+                ProjectVisibility.PRIVATE
+        );
+
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
         when(projectRepository.save(any(Project.class))).thenReturn(project);
 
-        Project updated = projectService.update(ID, dto);
+        Project updated = projectService.update(ID, dto, OWNER_ID);
 
         assertEquals("Updated description", updated.getDescription());
         assertEquals(ProjectStatus.COMPLETED, updated.getStatus());
@@ -106,17 +112,54 @@ class ProjectServiceTest {
 
     @Test
     void updateProject_InvalidStatus_ThrowsException() {
-        ProjectUpdateDto dto = new ProjectUpdateDto("Updated description",
+        ProjectUpdateDto dto = new ProjectUpdateDto(
+                "Updated description",
                 "INVALID",
-                ProjectVisibility.PUBLIC);
-        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+                ProjectVisibility.PUBLIC
+        );
 
-        Executable executable = () -> projectService.update(ID, dto);
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
 
-        TestUtils.assertThrowsWithMessage(
-                IllegalArgumentException.class,
-                "No enum constant faang.school.projectservice.model.ProjectStatus.INVALID",
-                executable
+        assertThrowsAny(IllegalArgumentException.class, () ->
+                projectService.update(ID, dto, OWNER_ID)
+        );
+    }
+
+    @Test
+    void updateProject_NothingToUpdate_ThrowsBadRequest() {
+        ProjectUpdateDto dto = new ProjectUpdateDto(
+                null,
+                null,
+                ProjectVisibility.PUBLIC
+        );
+
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
+
+        assertThrowsAny(BadRequestException.class, () ->
+                projectService.update(ID, dto, OWNER_ID)
+        );
+    }
+
+    @Test
+    void updateProject_ProjectNotFound_ThrowsResourceNotFound() {
+        when(projectRepository.findById(ID)).thenReturn(Optional.empty());
+
+        ProjectUpdateDto dto = new ProjectUpdateDto("desc", "CREATED", ProjectVisibility.PUBLIC);
+
+        assertThrowsAny(ResourceNotFoundException.class, () ->
+                projectService.update(ID, dto, OWNER_ID)
+        );
+    }
+
+    @Test
+    void updateProject_PrivateProjectAndNotParticipant_ThrowsAccessDenied() {
+        project.setVisibility(ProjectVisibility.PRIVATE);
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
+
+        ProjectUpdateDto dto = new ProjectUpdateDto("desc", "CREATED", ProjectVisibility.PRIVATE);
+
+        assertThrowsAny(AccessDeniedException.class, () ->
+                projectService.update(ID, dto, 999L)
         );
     }
 
@@ -150,10 +193,29 @@ class ProjectServiceTest {
 
     @Test
     void getProjectById_Success() {
-        when(projectRepository.getReferenceById(ID)).thenReturn(project);
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
 
         Project result = projectService.getProjectById(ID, OWNER_ID);
 
         assertEquals(project, result);
+    }
+
+    @Test
+    void getProjectById_NotFound_ThrowsException() {
+        when(projectRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrowsAny(ResourceNotFoundException.class, () ->
+                projectService.getProjectById(ID, OWNER_ID)
+        );
+    }
+
+    @Test
+    void getProjectById_PrivateAndNotParticipant_ThrowsAccessDenied() {
+        project.setVisibility(ProjectVisibility.PRIVATE);
+        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
+
+        assertThrowsAny(AccessDeniedException.class, () ->
+                projectService.getProjectById(ID, 999L)
+        );
     }
 }

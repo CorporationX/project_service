@@ -23,8 +23,8 @@ public class ProjectFacade {
         return ProjectMapper.toDto(project);
     }
 
-    public ProjectDto update(ProjectUpdateDto projectUpdateDto, Long id) {
-        Project project = projectService.update(id, projectUpdateDto);
+    public ProjectDto update(ProjectUpdateDto projectUpdateDto, Long id, Long ownerId) {
+        Project project = projectService.update(id, projectUpdateDto, ownerId);
         return ProjectMapper.toDto(project);
     }
 
