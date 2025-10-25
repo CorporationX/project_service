@@ -1,5 +1,5 @@
 package faang.school.projectservice.model;
 
 public enum InternshipStatus {
-    IN_PROGRESS, COMPLETED
+    CREATED, IN_PROGRESS, COMPLETED
 }
