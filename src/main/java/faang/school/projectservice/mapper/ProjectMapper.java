@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.project.ProjectCreateDto;
 import faang.school.projectservice.dto.client.project.ProjectDto;
+import faang.school.projectservice.dto.client.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.stereotype.Component;
@@ -41,5 +42,14 @@ public class ProjectMapper {
                 .description(dto.description())
                 .visibility(dto.visibility())
                 .build();
+    }
+
+    public static Project toEntity(ProjectUpdateDto dto, Project existing) {
+        if (dto == null || existing == null) return existing;
+
+        existing.setDescription(dto.description());
+        existing.setVisibility(dto.visibility());
+        existing.setStatus(dto.status());
+        return existing;
     }
 }

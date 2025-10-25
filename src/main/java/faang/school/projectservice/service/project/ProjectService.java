@@ -54,11 +54,11 @@ public class ProjectService {
 
         ProjectValidator.validateAccessToProject(project, ownerId);
         ProjectValidator.validateUpdate(project,
-                projectUpdateDto.status() != null ? ProjectStatus.valueOf(projectUpdateDto.status()) : null,
+                projectUpdateDto.status() != null ? projectUpdateDto.status() : null,
                 projectUpdateDto.description());
 
         if (projectUpdateDto.status() != null) {
-            project.setStatus(ProjectStatus.valueOf(projectUpdateDto.status()));
+            project.setStatus(projectUpdateDto.status());
         }
         if (projectUpdateDto.description() != null) {
             project.setDescription(projectUpdateDto.description());

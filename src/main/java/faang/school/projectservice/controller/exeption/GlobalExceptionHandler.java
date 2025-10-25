@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateResource(DuplicateResourceException ex) {
-        log.warn("Duplicate resource: {}", ex.getMessage());
+        log.error("Duplicate resource: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.CONFLICT, "Duplicate Resource", ex.getMessage());
     }
 

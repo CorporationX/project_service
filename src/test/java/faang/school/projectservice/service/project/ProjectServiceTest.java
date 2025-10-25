@@ -96,7 +96,7 @@ class ProjectServiceTest {
     void updateProject_Success() {
         ProjectUpdateDto dto = new ProjectUpdateDto(
                 "Updated description",
-                "COMPLETED",
+                ProjectStatus.COMPLETED,
                 ProjectVisibility.PRIVATE
         );
 
@@ -108,21 +108,6 @@ class ProjectServiceTest {
         assertEquals("Updated description", updated.getDescription());
         assertEquals(ProjectStatus.COMPLETED, updated.getStatus());
         verify(projectRepository).save(project);
-    }
-
-    @Test
-    void updateProject_InvalidStatus_ThrowsException() {
-        ProjectUpdateDto dto = new ProjectUpdateDto(
-                "Updated description",
-                "INVALID",
-                ProjectVisibility.PUBLIC
-        );
-
-        when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
-
-        assertThrowsAny(IllegalArgumentException.class, () ->
-                projectService.update(ID, dto, OWNER_ID)
-        );
     }
 
     @Test
@@ -144,7 +129,7 @@ class ProjectServiceTest {
     void updateProject_ProjectNotFound_ThrowsResourceNotFound() {
         when(projectRepository.findById(ID)).thenReturn(Optional.empty());
 
-        ProjectUpdateDto dto = new ProjectUpdateDto("desc", "CREATED", ProjectVisibility.PUBLIC);
+        ProjectUpdateDto dto = new ProjectUpdateDto("desc", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
 
         assertThrowsAny(ResourceNotFoundException.class, () ->
                 projectService.update(ID, dto, OWNER_ID)
@@ -156,7 +141,7 @@ class ProjectServiceTest {
         project.setVisibility(ProjectVisibility.PRIVATE);
         when(projectRepository.findById(ID)).thenReturn(Optional.of(project));
 
-        ProjectUpdateDto dto = new ProjectUpdateDto("desc", "CREATED", ProjectVisibility.PRIVATE);
+        ProjectUpdateDto dto = new ProjectUpdateDto("desc", ProjectStatus.CREATED, ProjectVisibility.PRIVATE);
 
         assertThrowsAny(AccessDeniedException.class, () ->
                 projectService.update(ID, dto, 999L)
