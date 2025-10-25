@@ -31,9 +31,9 @@ public class SubProjectController {
         return subProjectService.create(userContext.getUserId(), createSubProjectDto);
     }
 
-    @PutMapping
-    public SubProjectDto update(@Valid UpdateSubProjectDto updateSubProjectDto) {
-        return subProjectService.update(userContext.getUserId(), updateSubProjectDto);
+    @PutMapping("/{subProjectId}")
+    public SubProjectDto update(@PathVariable long subProjectId, @Valid UpdateSubProjectDto updateSubProjectDto) {
+        return subProjectService.update(userContext.getUserId(), subProjectId, updateSubProjectDto);
     }
 
     @PutMapping("/{subProjectId}/complete")

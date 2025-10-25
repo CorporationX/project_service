@@ -131,18 +131,21 @@ public class SubProjectServiceImplTest {
     @Test
     public void updateByNotOwner() {
         long requesterId = 1L;
+        long subProjectId = 1L;
         UpdateSubProjectDto updateSubProjectDto = createUpdateSubProjectDtoForTest();
         Project subProjectToUpdate = new Project();
         subProjectToUpdate.setOwnerId(2L);
 
         when(projectRepository.findById(updateSubProjectDto.id())).thenReturn(Optional.of(subProjectToUpdate));
 
-        assertThrows(ForbiddenException.class, () -> subProjectServiceImpl.update(requesterId, updateSubProjectDto));
+        assertThrows(ForbiddenException.class,
+                () -> subProjectServiceImpl.update(requesterId, subProjectId, updateSubProjectDto));
     }
 
     @Test
     public void updateMakePublicSubProjectFromPrivateProject() {
         long requesterId = 1L;
+        long subProjectId = 1L;
         UpdateSubProjectDto updateSubProjectDto = createUpdateSubProjectDtoForTest();
         Project subProjectToUpdate = new Project();
         subProjectToUpdate.setOwnerId(1L);
@@ -152,7 +155,8 @@ public class SubProjectServiceImplTest {
 
         when(projectRepository.findById(updateSubProjectDto.id())).thenReturn(Optional.of(subProjectToUpdate));
 
-        assertThrows(ForbiddenException.class, () -> subProjectServiceImpl.update(requesterId, updateSubProjectDto));
+        assertThrows(ForbiddenException.class,
+                () -> subProjectServiceImpl.update(requesterId, subProjectId, updateSubProjectDto));
     }
 
     @Test
@@ -167,6 +171,7 @@ public class SubProjectServiceImplTest {
         Project childSubProject = new Project();
         childSubProject.setVisibility(ProjectVisibility.PUBLIC);
         subProjectToUpdate.setChildren(List.of(childSubProject));
+        long subProjectId = 1L;
 
         when(projectRepository.findById(updateSubProjectDto.id())).thenReturn(Optional.of(subProjectToUpdate));
         when(teamRepository.findAllById(updateSubProjectDto.teamIds())).thenReturn(List.of(new Team()));
@@ -175,7 +180,7 @@ public class SubProjectServiceImplTest {
         when(meetRepository.findAllById(updateSubProjectDto.meetIds())).thenReturn(List.of(new Meet()));
         when(scheduleRepository.findById(updateSubProjectDto.scheduleId())).thenReturn(Optional.of(new Schedule()));
 
-        subProjectServiceImpl.update(requesterId, updateSubProjectDto);
+        subProjectServiceImpl.update(requesterId, subProjectId, updateSubProjectDto);
 
         assertEquals(ProjectVisibility.PRIVATE, childSubProject.getVisibility());
     }
@@ -190,6 +195,7 @@ public class SubProjectServiceImplTest {
         parentProject.setVisibility(ProjectVisibility.PUBLIC);
         subProjectToUpdate.setParentProject(parentProject);
         subProjectToUpdate.setChildren(new ArrayList<>());
+        long subProjectId = 1L;
 
         when(projectRepository.findById(updateSubProjectDto.id())).thenReturn(Optional.of(subProjectToUpdate));
         when(teamRepository.findAllById(updateSubProjectDto.teamIds())).thenReturn(List.of(new Team()));
@@ -198,7 +204,7 @@ public class SubProjectServiceImplTest {
         when(meetRepository.findAllById(updateSubProjectDto.meetIds())).thenReturn(List.of(new Meet()));
         when(scheduleRepository.findById(updateSubProjectDto.scheduleId())).thenReturn(Optional.of(new Schedule()));
 
-        subProjectServiceImpl.update(requesterId, updateSubProjectDto);
+        subProjectServiceImpl.update(requesterId, subProjectId, updateSubProjectDto);
 
         verify(projectRepository, times(1)).save(subProjectCaptor.capture());
         assertEquals(updateSubProjectDto.name(), subProjectCaptor.getValue().getName());

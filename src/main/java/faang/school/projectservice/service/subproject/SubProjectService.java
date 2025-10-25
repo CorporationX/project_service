@@ -9,7 +9,7 @@ import java.util.List;
 public interface SubProjectService {
     SubProjectDto create(long creatorId, CreateSubProjectDto createSubProjectDto);
 
-    SubProjectDto update(long requesterId, UpdateSubProjectDto updateSubProjectDto);
+    SubProjectDto update(long requesterId, long subProjectId, UpdateSubProjectDto updateSubProjectDto);
 
     boolean complete(long requesterId, long subprojectId);
 

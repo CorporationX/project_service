@@ -66,8 +66,8 @@ public class SubProjectServiceImpl implements SubProjectService {
 
     @Override
     @Transactional
-    public SubProjectDto update(long requesterId, UpdateSubProjectDto updateSubProjectDto) {
-        Project subProjectToUpdate = projectRepository.findById(updateSubProjectDto.id()).get();
+    public SubProjectDto update(long requesterId, long subProjectId, UpdateSubProjectDto updateSubProjectDto) {
+        Project subProjectToUpdate = projectRepository.findById(subProjectId).get();
         if (subProjectToUpdate.getOwnerId() != requesterId) {
             log.error(
                     "Пользователь с id: {} не может редактировать проект с id: {}, он не является его владельцем",
