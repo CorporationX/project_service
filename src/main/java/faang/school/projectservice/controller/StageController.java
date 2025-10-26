@@ -24,36 +24,36 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/stage")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Validated
 public class StageController {
     private final StageServiceImpl stageServiceImpl;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping
+    @PostMapping("/stages")
     public void createStage(@RequestBody @Valid StageCreateDto stageCreateDto) {
         stageServiceImpl.createStage(stageCreateDto);
     }
 
-    @GetMapping
+    @GetMapping("/stages")
     public List<StageDto> getAllStageByFilter(@Valid @RequestBody AllStageFilterDto allStageFilterDto) {
         return stageServiceImpl.getAllStageByFilter(allStageFilterDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{stageId}/{projectId}")
-    public void deleteStage(@PathVariable @NotNull(message = "Specify stage")
-                            @Positive(message = "The stage must be positive!")
-                            Long stageId,
-                            @NotNull(message = "Specify project")
+    @DeleteMapping("/projects/{projectId}/stages/{stageId}")
+    public void deleteStage(@PathVariable @NotNull(message = "Specify project")
                             @Positive(message = "The project must be positive!")
-                            @PathVariable Long projectId) {
+                            Long projectId,
+                            @NotNull(message = "Specify stage")
+                            @Positive(message = "The stage must be positive!")
+                            @PathVariable Long stageId) {
 
         stageServiceImpl.deleteStage(projectId, stageId);
     }
 
-    @PutMapping("/{stageId}")
+    @PutMapping("/stages/{stageId}")
     public StageDto updateStage(@Valid @RequestBody StageUpdateDto stageUpdateDto,
                                 @PathVariable @NotNull
                                 @Positive(message = "The stage must be positive!")
@@ -61,14 +61,14 @@ public class StageController {
         return stageServiceImpl.updateStage(stageUpdateDto, stageId);
     }
 
-    @GetMapping("/project/{projectId}/stages")
+    @GetMapping("/projects/{projectId}/stages")
     public List<StageDto> getStages(@PathVariable @NotNull
                                     @Positive(message = "The project must be positive!")
                                     Long projectId) {
         return stageServiceImpl.getStages(projectId);
     }
 
-    @GetMapping("/project/{stageId}/stage")
+    @GetMapping("/stages/{stageId}")
     public StageDto getStage(@PathVariable @NotNull
                              @Positive(message = "The stage must be positive!")
                              Long stageId) {
