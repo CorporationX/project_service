@@ -1,4 +1,4 @@
-package faang.school.project_service.service;
+package faang.school.project_service.service.internship;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;

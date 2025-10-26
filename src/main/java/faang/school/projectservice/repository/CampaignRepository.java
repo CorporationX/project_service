@@ -1,5 +1,6 @@
 package faang.school.projectservice.repository;
 
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Campaign;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,10 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
                                     @Param("maxGoal") BigDecimal maxGoal,
                                     @Param("status") String status,
                                     Pageable pageable);
+
+    default Campaign getByIdOrThrow(long campaignId) {
+        return findById(campaignId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Campaign %d not found", campaignId))
+        );
+    }
 }
