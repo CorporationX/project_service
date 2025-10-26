@@ -71,8 +71,8 @@ public class SubProjectServiceImpl implements SubProjectService {
     }
 
     @Override
-    public List<SubProjectDto> getSubProjects(Long projectId, String name, ProjectStatus status) {
-        Project parentProject = projectRepository.findById(projectId)
+    public List<SubProjectDto> getSubProjects(Long subProjectId, String name, ProjectStatus status) {
+        Project parentProject = projectRepository.findById(subProjectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
         if (parentProject.getChildren() == null) {
@@ -123,7 +123,7 @@ public class SubProjectServiceImpl implements SubProjectService {
         forAllSubProjects(project, child -> {
             if (child.getStatus() != requiredStatus) {
                 throw new IllegalStateException(
-                        "Cannot complete project: subproject '" + child.getName() + "' has status " + child.getStatus()
+                        "Cannot complete project: subproject %s has status %s".formatted(child.getName(), child.getStatus())
                 );
             }
         });
@@ -131,8 +131,8 @@ public class SubProjectServiceImpl implements SubProjectService {
 
     private void createMomentIfAllSubProjectsCompleted(Project project) {
         Moment moment = new Moment();
-        moment.setName("All subprojects completed: " + project.getName());
-        moment.setDescription("This moment records the completion of all subprojects of the project " + project.getName());
+        moment.setName("All subprojects completed: %s".formatted(project.getName()));
+        moment.setDescription("This moment records the completion of all subprojects of the project %s".formatted(project.getName()));
         moment.setDate(LocalDateTime.now());
 
         moment.setProjects(List.of(project));

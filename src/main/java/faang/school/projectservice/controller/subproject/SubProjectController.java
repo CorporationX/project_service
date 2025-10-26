@@ -33,12 +33,12 @@ public class SubProjectController {
         return subProjectService.updateSubProject(updateSubProjectDto, subProjectId);
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/{subProjectId}")
     public List<SubProjectDto> getSubProjects(
-            @PathVariable @Positive Long projectId,
+            @PathVariable @Positive Long subProjectId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) ProjectStatus status
     ) {
-        return subProjectService.getSubProjects(projectId, name, status);
+        return subProjectService.getSubProjects(subProjectId, name, status);
     }
 }
