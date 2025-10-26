@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,12 +12,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -33,6 +36,9 @@ public class Candidate {
     private String coverLetter;
     @Enumerated(EnumType.STRING)
     private CandidateStatus candidateStatus;
+
+    @Column(name = "is_accepted", columnDefinition = "boolean default false")
+    private Boolean isAccepted;
 
     @ManyToOne
     @JoinColumn(name = "vacancy_id")
