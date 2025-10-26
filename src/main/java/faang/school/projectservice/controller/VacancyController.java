@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,15 @@ public class VacancyController {
     @Operation(
             summary = "Create a new vacancy",
             description = "Create a new vacancy in the project",
+            parameters = {
+                    @Parameter(
+                            name = "x-user-id",
+                            description = "Current user id",
+                            required = true,
+                            example = "1",
+                            in = ParameterIn.HEADER
+                    )
+            },
             responses = {
                     @ApiResponse(
                             responseCode = "201",
@@ -56,6 +66,7 @@ public class VacancyController {
                     )
             }
     )
+
     @PostMapping
     VacancyDto createVacancy(
             @RequestBody
@@ -67,6 +78,15 @@ public class VacancyController {
     @Operation(
             summary = "Update vacancy by Id",
             description = "Update the vacancy fields by it's Id",
+            parameters = {
+                    @Parameter(
+                            name = "x-user-id",
+                            description = "Current user id",
+                            required = true,
+                            example = "1",
+                            in = ParameterIn.HEADER
+                    )
+            },
             responses = {
                     @ApiResponse(
                             responseCode = "200",
