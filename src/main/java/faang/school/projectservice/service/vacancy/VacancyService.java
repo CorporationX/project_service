@@ -89,8 +89,8 @@ public class VacancyService {
 
         Vacancy saveVacancy = vacancyRepository.save(vacancy);
 
-        log.info("Adding candidate with id: {} and status: {} to vacancy with id: {}", vacancyId,
-                candidate.getCandidateStatus(), candidateCreateDto.userId());
+        log.info("Adding candidate with id: {} and status: {} to vacancy with id: {}",
+                candidateCreateDto.userId(), candidate.getCandidateStatus(),  vacancyId);
 
         return vacancyMapper.toVacancyDto(saveVacancy);
     }
@@ -116,7 +116,7 @@ public class VacancyService {
         candidate.setIsAccepted(status.isAccepted());
         vacancyRepository.save(vacancy);
 
-        log.info();
+        log.info("Update status for Candidate with id: {} on status: {}", candidate.getUserId(), status.getActionText());
 
         return vacancyMapper.toCandidateDto(candidate);
     }
