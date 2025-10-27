@@ -15,7 +15,7 @@ public interface InternshipMapper {
 
     InternshipMapper INSTANCE = Mappers.getMapper(InternshipMapper.class);
 
-    @Mapping(target = "name", source = "entity.name") //
+    @Mapping(target = "name", source = "model.name") //
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
