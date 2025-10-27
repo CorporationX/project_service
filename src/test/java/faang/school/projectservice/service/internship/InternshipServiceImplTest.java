@@ -18,10 +18,9 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.service.InternshipServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -64,6 +63,11 @@ public class InternshipServiceImplTest {
 
     @Captor
     private ArgumentCaptor<Internship> captor;
+
+    @BeforeEach
+    public void setUp() {
+        internshipService.setInternshipDurationMonths(INTERNSHIP_DURATION_MONTHS);
+    }
 
     @Test
     public void testCreateWithEmptyInterns() {
@@ -196,13 +200,13 @@ public class InternshipServiceImplTest {
         LocalDateTime end = longInternShip ? start.plusMonths(longInternShipDuration)
                 : start.plusMonths(INTERNSHIP_DURATION_MONTHS);
 
-        List<TeamMember> interns = new ArrayList<>();
+        List<Long> internIds = new ArrayList<>();
         if (!emptyInterns) {
-            interns = List.of(new TeamMember(), new TeamMember());
+            internIds = List.of(1L, 2L);
         }
         return new CreateInternshipDto(
                 1L,
-                interns,
+                internIds,
                 start,
                 end,
                 InternshipStatus.IN_PROGRESS,
@@ -236,7 +240,6 @@ public class InternshipServiceImplTest {
         Internship internship = new Internship();
         internship.setInterns(teamMembers);
         when(internshipRepository.getByIdOrThrow(1L)).thenReturn(internship);
-
     }
 
     private UpdateInternshipDto prepareUpdateDto(boolean noEmptyAhead,
@@ -246,8 +249,5 @@ public class InternshipServiceImplTest {
         List<Long> aheadList = noEmptyAhead ? List.of(1L, 2L, 3L) : List.of();
         List<Long> dismissList = noEmptyDismiss ? List.of(1L, 2L, 3L) : List.of();
         return new UpdateInternshipDto(aheadList, dismissList, status, role);
-
-
     }
-
 }

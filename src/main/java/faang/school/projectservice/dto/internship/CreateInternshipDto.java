@@ -8,7 +8,7 @@ import java.util.List;
 
 public record CreateInternshipDto(
         Long mentorId,
-        List<TeamMember> interns,
+        List<Long> internIds,
         LocalDateTime startDate,
         LocalDateTime endDate,
         InternshipStatus status,

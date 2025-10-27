@@ -25,6 +25,10 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size=5MB:
+
 server:
   port: 8082
 
@@ -40,11 +44,15 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: corpbucket
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+internship:
+  duration:
+    months: 3

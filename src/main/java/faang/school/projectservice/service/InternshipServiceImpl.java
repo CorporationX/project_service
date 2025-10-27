@@ -16,7 +16,9 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,7 +31,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class InternshipServiceImpl implements InternshipService {
 
-    private static final int INTERNSHIP_DURATION_MONTHS = 3;
+    @Setter
+    @Value("${internship.duration.months}")
+    private int internshipDurationMonths;
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
@@ -39,6 +43,11 @@ public class InternshipServiceImpl implements InternshipService {
     @Override
     public InternshipDto createInternship(Long projectId, CreateInternshipDto internshipDto) {
 
+        if (internshipDto.internIds().isEmpty()) {
+            String message = "Список стажеров не может быть пустым";
+            log.warn(message);
+            throw new DataValidationException(message);
+        }
         Project project = projectRepository.getByIdOrThrow(projectId);
 
         validateCreate(project, internshipDto);
@@ -122,10 +131,9 @@ public class InternshipServiceImpl implements InternshipService {
 
     private void validateCreate(Project project, CreateInternshipDto internshipDto) {
 
-        if (internshipDto.startDate().plusMonths(INTERNSHIP_DURATION_MONTHS)
+        if (internshipDto.startDate().plusMonths(internshipDurationMonths)
                 .isBefore(internshipDto.endDate())) {
-            String message = "Стажировка не может быть дольше " + INTERNSHIP_DURATION_MONTHS +
-                    "месяцев";
+            String message = String.format("Стажировка не может быть дольше %d месяцев", internshipDurationMonths);
             log.warn(message);
             throw new DataValidationException(message);
         }
@@ -142,8 +150,6 @@ public class InternshipServiceImpl implements InternshipService {
             log.warn(message);
             throw new DataValidationException(message);
         }
-
-
     }
 
     private void validateUpdate(List<TeamMember> teamMembers, List<Long> idListDto) {
@@ -154,8 +160,5 @@ public class InternshipServiceImpl implements InternshipService {
             throw new DataValidationException(message);
 
         }
-
     }
-
-
 }

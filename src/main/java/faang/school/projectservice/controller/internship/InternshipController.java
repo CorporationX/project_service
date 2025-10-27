@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -23,8 +24,9 @@ public class InternshipController {
 
 private final InternshipService internshipService;
 
-@PostMapping("/{projectId}")
-public InternshipDto createInternship(@NonNull Long projectId, @Valid @RequestBody CreateInternshipDto internshipDto) {
+@PostMapping
+public InternshipDto createInternship(@RequestParam Long projectId,
+                                      @Valid @RequestBody CreateInternshipDto internshipDto) {
 
     return internshipService.createInternship(projectId, internshipDto);
 }
@@ -34,7 +36,7 @@ public InternshipDto updateInternship(@NonNull Long internshipId,@Valid @Request
     return internshipService.updateInternship(internshipId, internshipDto);
 }
 
-@GetMapping
+@GetMapping("/filter")
 public List<InternshipDto> getByFilter(SearchDto searchDto) {
     return internshipService.findInternships(searchDto);
 }
@@ -44,7 +46,7 @@ public InternshipDto getById(@NonNull Long internshipId) {
     return internshipService.findById(internshipId);
 }
 
-@GetMapping("/all")
+@GetMapping
 public List<InternshipDto> getAllInternships() {
     return internshipService.findAll();
 }

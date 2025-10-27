@@ -16,7 +16,7 @@ public interface InternshipMapper {
 
     InternshipDto toDto(Internship internship);
 
-    Internship update(UpdateInternshipDto dto, @MappingTarget Internship internship);
+    void update(UpdateInternshipDto dto, @MappingTarget Internship internship);
 
     Internship toEntity(CreateInternshipDto internshipDto);
 
