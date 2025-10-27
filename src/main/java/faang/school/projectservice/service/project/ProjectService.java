@@ -5,6 +5,9 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.service.project.filter.FilterProject;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -13,7 +16,10 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import com.amazonaws.services.s3.AmazonS3;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -24,6 +30,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
     private final List<FilterProject> filters;
+    private final S3Service s3Service;
+    private final ResourceRepository resourceRepository;
 
     public Project createProject(ProjectCreateDto projectCreateDto) {
         long userId = userContext.getUserId();
@@ -70,6 +78,31 @@ public class ProjectService {
         ProjectValidator.validateProjectOwner(userId, project);
 
         projectRepository.delete(project);
+    }
+
+    public Resource addImageCover(long projectId, MultipartFile file) {
+        long userId = userContext.getUserId();
+        Project project = getProjectById(projectId);
+
+        ProjectValidator.validateProjectOwner(userId, project);
+
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
+        checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
+
+        String folder = project.getId() + project.getName();
+        Resource resource = s3Service.uploadFile(file, folder);
+        resource.setProject(project);
+
+        project.setStorageSize(newStorageSize);
+        projectRepository.save(project);
+
+        return resourceRepository.save(resource);
+    }
+
+    private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
+        if (newStorageSize.compareTo(maxStorageSize) > 0) {
+            throw new DataValidationException("Project storage size exceeded");
+        }
     }
 
     private Stream<Project> filterProjectsByAccess(Stream<Project> projects) {

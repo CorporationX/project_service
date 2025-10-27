@@ -5,16 +5,22 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -47,5 +53,10 @@ public class ProjectController {
     @DeleteMapping("/{id}")
     public void deleteProject(@PathVariable("id") long projectId) {
         projectFacade.deleteProject(projectId);
+    }
+
+    @PutMapping("/{projectId}/add-image-cover")
+    public ResourceDto addImageCover(@PathVariable long projectId, @RequestBody MultipartFile file) {
+        return projectFacade.addImageCover(projectId, file);
     }
 }

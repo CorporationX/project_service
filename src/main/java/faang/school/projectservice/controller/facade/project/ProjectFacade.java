@@ -6,9 +6,12 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -47,5 +50,11 @@ public class ProjectFacade {
 
     public void deleteProject(long projectId) {
         projectService.deleteProject(projectId);
+    }
+
+    public ResourceDto addImageCover(long projectId, MultipartFile file) {
+        Resource resource = projectService.addImageCover(projectId, file);
+
+        return projectMapper.toResourceDto();
     }
 }
