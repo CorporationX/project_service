@@ -6,7 +6,6 @@ import faang.school.projectservice.model.TeamRole;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 public record InternshipDto(
         long id,
 
