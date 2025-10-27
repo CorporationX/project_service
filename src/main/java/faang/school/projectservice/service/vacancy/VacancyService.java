@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.exeption.IllegalArgumentException;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
@@ -14,7 +15,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -33,42 +33,35 @@ public class VacancyService {
     private final ProjectRepository projectRepository;
     private final UserContext userContext;
     private final VacancyMapper vacancyMapper;
-    private final VacancyValidator vacancyValidator;
     private final TeamMemberRepository teamMemberRepository;
-    private final CandidateRepository candidateRepository;
 
     public VacancyDto createVacancy(VacancyCreateDto vacancyCreateDto) {
         long userId = userContext.getUserId();
         long projectId = vacancyCreateDto.projectId();
-
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
         Project project = projectRepository.getByIdOrThrow(projectId);
 
-        vacancyValidator.validateRole(author);
+        VacancyValidator.validateRole(author);
 
         Vacancy vacancy = vacancyMapper.toVacancy(vacancyCreateDto);
         vacancy.setProject(project);
         vacancy.setStatus(VacancyStatus.OPEN);
+        vacancyRepository.save(vacancy);
 
-        Vacancy vacancyCreate = vacancyRepository.save(vacancy);
+        log.info("Create new vacancy with id: {}", vacancy.getId());
 
-        log.info("Create new vacancy ");
-
-        return vacancyMapper.toVacancyDto(vacancyCreate);
+        return vacancyMapper.toVacancyDto(vacancy);
     }
 
     public VacancyDto updateVacancy(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
         long userId = userContext.getUserId();
-
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
         long projectId = vacancy.getProject().getId();
-
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        vacancyValidator.validateRole(author);
+        VacancyValidator.validateRole(author);
 
         vacancyMapper.updateVacancyFromDto(vacancyUpdateDto, vacancy);
-
         Vacancy vacancyUpdate = vacancyRepository.save(vacancy);
 
         log.info("Update vacancy with id: {}", vacancyId);
@@ -78,165 +71,64 @@ public class VacancyService {
 
     public VacancyDto addCandidatesToVacancy(Long vacancyId, CandidateCreateDto candidateCreateDto) {
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-
         long projectId = vacancy.getProject().getId();
         long userId = userContext.getUserId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        vacancyValidator.validateRole(author);
-
-        if (VacancyStatus.CLOSED.equals(vacancy.getStatus())) {
-            throw new IllegalStateException("Cannot add candidates to a closed vacancy");
-        }
+        VacancyValidator.validateRole(author);
+        VacancyValidator.validateAddCandidatesToClosedVacancy(vacancy);
 
         Project project = vacancy.getProject();
-
-        boolean isMember = project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(member -> member.getUserId().equals(candidateCreateDto.userId()));
-
-        if (isMember) {
-            throw new IllegalArgumentException("Candidate is already a project member");
-        }
-
-        boolean isCandidate = vacancy.getCandidates().stream()
-                .anyMatch(candidate -> candidate.getUserId().equals(candidateCreateDto.userId()));
-
-        if (isCandidate) {
-            throw new IllegalArgumentException("Candidate already added to this vacancy");
-        }
+        VacancyValidator.validateCandidateIsAlreadyProjectMember(project, candidateCreateDto);
+        VacancyValidator.validateCandidateAlreadyAddedThisVacancy(vacancy, candidateCreateDto);
 
         Candidate candidate = vacancyMapper.toCandidate(candidateCreateDto);
+        candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
 
         vacancy.getCandidates().add(candidate);
 
         Vacancy saveVacancy = vacancyRepository.save(vacancy);
 
-        log.info("Adding candidates to vacancy with id: {}", vacancyId);
+        log.info("Adding candidate with id: {} and status: {} to vacancy with id: {}", vacancyId,
+                candidate.getCandidateStatus(), candidateCreateDto.userId());
 
         return vacancyMapper.toVacancyDto(saveVacancy);
     }
 
     public CandidateDto updateCandidateStatus(Long vacancyId, Long candidateId, CandidateStatus status) {
-        return switch (status) {
-            case ACCEPTED -> acceptCandidate(vacancyId, candidateId);
-            case REJECTED -> rejectCandidate(vacancyId, candidateId);
-            case WAITING_RESPONSE -> waitingResponse(vacancyId, candidateId);
-            default -> throw new IllegalArgumentException("Invalid status: " + status);
-        };
-    }
+        VacancyValidator.validateCandidateStatusNotNull(status);
 
-    public CandidateDto acceptCandidate(Long vacancyId, Long candidateId) {
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-
         long userId = userContext.getUserId();
         long projectId = vacancy.getProject().getId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        vacancyValidator.validateRole(author);
+        VacancyValidator.validateRole(author);
 
         Candidate candidate = vacancy.getCandidates().stream()
                 .filter(x -> x.getId().equals(candidateId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
 
-        boolean isAccepted = vacancy.getAcceptedCandidates().stream()
-                .anyMatch(candidat -> CandidateStatus.ACCEPTED.equals(candidat.getCandidateStatus()));
+        VacancyValidator.validateCandidateNotInCurrentStatus(vacancy, candidate, status);
 
-        if (isAccepted) {
-            throw new IllegalStateException("Candidate is already accepted");
-        }
-
-        candidate.setCandidateStatus(CandidateStatus.ACCEPTED);
-        candidate.setIsAccepted(true);
-
-        vacancy.getCandidates().add(candidate);
-
+        candidate.setCandidateStatus(status);
+        candidate.setIsAccepted(status.isAccepted());
         vacancyRepository.save(vacancy);
 
-        log.info("Accepted candidate with id: {} to vacancy with id: {}", candidateId, vacancyId);
-
-        return vacancyMapper.toCandidateDto(candidate);
-    }
-
-    public CandidateDto rejectCandidate(Long vacancyId, Long candidateId) {
-        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-
-        long userId = userContext.getUserId();
-        long projectId = vacancy.getProject().getId();
-        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-
-        vacancyValidator.validateRole(author);
-
-        Candidate candidate = vacancy.getCandidates().stream()
-                .filter(x -> x.getId().equals(candidateId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
-
-        boolean isRejected = vacancy.getAcceptedCandidates().stream()
-                .anyMatch(candidat -> CandidateStatus.REJECTED.equals(candidat.getCandidateStatus()));
-
-        if (isRejected) {
-            throw new IllegalStateException("Candidate is already rejected");
-        }
-
-        candidate.setCandidateStatus(CandidateStatus.REJECTED);
-        candidate.setIsAccepted(false);
-
-        vacancy.getCandidates().add(candidate);
-
-        vacancyRepository.save(vacancy);
-
-        log.info("Rejected candidate with id: {} to vacancy with id: {}", candidateId, vacancyId);
-
-        return vacancyMapper.toCandidateDto(candidate);
-    }
-
-    public CandidateDto waitingResponse(Long vacancyId, Long candidateId) {
-        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-
-        long userId = userContext.getUserId();
-        long projectId = vacancy.getProject().getId();
-        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-
-        vacancyValidator.validateRole(author);
-
-        Candidate candidate = vacancy.getCandidates().stream()
-                .filter(x -> x.getId().equals(candidateId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
-
-        boolean isWaitingResponse = vacancy.getAcceptedCandidates().stream()
-                .anyMatch(candidat -> CandidateStatus.WAITING_RESPONSE.equals(candidat.getCandidateStatus()));
-
-        if (isWaitingResponse) {
-            throw new IllegalStateException("Candidate is already rejected");
-        }
-
-        candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
-        candidate.setIsAccepted(false);
-
-        vacancy.getCandidates().add(candidate);
-
-        vacancyRepository.save(vacancy);
-
-        log.info("Waiting Response for candidate with id: {} to vacancy with id: {}", candidateId, vacancyId);
+        log.info();
 
         return vacancyMapper.toCandidateDto(candidate);
     }
 
     public VacancyDto closeVacancy(Long vacancyId) {
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-
         long userId = userContext.getUserId();
         long projectId = vacancy.getProject().getId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        vacancyValidator.validateRole(author);
-
-        if (vacancy.getAcceptedCandidates().size() < vacancy.getCount()) {
-            throw new IllegalStateException("Not enough candidates to close vacancy");
-        }
+        VacancyValidator.validateRole(author);
+        VacancyValidator.validateCanCloseVacancy(vacancy);
 
         vacancy.setStatus(VacancyStatus.CLOSED);
 
@@ -299,7 +191,7 @@ public class VacancyService {
         long projectId = vacancy.getProject().getId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        vacancyValidator.validateRole(author);
+        VacancyValidator.validateRole(author);
 
         vacancyRepository.deleteById(vacancyId);
 

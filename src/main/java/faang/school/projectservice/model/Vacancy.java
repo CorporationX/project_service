@@ -32,6 +32,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -63,11 +64,11 @@ public class Vacancy {
     private Project project;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Candidate> candidates;
+    private List<Candidate> candidates = new ArrayList<>();
 
     @Where(clause = "is_accepted = true")
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Candidate> acceptedCandidates;
+    private List<Candidate> acceptedCandidates = new ArrayList<>();
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
