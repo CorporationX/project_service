@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.internship.SearchDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.service.InternshipService;
 import jakarta.validation.Valid;
-import lombok.NonNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +32,7 @@ public InternshipDto createInternship(@RequestParam Long projectId,
 }
 
 @PutMapping("/{internshipId}")
-public InternshipDto updateInternship(@NonNull Long internshipId,@Valid @RequestBody UpdateInternshipDto internshipDto) {
+public InternshipDto updateInternship(@NotNull Long internshipId, @Valid @RequestBody UpdateInternshipDto internshipDto) {
     return internshipService.updateInternship(internshipId, internshipDto);
 }
 
@@ -42,7 +42,7 @@ public List<InternshipDto> getByFilter(SearchDto searchDto) {
 }
 
 @GetMapping("/{internshipId}")
-public InternshipDto getById(@NonNull Long internshipId) {
+public InternshipDto getById(@NotNull Long internshipId) {
     return internshipService.findById(internshipId);
 }
 
@@ -50,5 +50,4 @@ public InternshipDto getById(@NonNull Long internshipId) {
 public List<InternshipDto> getAllInternships() {
     return internshipService.findAll();
 }
-
 }
