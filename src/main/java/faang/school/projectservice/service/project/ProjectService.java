@@ -12,12 +12,14 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProjectService {
@@ -31,6 +33,7 @@ public class ProjectService {
         validateDuplicateProjectName(userId, projectCreateDto);
 
         Project project = ProjectMapper.toEntity(projectCreateDto, userId);
+        log.info("Creating new project: {} for user: {}", project.getName(), userId);
 
         return projectRepository.save(project);
     }
@@ -40,8 +43,10 @@ public class ProjectService {
         long userId = userContext.getUserId();
 
         ProjectValidator.validateProjectOwner(userId, project);
+        ProjectValidator.validateBlankFields(projectUpdateDto.name(), projectUpdateDto.description());
 
         ProjectMapper.updateProjectFields(project, projectUpdateDto);
+        log.info("Updating project: {} for user: {}", project.getName(), userId);
 
         return projectRepository.save(project);
     }
@@ -68,6 +73,7 @@ public class ProjectService {
         Project project = getProjectById(projectId);
 
         ProjectValidator.validateProjectOwner(userId, project);
+        log.info("Deleting project: {} for user: {}", project.getName(), userId);
 
         projectRepository.delete(project);
     }

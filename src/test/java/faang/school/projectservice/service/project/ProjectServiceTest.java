@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.project.filter.FilterProject;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -108,6 +109,9 @@ public class ProjectServiceTest {
         when(projectRepository.save(any(Project.class))).thenAnswer(
                 invocation -> invocation.getArgument(0));
 
+        Long originalId = projectFirst.getId();
+        Long originalOwnerId = projectFirst.getOwnerId();
+
         Project result = projectService.updateProject(projectId, projectUpdateDto);
 
         assertNotNull(result);
@@ -116,6 +120,9 @@ public class ProjectServiceTest {
         assertEquals(projectUpdateDto.description(), result.getDescription());
         assertEquals(projectUpdateDto.status(), result.getStatus());
         assertEquals(projectUpdateDto.visibility(), result.getVisibility());
+
+        assertEquals(projectFirst.getId(), originalId);
+        assertEquals(projectFirst.getOwnerId(), originalOwnerId);
     }
 
     @Test
@@ -124,7 +131,7 @@ public class ProjectServiceTest {
         when(userContext.getUserId()).thenReturn(currentUserId);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(projectFirst));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DataValidationException.class,
                 () -> projectService.updateProject(projectId, projectUpdateDto));
     }
 
@@ -173,7 +180,7 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId)).thenReturn(Optional.ofNullable(projectSecond));
 
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DataValidationException.class,
                 () -> projectService.deleteProject(projectId));
     }
 

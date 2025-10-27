@@ -3,15 +3,14 @@ package faang.school.projectservice.dto.project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 @Builder
-public record  ProjectUpdateDto(
-        @Nullable @NotBlank
+public record ProjectUpdateDto(
+        @Nullable
         String name,
 
-        @Nullable @NotBlank
+        @Nullable
         String description,
 
         @Nullable
