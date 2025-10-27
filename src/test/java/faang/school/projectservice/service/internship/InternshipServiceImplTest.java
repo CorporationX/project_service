@@ -18,7 +18,6 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.InternshipService;
 import faang.school.projectservice.service.InternshipServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,9 +39,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@TestPropertySource(locations = "classpath:application-test.yaml")
 public class InternshipServiceImplTest {
-
-    private static final int INTERNSHIP_DURATION_MONTHS = 3;
 
     @Mock
     private InternshipRepository internshipRepository;
@@ -63,11 +62,6 @@ public class InternshipServiceImplTest {
 
     @Captor
     private ArgumentCaptor<Internship> captor;
-
-    @BeforeEach
-    public void setUp() {
-        internshipService.setInternshipDurationMonths(INTERNSHIP_DURATION_MONTHS);
-    }
 
     @Test
     public void testCreateWithEmptyInterns() {
@@ -92,7 +86,6 @@ public class InternshipServiceImplTest {
 
         assertThrows(DataValidationException.class,
                 () -> internshipService.createInternship(1L, internshipDto));
-
     }
 
     @Test
@@ -196,9 +189,8 @@ public class InternshipServiceImplTest {
     private CreateInternshipDto prepareCreateDto(boolean emptyInterns, boolean longInternShip) {
 
         LocalDateTime start = LocalDateTime.of(2025, 9, 1, 9, 0, 0);
-        int longInternShipDuration = INTERNSHIP_DURATION_MONTHS + 1;
-        LocalDateTime end = longInternShip ? start.plusMonths(longInternShipDuration)
-                : start.plusMonths(INTERNSHIP_DURATION_MONTHS);
+        LocalDateTime end = longInternShip ? start.plusMonths(4)
+                : start.plusMonths(3);
 
         List<Long> internIds = new ArrayList<>();
         if (!emptyInterns) {

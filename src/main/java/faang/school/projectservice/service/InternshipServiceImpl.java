@@ -16,7 +16,6 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,9 +30,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class InternshipServiceImpl implements InternshipService {
 
-    @Setter
     @Value("${internship.duration.months}")
     private int internshipDurationMonths;
+
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
     private final InternshipMapper internshipMapper;
