@@ -22,9 +22,6 @@ public record CreateProjectDto(
         ProjectVisibility visibility,
 
         @Nullable
-        Long ownerId,
-
-        @Nullable
         Long parentProjectId
 ) {
 }

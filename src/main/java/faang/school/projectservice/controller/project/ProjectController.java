@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
 
-    private ProjectService projectService;
+    private final ProjectService projectService;
 
     @PostMapping
     public ResponseEntity<ProjectDto> create(@RequestBody @Valid CreateProjectDto createProjectDto) {

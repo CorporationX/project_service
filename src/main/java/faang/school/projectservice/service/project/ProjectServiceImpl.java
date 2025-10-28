@@ -35,10 +35,6 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto create(CreateProjectDto createProjectDto) {
         long ownerId = userContext.getUserId();
 
-        if (createProjectDto.ownerId() != null) {
-            ownerId = createProjectDto.ownerId();
-        }
-
         if (projectRepository.existsByOwnerIdAndName(ownerId, createProjectDto.name())) {
             String errorMessage = "Rejected to create project. User %d already has project by name %s"
                     .formatted(ownerId, createProjectDto.name());
@@ -48,7 +44,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = projectMapper.toProject(createProjectDto);
         project.setStatus(ProjectStatus.CREATED);
-        project.setCreatedAt(LocalDateTime.now());
         project.setOwnerId(ownerId);
 
         if (createProjectDto.parentProjectId() != null) {

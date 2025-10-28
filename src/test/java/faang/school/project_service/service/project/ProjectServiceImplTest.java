@@ -85,19 +85,19 @@ public class ProjectServiceImplTest {
 
     @Test
     void testCreateThrowsExceptionIfUserAlreadyHasSameNameProject() {
+        long ownerId = 1L;
         CreateProjectDto createProjectDto = CreateProjectDto.builder()
-                .ownerId(1L)
                 .name("project name")
                 .build();
 
-        when(userContext.getUserId()).thenReturn(createProjectDto.ownerId());
-        when(projectRepository.existsByOwnerIdAndName(createProjectDto.ownerId(), createProjectDto.name()))
+        when(userContext.getUserId()).thenReturn(ownerId);
+        when(projectRepository.existsByOwnerIdAndName(ownerId, createProjectDto.name()))
                 .thenReturn(true);
 
         DataValidationException dataValidationException = Assertions.assertThrows(DataValidationException.class,
                 () -> projectService.create(createProjectDto));
         assertEquals("Rejected to create project. User %d already has project by name %s"
-                .formatted(createProjectDto.ownerId(), createProjectDto.name()), dataValidationException.getMessage());
+                .formatted(ownerId, createProjectDto.name()), dataValidationException.getMessage());
     }
 
     @Test
