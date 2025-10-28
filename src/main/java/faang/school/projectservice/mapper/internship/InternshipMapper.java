@@ -1,35 +1,44 @@
 package faang.school.projectservice.mapper.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
+import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Mapper
-public interface InternshipMapper {
+@Component
+public class InternshipMapper {
 
-    InternshipMapper INSTANCE = Mappers.getMapper(InternshipMapper.class);
+    private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
-    @Mapping(target = "name", source = "model.name") //
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
-    @Mapping(target = "schedule", ignore = true)
-    Internship toInternship(InternshipDto internshipDto);
+    @Autowired
+    public InternshipMapper(ProjectRepository projectRepository, TeamMemberRepository teamMemberRepository) {
+        this.projectRepository = projectRepository;
+        this.teamMemberRepository = teamMemberRepository;
+    }
 
-    @Mapping(target = "projectId", source = "project.id")
-    @Mapping(target = "mentorId", source = "mentorId.id")
-    @Mapping(target = "internsIds", expression = "java(mapInternsToIds(internship.getInterns()))")
-    InternshipDto toInternshipDto(Internship internship);
+    public Internship toInternship(CreateInternshipDto createInternshipDto) {
+        return Internship.builder()
+                .name(createInternshipDto.name())
+                .description(createInternshipDto.description())
+                .status(createInternshipDto.status())
+                .role(createInternshipDto.role())
+                .startDate(createInternshipDto.startDate())
+                .endDate(createInternshipDto.endDate())
+                .project(projectRepository.findById(createInternshipDto.projectId()).orElseThrow(() ->
+                        new RuntimeException("Project with ID " + createInternshipDto.projectId() + " was not found")))
+                .mentorId(teamMemberRepository.findById(createInternshipDto.mentorId()).orElseThrow(() ->
+                        new RuntimeException("Mentor with ID " + createInternshipDto.mentorId() + " was not found")))
+                .interns(fetchInterns(createInternshipDto.internsIds()))
+                .build();
+    }
 
-    default List<Long> mapInternsToIds(List<TeamMember> interns) {
-        return interns.stream().map(TeamMember::getId).collect(Collectors.toList());
+    private List<TeamMember> fetchInterns(List<Long> internIds) {
+        return teamMemberRepository.findAllById(internIds);
     }
 }
