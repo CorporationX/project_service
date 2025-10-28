@@ -19,39 +19,39 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/subprojects")
+@RequestMapping("api/v1")
 @Validated
 @RequiredArgsConstructor
 public class SubProjectController {
     private final UserContext userContext;
     private final SubProjectService subProjectService;
 
-    @PostMapping
+    @PostMapping("/subprojects")
     public SubProjectDto create(@Valid CreateSubProjectDto createSubProjectDto) {
         return subProjectService.create(userContext.getUserId(), createSubProjectDto);
     }
 
-    @PutMapping("/{subProjectId}")
+    @PutMapping("/subprojects/{subProjectId}")
     public SubProjectDto update(@PathVariable long subProjectId, @Valid UpdateSubProjectDto updateSubProjectDto) {
         return subProjectService.update(userContext.getUserId(), subProjectId, updateSubProjectDto);
     }
 
-    @PutMapping("/{subProjectId}/complete")
+    @PutMapping("/subprojects/{subProjectId}/complete")
     public boolean complete(@PathVariable long subProjectId) {
         return subProjectService.complete(userContext.getUserId(), subProjectId);
     }
 
-    @GetMapping("/{subProjectId}")
+    @GetMapping("/subprojects/{subProjectId}")
     public SubProjectDto getById(@PathVariable long subProjectId) {
         return subProjectService.getById(subProjectId);
     }
 
-    @GetMapping("/by-parent-project/{parentProjectId}")
+    @GetMapping("/projects/{parentProjectId}/subprojects")
     public List<SubProjectDto> getAllByParentProject(@PathVariable long parentProjectId) {
         return subProjectService.getAllByParentProject(parentProjectId);
     }
 
-    @DeleteMapping("/{subProjectId}")
+    @DeleteMapping("/subprojects/{subProjectId}")
     public boolean delete(@PathVariable long subprojectId) {
         return subProjectService.delete(userContext.getUserId(), subprojectId);
     }
