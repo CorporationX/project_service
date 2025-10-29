@@ -1,5 +1,4 @@
 package faang.school.projectservice.service.s3;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -8,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -22,18 +20,18 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public void uploadFile(MultipartFile file, String key) {
-        long fileSize = file.getSize();
+    public void uploadFile(String contentType, byte[] fileBytes, String key) {
+        long fileSize = fileBytes.length;
         if (fileSize > 1024 * 1024 * 5) {
 
         }
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
+        objectMetadata.setContentType(contentType);
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
+                    bucketName, key, new ByteArrayInputStream(fileBytes), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (Exception e) {
             log.error(Arrays.toString(e.getStackTrace()));
