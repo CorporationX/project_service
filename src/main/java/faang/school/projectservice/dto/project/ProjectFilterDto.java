@@ -5,6 +5,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 public class ProjectFilterDto {
     private Long projectId;
 
+    @Size(max = 128, message = "Project name cannot exceed 128 characters")
     private String name;
 
     @Positive(message = "Project owner id must be positive")
@@ -39,7 +41,9 @@ public class ProjectFilterDto {
     @Max(value = 100, message = "Page size cannot exceed 100")
     private Integer size;
 
+    @Size(max = 255)
     private String sortBy;
+    @Size(max = 255)
     private String sortDirection;
 
     public Integer getPage() {

@@ -40,6 +40,5 @@ public class ProjectCreateDto {
 
     @NotNull(message = "Project visibility must be specified")
     private ProjectVisibility visibility;
-
     private String coverImageId;
 }
