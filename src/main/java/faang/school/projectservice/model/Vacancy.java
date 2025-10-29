@@ -64,10 +64,12 @@ public class Vacancy {
     private Project project;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Candidate> candidates = new ArrayList<>();
 
     @Where(clause = "is_accepted = true")
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Candidate> acceptedCandidates = new ArrayList<>();
 
     @CreationTimestamp
@@ -99,7 +101,8 @@ public class Vacancy {
     @ElementCollection
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
-    private List<Long> requiredSkillIds;
+    @Builder.Default
+    private List<Long> requiredSkillIds = new ArrayList<>();
 
     @Column(name = "cover_image_key")
     private String coverImageKey;

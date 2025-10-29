@@ -24,7 +24,11 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
         );
     }
 
-    @Query("SELECT v FROM Vacancy v LEFT JOIN FETCH v.candidates WHERE v.id = :id")
+    @Query(""" 
+            SELECT v FROM Vacancy v
+            LEFT JOIN FETCH v.candidates
+            WHERE v.id = :id
+            """)
     Optional<Vacancy> getWithCandidates(@Param("id") Long Id);
 
     @Query("SELECT v FROM Vacancy v")
@@ -33,7 +37,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
     @Query("""
             SELECT v FROM Vacancy v WHERE
             (:description IS NULL OR LOWER(v.description) LIKE LOWER(CONCAT('%', :description, '%'))) AND
-            (:position IS NULL OR v.position = :position)
+            (:position IS NULL OR LOWER(v.position) LIKE LOWER(CONCAT('%', :position, '%')))
             """)
     List<Vacancy> findVacancyByFilters(@Param("description") String description,
                                        @Param("position") TeamRole position);

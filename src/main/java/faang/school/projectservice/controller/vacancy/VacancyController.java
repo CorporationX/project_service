@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
+import faang.school.projectservice.dto.vacancy.SearchDto;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
@@ -11,6 +12,8 @@ import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,14 +49,14 @@ public class VacancyController {
         return vacancyService.updateVacancy(vacancyId, vacancyUpdateDto);
     }
 
-    @PatchMapping("/{vacancyId}/candidates")
+    @PostMapping("/{vacancyId}/candidates")
     public VacancyDto addCandidatesToVacancy(@PathVariable Long vacancyId,
                                              @Valid @RequestBody CandidateCreateDto candidateCreateDto) {
 
         return vacancyService.addCandidatesToVacancy(vacancyId, candidateCreateDto);
     }
 
-    @PatchMapping("/{vacancyId}/candidates/{candidateId}")
+    @PatchMapping("/{vacancyId}/candidates/{userId}")
     public CandidateDto updateCandidateStatus(@PathVariable Long vacancyId,
                                               @PathVariable Long candidateId,
                                               @RequestParam CandidateStatus status) {
@@ -72,9 +75,8 @@ public class VacancyController {
     }
 
     @GetMapping
-    public List<VacancyDto> findVacancies(@RequestParam(required = false) String description,
-                                          @RequestParam(required = false) TeamRole position) {
-        return vacancyService.findVacancies(description, position);
+    public Page<VacancyDto> findVacancies(Pageable pageable, @Valid @RequestBody SearchDto searchDto) {
+        return vacancyService.findVacancies(pageable, searchDto);
     }
 
     @DeleteMapping("/{vacancyId}")

@@ -44,12 +44,12 @@ public class VacancyValidator {
     }
 
     public static void validateCandidateIsAlreadyProjectMember(Project project,
-                                                               CandidateCreateDto candidateCreateDto) {
+                                                               Candidate candidate) {
         boolean isMember = project.getTeams().stream()
                 .filter(Objects::nonNull)
                 .flatMap(team -> team.getTeamMembers().stream())
                 .filter(Objects::nonNull)
-                .anyMatch(member -> member.getUserId().equals(candidateCreateDto.userId()));
+                .anyMatch(member -> Objects.equals(member.getUserId(),candidate.getUserId()));
 
         if (isMember) {
             throw new IllegalArgumentException("Candidate is already a project member");
@@ -60,7 +60,7 @@ public class VacancyValidator {
                                                                 CandidateCreateDto candidateCreateDto) {
         boolean isCandidate = vacancy.getCandidates().stream()
                 .filter(Objects::nonNull)
-                .anyMatch(candidate -> candidate.getUserId().equals(candidateCreateDto.userId()));
+                .anyMatch(candidate -> Objects.equals(candidate.getUserId(), candidateCreateDto.userId()));
 
         if (isCandidate) {
             throw new IllegalArgumentException("Candidate already added to this vacancy");
@@ -75,7 +75,7 @@ public class VacancyValidator {
 
     public static void validateCandidateNotInCurrentStatus(Vacancy vacancy, Candidate candidate, CandidateStatus status) {
         boolean hasSameStatus = vacancy.getCandidates().stream()
-                .anyMatch(c -> status.equals(c.getCandidateStatus()) && c.getId().equals(candidate.getId()));
+                .anyMatch(c -> Objects.equals(status, c.getCandidateStatus()) && Objects.equals(c.getId(), candidate.getId()));
 
         if (hasSameStatus) {
             throw new IllegalStateException("Candidate is already " + status.name().toLowerCase());
@@ -85,6 +85,27 @@ public class VacancyValidator {
     public static void validateCanCloseVacancy(Vacancy vacancy) {
         if (vacancy.getAcceptedCandidates().size() < vacancy.getCount()) {
             throw new IllegalStateException("Not enough candidates to close vacancy");
+        }
+    }
+
+    public static void validateVacancyIsClose(Vacancy vacancy) {
+        if (vacancy.getStatus() == VacancyStatus.CLOSED) {
+            throw new IllegalStateException("Vacancy has already been closed");
+        }
+    }
+
+    public static void validateVacancyCount(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("Vacancy count must be positive");
+        }
+        if (count > 100) { // или другое разумное ограничение
+            throw new IllegalArgumentException("Vacancy count is too large");
+        }
+    }
+
+    public static void validateVacancyHasProject(Vacancy vacancy) {
+        if (vacancy.getProject() == null) {
+            throw new IllegalStateException("Vacancy project is null");
         }
     }
 }

@@ -1,8 +1,13 @@
 package faang.school.projectservice.dto.vacancy;
 
+import faang.school.projectservice.model.CandidateStatus;
+
 public record CandidateDto(
-        Long candidateId,
-        String name,
-        String specialization
+        Long userId,
+        String username,
+        String resumeDocKey,
+        String coverLetter,
+        CandidateStatus candidateStatus,
+        Boolean isAccepted
 ) {
 }
