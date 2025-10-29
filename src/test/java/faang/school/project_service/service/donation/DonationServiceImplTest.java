@@ -142,14 +142,17 @@ public class DonationServiceImplTest {
 
     @Test
     void testSendDonationThrowsExceptionIfCampaignStatusNotActive() {
-        campaign.setStatus(CampaignStatus.CANCELED);
+        Campaign campaignWithCanceledStatus = Campaign.builder()
+                .id(campaign.getId())
+                .status(CampaignStatus.CANCELED)
+                .build();
 
-        getSendDonationCustomMocks();
+        getSendDonationCustomMocks(campaignWithCanceledStatus);
 
         ForbiddenException forbiddenException = assertThrows(ForbiddenException.class,
                 () -> donationService.sendDonation(createDonationDto));
         assertEquals("Campaign %d is not active. Cant send donation for none active campaignDto"
-                .formatted(campaign.getId()), forbiddenException.getMessage());
+                .formatted(campaignWithCanceledStatus.getId()), forbiddenException.getMessage());
     }
 
     @Test
@@ -160,7 +163,7 @@ public class DonationServiceImplTest {
         Donation donationToReturn = Donation.builder().id(432L).build();
         long userId = 3445L;
 
-        getSendDonationCustomMocks();
+        getSendDonationCustomMocks(campaign);
 
         when(userContext.getUserId()).thenReturn(userId);
         when(donationRepository.save(any(Donation.class))).thenReturn(donationToReturn);
@@ -233,22 +236,6 @@ public class DonationServiceImplTest {
     }
 
     @Test
-    void testGetDonationsByUserIdReturnAllUserDonations() {
-        long userId = getGetDonationsByUserIdCustomMocks();
-
-        List<Long> actualDonationsIds = donationService.getDonationsByUserId(userId, null).stream()
-                .map(DonationDto::id)
-                .sorted()
-                .toList();
-        List<Long> expectedDonationsIds = donationList.stream()
-                .map(Donation::getId)
-                .sorted()
-                .toList();
-
-        assertEquals(expectedDonationsIds, actualDonationsIds);
-    }
-
-    @Test
     void testGetDonationsByUserIdPositive() {
         long userId = getGetDonationsByUserIdCustomMocks();
 
@@ -264,7 +251,7 @@ public class DonationServiceImplTest {
         assertEquals(expectedDonationsIds, actualDonationsIds);
     }
 
-    private void getSendDonationCustomMocks() {
+    private void getSendDonationCustomMocks(Campaign campaign) {
         when(campaignRepository.getByIdOrThrow(campaign.getId())).thenReturn(campaign);
     }
 

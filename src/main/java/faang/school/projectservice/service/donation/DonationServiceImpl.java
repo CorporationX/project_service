@@ -26,8 +26,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -72,7 +72,8 @@ public class DonationServiceImpl implements DonationService {
         donation.setPaymentNumber(paymentResponse.paymentNumber());
 
         log.info("Sent payment. Payment number {}, amount {}, paymentCurrency currency {}, target currency {}",
-                donation.getPaymentNumber(), donation.getAmount(), donation.getCurrency(), donation.getCurrency());
+                paymentRequest.paymentNumber(), paymentRequest.amount(), paymentRequest.paymentCurrency(),
+                paymentRequest.targetCurrency());
 
         Donation savedDonation = donationRepository.save(donation);
         log.info("Donation {} has been sent", savedDonation.getId());
@@ -84,10 +85,6 @@ public class DonationServiceImpl implements DonationService {
         validateUser(userId);
         Stream<Donation> donationStream = donationRepository.findAllByUserId(userId).stream();
         log.debug("Got all donations for user {}", userId);
-
-        if (donationFilterDto == null) {
-            return donationStream.map(donationMapper::toDonationDto).toList();
-        }
 
         for (DonationFilter donationFilter : donationFilters) {
             if (donationFilter.isApplicable(donationFilterDto)) {
@@ -112,8 +109,9 @@ public class DonationServiceImpl implements DonationService {
     }
 
     private long generatePaymentNumber() {
-        LocalDateTime now = LocalDateTime.now();
-        return Long.parseLong(now.format(DateTimeFormatter.ofPattern("ddMMssmm")));
+        long millis = System.currentTimeMillis();
+        int randomInt = ThreadLocalRandom.current().nextInt(1000, 9999);
+        return millis + randomInt;
     }
 
     @Retryable(retryFor = {FeignException.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))

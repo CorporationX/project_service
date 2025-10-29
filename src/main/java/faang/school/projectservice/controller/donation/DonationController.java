@@ -33,14 +33,14 @@ public class DonationController {
 
     @GetMapping
     public ResponseEntity<List<DonationDto>> getDonationsByUserId(@RequestParam("userId") long userId,
-                                                                  @ModelAttribute DonationFilterDto donationFilterDto) {
-        return ResponseEntity.status(HttpStatus.OK).body(donationService.getDonationsByUserId(userId,
+                                                                  @ModelAttribute @Valid DonationFilterDto donationFilterDto) {
+        return ResponseEntity.ok(donationService.getDonationsByUserId(userId,
                 donationFilterDto));
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<DonationDto> getDonationByIdAndUserID(@PathVariable long id,
+    public ResponseEntity<DonationDto> getDonationByIdAndUserId(@PathVariable long id,
                                                                 @RequestParam("userId") long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(donationService.getDonationByIdAndUserId(id, userId));
+        return ResponseEntity.ok(donationService.getDonationByIdAndUserId(id, userId));
     }
 }
