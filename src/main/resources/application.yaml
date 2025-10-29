@@ -20,6 +20,9 @@ spring:
       hibernate:
         format_sql: true
 
+  profiles:
+    active: ${APP_ENV}
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
