@@ -2,7 +2,6 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.exeption.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Vacancy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

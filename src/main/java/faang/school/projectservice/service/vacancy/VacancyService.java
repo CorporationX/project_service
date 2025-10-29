@@ -44,7 +44,6 @@ public class VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final CandidateMapper candidateMapper;
     private final TeamMemberService teamMemberService;
-    private final CandidateRepository candidateRepository;
 
     @Transactional
     public VacancyDto createVacancy(VacancyCreateDto vacancyCreateDto) {

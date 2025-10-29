@@ -278,7 +278,6 @@ public class VacancyServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         when(vacancyRepository.findAll(any(Example.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(vacancy)));
-        ;
 
         Page<VacancyDto> result = vacancyService.findVacancies(pageable, searchDto);
 

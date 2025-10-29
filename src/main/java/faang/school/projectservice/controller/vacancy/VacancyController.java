@@ -7,7 +7,6 @@ import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.model.CandidateStatus;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
