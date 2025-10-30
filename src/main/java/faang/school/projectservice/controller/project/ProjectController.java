@@ -7,9 +7,10 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +33,7 @@ import java.util.List;
 @RestController
 public class ProjectController {
     private final ProjectFacade projectFacade;
+    private final ProjectService projectService;
 
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectCreateDto projectCreateDto) {
@@ -61,5 +63,11 @@ public class ProjectController {
     @PutMapping(value = "/{projectId}/add-image-cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResourceDto addImageCover(@PathVariable long projectId, @RequestPart("file")MultipartFile file) {
         return projectFacade.addImageCover(projectId, file);
+    }
+
+    @GetMapping("/avatar/{projectId}")
+    public ResponseEntity<Resource> getAvatarUsers(@PathVariable Long projectId ) {
+
+        return projectService.getProjectAvatar(projectId);
     }
 }

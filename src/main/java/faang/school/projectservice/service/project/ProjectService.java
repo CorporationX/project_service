@@ -15,6 +15,11 @@ import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.service.project.filter.FilterProject;
 import faang.school.projectservice.service.project.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,6 +108,26 @@ public class ProjectService {
         resource = resourceRepository.save(resource);
         s3Service.saveToFileStorage(file, key);
         return resource;
+    }
+
+    public ResponseEntity<org.springframework.core.io.Resource> getProjectAvatar(Long projectId) {
+        Project project = projectRepository.getById(projectId);
+        String avatarKey = project.getCoverImageId();
+
+        if (Objects.nonNull(avatarKey)) {
+
+            var metadata = s3Service.getFileMetadata(avatarKey);
+            byte[] fileBytes = s3Service.downloadAvatarAsBytes(avatarKey);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.valueOf(metadata.contentType()));
+
+            org.springframework.core.io.Resource resource = new ByteArrayResource(fileBytes);
+
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+
+        } else {
+            throw new DataValidationException("No avatar in this project");
+        }
     }
 
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
