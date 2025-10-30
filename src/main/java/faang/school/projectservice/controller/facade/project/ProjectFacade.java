@@ -4,12 +4,13 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class ProjectFacade {
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
+    private final ResourceMapper resourceMapper;
 
     public ProjectDto createProject(ProjectCreateDto projectCreateDto) {
         Project project = projectService.createProject(projectCreateDto);
@@ -55,6 +57,6 @@ public class ProjectFacade {
     public ResourceDto addImageCover(long projectId, MultipartFile file) {
         Resource resource = projectService.addImageCover(projectId, file);
 
-        return projectMapper.toResourceDto();
+        return resourceMapper.toResourceDto(resource);
     }
 }
