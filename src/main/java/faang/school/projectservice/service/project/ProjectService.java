@@ -5,19 +5,19 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.repository.ResourceRepository;
-import faang.school.projectservice.service.S3Service;
-import faang.school.projectservice.service.project.filter.FilterProject;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.ResourceRepository;
+import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.project.filter.FilterProject;
 import faang.school.projectservice.service.project.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.amazonaws.services.s3.AmazonS3;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -80,6 +80,7 @@ public class ProjectService {
         projectRepository.delete(project);
     }
 
+    @Transactional
     public Resource addImageCover(long projectId, MultipartFile file) {
         long userId = userContext.getUserId();
         Project project = getProjectById(projectId);
@@ -89,14 +90,19 @@ public class ProjectService {
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
-        String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
+        String key = project.getId() + project.getName();
+        Resource resource = new Resource();
+        resource.setName(file.getName());
+        resource.setKey(key);
         resource.setProject(project);
 
-        project.setStorageSize(newStorageSize);
-        projectRepository.save(project);
 
-        return resourceRepository.save(resource);
+        project.setStorageSize(newStorageSize);
+        project.setCoverImageId(key);
+        projectRepository.save(project);
+        resource = resourceRepository.save(resource);
+        s3Service.saveToFileStorage(file, key);
+        return resource;
     }
 
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {
