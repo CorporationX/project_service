@@ -106,10 +106,7 @@ public class VacancyService {
         vacancyRepository.save(vacancy);
 
         log.info("Added candidate with id: {} and status: {} to vacancy: {} in project: {}",
-                candidateCreateDto.userId(),
-                candidate.getCandidateStatus(),
-                vacancyId,
-                project.getId());
+                candidateCreateDto.userId(), candidate.getCandidateStatus(), vacancyId, project.getId());
 
         return vacancyMapper.toVacancyDto(vacancy);
     }

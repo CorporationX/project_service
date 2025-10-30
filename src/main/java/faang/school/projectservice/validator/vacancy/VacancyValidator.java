@@ -98,7 +98,7 @@ public class VacancyValidator {
         if (count <= 0) {
             throw new IllegalArgumentException("Vacancy count must be positive");
         }
-        if (count > 100) { // или другое разумное ограничение
+        if (count > 100) {
             throw new IllegalArgumentException("Vacancy count is too large");
         }
     }

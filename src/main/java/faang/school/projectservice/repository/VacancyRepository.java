@@ -12,15 +12,15 @@ import java.util.Optional;
 
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
-    default Vacancy getByIdOrThrow(long Id) {
-        return findById(Id).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Vacancy %d not found", Id))
+    default Vacancy getByIdOrThrow(long id) {
+        return findById(id).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Vacancy %d not found", id))
         );
     }
 
-    default Vacancy getWithCandidatesOrThrow(long Id) {
-        return getWithCandidates(Id).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Vacancy %d not found", Id))
+    default Vacancy getWithCandidatesOrThrow(long id) {
+        return getWithCandidates(id).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Vacancy %d not found", id))
         );
     }
 
@@ -29,10 +29,8 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
             LEFT JOIN FETCH v.candidates
             WHERE v.id = :id
             """)
-    Optional<Vacancy> getWithCandidates(@Param("id") Long Id);
+    Optional<Vacancy> getWithCandidates(@Param("id") Long id);
 
-    @Query("SELECT v FROM Vacancy v")
-    List<Vacancy> findAllVacancies();
 
     @Query("""
             SELECT v FROM Vacancy v WHERE
