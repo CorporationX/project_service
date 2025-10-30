@@ -16,8 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigInteger;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class S3Service {
     private final AmazonS3 s3client;
     private String bucketName;
