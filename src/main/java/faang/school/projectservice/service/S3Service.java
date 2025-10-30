@@ -8,8 +8,8 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +20,8 @@ import java.math.BigInteger;
 @Service
 public class S3Service {
     private final AmazonS3 s3client;
+
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     public Resource uploadFile(MultipartFile file, String folder) {
