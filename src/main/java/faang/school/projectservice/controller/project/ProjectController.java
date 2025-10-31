@@ -58,7 +58,7 @@ public class ProjectController {
         projectFacade.deleteProject(projectId);
     }
 
-    @PutMapping(value = "/add-cover-image/{projectId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/cover-image/{projectId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResourceDto addImageCover(@PathVariable long projectId, @RequestPart("file")MultipartFile file) {
         return projectFacade.addImageCover(projectId, file);
     }
