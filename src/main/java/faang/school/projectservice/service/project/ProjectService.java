@@ -111,7 +111,7 @@ public class ProjectService {
     }
 
     public ResponseEntity<org.springframework.core.io.Resource> getProjectAvatar(Long projectId) {
-        Project project = projectRepository.getById(projectId);
+        Project project = getProjectById(projectId);
         String avatarKey = project.getCoverImageId();
 
         if (Objects.nonNull(avatarKey)) {
