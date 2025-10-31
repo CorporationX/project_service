@@ -56,7 +56,6 @@ public class InternshipServiceImpl implements InternshipService {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setProject(project);
         internship.setCreatedBy(createdBy);
-        internship.setCreatedAt(now);
         internship.setRole(TeamRole.INTERN);
 
         return internshipMapper.toDto(internshipRepository.save(internship));
@@ -97,7 +96,6 @@ public class InternshipServiceImpl implements InternshipService {
             log.info("Досрочно прошли стажировку {}", aheadList);
         }
         internshipMapper.update(internshipDto, internship);
-        internship.setUpdatedAt(now);
         internship.setUpdatedBy(userId);
 
         return internshipMapper.toDto(internshipRepository.save(internship));
@@ -145,7 +143,7 @@ public class InternshipServiceImpl implements InternshipService {
                 .toList();
 
         if (!memberIds.contains(mentorId)) {
-            String message = "Выбран ментор не из команды проекта";
+            String message = "Ментор с id %d не является участником проекта %s".formatted(mentorId, project.getName());
             log.warn(message);
             throw new DataValidationException(message);
         }
