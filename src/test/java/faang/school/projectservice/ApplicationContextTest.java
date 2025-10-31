@@ -18,7 +18,7 @@ public class ApplicationContextTest {
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:13.3")
-            .withDatabaseName("testDb")
+            .withDatabaseName("postgres")
             .withUsername("user")
             .withPassword("password");
 
