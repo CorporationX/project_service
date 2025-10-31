@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.dto.resource.ResourceDto;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,14 +58,13 @@ public class ProjectController {
         projectFacade.deleteProject(projectId);
     }
 
-    @PutMapping(value = "/{projectId}/add-image-cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/add-cover-image/{projectId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResourceDto addImageCover(@PathVariable long projectId, @RequestPart("file")MultipartFile file) {
         return projectFacade.addImageCover(projectId, file);
     }
 
-    @GetMapping("/avatar/{projectId}")
+    @GetMapping("/cover-image/{projectId}")
     public ResponseEntity<Resource> getAvatarUsers(@PathVariable Long projectId ) {
-
         return projectService.getProjectAvatar(projectId);
     }
 }

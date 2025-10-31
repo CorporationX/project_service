@@ -126,7 +126,7 @@ public class ProjectService {
             return new ResponseEntity<>(resource, headers, HttpStatus.OK);
 
         } else {
-            throw new DataValidationException("No avatar in this project");
+            throw new DataValidationException("This project does not have a cover image");
         }
     }
 

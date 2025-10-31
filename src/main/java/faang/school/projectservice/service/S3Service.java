@@ -1,9 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +18,6 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,7 +42,7 @@ public class S3Service {
             try (InputStream inputStream = multipartFile.getInputStream()) {
                 return s3client.putObject(request, RequestBody.fromInputStream(inputStream, multipartFile.getSize()));
             }
-
+//TODO change to custom exception
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Error generating random avatar for user!Key - %s", key));
         }
@@ -64,6 +59,7 @@ public class S3Service {
             return objectBytes.asByteArray();
 
         } catch (S3Exception e) {
+            //TODO change to custom exception
             throw new IllegalArgumentException(String.format("Error with downloading project picture. Key: %s", key));
         }
     }
@@ -78,6 +74,7 @@ public class S3Service {
             return s3client.headObject(headObjectRequest);
 
         } catch (S3Exception e) {
+            //TODO change to custom exception
             throw new IllegalArgumentException(String.format("File not found in S3: %s", key));
         }
     }
