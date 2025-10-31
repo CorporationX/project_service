@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,7 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public PutObjectResponse saveToFileStorage(MultipartFile multipartFile, String key) {
+    public void saveToFileStorage(MultipartFile multipartFile, String key) {
         try {
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -40,11 +41,10 @@ public class S3Service {
                     .metadata(Map.of("filename", Objects.requireNonNull(multipartFile.getOriginalFilename())))
                     .build();
             try (InputStream inputStream = multipartFile.getInputStream()) {
-                return s3client.putObject(request, RequestBody.fromInputStream(inputStream, multipartFile.getSize()));
+                s3client.putObject(request, RequestBody.fromInputStream(inputStream, multipartFile.getSize()));
             }
-//TODO change to custom exception
         } catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Error generating random avatar for user!Key - %s", key));
+            throw new FileException(String.format("Error generating random avatar for user!Key - %s", key));
         }
     }
 
@@ -59,8 +59,7 @@ public class S3Service {
             return objectBytes.asByteArray();
 
         } catch (S3Exception e) {
-            //TODO change to custom exception
-            throw new IllegalArgumentException(String.format("Error with downloading project picture. Key: %s", key));
+            throw new FileException(String.format("Error with downloading project picture. Key: %s", key));
         }
     }
 
@@ -74,8 +73,7 @@ public class S3Service {
             return s3client.headObject(headObjectRequest);
 
         } catch (S3Exception e) {
-            //TODO change to custom exception
-            throw new IllegalArgumentException(String.format("File not found in S3: %s", key));
+            throw new FileException(String.format("File not found in S3: %s", key));
         }
     }
 
