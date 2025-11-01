@@ -3,6 +3,7 @@ package faang.school.projectservice.service.donation;
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.client.UserDto;
@@ -47,9 +48,6 @@ public class DonationServiceImpl implements DonationService {
     @Override
     @Retryable(retryFor = {FeignException.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))
     public DonationDto sendDonation(CreateDonationDto createDonationDto) {
-        if (createDonationDto.targetCurrency() == null) {
-            createDonationDto = createDonationDto.withTargetCurrency(createDonationDto.paymentCurrency());
-        }
 
         Campaign campaign = campaignRepository.getByIdOrThrow(createDonationDto.campaignId());
         log.debug("Got campaign {} from base", campaign.getId());
@@ -61,8 +59,12 @@ public class DonationServiceImpl implements DonationService {
             throw new ForbiddenException(errorMessage);
         }
 
+        Currency targetCurrency = createDonationDto.targetCurrency() == null
+                ? createDonationDto.paymentCurrency()
+                : createDonationDto.targetCurrency();
+
         PaymentRequest paymentRequest = new PaymentRequest(generatePaymentNumber(), createDonationDto.amount(),
-                createDonationDto.paymentCurrency(), createDonationDto.targetCurrency());
+                createDonationDto.paymentCurrency(), targetCurrency);
         PaymentResponse paymentResponse = paymentServiceClient.sendPayment(paymentRequest);
 
         Donation donation = donationMapper.toDonation(createDonationDto);

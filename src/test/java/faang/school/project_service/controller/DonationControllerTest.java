@@ -124,7 +124,7 @@ public class DonationControllerTest {
         when(donationService.getDonationByIdAndUserId(donationId, userId)).thenReturn(donationOne);
 
         mockMvc.perform(MockMvcRequestBuilders.get(basePath + "/{id}", donationId)
-                        .param("userId", String.valueOf(userId)))
+                        .header("x-user-id", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(DonationDto.Fields.id, Matchers.equalTo(donationOne.id().intValue())));
     }

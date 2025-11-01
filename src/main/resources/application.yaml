@@ -48,6 +48,8 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+    servlet:
+      context-path: /api
 
 internship:
   duration:

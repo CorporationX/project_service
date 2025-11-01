@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,14 +34,15 @@ public class DonationController {
 
     @GetMapping
     public ResponseEntity<List<DonationDto>> getDonationsByUserId(@RequestParam("userId") long userId,
-                                                                  @ModelAttribute @Valid DonationFilterDto donationFilterDto) {
+                                                                  @ModelAttribute @Valid
+                                                                  DonationFilterDto donationFilterDto) {
         return ResponseEntity.ok(donationService.getDonationsByUserId(userId,
                 donationFilterDto));
     }
 
     @GetMapping("{id}")
     public ResponseEntity<DonationDto> getDonationByIdAndUserId(@PathVariable long id,
-                                                                @RequestParam("userId") long userId) {
+                                                                @RequestHeader("x-user-id") long userId ) {
         return ResponseEntity.ok(donationService.getDonationByIdAndUserId(id, userId));
     }
 }
