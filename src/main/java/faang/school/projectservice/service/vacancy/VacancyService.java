@@ -1,13 +1,15 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
 import faang.school.projectservice.dto.vacancy.SearchDto;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
-import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
 import faang.school.projectservice.mapper.vacancy.CandidateMapper;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -44,6 +46,8 @@ public class VacancyService {
     private final TeamMemberRepository teamMemberRepository;
     private final CandidateMapper candidateMapper;
     private final TeamMemberService teamMemberService;
+    private final UserServiceClient userServiceClient;
+    private final CandidateRepository candidateRepository;
 
     @Transactional
     public VacancyDto createVacancy(VacancyCreateDto vacancyCreateDto) {
@@ -61,7 +65,6 @@ public class VacancyService {
         vacancyRepository.save(vacancy);
 
         log.info("Create new vacancy with id: {}", vacancy.getId());
-
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
@@ -78,7 +81,6 @@ public class VacancyService {
         Vacancy vacancyUpdate = vacancyRepository.save(vacancy);
 
         log.info("Vacancy with id: {} was updated by user: {}", vacancyId, userId);
-
         return vacancyMapper.toVacancyDto(vacancyUpdate);
     }
 
@@ -90,12 +92,12 @@ public class VacancyService {
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
         VacancyValidator.validateRole(author);
+        validateUserExist(candidateCreateDto.userId());
         VacancyValidator.validateAddCandidatesToClosedVacancy(vacancy);
-
-        Project project = vacancy.getProject();
         VacancyValidator.validateCandidateAlreadyAddedThisVacancy(vacancy, candidateCreateDto);
 
         Candidate candidate = candidateMapper.toCandidate(candidateCreateDto);
+        Project project = vacancy.getProject();
         VacancyValidator.validateCandidateIsAlreadyProjectMember(project, candidate);
         candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
         candidate.setIsAccepted(false);
@@ -104,50 +106,29 @@ public class VacancyService {
         candidates.add(candidate);
         vacancy.setCandidates(candidates);
         vacancyRepository.save(vacancy);
-
         log.info("Added candidate with id: {} and status: {} to vacancy: {} in project: {}",
                 candidateCreateDto.userId(), candidate.getCandidateStatus(), vacancyId, project.getId());
-
         return vacancyMapper.toVacancyDto(vacancy);
     }
 
     @Transactional
     public CandidateDto updateCandidateStatus(Long vacancyId, Long candidateId, CandidateStatus status) {
         VacancyValidator.validateCandidateStatusNotNull(status);
-
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
         long userId = userContext.getUserId();
         long projectId = vacancy.getProject().getId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-
         VacancyValidator.validateRole(author);
 
-        Candidate candidate = vacancy.getCandidates().stream()
-                .filter(x -> x.getId().equals(candidateId))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Candidate with id %s not found in vacancy %s", candidateId, vacancyId)));
-
+        Candidate candidate = candidateRepository.findByVacancyIdAndCandidateIdOrThrow(vacancyId, candidateId);
         VacancyValidator.validateCandidateNotInCurrentStatus(vacancy, candidate, status);
-
         candidate.setCandidateStatus(status);
         candidate.setIsAccepted(status.isAccepted());
-
         VacancyValidator.validateCandidateIsAlreadyProjectMember(vacancy.getProject(), candidate);
-        if (status == CandidateStatus.ACCEPTED) {
-            teamMemberService.addCandidateToTeam(projectId, candidateId, vacancyId);
-            log.info("Adding candidate {} (user: {}) to project team {} for vacancy {}",
-                    candidateId, candidate.getUserId(), projectId, vacancyId);
-            if (vacancy.getAcceptedCandidates().size() >= vacancy.getCount()) {
-                VacancyValidator.validateCanCloseVacancy(vacancy);
-                vacancy.setStatus(VacancyStatus.CLOSED);
-                log.info("Vacancy {} automatically closed - enough accepted candidates", vacancyId);
-            }
-        }
+        addCandidateToTeam(status, projectId, candidateId, vacancyId);
         vacancyRepository.save(vacancy);
         log.info("Updated status for Candidate with id: {} in vacancy {} to status: {}",
                 candidate.getUserId(), vacancyId, status.getActionText());
-
         return candidateMapper.toCandidateDto(candidate);
     }
 
@@ -189,7 +170,6 @@ public class VacancyService {
                 .build(), matcher);
 
         Page<Vacancy> pageVacancy = vacancyRepository.findAll(example, pageable);
-
         return pageVacancy.map(vacancyMapper::toVacancyDto);
     }
 
@@ -205,7 +185,24 @@ public class VacancyService {
         VacancyValidator.validateRole(author);
 
         vacancyRepository.deleteById(vacancyId);
-
         log.info("Delete vacancy with id: {}", vacancyId);
+    }
+
+    private void validateUserExist(Long userId) {
+        try {
+            UserDto userDto = userServiceClient.getUser(userId);
+        } catch (Exception e) {
+            log.error("User with id {} not found", userId, e);
+            throw new EntityNotFoundException("User with id " + userId + " not found");
+        }
+    }
+
+    private void addCandidateToTeam(CandidateStatus status, Long projectId, Long candidateId, Long vacancyId) {
+        if (status == CandidateStatus.ACCEPTED) {
+            teamMemberService.addCandidateToTeam(projectId, candidateId, vacancyId);
+            log.info("Adding candidate {}  to project team {} for vacancy {}",
+                    candidateId, projectId, vacancyId);
+            VacancyValidator.validateAutomaticallyClosed(vacancyRepository.getByIdOrThrow(vacancyId));
+        }
     }
 }

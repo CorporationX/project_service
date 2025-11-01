@@ -1,6 +1,6 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
 import faang.school.projectservice.model.Candidate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,8 +13,8 @@ public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
     default Candidate findByVacancyIdAndCandidateIdOrThrow(Long vacancyId, Long candidateId) {
         return findByVacancyIdAndCandidateId(vacancyId, candidateId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Vacancy %d not found", vacancyId))
-        );
+                () -> new EntityNotFoundException(String.format("Candidate with id %s not found in vacancy %s",
+                        candidateId, vacancyId)));
     }
 
     @Query("""

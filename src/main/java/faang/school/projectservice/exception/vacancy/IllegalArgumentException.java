@@ -1,4 +1,4 @@
-package faang.school.projectservice.exeption;
+package faang.school.projectservice.exception.vacancy;
 
 public class IllegalArgumentException extends RuntimeException {
     public IllegalArgumentException(String message) {

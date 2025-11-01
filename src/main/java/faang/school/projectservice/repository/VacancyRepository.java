@@ -1,6 +1,6 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,22 +33,22 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
 
     @Query("""
-            SELECT v FROM Vacancy v WHERE
-            (:description IS NULL OR LOWER(v.description) LIKE LOWER(CONCAT('%', :description, '%'))) AND
-            (:position IS NULL OR LOWER(v.position) LIKE LOWER(CONCAT('%', :position, '%')))
+            SELECT v FROM Vacancy v
+            WHERE (:description IS NULL OR LOWER(v.description) LIKE LOWER(CONCAT('%', :description, '%'))) AND
+                  (:position IS NULL OR LOWER(v.position) LIKE LOWER(CONCAT('%', :position, '%')))
             """)
     List<Vacancy> findVacancyByFilters(@Param("description") String description,
                                        @Param("position") TeamRole position);
 
     @Query("""
-            SELECT v FROM Vacancy v WHERE
-            (:description IS NULL OR LOWER(v.description) LIKE LOWER(CONCAT('%', :description, '%')))
+            SELECT v FROM Vacancy v 
+            WHERE (:description IS NULL OR v.description ILIKE CONCAT('%', :description, '%'))
             """)
     List<Vacancy> findVacancyByDescription(@Param("description") String description);
 
     @Query("""
-            SELECT v FROM Vacancy v WHERE
-            (:position IS NULL OR v.position = :position)
+            SELECT v FROM Vacancy v
+            WHERE v.position = :position
             """)
     List<Vacancy> findVacancyByPosition(@Param("position") TeamRole position);
 }

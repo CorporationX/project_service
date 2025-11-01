@@ -1,9 +1,9 @@
 package faang.school.projectservice.validator.vacancy;
 
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
-import faang.school.projectservice.exeption.ForbiddenException;
-import faang.school.projectservice.exeption.IllegalStateException;
-import faang.school.projectservice.exeption.IllegalArgumentException;
+import faang.school.projectservice.exception.vacancy.ForbiddenException;
+import faang.school.projectservice.exception.vacancy.IllegalStateException;
+import faang.school.projectservice.exception.vacancy.IllegalArgumentException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
@@ -106,6 +106,14 @@ public class VacancyValidator {
     public static void validateVacancyHasProject(Vacancy vacancy) {
         if (vacancy.getProject() == null) {
             throw new IllegalStateException("Vacancy project is null");
+        }
+    }
+
+    public static void validateAutomaticallyClosed(Vacancy vacancy) {
+        if (vacancy.getAcceptedCandidates().size() >= vacancy.getCount()) {
+            VacancyValidator.validateCanCloseVacancy(vacancy);
+            vacancy.setStatus(VacancyStatus.CLOSED);
+            log.info("Vacancy {} automatically closed - enough accepted candidates", vacancy.getId());
         }
     }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.exeption;
+package faang.school.projectservice.exception.vacancy;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
