@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.ValidationException;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -33,7 +34,22 @@ public class InternshipService {
         internshipValidator.validateInternshipLength(createInternshipDto);
         validateMentorBelongsToProject(createInternshipDto);
 
-        Internship internship = internshipMapper.toInternship(createInternshipDto);
+        Project project = projectRepository.findById(createInternshipDto.projectId()).orElseThrow(() ->
+                new RuntimeException("Project with ID " + createInternshipDto.projectId() + " was not found"));
+        TeamMember mentor = teamMemberRepository.findById(createInternshipDto.mentorId()).orElseThrow(() ->
+                new RuntimeException("Mentor with ID " + createInternshipDto.mentorId() + " was not found"));
+        boolean belongsToAnyTeam = project.getTeams().stream()
+                .anyMatch(team -> team.getTeamMembers().contains(mentor));
+
+        if (!belongsToAnyTeam) {
+            try {
+                throw new ValidationException("The specified mentor is not a member of the project team");
+            } catch (ValidationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Internship internship = internshipMapper.toInternship(createInternshipDto, project, mentor);
 
         internship = internshipRepository.save(internship);
 
@@ -62,5 +78,9 @@ public class InternshipService {
         if (!belongsToAnyTeam) {
             throw new jakarta.validation.ValidationException("The specified mentor is not a member of the project team");
         }
+    }
+
+    private List<TeamMember> fetchInterns(List<Long> internIds) {
+        return teamMemberRepository.findAllById(internIds);
     }
 }
