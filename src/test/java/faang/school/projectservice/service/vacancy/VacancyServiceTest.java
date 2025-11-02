@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.common.PageResponse;
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
 import faang.school.projectservice.dto.vacancy.SearchDto;
@@ -66,6 +68,9 @@ public class VacancyServiceTest {
 
     @Mock
     private UserContext userContext;
+
+    @Mock
+    private UserServiceClient userServiceClient;
 
     @Spy
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
@@ -219,8 +224,9 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.getByIdOrThrow(1L)).thenReturn(vacancy);
         when(teamMemberRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(author);
+        when(candidateRepository.findByVacancyIdAndCandidateIdOrThrow(1L, 200L)).thenReturn(candidate);
 
-        CandidateDto result = vacancyService.updateCandidateStatus(1L, 1L, CandidateStatus.ACCEPTED);
+        CandidateDto result = vacancyService.updateCandidateStatus(1L, 200L, CandidateStatus.ACCEPTED);
 
         assertNotNull(result);
         assertEquals(CandidateStatus.ACCEPTED, result.candidateStatus());
@@ -279,11 +285,11 @@ public class VacancyServiceTest {
         when(vacancyRepository.findAll(any(Example.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(vacancy)));
 
-        Page<VacancyDto> result = vacancyService.findVacancies(pageable, searchDto);
+        PageResponse<VacancyDto> result = vacancyService.findVacancies(pageable, searchDto);
 
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(vacancy.getName(), result.getContent().get(0).name());
+        assertEquals(1, result.totalElements());
+        assertEquals(vacancy.getName(), result.content().get(0).name());
     }
 
     @Test

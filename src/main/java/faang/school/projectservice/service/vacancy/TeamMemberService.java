@@ -2,7 +2,6 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
-import faang.school.projectservice.exception.vacancy.IllegalStateException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;

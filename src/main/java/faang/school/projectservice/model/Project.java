@@ -30,6 +30,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -94,7 +95,8 @@ public class Project {
     private String coverImageId;
 
     @OneToMany(mappedBy = "project")
-    private List<Team> teams;
+    @Builder.Default
+    private List<Team> teams = new ArrayList<>();
 
     @OneToOne(mappedBy = "project")
     private Schedule schedule;

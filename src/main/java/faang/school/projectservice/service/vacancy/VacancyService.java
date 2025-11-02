@@ -191,7 +191,7 @@ public class VacancyService {
 
     private void validateUserExist(Long userId) {
         try {
-            UserDto userDto = userServiceClient.getUser(userId);
+            userServiceClient.getUser(userId);
         } catch (Exception e) {
             log.error("User with id {} not found", userId, e);
             throw new EntityNotFoundException("User with id " + userId + " not found");

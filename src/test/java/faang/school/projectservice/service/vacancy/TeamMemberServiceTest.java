@@ -65,7 +65,6 @@ public class TeamMemberServiceTest {
     void setUp() {
         team = Team.builder()
                 .id(1L)
-                .teamMembers(new ArrayList<>())
                 .build();
 
         List<Team> teams = new ArrayList<>();

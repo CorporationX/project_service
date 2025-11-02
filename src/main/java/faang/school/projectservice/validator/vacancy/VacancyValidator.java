@@ -2,8 +2,6 @@ package faang.school.projectservice.validator.vacancy;
 
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.exception.vacancy.ForbiddenException;
-import faang.school.projectservice.exception.vacancy.IllegalStateException;
-import faang.school.projectservice.exception.vacancy.IllegalArgumentException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
