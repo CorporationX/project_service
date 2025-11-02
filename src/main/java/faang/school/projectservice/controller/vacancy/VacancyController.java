@@ -1,48 +1,70 @@
 package faang.school.projectservice.controller.vacancy;
 
-import faang.school.projectservice.controller.vacancy.facade.VacancyFacade;
+import faang.school.projectservice.dto.common.PageResponse;
+import faang.school.projectservice.dto.vacancy.SearchDto;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
-import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
+import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/vacancies")
+@RequestMapping("/api/v1/vacancies")
 @RestController
 public class VacancyController {
-
-    private final VacancyFacade vacancyMapping;
+    private final VacancyService vacancyService;
 
     @PostMapping
-    public VacancyDto create(@Valid @RequestBody VacancyCreateDto vacancyCreateDto) {
-        return vacancyMapping.create(vacancyCreateDto);
-    }
-
-    @GetMapping("/{vacancyId}")
-    public VacancyDto getById(@PathVariable Long vacancyId) {
-        return vacancyMapping.getById(vacancyId);
-    }
-
-    @PostMapping("/filters")
-    public List<VacancyDto> getByFilter(@RequestBody VacancyFilterDto vacancyFilterDto) {
-        return vacancyMapping.getByFilter(vacancyFilterDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public VacancyDto createVacancy(@Valid @RequestBody VacancyCreateDto vacancyCreateDto) {
+        return vacancyService.createVacancy(vacancyCreateDto);
     }
 
     @PatchMapping("/{vacancyId}")
-    public VacancyDto update(@PathVariable Long vacancyId, @RequestBody VacancyUpdateDto vacancyUpdateDto) {
-        return vacancyMapping.update(vacancyId, vacancyUpdateDto);
+    public VacancyDto updateVacancy(@PathVariable Long vacancyId,
+                                    @Valid @RequestBody VacancyUpdateDto vacancyUpdateDto) {
+        return vacancyService.updateVacancy(vacancyId, vacancyUpdateDto);
+    }
+
+    @PatchMapping("/{vacancyId}/close")
+    public VacancyDto closeVacancy(@PathVariable Long vacancyId) {
+        return vacancyService.closeVacancy(vacancyId);
+    }
+
+    @GetMapping("/{vacancyId}")
+    public VacancyDto getVacancy(@PathVariable Long vacancyId) {
+
+        return vacancyService.getVacancy(vacancyId);
+    }
+
+    @GetMapping
+    public PageResponse<VacancyDto> findVacancies(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @Valid @ModelAttribute SearchDto searchDto) {
+        return vacancyService.findVacancies(pageable, searchDto);
+    }
+
+    @DeleteMapping("/{vacancyId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVacancy(@PathVariable Long vacancyId) {
+        vacancyService.deleteVacancy(vacancyId);
     }
 }

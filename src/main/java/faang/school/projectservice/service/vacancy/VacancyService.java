@@ -1,150 +1,209 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.common.PageResponse;
+import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
+import faang.school.projectservice.dto.vacancy.CandidateDto;
+import faang.school.projectservice.dto.vacancy.SearchDto;
+import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
-import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
+import faang.school.projectservice.mapper.vacancy.CandidateMapper;
+import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.repository.CampaignRepository;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import static faang.school.projectservice.model.VacancyStatus.CLOSED;
-import static faang.school.projectservice.model.VacancyStatus.OPEN;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class VacancyService {
-
     private final VacancyRepository vacancyRepository;
-    private final UserContext userContext;
-    private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
-    private final CandidateRepository candidateRepository;
+    private final UserContext userContext;
     private final VacancyMapper vacancyMapper;
-    private final CampaignRepository campaignRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final CandidateMapper candidateMapper;
+    private final TeamMemberService teamMemberService;
+    private final UserServiceClient userServiceClient;
+    private final CandidateRepository candidateRepository;
 
-    public Vacancy create(Vacancy vacancy, Long projectId) {
-        Long userId = userContext.getUserId();
+    @Transactional
+    public VacancyDto createVacancy(VacancyCreateDto vacancyCreateDto) {
+        long userId = userContext.getUserId();
+        long projectId = vacancyCreateDto.projectId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        Project project = projectRepository.getByIdOrThrow(projectId);
 
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        VacancyValidator.validateRole(author);
+        VacancyValidator.validateVacancyCount(vacancyCreateDto.count());
 
-        VacancyValidator.validateRoleForVacancyCreation(teamMember);
-
-        Project project = projectRepository.getReferenceById(projectId);
-
-        vacancy.setStatus(OPEN);
-        vacancy.setProject(project);
+        Vacancy vacancy = vacancyMapper.toVacancy(vacancyCreateDto, project);
+        vacancy.setStatus(VacancyStatus.OPEN);
+        VacancyValidator.validateVacancyHasProject(vacancy);
         vacancyRepository.save(vacancy);
-        log.info("The vacancy was created {} {} for project {} by user {}",
-                vacancy.getId(), vacancy.getName(), projectId, userId);
-        return vacancy;
+
+        log.info("Create new vacancy with id: {}", vacancy.getId());
+        return vacancyMapper.toVacancyDto(vacancy);
     }
 
-    public Vacancy getById(Long vacancyId) {
-        return vacancyRepository.getReferenceById(vacancyId);
+    @Transactional
+    public VacancyDto updateVacancy(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
+        long userId = userContext.getUserId();
+        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        long projectId = vacancy.getProject().getId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+
+        VacancyValidator.validateRole(author);
+
+        vacancyMapper.updateVacancyFromDto(vacancyUpdateDto, vacancy);
+        Vacancy vacancyUpdate = vacancyRepository.save(vacancy);
+
+        log.info("Vacancy with id: {} was updated by user: {}", vacancyId, userId);
+        return vacancyMapper.toVacancyDto(vacancyUpdate);
     }
 
-    public List<Vacancy> getVacancyByFilters(VacancyFilterDto vacancyFilterDto) {
-        List<Vacancy> vacancies = vacancyRepository.findAll();
-        if (vacancies.isEmpty()) {
-            log.warn("The vacancy list is empty");
-            return List.of();
-        }
+    @Transactional
+    public VacancyDto addCandidatesToVacancy(Long vacancyId, CandidateCreateDto candidateCreateDto) {
+        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        long projectId = vacancy.getProject().getId();
+        long userId = userContext.getUserId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
 
-        List<Vacancy> filteredVacancies = vacancies.stream()
-                .filter(byPosition(vacancyFilterDto.position()))
-                .filter(byName(vacancyFilterDto.name()))
-                .toList();
+        VacancyValidator.validateRole(author);
+        validateUserExist(candidateCreateDto.userId());
+        VacancyValidator.validateAddCandidatesToClosedVacancy(vacancy);
+        VacancyValidator.validateCandidateAlreadyAddedThisVacancy(vacancy, candidateCreateDto);
 
-        log.info("Filtered {} vacancies from total {}", filteredVacancies.size(), vacancies.size());
-        return filteredVacancies;
-    }
-
-
-    public Vacancy updateVacancy(Long vacancyId, VacancyUpdateDto vacancyUpdateDto) {
-
-        Long userId = userContext.getUserId();
-        Vacancy vacancy = vacancyRepository.getReferenceById(vacancyId);
+        Candidate candidate = candidateMapper.toCandidate(candidateCreateDto);
         Project project = vacancy.getProject();
-        Long projectId = project.getId();
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-
-        VacancyValidator.validateRoleForVacancyCreation(teamMember);
-
-        VacancyValidator.guardAgainstUpdatingClosedVacancy(vacancy.getStatus());
-        Candidate candidate = null;
-        Long candidateId = vacancyUpdateDto.candidateId();
-        if (candidateId != null) {
-            candidate = candidateRepository.getReferenceById(candidateId);
-        }
-
-        vacancyMapper.mappingVacancyUpdateDto(vacancy, vacancyUpdateDto, candidate);
-
-        if (vacancyUpdateDto.vacancyStatus() != null && vacancyUpdateDto.vacancyStatus().equals(CLOSED)) {
-            processVacancyClosure(vacancy, project);
-        }
-
+        VacancyValidator.validateCandidateIsAlreadyProjectMember(project, candidate);
+        candidate.setCandidateStatus(CandidateStatus.WAITING_RESPONSE);
+        candidate.setIsAccepted(false);
+        candidate.setVacancy(vacancy);
+        List<Candidate> candidates = new ArrayList<>(vacancy.getCandidates());
+        candidates.add(candidate);
+        vacancy.setCandidates(candidates);
         vacancyRepository.save(vacancy);
-        log.info("The vacancy {} has been updated", vacancy.getId());
-        return vacancy;
+        log.info("Added candidate with id: {} and status: {} to vacancy: {} in project: {}",
+                candidateCreateDto.userId(), candidate.getCandidateStatus(), vacancyId, project.getId());
+        return vacancyMapper.toVacancyDto(vacancy);
     }
 
-    private void processVacancyClosure(Vacancy vacancy,
-                                       Project project) {
-        List<TeamMember> teamMemberList = new ArrayList<>();
-        int limitCandidate = vacancy.getCount();
+    @Transactional
+    public CandidateDto updateCandidateStatus(Long vacancyId, Long candidateId, CandidateStatus status) {
+        VacancyValidator.validateCandidateStatusNotNull(status);
+        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        long userId = userContext.getUserId();
+        long projectId = vacancy.getProject().getId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        VacancyValidator.validateRole(author);
 
-        Team team = VacancyValidator.validateVacancyTeamInProject(vacancy, project);
-        VacancyValidator.checkCountCandidates(vacancy);
-        vacancy.getCandidates().stream()
-                .limit(limitCandidate)
-                .forEach(candidate -> {
-                    TeamMember teamMemberNew = createTeamMember(candidate, team, vacancy.getPosition());
-                    teamMemberList.add(teamMemberNew);
-                });
-
-        teamMemberRepository.saveAll(teamMemberList);
+        Candidate candidate = candidateRepository.findByVacancyIdAndCandidateIdOrThrow(vacancyId, candidateId);
+        VacancyValidator.validateCandidateNotInCurrentStatus(vacancy, candidate, status);
+        candidate.setCandidateStatus(status);
+        candidate.setIsAccepted(status.isAccepted());
+        VacancyValidator.validateCandidateIsAlreadyProjectMember(vacancy.getProject(), candidate);
+        addCandidateToTeam(status, projectId, candidateId, vacancyId);
+        vacancyRepository.save(vacancy);
+        log.info("Updated status for Candidate with id: {} in vacancy {} to status: {}",
+                candidate.getUserId(), vacancyId, status.getActionText());
+        return candidateMapper.toCandidateDto(candidate);
     }
 
-    private TeamMember createTeamMember(Candidate candidate, Team team, TeamRole position) {
-        return TeamMember.builder()
-                .userId(candidate.getUserId())
-                .nickname(candidate.getUsername())
-                .team(team)
-                .roles(Arrays.asList(position))
-                .build();
+    @Transactional
+    public VacancyDto closeVacancy(Long vacancyId) {
+        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        long userId = userContext.getUserId();
+        long projectId = vacancy.getProject().getId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+
+        VacancyValidator.validateRole(author);
+        VacancyValidator.validateVacancyIsClose(vacancy);
+        VacancyValidator.validateCanCloseVacancy(vacancy);
+
+        vacancy.setStatus(VacancyStatus.CLOSED);
+        vacancyRepository.save(vacancy);
+
+        log.info("Close vacancy with id: {}", vacancyId);
+        return vacancyMapper.toVacancyDto(vacancy);
     }
 
-
-    private Predicate<Vacancy> byPosition(TeamRole position) {
-        return vacancy -> position == null || Objects.equals(vacancy.getPosition(), position);
+    @Transactional
+    public VacancyDto getVacancy(Long vacancyId) {
+        Vacancy vacancy = vacancyRepository.getWithCandidatesOrThrow(vacancyId);
+        log.info("Get vacancy with id: {}", vacancyId);
+        return vacancyMapper.toVacancyDto(vacancy);
     }
 
-    private Predicate<Vacancy> byName(String name) {
-        return vacancy -> {
-            if (name == null || name.isBlank()) {
-                return true;
-            }
-            return vacancy.getName() != null
-                    && vacancy.getName().toLowerCase().contains(name.toLowerCase());
-        };
+    @Transactional
+    public PageResponse<VacancyDto> findVacancies(Pageable pageable, SearchDto searchDto) {
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Example<Vacancy> example = Example.of(Vacancy.builder()
+                .description(searchDto.description())
+                .position(searchDto.position())
+                .build(), matcher);
+
+        Page<Vacancy> pageVacancy = vacancyRepository.findAll(example, pageable);
+        return PageResponse.from(pageVacancy, vacancyMapper::toVacancyDto);
+    }
+
+    @Transactional
+    public void deleteVacancy(Long vacancyId) {
+        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
+        VacancyValidator.validateVacancyHasProject(vacancy);
+
+        long userId = userContext.getUserId();
+        long projectId = vacancy.getProject().getId();
+        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+
+        VacancyValidator.validateRole(author);
+
+        vacancyRepository.deleteById(vacancyId);
+        log.info("Delete vacancy with id: {}", vacancyId);
+    }
+
+    private void validateUserExist(Long userId) {
+        try {
+            userServiceClient.getUser(userId);
+        } catch (Exception e) {
+            log.error("User with id {} not found", userId, e);
+            throw new EntityNotFoundException("User with id " + userId + " not found");
+        }
+    }
+
+    private void addCandidateToTeam(CandidateStatus status, Long projectId, Long candidateId, Long vacancyId) {
+        if (status == CandidateStatus.ACCEPTED) {
+            teamMemberService.addCandidateToTeam(projectId, candidateId, vacancyId);
+            log.info("Adding candidate {}  to project team {} for vacancy {}",
+                    candidateId, projectId, vacancyId);
+            VacancyValidator.validateAutomaticallyClosed(vacancyRepository.getByIdOrThrow(vacancyId));
+        }
     }
 }
