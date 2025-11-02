@@ -2,16 +2,12 @@ package faang.school.projectservice.mapper.internship;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.TeamMember;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InternshipMapper {
 
-    public static Internship toInternship(CreateInternshipDto createInternshipDto,
-                                   Project project,
-                                   TeamMember mentor) {
+    public static Internship toInternship(CreateInternshipDto createInternshipDto) {
         return Internship.builder()
                 .name(createInternshipDto.name())
                 .description(createInternshipDto.description())
@@ -19,8 +15,6 @@ public class InternshipMapper {
                 .role(createInternshipDto.role())
                 .startDate(createInternshipDto.startDate())
                 .endDate(createInternshipDto.endDate())
-                .project(project)
-                .mentorId(mentor)
                 .build();
     }
 }

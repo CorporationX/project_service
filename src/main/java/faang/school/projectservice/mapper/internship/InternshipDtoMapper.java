@@ -6,15 +6,12 @@ import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface InternshipDtoMapper {
-
-    InternshipDtoMapper INSTANCE = Mappers.getMapper(InternshipDtoMapper.class);
 
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "mentorId", source = "mentorId.id")
