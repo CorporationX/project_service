@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.vacancy;
 
+import faang.school.projectservice.dto.common.PageResponse;
 import faang.school.projectservice.dto.vacancy.SearchDto;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -55,8 +56,8 @@ public class VacancyController {
     }
 
     @GetMapping
-    public Page<VacancyDto> findVacancies(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+    public PageResponse<VacancyDto> findVacancies(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Valid @ModelAttribute SearchDto searchDto) {
         return vacancyService.findVacancies(pageable, searchDto);
     }

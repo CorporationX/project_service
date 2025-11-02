@@ -3,6 +3,7 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.common.PageResponse;
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
 import faang.school.projectservice.dto.vacancy.SearchDto;
@@ -158,7 +159,7 @@ public class VacancyService {
     }
 
     @Transactional
-    public Page<VacancyDto> findVacancies(Pageable pageable, SearchDto searchDto) {
+    public PageResponse<VacancyDto> findVacancies(Pageable pageable, SearchDto searchDto) {
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
                 .withIgnoreCase()
@@ -170,7 +171,7 @@ public class VacancyService {
                 .build(), matcher);
 
         Page<Vacancy> pageVacancy = vacancyRepository.findAll(example, pageable);
-        return pageVacancy.map(vacancyMapper::toVacancyDto);
+        return PageResponse.from(pageVacancy, vacancyMapper::toVacancyDto);
     }
 
     @Transactional
