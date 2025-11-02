@@ -34,22 +34,17 @@ public class InternshipService {
         internshipValidator.validateInternshipLength(createInternshipDto);
         validateMentorBelongsToProject(createInternshipDto);
 
-        Project project = projectRepository.findById(createInternshipDto.projectId()).orElseThrow(() ->
+        Project projectId = projectRepository.findById(createInternshipDto.projectId()).orElseThrow(() ->
                 new RuntimeException("Project with ID " + createInternshipDto.projectId() + " was not found"));
-        TeamMember mentor = teamMemberRepository.findById(createInternshipDto.mentorId()).orElseThrow(() ->
+        TeamMember mentorId = teamMemberRepository.findById(createInternshipDto.mentorId()).orElseThrow(() ->
                 new RuntimeException("Mentor with ID " + createInternshipDto.mentorId() + " was not found"));
-        boolean belongsToAnyTeam = project.getTeams().stream()
-                .anyMatch(team -> team.getTeamMembers().contains(mentor));
+        List<TeamMember> interns = fetchInterns(createInternshipDto.internsIds());
 
-        if (!belongsToAnyTeam) {
-            try {
-                throw new ValidationException("The specified mentor is not a member of the project team");
-            } catch (ValidationException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        Internship internship = internshipMapper.toInternship(createInternshipDto);
 
-        Internship internship = internshipMapper.toInternship(createInternshipDto, project, mentor);
+        internship.setProject(projectId);
+        internship.setMentorId(mentorId);
+        internship.setInterns(interns);
 
         internship = internshipRepository.save(internship);
 
