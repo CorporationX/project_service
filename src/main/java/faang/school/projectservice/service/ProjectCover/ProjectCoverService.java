@@ -44,6 +44,7 @@ public class ProjectCoverService {
             log.info("added cover image with key{} for projectId: {}", key, projectId);
 
         } catch (IOException e) {
+            log.error(String.valueOf(e));
             throw new RuntimeException(e);
         }
     }
@@ -69,6 +70,7 @@ public class ProjectCoverService {
             log.info("updated cover image with key{} for projectId: {}", key, projectId);
 
         } catch (IOException e) {
+            log.error(String.valueOf(e));
             throw new RuntimeException(e);
         }
     }
@@ -99,9 +101,10 @@ public class ProjectCoverService {
     }
 
     public byte[] processCoverImage(MultipartFile file) throws IOException {
-        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(file.getBytes()));
+        BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
         if (originalImage == null) {
+            log.error("Невозможно прочитать изображение");
             throw new RuntimeException("Невозможно прочитать изображение");
         }
 

@@ -29,7 +29,7 @@ public class ProjectCoverController {
     private final ProjectCoverService projectCoverService;
     private final UserContext userContext;
 
-    @PostMapping("{projectId}")
+    @PostMapping("/{projectId}")
     public ResponseEntity<Void> addProjectCover(@PathVariable Long projectId, @NotNull @RequestBody MultipartFile file) {
         projectCoverService.addCover(projectId, userContext.getUserId(), file);
         return ResponseEntity.ok().build();
