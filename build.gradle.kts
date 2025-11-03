@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
 }
 
 group = "faang.school"
@@ -41,8 +42,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    implementation("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
@@ -67,6 +68,66 @@ tasks.withType<Test> {
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+
+/**
+ * Jacoco settings
+ */
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)   // нужен для CI (например, SonarQube)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
+    }
+
+    classDirectories.setFrom(
+            files(classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                            "faang/school/projectservice/controller/**",
+                            "faang/school/projectservice/repository/**"
+                    )
+                }
+            })
+    )
+}
+
+/**
+ * Проверка минимального процента покрытия кода
+ */
+tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+            files(classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                            "faang/school/projectservice/controller/**",
+                            "faang/school/projectservice/repository/**"
+                    )
+                }
+            })
+    )
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.7".toBigDecimal() // не меньше 60% покрытия
+            }
+        }
+    }
+}
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
