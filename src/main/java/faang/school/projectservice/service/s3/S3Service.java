@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Arrays;
 
 @Service
@@ -22,9 +21,6 @@ public class S3Service {
 
     public void uploadFile(String contentType, byte[] fileBytes, String key) {
         long fileSize = fileBytes.length;
-        if (fileSize > 1024 * 1024 * 5) {
-
-        }
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(contentType);
@@ -42,10 +38,10 @@ public class S3Service {
         s3Client.deleteObject(bucketName, key);
     }
 
-    public InputStream downloadFile(String key) {
+    public byte[] downloadFile(String key) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, key);
-            return s3Object.getObjectContent();
+            return s3Object.getObjectContent().readAllBytes();
         } catch (Exception e) {
             log.error(Arrays.toString(e.getStackTrace()));
             throw new RuntimeException(e);

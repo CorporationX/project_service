@@ -13,10 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @RequiredArgsConstructor
 @Service
@@ -38,20 +36,21 @@ public class ProjectCoverService {
         byte[] image;
         try {
             image = processCoverImage(file);
-            s3Service.uploadFile(file.getContentType(),image, key);
+            s3Service.uploadFile(file.getContentType(), image, key);
             project.setCoverImageId(key);
             projectRepository.save(project);
             log.info("added cover image with key{} for projectId: {}", key, projectId);
 
         } catch (IOException e) {
-            log.error(String.valueOf(e));
+            log.error("couldn't read the file", e);
             throw new RuntimeException(e);
         }
     }
 
-    public InputStream downloadCover(Long projectId) {
+    public byte[] downloadCover(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow();
         String key = project.getCoverImageId();
+
         return s3Service.downloadFile(key);
     }
 
@@ -65,12 +64,12 @@ public class ProjectCoverService {
         byte[] image;
         try {
             image = processCoverImage(file);
-            s3Service.uploadFile(file.getContentType(),image, key);
+            s3Service.uploadFile(file.getContentType(), image, key);
             projectRepository.save(project);
             log.info("updated cover image with key{} for projectId: {}", key, projectId);
 
         } catch (IOException e) {
-            log.error(String.valueOf(e));
+            log.error("couldn't upload the file", e);
             throw new RuntimeException(e);
         }
     }
@@ -104,8 +103,9 @@ public class ProjectCoverService {
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
         if (originalImage == null) {
-            log.error("Невозможно прочитать изображение");
-            throw new RuntimeException("Невозможно прочитать изображение");
+            String message = "The image is not read";
+            log.error(message);
+            throw new RuntimeException(message);
         }
 
         int originalWidth = originalImage.getWidth();

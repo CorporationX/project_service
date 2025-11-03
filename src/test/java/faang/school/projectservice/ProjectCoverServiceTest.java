@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,16 +71,15 @@ public class ProjectCoverServiceTest {
 
         Project project = new Project();
         project.setCoverImageId(coverImageKey);
-
-        InputStream expectedInputStream = new ByteArrayInputStream("test image content".getBytes());
+        byte[] expected = "test".getBytes();
 
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-        when(s3Service.downloadFile(anyString())).thenReturn(expectedInputStream);
+        when(s3Service.downloadFile(anyString())).thenReturn(expected);
 
-        InputStream result = projectCoverService.downloadCover(1L);
+        byte[] result = projectCoverService.downloadCover(1L);
 
         assertNotNull(result);
-        assertEquals(expectedInputStream, result);
+        assertEquals(expected, result);
 
         verify(projectRepository, times(1)).findById(1L);
         verify(s3Service, times(1)).downloadFile(coverImageKey);

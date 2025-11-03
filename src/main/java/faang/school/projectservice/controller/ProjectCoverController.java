@@ -22,39 +22,33 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/project-cover")
+@RequestMapping("api/v1/projects")
 @Validated
 public class ProjectCoverController {
 
     private final ProjectCoverService projectCoverService;
     private final UserContext userContext;
 
-    @PostMapping("/{projectId}")
+    @PostMapping("/{projectId}/project-covers")
     public ResponseEntity<Void> addProjectCover(@PathVariable Long projectId, @NotNull @RequestBody MultipartFile file) {
         projectCoverService.addCover(projectId, userContext.getUserId(), file);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(path = "/{projectId}", produces = "application/octet-stream")
+    @GetMapping(path = "/{projectId}/project-covers", produces = "application/octet-stream")
     public ResponseEntity<byte[]> downloadProjectCover(@PathVariable Long projectId) {
-        byte[] imageBytes = null;
-        try {
-            imageBytes = projectCoverService.downloadCover(projectId).readAllBytes();
-        } catch (IOException e) {
-            log.error("Error downloading resource", e);
-        }
 
-        return new ResponseEntity<>(imageBytes, HttpStatus.OK);
+        return new ResponseEntity<>(projectCoverService.downloadCover(projectId), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{projectId}")
+    @DeleteMapping("/{projectId}/project-covers")
     public ResponseEntity<Void> deleteProjectCover(@PathVariable Long resourceId) {
         projectCoverService.deleteCover(resourceId, userContext.getUserId());
 
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{projectId}")
+    @PutMapping("/{projectId}/project-covers")
     public ResponseEntity<Void> updateProjectCover(@PathVariable Long resourceId, @RequestBody MultipartFile file) {
         projectCoverService.updateCover(resourceId, userContext.getUserId(), file);
 
