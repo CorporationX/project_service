@@ -24,6 +24,13 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
+     * Spring Cloud
+     */
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.1"))
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+
+    /**
      * Database
      */
     implementation("org.liquibase:liquibase-core")
