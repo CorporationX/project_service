@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.moment.UpdateMomentDto;
 import faang.school.projectservice.service.moment.MomentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/moments")
 @RequiredArgsConstructor
@@ -25,13 +27,13 @@ public class MomentController {
     private final MomentService momentService;
 
     @PostMapping
-    public MomentDto createMoment(@RequestBody @NonNull CreateMomentDto momentDto) throws Exception {
+    public MomentDto createMoment(@RequestBody @Validated CreateMomentDto momentDto) throws Exception {
         return momentService.createMoment(momentDto);
     }
 
     @PutMapping("/{id}")
     public MomentDto updateMoment(
-            @PathVariable("id") long momentId, @RequestBody @NonNull UpdateMomentDto momentDto) throws Exception {
+            @PathVariable("id") long momentId, @RequestBody @Validated UpdateMomentDto momentDto) throws Exception {
         return momentService.updateMoment(momentId, momentDto);
     }
 
@@ -51,7 +53,7 @@ public class MomentController {
     }
 
     @PostMapping("/by-month")
-    public List<MomentDto> getMomentsByMonth(@RequestBody SearchMomentDto searchMomentDto) {
+    public List<MomentDto> getMomentsByMonth(@RequestBody @Validated SearchMomentDto searchMomentDto) {
         return momentService.getMomentsByMonth(searchMomentDto);
     }
 

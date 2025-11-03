@@ -1,16 +1,18 @@
 package faang.school.projectservice.dto.moment;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record CreateMomentDto(
-        String name,
-        String description,
+        @NotBlank String name,
+        @NotBlank String description,
         LocalDateTime date,
         List<Long> projectIds,
         List<Long> userIds,
         String imageId,
         LocalDateTime createdAt,
-        Long createdBy
+        @NotBlank Long createdBy
 ) {
 }
