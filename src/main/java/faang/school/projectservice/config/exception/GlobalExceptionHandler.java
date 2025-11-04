@@ -1,5 +1,8 @@
-package faang.school.projectservice.exception.vacancy;
+package faang.school.projectservice.config.exception;
 
+import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
+import faang.school.projectservice.exception.vacancy.ErrorResponse;
+import faang.school.projectservice.exception.vacancy.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

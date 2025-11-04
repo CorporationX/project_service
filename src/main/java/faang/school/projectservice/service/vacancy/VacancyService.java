@@ -2,10 +2,8 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.common.PageResponse;
 import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
-import faang.school.projectservice.dto.vacancy.CandidateDto;
 import faang.school.projectservice.dto.vacancy.SearchDto;
 import faang.school.projectservice.dto.vacancy.VacancyCreateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -46,9 +44,7 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
     private final CandidateMapper candidateMapper;
-    private final TeamMemberService teamMemberService;
     private final UserServiceClient userServiceClient;
-    private final CandidateRepository candidateRepository;
 
     @Transactional
     public VacancyDto createVacancy(VacancyCreateDto vacancyCreateDto) {
@@ -113,27 +109,6 @@ public class VacancyService {
     }
 
     @Transactional
-    public CandidateDto updateCandidateStatus(Long vacancyId, Long candidateId, CandidateStatus status) {
-        VacancyValidator.validateCandidateStatusNotNull(status);
-        Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-        long userId = userContext.getUserId();
-        long projectId = vacancy.getProject().getId();
-        TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-        VacancyValidator.validateRole(author);
-
-        Candidate candidate = candidateRepository.findByVacancyIdAndCandidateIdOrThrow(vacancyId, candidateId);
-        VacancyValidator.validateCandidateNotInCurrentStatus(vacancy, candidate, status);
-        candidate.setCandidateStatus(status);
-        candidate.setIsAccepted(status.isAccepted());
-        VacancyValidator.validateCandidateIsAlreadyProjectMember(vacancy.getProject(), candidate);
-        addCandidateToTeam(status, projectId, candidateId, vacancyId);
-        vacancyRepository.save(vacancy);
-        log.info("Updated status for Candidate with id: {} in vacancy {} to status: {}",
-                candidate.getUserId(), vacancyId, status.getActionText());
-        return candidateMapper.toCandidateDto(candidate);
-    }
-
-    @Transactional
     public VacancyDto closeVacancy(Long vacancyId) {
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
         long userId = userContext.getUserId();
@@ -195,15 +170,6 @@ public class VacancyService {
         } catch (Exception e) {
             log.error("User with id {} not found", userId, e);
             throw new EntityNotFoundException("User with id " + userId + " not found");
-        }
-    }
-
-    private void addCandidateToTeam(CandidateStatus status, Long projectId, Long candidateId, Long vacancyId) {
-        if (status == CandidateStatus.ACCEPTED) {
-            teamMemberService.addCandidateToTeam(projectId, candidateId, vacancyId);
-            log.info("Adding candidate {}  to project team {} for vacancy {}",
-                    candidateId, projectId, vacancyId);
-            VacancyValidator.validateAutomaticallyClosed(vacancyRepository.getByIdOrThrow(vacancyId));
         }
     }
 }

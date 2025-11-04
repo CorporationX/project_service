@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +85,9 @@ public class VacancyServiceTest {
 
     @InjectMocks
     private VacancyService vacancyService;
+
+    @InjectMocks
+    private CandidateService candidateService;
 
     @Captor
     private ArgumentCaptor<Vacancy> vacancyCaptor;
@@ -226,7 +228,7 @@ public class VacancyServiceTest {
         when(teamMemberRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(author);
         when(candidateRepository.findByVacancyIdAndCandidateIdOrThrow(1L, 200L)).thenReturn(candidate);
 
-        CandidateDto result = vacancyService.updateCandidateStatus(1L, 200L, CandidateStatus.ACCEPTED);
+        CandidateDto result = candidateService.updateCandidateStatus(1L, 200L, CandidateStatus.ACCEPTED);
 
         assertNotNull(result);
         assertEquals(CandidateStatus.ACCEPTED, result.candidateStatus());
