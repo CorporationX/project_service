@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import jakarta.validation.ConstraintValidator;
