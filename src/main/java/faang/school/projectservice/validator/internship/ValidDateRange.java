@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.internship;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

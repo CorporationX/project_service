@@ -1,6 +1,7 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.TeamMember;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,4 +17,9 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    default TeamMember findMentorByIdOrThrow(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Mentor with ID %d was not found".formatted(id)));
+    }
 }
