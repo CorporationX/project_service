@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -109,6 +110,7 @@ public class MeetServiceImplTest {
         when(projectRepository.getByIdOrThrow(project.getId())).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> meetServiceWithExactDateFilter.create(createMeetDto));
+        verify(meetRepository, never()).save(Mockito.any(Meet.class));
     }
 
     @Test
