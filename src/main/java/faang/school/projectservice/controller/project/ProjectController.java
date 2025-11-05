@@ -59,7 +59,7 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/avatar")
-    public ResponseEntity<ResourceDto> addProjectAvatar(@PathVariable long projectId,
+    public ResponseEntity<ResourceDto> addProjectAvatar(@PathVariable Long projectId,
                                                         @RequestParam("file") MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED).body(resourceService.addProjectAvatar(projectId, file));
     }
