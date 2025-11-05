@@ -48,6 +48,9 @@ public class InternshipService {
     }
 
     private void validateMentorBelongsToProject(Project project, TeamMember mentor) {
+        if (project.getTeams() == null || project.getTeams().isEmpty()) {
+            throw new EntityNotFoundException("Project has no associated teams.");
+        }
         boolean belongsToAnyTeam = project.getTeams().stream()
                 .anyMatch(team -> team.getTeamMembers().contains(mentor));
         if (!belongsToAnyTeam) {
