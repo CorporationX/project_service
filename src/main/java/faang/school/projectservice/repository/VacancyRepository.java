@@ -34,16 +34,16 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
     @Query("""
             SELECT v FROM Vacancy v
-            WHERE (:description IS NULL OR LOWER(v.description) LIKE LOWER(CONCAT('%', :description, '%'))) AND
-                  (:position IS NULL OR LOWER(v.position) LIKE LOWER(CONCAT('%', :position, '%')))
+            WHERE (:description IS NULL OR v.description ILIKE CONCAT('%', :description, '%')) AND
+                  (:position IS NULL OR v.position ILIKE CONCAT('%', :position, '%'))
             """)
     List<Vacancy> findVacancyByFilters(@Param("description") String description,
                                        @Param("position") TeamRole position);
 
-    @Query("""
-            SELECT v FROM Vacancy v 
+    @Query(value = """
+            SELECT * FROM vacancy
             WHERE (:description IS NULL OR v.description ILIKE CONCAT('%', :description, '%'))
-            """)
+            """, nativeQuery = true)
     List<Vacancy> findVacancyByDescription(@Param("description") String description);
 
     @Query("""

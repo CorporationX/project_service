@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.vacancy.CandidateCreateDto;
 import faang.school.projectservice.dto.vacancy.CandidateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.CandidateStatus;
+import faang.school.projectservice.service.vacancy.CandidateService;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CandidateController {
     private final VacancyService vacancyService;
+    private final CandidateService candidateService;
 
-    @PostMapping("/{vacancyId}")
-    public VacancyDto addCandidatesToVacancy(@PathVariable Long vacancyId,
+    @PostMapping
+    public VacancyDto addCandidatesToVacancy(@RequestParam("vacancyId") Long vacancyId,
                                              @Valid @RequestBody CandidateCreateDto candidateCreateDto) {
-
         return vacancyService.addCandidatesToVacancy(vacancyId, candidateCreateDto);
     }
 
-    @PatchMapping("/vacancies/{vacancyId}/candidates/{candidateId}")
-    public CandidateDto updateCandidateStatus(@PathVariable Long vacancyId,
+    @PatchMapping("/{candidateId}")
+    public CandidateDto updateCandidateStatus(@RequestParam("vacancyId") Long vacancyId,
                                               @PathVariable Long candidateId,
                                               @RequestParam CandidateStatus status) {
-        return vacancyService.updateCandidateStatus(vacancyId, candidateId, status);
+        return candidateService.updateCandidateStatus(vacancyId, candidateId, status);
     }
 }
