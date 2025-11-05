@@ -1,0 +1,32 @@
+package faang.school.projectservice.dto.subproject;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.Min;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record UpdateSubProjectDto(
+        @Min(1)
+        @JsonProperty("id") Long id,
+        @JsonProperty("name") String name,
+        @JsonProperty("description") String description,
+        @JsonProperty("childrenIds") List<Long> childrenIds,
+        @JsonProperty("tasksIds") List<Long> taskIds,
+        @JsonProperty("resourceIds") List<String> resourceIds,
+        @JsonProperty("status") ProjectStatus status,
+        @JsonProperty("visibility") ProjectVisibility visibility,
+        @JsonProperty("coverImageId") String coverImageId,
+        @JsonProperty("teamIds") List<Long> teamIds,
+        @JsonProperty("scheduleId") Long scheduleId,
+        @JsonProperty("stageIds") List<Long> stageIds,
+        @JsonProperty("vacancieIds") List<Long> vacancyIds,
+        @JsonProperty("momentIds") List<Long> momentIds,
+        @JsonProperty("meetIds") List<Long> meetIds,
+        @JsonProperty("presentationFileKey") String presentationFileKey,
+        @JsonProperty("presentationGeneratedAt") LocalDateTime presentationGeneratedAt,
+        @JsonProperty("galleryFileKeys") List<String> galleryFileKeys
+) {
+}
