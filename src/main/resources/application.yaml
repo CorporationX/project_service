@@ -56,3 +56,11 @@ services:
 internship:
   duration:
     months: 3
+cover:
+   max-size-bytes: 5242880
+   max-width-horizontal: 1080
+   max-height-horizontal: 566
+   max-width-vertical: 566
+   max-height-vertical: 1080
+   max-square: 1080
+   output-quality: 0.85
