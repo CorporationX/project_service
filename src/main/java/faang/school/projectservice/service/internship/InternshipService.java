@@ -35,6 +35,7 @@ public class InternshipService {
         validateMentorBelongsToProject(project, mentor);
 
         List<TeamMember> interns = teamMemberRepository.findAllById(createInternshipDto.internsIds());
+        validateInternsNotEmpty(interns);
 
         Internship internship = InternshipMapper.toInternship(
                 createInternshipDto,
@@ -55,6 +56,12 @@ public class InternshipService {
                 .anyMatch(team -> team.getTeamMembers().contains(mentor));
         if (!belongsToAnyTeam) {
             throw new EntityNotFoundException("Mentor is not a member of the project team");
+        }
+    }
+
+    private void validateInternsNotEmpty(List<TeamMember> interns) {
+        if(interns == null || interns.isEmpty()) {
+            throw new EntityNotFoundException("Interns are missing.");
         }
     }
 }
