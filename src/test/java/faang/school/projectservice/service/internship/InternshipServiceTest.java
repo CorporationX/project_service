@@ -155,11 +155,9 @@ class InternshipServiceTest {
         Project project = new Project();
         project.setTeams(teams);
 
-        List<TeamMember> interns = new ArrayList<>();
-
         Mockito.when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
         Mockito.when(teamMemberRepository.findMentorByIdOrThrow(2L)).thenReturn(mentor);
-        Mockito.when(teamMemberRepository.findAllById(dto.internsIds())).thenReturn(interns);
+        Mockito.when(teamMemberRepository.findAllById(dto.internsIds())).thenReturn(Collections.emptyList());
 
         Assertions.assertThrows(EntityNotFoundException.class,
                 () -> internshipService.createInternship(dto));
