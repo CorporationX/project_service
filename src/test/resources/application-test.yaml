@@ -1,0 +1,5 @@
+calculations_messages_processing:
+  enabled: false
+internship:
+  duration:
+    months: 3

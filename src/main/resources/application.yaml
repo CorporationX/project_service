@@ -25,6 +25,10 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size=5MB:
+
 server:
   port: 8082
 
@@ -49,6 +53,9 @@ services:
     host: http://localhost
     port: 8080
 
+internship:
+  duration:
+    months: 3
 cover:
    max-size-bytes: 5242880
    max-width-horizontal: 1080
