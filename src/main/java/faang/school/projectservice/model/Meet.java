@@ -27,6 +27,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "id")
+@Builder
+@AllArgsConstructor
 public class Meet {
 
     @Id
