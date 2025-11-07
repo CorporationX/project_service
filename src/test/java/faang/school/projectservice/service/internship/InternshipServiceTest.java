@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,38 +49,49 @@ class InternshipServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
 
-    @Test
-    public void testCreateInternship_Success() {
-        CreateInternshipDto dto = new CreateInternshipDto(
+    private final TeamMember mentor = new TeamMember();
+    private final Team team = new Team();
+    private final List<Team> teams = new ArrayList<>();
+    private final Project project = new Project();
+    private final TeamMember intern = new TeamMember();
+    private final List<TeamMember> interns = new ArrayList<>();
+
+    private final long DAYS_NUMBER = 1L;
+    private final long PROJECT_ID = 1L;
+    private final long MENTOR_ID = 2L;
+    private final long INTERNS = 3L;
+
+    private CreateInternshipDto createInternshipDto() {
+        return new CreateInternshipDto(
                 "Yandex",
                 "I'm gay",
                 IN_PROGRESS,
                 OWNER,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1),
-                1L,
-                2L,
-                Collections.singletonList(3L)
+                LocalDateTime.now().plusDays(DAYS_NUMBER),
+                PROJECT_ID,
+                MENTOR_ID,
+                Collections.singletonList(INTERNS)
         );
+    }
 
-        TeamMember mentor = new TeamMember();
+    @Test
+    public void testCreateInternship_Success() {
+        CreateInternshipDto dto = createInternshipDto();
 
-        Team team = new Team();
         team.setTeamMembers(List.of(mentor));
 
-        List<Team> teams = new ArrayList<>();
         teams.add(team);
 
-        Project project = new Project();
         project.setTeams(teams);
+        project.setId(PROJECT_ID);
+        mentor.setId(MENTOR_ID);
 
-        TeamMember intern = new TeamMember();
-
-        List<TeamMember> interns = new ArrayList<>();
+        intern.setId(INTERNS);
         interns.add(intern);
 
-        Mockito.when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
-        Mockito.when(teamMemberRepository.findMentorByIdOrThrow(2L)).thenReturn(mentor);
+        Mockito.when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(project);
+        Mockito.when(teamMemberRepository.findMentorByIdOrThrow(MENTOR_ID)).thenReturn(mentor);
         Mockito.when(teamMemberRepository.findAllById(dto.internsIds())).thenReturn(interns);
         Mockito.when(internshipRepository.save(Mockito.any(Internship.class)))
                 .thenAnswer(invocationOnMock -> {
@@ -88,38 +100,28 @@ class InternshipServiceTest {
 
         InternshipDto result = internshipService.createInternship(dto);
 
+        Assertions.assertEquals("Yandex", result.name());
         Assertions.assertEquals("I'm gay", result.description());
+        Assertions.assertEquals(IN_PROGRESS, result.status());
+        Assertions.assertEquals(OWNER, result.role());
+        Assertions.assertTrue(Duration.between(result.startDate(), LocalDateTime.now()).abs().toMillis() <= 100);
+        Assertions.assertTrue(Duration.between(result.endDate(), LocalDateTime.now().plusDays(DAYS_NUMBER)).abs().toMillis() <= 100);
+        Assertions.assertEquals(PROJECT_ID, result.projectId());
+        Assertions.assertEquals(MENTOR_ID, result.mentorId());
+        Assertions.assertEquals(Collections.singletonList(INTERNS), result.internsIds());
         Assertions.assertDoesNotThrow(() -> internshipService.createInternship(dto));
     }
 
     @Test
     public void testValidateInternsNotEmpty_Null() {
-        CreateInternshipDto dto = new CreateInternshipDto(
-                "Yandex",
-                "I'm gay",
-                IN_PROGRESS,
-                OWNER,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1),
-                1L,
-                2L,
-                Collections.singletonList(3L)
-        );
+        CreateInternshipDto dto = createInternshipDto();
 
-        TeamMember mentor = new TeamMember();
-
-        Team team = new Team();
         team.setTeamMembers(List.of(mentor));
 
-        List<Team> teams = new ArrayList<>();
         teams.add(team);
 
-        Project project = new Project();
         project.setTeams(teams);
 
-        TeamMember intern = new TeamMember();
-
-        List<TeamMember> interns = new ArrayList<>();
         interns.add(intern);
 
         Mockito.when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
@@ -132,27 +134,12 @@ class InternshipServiceTest {
 
     @Test
     public void testValidateInternsNotEmpty_Empty() {
-        CreateInternshipDto dto = new CreateInternshipDto(
-                "Yandex",
-                "I'm gay",
-                IN_PROGRESS,
-                OWNER,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1),
-                1L,
-                2L,
-                Collections.singletonList(3L)
-        );
+        CreateInternshipDto dto = createInternshipDto();
 
-        TeamMember mentor = new TeamMember();
-
-        Team team = new Team();
         team.setTeamMembers(List.of(mentor));
 
-        List<Team> teams = new ArrayList<>();
         teams.add(team);
 
-        Project project = new Project();
         project.setTeams(teams);
 
         Mockito.when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
