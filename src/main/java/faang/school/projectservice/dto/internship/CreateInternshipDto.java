@@ -15,8 +15,8 @@ public record CreateInternshipDto(
         @NotBlank String name,
         @NotBlank String description,
 
-        @NotBlank InternshipStatus status,
-        @NotBlank TeamRole role,
+        @NotNull InternshipStatus status,
+        @NotNull TeamRole role,
 
         @NotNull LocalDateTime startDate,
         LocalDateTime endDate,
