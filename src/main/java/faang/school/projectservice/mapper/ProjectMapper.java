@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
-import java.time.LocalDateTime;
+import java.math.BigInteger;
 import java.util.function.Consumer;
 
 @Mapper(componentModel = "spring",
@@ -25,6 +25,8 @@ public interface ProjectMapper {
                 .status(ProjectStatus.CREATED)
                 .ownerId(userId)
                 .visibility(projectCreateDto.visibility())
+                .storageSize(BigInteger.valueOf(0))
+                .maxStorageSize(BigInteger.valueOf(10485760))
                 .build();
     }
 
