@@ -37,7 +37,6 @@ calculations_messages_processing:
 
 services:
   s3:
-#    endpoint: http://192.168.1.100:9000
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
