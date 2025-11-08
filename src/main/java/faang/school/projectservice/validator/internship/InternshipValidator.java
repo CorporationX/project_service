@@ -9,7 +9,7 @@ public class InternshipValidator {
 
     private static final long MONTH_NUMBER = 3L;
 
-    public static void validateInternshipLength(CreateInternshipDto createInternshipDto) {
+    public static void validateInternshipLengthDate(CreateInternshipDto createInternshipDto) {
         LocalDate start = LocalDate.from(createInternshipDto.startDate());
         LocalDate end = createInternshipDto.endDate() != null ?
                 LocalDate.from(createInternshipDto.endDate()) :

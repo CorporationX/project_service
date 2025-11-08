@@ -32,7 +32,7 @@ public class InternshipValidatorTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(3)
         );
-        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLength(dto));
+        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLengthDate(dto));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class InternshipValidatorTest {
                 LocalDateTime.now().plusMonths(4)
         );
         Assertions.assertThrows(DateTimeException.class,
-                () -> InternshipValidator.validateInternshipLength(dto));
+                () -> InternshipValidator.validateInternshipLengthDate(dto));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class InternshipValidatorTest {
                 LocalDateTime.now(),
                 null
         );
-        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLength(dto));
+        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLengthDate(dto));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class InternshipValidatorTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(3).minusSeconds(1)
         );
-        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLength(dto));
+        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLengthDate(dto));
     }
 
     @Test
@@ -69,6 +69,6 @@ public class InternshipValidatorTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusSeconds(1)
         );
-        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLength(dto));
+        Assertions.assertDoesNotThrow(() -> InternshipValidator.validateInternshipLengthDate(dto));
     }
 }

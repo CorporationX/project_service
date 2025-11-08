@@ -2,6 +2,7 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -28,7 +29,7 @@ public class InternshipService {
 
     public InternshipDto createInternship(CreateInternshipDto createInternshipDto) {
 
-        InternshipValidator.validateInternshipLength(createInternshipDto);
+        InternshipValidator.validateInternshipLengthDate(createInternshipDto);
 
         Project project = projectRepository.findByIdOrThrow(createInternshipDto.projectId());
         TeamMember mentor = teamMemberRepository.findMentorByIdOrThrow(createInternshipDto.mentorId());
@@ -46,6 +47,10 @@ public class InternshipService {
         internship = internshipRepository.save(internship);
 
         return internshipDtoMapper.toInternshipDto(internship);
+    }
+
+    public InternshipDto updateInternship(UpdateInternshipDto updateInternshipDto) {
+
     }
 
     private void validateMentorBelongsToProject(Project project, TeamMember mentor) {
