@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -41,6 +41,7 @@ services:
     accessKey: user
     secretKey: password
     bucketName: cover-image-bucket
+    resourceBucketName: project-resource-bucket
     isMocked: false
     max-file-size: 5242880
   payment-service:

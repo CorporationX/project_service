@@ -34,7 +34,7 @@ dependencies {
     /**
      * Amazon S3
      */
-    implementation("software.amazon.awssdk:s3:2.20.56")
+    implementation("software.amazon.awssdk:s3:2.37.5")
 
     /**
      * Utils & Logging
