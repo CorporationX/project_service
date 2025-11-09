@@ -1,6 +1,6 @@
-package faang.school.projectservice.controller.s3;
+package faang.school.projectservice.controller.resource;
 
-import faang.school.projectservice.service.s3.ResourceService;
+import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

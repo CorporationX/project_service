@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -81,6 +81,39 @@ public class ResourceService {
         return resourceId;
     }
 
+    @Transactional
+    public void delete(Long projectId, Long resourceId) {
+        Resource resource = resourceRepository.getByIdOrThrow(resourceId);
+        if (resource.getStatus() == ResourceStatus.DELETED) {
+            return;
+        }
+        TeamMember teamMember = getTeamMember(projectId);
+        validatePermissionToDelete(resource, teamMember);
+
+        String key = resource.getKey();
+        updateProjectStorageSize(projectId, resource.getSize().negate());
+
+        resource.setKey("");
+        resource.setSize(BigInteger.ZERO);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedBy(teamMember);
+        resourceRepository.save(resource);
+        log.info("Resource {} was marked as deleted", resource.getId());
+
+
+        try {
+            DeleteObjectRequest del = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+            s3Client.deleteObject(del);
+        } catch (Exception e) {
+            throw new FileNotSavedException(
+                    String.format("Error when deleting a file on S3 using the key: %s. Error message: %s",
+                            key, e.getMessage()));
+        }
+    }
+
     private void updateResource(Resource resource,
                                 long projectId,
                                 BigInteger fileSize,
@@ -145,39 +178,6 @@ public class ResourceService {
             throw new IllegalStateException(String.format("Storage quota (%d) exceeded for projectId: %d",
                     project.getMaxStorageSize(),
                     project.getId()));
-        }
-    }
-
-    @Transactional
-    public void delete(Long projectId, Long resourceId) {
-        Resource resource = resourceRepository.getByIdOrThrow(resourceId);
-        if (resource.getStatus() == ResourceStatus.DELETED) {
-            return;
-        }
-        TeamMember teamMember = getTeamMember(projectId);
-        validatePermissionToDelete(resource, teamMember);
-
-        String key = resource.getKey();
-        updateProjectStorageSize(projectId, resource.getSize().negate());
-
-        resource.setKey("");
-        resource.setSize(BigInteger.ZERO);
-        resource.setStatus(ResourceStatus.DELETED);
-        resource.setUpdatedBy(teamMember);
-        resourceRepository.save(resource);
-        log.info("Resource {} was marked as deleted", resource.getId());
-
-
-        try {
-            DeleteObjectRequest del = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .build();
-            s3Client.deleteObject(del);
-        } catch (Exception e) {
-            throw new FileNotSavedException(
-                    String.format("Error when deleting a file on S3 using the key: %s. Error message: %s",
-                            key, e.getMessage()));
         }
     }
 
