@@ -24,15 +24,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(DataValidationException.class)
+    @ExceptionHandler({DataValidationException.class, FileException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataValidationException(DataValidationException ex) {
-        return new ErrorResponse(ex.getMessage());
-    }
-
-    @ExceptionHandler(FileException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleFileException(FileException ex) {
+    public ErrorResponse handleBadRequestExceptions(RuntimeException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
