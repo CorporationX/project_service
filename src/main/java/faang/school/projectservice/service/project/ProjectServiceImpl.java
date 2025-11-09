@@ -1,12 +1,14 @@
 package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.kafka.ProjectViewEvent;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ForbiddenException;
+import faang.school.projectservice.kafka.producer.ProjectViewProducer;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -30,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper mapper;
     private final UserContext userContext;
+    private final ProjectViewProducer projectViewProducer;
 
     @Override
     @Transactional
@@ -121,6 +124,9 @@ public class ProjectServiceImpl implements ProjectService {
             throw new ForbiddenException("You don't have access to this private project");
         }
 
+        if (project.getOwnerId() != requesterId) {
+            projectViewProducer.sendToKafka(new ProjectViewEvent(projectId, requesterId));
+        }
         return mapper.toProjectDto(project);
     }
 
