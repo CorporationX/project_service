@@ -3,6 +3,7 @@ package faang.school.projectservice.mapper.internship;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 
@@ -17,7 +18,7 @@ public interface InternshipMapper {
         return Internship.builder()
                 .name(createInternshipDto.name())
                 .description(createInternshipDto.description())
-                .status(createInternshipDto.status())
+                .status(InternshipStatus.IN_PROGRESS)
                 .role(createInternshipDto.role())
                 .startDate(createInternshipDto.startDate())
                 .endDate(createInternshipDto.endDate())

@@ -3,7 +3,7 @@ package faang.school.projectservice.service.internship;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
-import faang.school.projectservice.exception.TasksValidationException;
+import faang.school.projectservice.exception.CanNotUpdateStatusValidationException;
 import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -12,7 +12,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -59,9 +58,11 @@ public class InternshipService {
 
     public InternshipDto updateInternship(long internshipId, UpdateInternshipDto updateIDto) {
         Internship internship = internshipRepository.findByIdOrThrow(internshipId);
+        validateIfInternshipIsComplete(internship);
 
         if (updateIDto.status() == InternshipStatus.COMPLETED) {
             handleInternshipCompletion(internship);
+            //endDate update
         } else {
             InternshipMapper.update(updateIDto, internship);
         }
@@ -87,17 +88,23 @@ public class InternshipService {
         }
     }
 
+    private void validateIfInternshipIsComplete(Internship internship) {
+        if (internship.getStatus() == InternshipStatus.COMPLETED) {
+            throw new CanNotUpdateStatusValidationException();
+        }
+    }
+
     private void handleInternshipCompletion(Internship internship) {
         List<TeamMember> interns = internship.getInterns();
         for (TeamMember intern : interns) {
             List<Task> tasks = taskRepository.findByPerformerUserId(intern.getId());
 
             if (!areAllTasksCompleted(tasks)) {
-                throw new TasksValidationException("Not all tasks were completed by intern: %s".formatted(intern.getNickname()));
+                //Удалить из проекта;
             }
         }
         for (TeamMember intern : interns) {
-            intern.setRoles(Collections.singletonList(TeamRole.DEVELOPER));
+            intern.setRoles(Collections.singletonList(internship.getRole()));
         }
     }
 
