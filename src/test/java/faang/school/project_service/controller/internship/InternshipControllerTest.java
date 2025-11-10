@@ -1,4 +1,4 @@
-package faang.school.project_service.controller;
+package faang.school.project_service.controller.internship;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

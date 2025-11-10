@@ -2,6 +2,7 @@ package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.exception.ForbiddenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,9 +24,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(DataValidationException.class)
+    @ExceptionHandler({DataValidationException.class, FileException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataValidationException(DataValidationException ex) {
+    public ErrorResponse handleBadRequestExceptions(RuntimeException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 

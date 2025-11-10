@@ -1,4 +1,4 @@
-package faang.school.project_service.controller;
+package faang.school.project_service.controller.project;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.controller.project.ProjectController;
@@ -6,9 +6,11 @@ import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.project.ProjectServiceImpl;
+import faang.school.projectservice.service.resource.ResourceService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -39,6 +42,8 @@ public class ProjectControllerTest {
 
     @Mock
     private ProjectServiceImpl projectService;
+    @Mock
+    private ResourceService resourceService;
     @InjectMocks
     private ProjectController projectController;
 
@@ -184,5 +189,22 @@ public class ProjectControllerTest {
                 .containsAll(expectedProjects.stream().map(ProjectDto::id).toList()));
         Assertions.assertTrue(actualProjects.stream().map(ProjectDto::name).toList()
                 .containsAll(expectedProjects.stream().map(ProjectDto::name).toList()));
+    }
+
+    @Test
+    void testAddProjectAvatar() throws Exception {
+        ResourceDto resourceDto = ResourceDto.builder()
+                .id(134L)
+                .build();
+        long projectId = 1L;
+        MockMultipartFile file
+                = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[]{});
+
+        when(resourceService.addProjectAvatar(Mockito.eq(projectId), Mockito.eq(file))).thenReturn(resourceDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(basePath + "/{projectId}/avatar", projectId)
+                        .file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath(ResourceDto.Fields.id, Matchers.equalTo(resourceDto.id().intValue())));
     }
 }
