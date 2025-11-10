@@ -47,11 +47,10 @@ public class ApplicationContextTest {
         registry.add("minio.access-key", () -> "minioadmin");
         registry.add("minio.secret-key", () -> "minioadmin");
         registry.add("minio.bucket", () -> "test-bucket");
-
-        registry.add("spring.liquibase.enabled", () -> "false");
     }
 
     @Test
     void contextLoads() {
+        //todo добавить проверку
     }
 }
