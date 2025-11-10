@@ -3,7 +3,7 @@ package faang.school.projectservice.service.internship;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
-import faang.school.projectservice.exception.CanNotUpdateStatusValidationException;
+import faang.school.projectservice.exception.InternshipAlreadyCompletedException;
 import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -16,11 +16,13 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.project.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +35,7 @@ public class InternshipService {
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TaskRepository taskRepository;
+    private final TeamMemberService teamMemberService;
 
     public InternshipDto createInternship(CreateInternshipDto createInternshipDto) {
 
@@ -62,7 +65,7 @@ public class InternshipService {
 
         if (updateIDto.status() == InternshipStatus.COMPLETED) {
             handleInternshipCompletion(internship);
-            //endDate update
+            internship.setEndDate(LocalDateTime.now());
         } else {
             InternshipMapper.update(updateIDto, internship);
         }
@@ -90,7 +93,7 @@ public class InternshipService {
 
     private void validateIfInternshipIsComplete(Internship internship) {
         if (internship.getStatus() == InternshipStatus.COMPLETED) {
-            throw new CanNotUpdateStatusValidationException();
+            throw new InternshipAlreadyCompletedException();
         }
     }
 
@@ -101,6 +104,7 @@ public class InternshipService {
 
             if (!areAllTasksCompleted(tasks)) {
                 //Удалить из проекта;
+                teamMemberService.removeMemberFromTeam(intern);
             }
         }
         for (TeamMember intern : interns) {
