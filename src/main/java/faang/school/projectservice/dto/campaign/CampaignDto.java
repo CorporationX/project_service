@@ -3,9 +3,12 @@ package faang.school.projectservice.dto.campaign;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.model.CampaignStatus;
 import lombok.Builder;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+@FieldNameConstants
 @Builder
 public record CampaignDto(
         Long id,
@@ -15,6 +18,8 @@ public record CampaignDto(
         BigDecimal amountRaised,
         CampaignStatus status,
         Long projectId,
-        Currency currency
+        Currency currency,
+        LocalDateTime createdAt,
+        Long createdBy
 ) {
 }

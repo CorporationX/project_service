@@ -33,7 +33,8 @@ public class InternshipController {
     }
 
     @PatchMapping("/{internshipId}")
-    public ResponseEntity<InternshipDto> update(@PathVariable long internshipId, @RequestBody @Valid UpdateInternshipDto updateInternshipDto) {
+    public ResponseEntity<InternshipDto> update(@PathVariable long internshipId,
+                                                @RequestBody @Valid UpdateInternshipDto updateInternshipDto) {
         return ResponseEntity.status(HttpStatus.OK).body(internshipService.update(internshipId, updateInternshipDto));
     }
 
