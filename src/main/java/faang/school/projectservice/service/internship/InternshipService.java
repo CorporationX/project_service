@@ -57,13 +57,13 @@ public class InternshipService {
         return internshipDtoMapper.toInternshipDto(internship);
     }
 
-    public InternshipDto updateInternship(long internshipId, UpdateInternshipDto uID) {
+    public InternshipDto updateInternship(long internshipId, UpdateInternshipDto updateIDto) {
         Internship internship = internshipRepository.findByIdOrThrow(internshipId);
 
-        if (uID.status() == InternshipStatus.COMPLETED) {
+        if (updateIDto.status() == InternshipStatus.COMPLETED) {
             handleInternshipCompletion(internship);
         } else {
-            InternshipMapper.update(uID, internship);
+            InternshipMapper.update(updateIDto, internship);
         }
 
         internship = internshipRepository.save(internship);
