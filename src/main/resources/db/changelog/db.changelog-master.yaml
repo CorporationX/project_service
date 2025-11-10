@@ -1,5 +1,21 @@
 databaseChangeLog:
   - include:
+      file: db/changelog/user_service/changeset/user_V001__initial.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V002__update_user_add_profile_pic.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V003__contact_preference.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V004__goals.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V005__insert_countries.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V006__insert_users.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V007__user_premium.sql
+  - include:
+      file: db/changelog/user_service/changeset/user_V008__add_personal_info_tables.sql
+  - include:
       file: db/changelog/changeset/project_V000__initial.sql
   - include:
       file: db/changelog/changeset/project_V001_create_stage.sql
