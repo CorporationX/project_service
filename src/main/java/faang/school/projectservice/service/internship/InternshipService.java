@@ -3,15 +3,11 @@ package faang.school.projectservice.service.internship;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
-import faang.school.projectservice.exception.InternshipAlreadyCompletedException;
+import faang.school.projectservice.exception.internship.HasInternsException;
+import faang.school.projectservice.exception.internship.AlreadyCompletedException;
 import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -25,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+
+import static faang.school.projectservice.model.TeamRole.INTERN;
 
 @RequiredArgsConstructor
 @Service
@@ -74,6 +72,19 @@ public class InternshipService {
         return internshipDtoMapper.toInternshipDto(internship);
     }
 
+    public void deleteInternship(long internshipId) {
+        Internship internship = internshipRepository.findByIdOrThrow(internshipId);
+        List<TeamMember> interns = internship.getInterns();
+
+        checkInternsBeforeDeletingInternship(interns);
+
+        internshipRepository.delete(internship);
+    }
+
+    public InternshipDto getInternshipByStatus(InternshipStatus status) {
+        Internship internship = internshipRepository.
+    }
+
     private void validateMentorBelongsToProject(Project project, TeamMember mentor) {
         if (project.getTeams() == null || project.getTeams().isEmpty()) {
             throw new EntityNotFoundException("Project has no associated teams.");
@@ -93,7 +104,7 @@ public class InternshipService {
 
     private void validateIfInternshipIsComplete(Internship internship) {
         if (internship.getStatus() == InternshipStatus.COMPLETED) {
-            throw new InternshipAlreadyCompletedException();
+            throw new AlreadyCompletedException();
         }
     }
 
@@ -103,7 +114,6 @@ public class InternshipService {
             List<Task> tasks = taskRepository.findByPerformerUserId(intern.getId());
 
             if (!areAllTasksCompleted(tasks)) {
-                //������� �� �������;
                 teamMemberService.removeMemberFromTeam(intern);
             }
         }
@@ -114,5 +124,18 @@ public class InternshipService {
 
     private boolean areAllTasksCompleted(List<Task> tasks) {
         return tasks.stream().allMatch(task -> task.getStatus() == TaskStatus.DONE);
+    }
+
+    private void checkInternsBeforeDeletingInternship(List<TeamMember> teamMembers) {
+        for (TeamMember teamMember : teamMembers) {
+            if (teamMember.getRoles().contains(INTERN)) {
+                throw new HasInternsException("Cannot delete internship while it contains active interns");
+            }
+        }
+    }
+
+    private List<Internship> findByStatus(Internship internship) {
+
+        return null;
     }
 }
