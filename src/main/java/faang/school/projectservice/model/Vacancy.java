@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -25,11 +26,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -60,8 +63,14 @@ public class Vacancy {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany(mappedBy = "vacancy")
-    private List<Candidate> candidates;
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Candidate> candidates = new ArrayList<>();
+
+    @Where(clause = "is_accepted = true")
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Candidate> acceptedCandidates = new ArrayList<>();
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -92,8 +101,11 @@ public class Vacancy {
     @ElementCollection
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
-    private List<Long> requiredSkillIds;
+    @Builder.Default
+    private List<Long> requiredSkillIds = new ArrayList<>();
 
     @Column(name = "cover_image_key")
     private String coverImageKey;
+
+    private Long teamId;
 }

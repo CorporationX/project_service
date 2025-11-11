@@ -65,7 +65,6 @@ class InternshipServiceTest {
         return new CreateInternshipDto(
                 "Yandex",
                 "I'm gay",
-                IN_PROGRESS,
                 OWNER,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(DAYS_NUMBER),

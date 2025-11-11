@@ -30,6 +30,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -60,8 +61,8 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
@@ -94,7 +95,8 @@ public class Project {
     private String coverImageId;
 
     @OneToMany(mappedBy = "project")
-    private List<Team> teams;
+    @Builder.Default
+    private List<Team> teams = new ArrayList<>();
 
     @OneToOne(mappedBy = "project")
     private Schedule schedule;

@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.internship;
 
-import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.validator.internship.ValidDateRange;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +14,6 @@ public record CreateInternshipDto(
         @NotBlank String name,
         @NotBlank String description,
 
-        @NotNull InternshipStatus status,
         @NotNull TeamRole role,
 
         @NotNull LocalDateTime startDate,
