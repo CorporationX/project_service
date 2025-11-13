@@ -27,6 +27,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -39,6 +41,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Project {
 
     @Id
@@ -62,15 +65,19 @@ public class Project {
 
     @ManyToOne(cascade={CascadeType.ALL})
     @JoinColumn(name="parent_project_id")
+    @JsonIgnore
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Project> children;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Task> tasks;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Resource> resources;
 
     @CreationTimestamp
@@ -94,21 +101,27 @@ public class Project {
     private String coverImageId;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
+    @JsonIgnore
     private Schedule schedule;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Stage> stages;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Vacancy> vacancies;
 
     @ManyToMany(mappedBy = "projects")
+    @JsonIgnore
     private List<Moment> moments;
 
     @OneToMany(mappedBy = "project")
+    @JsonIgnore
     private List<Meet> meets;
 
     @Column(name = "presentation_file_key")
@@ -120,5 +133,6 @@ public class Project {
     @ElementCollection
     @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "file_key", nullable = false)
+    @JsonIgnore
     private List<String> galleryFileKeys;
 }
