@@ -1,21 +1,33 @@
 package faang.school.projectservice.service.internship;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.common.PageResponse;
 import faang.school.projectservice.dto.internship.CreateInternshipDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
-import faang.school.projectservice.exception.internship.HasInternsException;
 import faang.school.projectservice.exception.internship.AlreadyCompletedException;
+import faang.school.projectservice.exception.internship.HasInternsException;
 import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.project.TeamMemberService;
+import faang.school.projectservice.service.vacancy.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,6 +46,7 @@ public class InternshipService {
     private final TeamMemberRepository teamMemberRepository;
     private final TaskRepository taskRepository;
     private final TeamMemberService teamMemberService;
+    private final UserContext userContext;
 
     public InternshipDto createInternship(CreateInternshipDto createInternshipDto) {
 
@@ -50,7 +63,8 @@ public class InternshipService {
                 createInternshipDto,
                 project,
                 mentor,
-                interns);
+                interns,
+                userContext.getUserId());
 
         internship = internshipRepository.save(internship);
 
@@ -81,8 +95,25 @@ public class InternshipService {
         internshipRepository.delete(internship);
     }
 
-    public InternshipDto getInternshipByStatus(InternshipStatus status) {
-        Internship internship = internshipRepository.
+    public PageResponse<InternshipDto> getInternshipsByFiler(InternshipFilterDto internshipFilterDto, Pageable pageable) {
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Example<Internship> example = Example.of(Internship.builder()
+                .status(internshipFilterDto.status())
+                .role(internshipFilterDto.role())
+                .name(internshipFilterDto.name())
+                .build(), matcher);
+
+        Page<Internship> pageInternship = internshipRepository.findAll(example, pageable);
+        return PageResponse.from(pageInternship, internshipDtoMapper::toInternshipDto);
+    }
+
+    public InternshipDto getInternshipById(long internshipId) {
+        Internship internship = internshipRepository.findByIdOrThrow(internshipId);
+        return internshipDtoMapper.toInternshipDto(internship);
     }
 
     private void validateMentorBelongsToProject(Project project, TeamMember mentor) {
@@ -132,10 +163,5 @@ public class InternshipService {
                 throw new HasInternsException("Cannot delete internship while it contains active interns");
             }
         }
-    }
-
-    private List<Internship> findByStatus(Internship internship) {
-
-        return null;
     }
 }

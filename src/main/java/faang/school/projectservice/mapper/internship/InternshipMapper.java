@@ -14,7 +14,8 @@ public interface InternshipMapper {
     static Internship toInternship(CreateInternshipDto createInternshipDto,
                                    Project project,
                                    TeamMember mentor,
-                                   List<TeamMember> interns) {
+                                   List<TeamMember> interns,
+                                   Long createdBy) {
         return Internship.builder()
                 .name(createInternshipDto.name())
                 .description(createInternshipDto.description())
@@ -25,6 +26,7 @@ public interface InternshipMapper {
                 .project(project)
                 .mentorId(mentor)
                 .interns(interns)
+                .createdBy(createdBy)
                 .build();
     }
 

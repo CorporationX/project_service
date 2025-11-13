@@ -51,7 +51,7 @@ public class VacancyService {
         long userId = userContext.getUserId();
         long projectId = vacancyCreateDto.projectId();
         TeamMember author = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-        Project project = projectRepository.getByIdOrThrow(projectId);
+        Project project = projectRepository.findByIdOrThrow(projectId);
 
         VacancyValidator.validateRole(author);
         VacancyValidator.validateVacancyCount(vacancyCreateDto.count());

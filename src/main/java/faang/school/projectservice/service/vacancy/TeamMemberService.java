@@ -40,7 +40,7 @@ public class TeamMemberService {
                         String.format("Candidate with id %s not found in vacancy %s", candidateId, vacancyId)));
 
         Vacancy vacancy = vacancyRepository.getByIdOrThrow(vacancyId);
-        Project project = projectRepository.getByIdOrThrow(projectId);
+        Project project = projectRepository.findByIdOrThrow(projectId);
         VacancyValidator.validateCandidateIsAlreadyProjectMember(project, candidate);
         Team team = project.getTeams().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("Project has no teams"));
@@ -52,5 +52,16 @@ public class TeamMemberService {
                 .team(team)
                 .build();
         return teamMemberRepository.save(newMember);
+    }
+
+    public void removeMemberFromTeam(TeamMember teamMember) {
+        validationTeamMemberIsNotEmpty(teamMember);
+        teamMemberRepository.delete(teamMember);
+    }
+
+    private void validationTeamMemberIsNotEmpty(TeamMember teamMember) {
+        if (teamMember == null) {
+            throw new faang.school.projectservice.exception.EntityNotFoundException("Team member can't be empty");
+        }
     }
 }
