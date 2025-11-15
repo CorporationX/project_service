@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper.internship;
 
-import faang.school.projectservice.dto.internship.CreateInternshipDto;
+import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.UpdateInternshipDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
@@ -27,7 +27,7 @@ public interface InternshipMapper {
         return interns.stream().map(TeamMember::getId).collect(Collectors.toList());
     }
 
-    static Internship toEntity(CreateInternshipDto createInternshipDto,
+    static Internship toEntity(InternshipCreateDto createInternshipDto,
                                Project project,
                                TeamMember mentor,
                                List<TeamMember> interns,
@@ -46,14 +46,14 @@ public interface InternshipMapper {
                 .build();
     }
 
-    static void update(UpdateInternshipDto dto, Internship internship) {
+    static void update(InternshipUpdateDto dto, Internship internship) {
         if (dto == null) {
             return;
         }
-        if (dto.name() != null) {
+        if (dto.name() != null && !dto.name().isBlank()) {
             internship.setName(dto.name());
         }
-        if (dto.description() != null) {
+        if (dto.description() != null && !dto.description().isBlank()) {
             internship.setDescription(dto.description());
         }
         if (dto.status() != null) {

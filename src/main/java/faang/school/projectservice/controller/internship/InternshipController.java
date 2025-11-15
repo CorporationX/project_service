@@ -1,13 +1,15 @@
 package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.common.PageResponse;
-import faang.school.projectservice.dto.internship.CreateInternshipDto;
+import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.UpdateInternshipDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.service.internship.InternshipService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,19 +28,20 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping
-    public InternshipDto createInternship(@Valid @RequestBody CreateInternshipDto createInternshipDto) {
+    public InternshipDto createInternship(@Valid @RequestBody InternshipCreateDto createInternshipDto) {
         return internshipService.createInternship(createInternshipDto);
     }
 
     @PatchMapping("/{internshipId}")
     public InternshipDto updateInternship(@PathVariable long internshipId,
-                                                          @Valid @RequestBody UpdateInternshipDto updateInternshipDto) {
+                                                          @Valid @RequestBody InternshipUpdateDto updateInternshipDto) {
         return internshipService.updateInternship(internshipId, updateInternshipDto);
     }
 
+    @PageableAsQueryParam
     @PostMapping("/search")
     public PageResponse<InternshipDto> getAllWithFilter(@RequestBody InternshipFilterDto internshipFilterDto,
-                                                        @PageableDefault Pageable pageable) {
+                                                        @Parameter(hidden = true) @PageableDefault Pageable pageable) {
         return internshipService.getInternshipsByFiler(internshipFilterDto, pageable);
     }
 

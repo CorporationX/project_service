@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.springframework.transaction.annotation.Propagation.MANDATORY;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,6 +56,7 @@ public class TeamMemberService {
         return teamMemberRepository.save(newMember);
     }
 
+    @Transactional(propagation=MANDATORY)
     public void removeMemberFromTeam(TeamMember teamMember) {
         validationTeamMemberIsNotEmpty(teamMember);
         teamMemberRepository.delete(teamMember);
@@ -61,7 +64,7 @@ public class TeamMemberService {
 
     private void validationTeamMemberIsNotEmpty(TeamMember teamMember) {
         if (teamMember == null) {
-            throw new faang.school.projectservice.exception.EntityNotFoundException("Team member can't be empty");
+            throw new EntityNotFoundException("Team member can't be empty");
         }
     }
 }

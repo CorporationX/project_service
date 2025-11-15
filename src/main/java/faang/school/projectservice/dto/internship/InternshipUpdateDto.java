@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-public record UpdateInternshipDto(
-        @NotBlank String name,
-        @NotBlank String description,
+public record InternshipUpdateDto(
+        String name,
+        String description,
 
-        @NotNull InternshipStatus status,
+        InternshipStatus status,
 
         LocalDateTime endDate
 ) {

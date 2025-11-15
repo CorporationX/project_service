@@ -1,8 +1,9 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.internship.CreateInternshipDto;
+import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
@@ -11,7 +12,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -57,21 +58,21 @@ class InternshipServiceTest {
     @Mock
     private UserContext userContext;
 
-    private final TeamMember mentor = new TeamMember();
-    private final Team team = new Team();
-    private final List<Team> teams = new ArrayList<>();
-    private final Project project = new Project();
-    private final TeamMember intern = new TeamMember();
-    private final List<TeamMember> interns = new ArrayList<>();
-
     private static final long DAYS_NUMBER = 1L;
     private static final long PROJECT_ID = 1L;
     private static final long MENTOR_ID = 2L;
     private static final long INTERNS = 3L;
     private static final long USER_ID = 4L;
 
-    private CreateInternshipDto createInternshipDto() {
-        return new CreateInternshipDto(
+    private TeamMember mentor;
+    private Team team;
+    private List<Team> teams;
+    private Project project;
+    private TeamMember intern;
+    private List<TeamMember> interns;
+
+    private InternshipCreateDto createInternshipDto() {
+        return new InternshipCreateDto(
                 "Yandex",
                 "I'm gay",
                 OWNER,
@@ -83,20 +84,35 @@ class InternshipServiceTest {
         );
     }
 
-    @Test
-    public void testCreateInternship_Success() {
-        CreateInternshipDto dto = createInternshipDto();
+    @BeforeEach
+    void input() {
+        mentor = TeamMember.builder()
+                .id(MENTOR_ID)
+                .build();
 
-        team.setTeamMembers(List.of(mentor));
+        team = Team.builder()
+                .teamMembers(List.of(mentor))
+                .build();
 
+        teams = new ArrayList<>();
         teams.add(team);
 
-        project.setTeams(teams);
-        project.setId(PROJECT_ID);
-        mentor.setId(MENTOR_ID);
+        project = Project.builder()
+                .id(PROJECT_ID)
+                .teams(teams)
+                .build();
 
-        intern.setId(INTERNS);
+        intern = TeamMember.builder()
+                .id(INTERNS)
+                .build();
+
+        interns = new ArrayList<>();
         interns.add(intern);
+    }
+
+    @Test
+    public void createInternship_shouldSave_whenAllDataIsValid() {
+        InternshipCreateDto dto = createInternshipDto();
 
         when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(project);
         when(teamMemberRepository.findMentorByIdOrThrow(MENTOR_ID)).thenReturn(mentor);
@@ -118,20 +134,11 @@ class InternshipServiceTest {
         assertEquals(PROJECT_ID, result.projectId());
         assertEquals(MENTOR_ID, result.mentorId());
         assertEquals(Collections.singletonList(INTERNS), result.internsIds());
-        assertDoesNotThrow(() -> internshipService.createInternship(dto));
     }
 
     @Test
-    public void testValidateInternsNotEmpty_Null() {
-        CreateInternshipDto dto = createInternshipDto();
-
-        team.setTeamMembers(List.of(mentor));
-
-        teams.add(team);
-
-        project.setTeams(teams);
-
-        interns.add(intern);
+    public void validateInternsNotNull_shouldThrowException_whenInternsAreNull() {
+        InternshipCreateDto dto = createInternshipDto();
 
         when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
         when(teamMemberRepository.findMentorByIdOrThrow(2L)).thenReturn(mentor);
@@ -142,18 +149,12 @@ class InternshipServiceTest {
     }
 
     @Test
-    public void testValidateInternsNotEmpty_Empty() {
-        CreateInternshipDto dto = createInternshipDto();
-
-        team.setTeamMembers(List.of(mentor));
-
-        teams.add(team);
-
-        project.setTeams(teams);
+    public void validateInternsNotEmpty_shouldThrowException_whenInternsAreEmpty() {
+        InternshipCreateDto dto = createInternshipDto();
 
         when(projectRepository.findByIdOrThrow(1L)).thenReturn(project);
         when(teamMemberRepository.findMentorByIdOrThrow(2L)).thenReturn(mentor);
-        when(teamMemberRepository.findAllById(dto.internsIds())).thenReturn(Collections.emptyList());
+        when(teamMemberRepository.findAllById(dto.internsIds())).thenReturn(List.of());
 
         assertThrows(EntityNotFoundException.class,
                 () -> internshipService.createInternship(dto));
