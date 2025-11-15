@@ -146,7 +146,7 @@ public class VacancyServiceTest {
                 3,
                 "Java Developer"
         );
-        Project project1 = projectRepository.getByIdOrThrow(vacancyCreateDto.projectId());
+        Project project1 = projectRepository.findByIdOrThrow(vacancyCreateDto.projectId());
         when(teamMemberRepository.findByUserIdAndProjectId(anyLong(), anyLong())).thenReturn(author);
         when(vacancyMapper.toVacancy(vacancyCreateDto, project1))
                 .thenAnswer(invocation -> {

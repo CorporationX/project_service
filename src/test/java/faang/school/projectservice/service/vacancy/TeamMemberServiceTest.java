@@ -107,7 +107,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(author);
         when(vacancyRepository.getByIdOrThrow(VACANCY_ID)).thenReturn(vacancy);
-        when(projectRepository.getByIdOrThrow(PROJECT_ID)).thenReturn(project);
+        when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(project);
 
         TeamMember expectedTeamMember = TeamMember.builder()
                 .userId(candidate.getUserId())
@@ -159,7 +159,7 @@ public class TeamMemberServiceTest {
                 .id(PROJECT_ID)
                 .teams(new ArrayList<>())
                 .build();
-        when(projectRepository.getByIdOrThrow(PROJECT_ID)).thenReturn(projectWithoutTeams);
+        when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(projectWithoutTeams);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> teamMemberService.addCandidateToTeam(PROJECT_ID, CANDIDATE_ID, VACANCY_ID));
@@ -191,7 +191,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(author);
         when(vacancyRepository.getByIdOrThrow(VACANCY_ID)).thenReturn(vacancy);
-        when(projectRepository.getByIdOrThrow(PROJECT_ID)).thenReturn(project);
+        when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(project);
 
         org.mockito.MockedStatic<VacancyValidator> mockedValidator = org.mockito.Mockito.mockStatic(VacancyValidator.class);
         mockedValidator.when(() -> VacancyValidator.validateCandidateIsAlreadyProjectMember(project, candidate))
@@ -211,7 +211,7 @@ public class TeamMemberServiceTest {
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(teamMemberRepository.findByUserIdAndProjectId(USER_ID, PROJECT_ID)).thenReturn(author);
         when(vacancyRepository.getByIdOrThrow(VACANCY_ID)).thenReturn(vacancy);
-        when(projectRepository.getByIdOrThrow(PROJECT_ID)).thenReturn(project);
+        when(projectRepository.findByIdOrThrow(PROJECT_ID)).thenReturn(project);
 
         TeamMember savedTeamMember = TeamMember.builder()
                 .id(2L)

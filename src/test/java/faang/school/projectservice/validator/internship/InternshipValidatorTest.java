@@ -16,7 +16,6 @@ public class InternshipValidatorTest {
         return new CreateInternshipDto(
                 "Yandex",
                 "I'm gay",
-                InternshipStatus.IN_PROGRESS,
                 TeamRole.DEVELOPER,
                 startDate,
                 endDate,

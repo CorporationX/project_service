@@ -7,8 +7,6 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.UpdateInternshipDto;
 import faang.school.projectservice.exception.internship.AlreadyCompletedException;
-import faang.school.projectservice.exception.internship.HasInternsException;
-import faang.school.projectservice.mapper.internship.InternshipDtoMapper;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
@@ -34,14 +32,12 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static faang.school.projectservice.model.TeamRole.INTERN;
-
 @RequiredArgsConstructor
 @Service
 public class InternshipService {
 
     private final InternshipRepository internshipRepository;
-    private final InternshipDtoMapper internshipDtoMapper;
+    private final InternshipMapper internshipMapper;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TaskRepository taskRepository;
@@ -59,16 +55,18 @@ public class InternshipService {
         List<TeamMember> interns = teamMemberRepository.findAllById(createInternshipDto.internsIds());
         validateInternsNotEmpty(interns);
 
-        Internship internship = InternshipMapper.toInternship(
+        long createdBy = userContext.getUserId();
+
+        Internship internship = InternshipMapper.toEntity(
                 createInternshipDto,
                 project,
                 mentor,
                 interns,
-                userContext.getUserId());
+                createdBy);
 
         internship = internshipRepository.save(internship);
 
-        return internshipDtoMapper.toInternshipDto(internship);
+        return internshipMapper.toDto(internship);
     }
 
     public InternshipDto updateInternship(long internshipId, UpdateInternshipDto updateIDto) {
@@ -83,16 +81,7 @@ public class InternshipService {
         }
 
         internship = internshipRepository.save(internship);
-        return internshipDtoMapper.toInternshipDto(internship);
-    }
-
-    public void deleteInternship(long internshipId) {
-        Internship internship = internshipRepository.findByIdOrThrow(internshipId);
-        List<TeamMember> interns = internship.getInterns();
-
-        checkInternsBeforeDeletingInternship(interns);
-
-        internshipRepository.delete(internship);
+        return internshipMapper.toDto(internship);
     }
 
     public PageResponse<InternshipDto> getInternshipsByFiler(InternshipFilterDto internshipFilterDto, Pageable pageable) {
@@ -108,12 +97,12 @@ public class InternshipService {
                 .build(), matcher);
 
         Page<Internship> pageInternship = internshipRepository.findAll(example, pageable);
-        return PageResponse.from(pageInternship, internshipDtoMapper::toInternshipDto);
+        return PageResponse.from(pageInternship, internshipMapper::toDto);
     }
 
     public InternshipDto getInternshipById(long internshipId) {
         Internship internship = internshipRepository.findByIdOrThrow(internshipId);
-        return internshipDtoMapper.toInternshipDto(internship);
+        return internshipMapper.toDto(internship);
     }
 
     private void validateMentorBelongsToProject(Project project, TeamMember mentor) {
@@ -155,13 +144,5 @@ public class InternshipService {
 
     private boolean areAllTasksCompleted(List<Task> tasks) {
         return tasks.stream().allMatch(task -> task.getStatus() == TaskStatus.DONE);
-    }
-
-    private void checkInternsBeforeDeletingInternship(List<TeamMember> teamMembers) {
-        for (TeamMember teamMember : teamMembers) {
-            if (teamMember.getRoles().contains(INTERN)) {
-                throw new HasInternsException("Cannot delete internship while it contains active interns");
-            }
-        }
     }
 }
