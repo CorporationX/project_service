@@ -66,6 +66,8 @@ public class Project {
     @ManyToOne(cascade={CascadeType.ALL})
     @JoinColumn(name="parent_project_id")
     @JsonIgnore
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
