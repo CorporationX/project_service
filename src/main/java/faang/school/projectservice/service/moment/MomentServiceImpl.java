@@ -27,14 +27,14 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MomentServiceImpl implements MomentService{
+public class MomentServiceImpl implements MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final ProjectRepository projectRepository;
     private final List<MomentFilter> momentFilters = List.of(new MomentMonthFilter());
 
     @Override
-    public MomentDto createMoment(@NonNull CreateMomentDto createMomentDto) throws Exception {
+    public MomentDto createMoment(@NonNull CreateMomentDto createMomentDto) {
         validateCreateMomentDto(createMomentDto);
         Moment moment = momentMapper.toMoment(createMomentDto);
         List<Project> projects = new ArrayList<>();
@@ -48,7 +48,7 @@ public class MomentServiceImpl implements MomentService{
     }
 
     @Override
-    public MomentDto updateMoment(long momentId, @NonNull UpdateMomentDto updateMomentDto) throws Exception {
+    public MomentDto updateMoment(long momentId, @NonNull UpdateMomentDto updateMomentDto) {
         validateUpdateMomentDto(updateMomentDto);
         Optional<Moment> optionalMoment = momentRepository.findById(momentId);
         if (optionalMoment.isEmpty()) {
@@ -109,7 +109,7 @@ public class MomentServiceImpl implements MomentService{
         }
     }
 
-    private void validateCreateMomentDto(CreateMomentDto momentDto) throws Exception {
+    private void validateCreateMomentDto(CreateMomentDto momentDto) {
         validateNullOrEmpty(momentDto.name(), "Name");
         validateNullOrEmpty(momentDto.description(), "Description");
         validateNullOrEmpty(momentDto.date().toString(), "Date");
@@ -120,7 +120,7 @@ public class MomentServiceImpl implements MomentService{
         validateNullOrEmpty(momentDto.createdBy().toString(), "CreatedBy");
     }
 
-    private void validateUpdateMomentDto(UpdateMomentDto momentDto) throws Exception {
+    private void validateUpdateMomentDto(UpdateMomentDto momentDto) {
         validateNullOrEmpty(momentDto.name(), "Name");
         validateNullOrEmpty(momentDto.description(), "Description");
         validateNullOrEmpty(momentDto.date().toString(), "Date");
@@ -136,9 +136,9 @@ public class MomentServiceImpl implements MomentService{
         }
     }
 
-    private void validateEmptyList(List<Long> list, String param) throws Exception {
+    private void validateEmptyList(List<Long> list, String param) {
         if (list.isEmpty()) {
-            throw new Exception(param + " - пуст. Добавьте в него хотя бы 1 элемент.");
+            throw new DataValidationException(param + " - пуст. Добавьте в него хотя бы 1 элемент.");
         }
     }
 }
