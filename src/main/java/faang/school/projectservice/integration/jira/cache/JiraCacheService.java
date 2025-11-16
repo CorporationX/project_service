@@ -9,7 +9,6 @@ import faang.school.projectservice.integration.jira.dto.response.JiraTransitions
 import faang.school.projectservice.integration.jira.metrics.JiraMetricsService;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;

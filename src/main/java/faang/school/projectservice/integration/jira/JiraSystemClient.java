@@ -4,7 +4,6 @@ import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.*;
 import com.atlassian.jira.rest.client.api.domain.input.*;
 import faang.school.projectservice.integration.jira.cache.JiraCacheService;
-import faang.school.projectservice.integration.jira.config.JiraOAuthClientConfig;
 import faang.school.projectservice.integration.jira.config.JiraProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
