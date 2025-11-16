@@ -63,7 +63,7 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="parent_project_id")
     @JsonIgnore
     private Project parentProject;

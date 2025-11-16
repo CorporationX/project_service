@@ -9,6 +9,7 @@ import faang.school.projectservice.integration.jira.dto.response.JiraTransitions
 import faang.school.projectservice.integration.jira.metrics.JiraMetricsService;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -59,7 +60,10 @@ public class JiraCacheService {
     // ==========================================
     // Issue Cache (OAuth Client - JiraIssueResponse)
     // ==========================================
-
+    
+    /**
+     * Получить Issue из кэша (OAuth Client)
+     */
     public Optional<JiraIssueResponse> getIssue(String issueKey) {
         if (!isCacheEnabled()) {
             metricsService.recordCacheMiss("issue");
@@ -86,7 +90,10 @@ public class JiraCacheService {
             return Optional.empty();
         }
     }
-
+    
+    /**
+     * Сохранить Issue в кэш (OAuth Client)
+     */
     public void putIssue(String issueKey, JiraIssueResponse issue) {
         if (!isCacheEnabled()) {
             return;
@@ -103,7 +110,10 @@ public class JiraCacheService {
             log.error("Failed to serialize issue to cache: {}", issueKey, e);
         }
     }
-
+    
+    /**
+     * Удалить Issue из кэша
+     */
     public void evictIssue(String issueKey) {
         String key = CACHE_PREFIX_ISSUE + issueKey;
         redisTemplate.delete(key);
@@ -163,7 +173,10 @@ public class JiraCacheService {
             log.error("Failed to serialize transitions to cache: {}", issueKey, e);
         }
     }
-
+    
+    /**
+     * Сохранить Transitions в кэш (System Client - List<Transition>)
+     */
     public void putTransitions(String issueKey, List<Transition> transitions) {
         if (!isCacheEnabled()) {
             return;
@@ -180,7 +193,10 @@ public class JiraCacheService {
             log.error("Failed to serialize transitions to cache: {}", issueKey, e);
         }
     }
-
+    
+    /**
+     * Получить Transitions из кэша (System Client - List<Transition>)
+     */
     public Optional<List<Transition>> getTransitionsList(String issueKey) {
         if (!isCacheEnabled()) {
             metricsService.recordCacheMiss("transitions");
@@ -210,7 +226,7 @@ public class JiraCacheService {
             return Optional.empty();
         }
     }
-
+    
     public void evictTransitions(String issueKey) {
         String key = CACHE_PREFIX_TRANSITIONS + issueKey;
         redisTemplate.delete(key);
@@ -238,7 +254,7 @@ public class JiraCacheService {
     public void putProjects(List<com.atlassian.jira.rest.client.api.domain.Project> projects) {
         // Projects кэширование не реализовано
     }
-
+    
     public void evictProjects() {
         redisTemplate.delete(CACHE_PREFIX_PROJECTS);
         log.debug("Projects evicted from cache");
@@ -247,7 +263,10 @@ public class JiraCacheService {
     // ==========================================
     // Cache Management
     // ==========================================
-
+    
+    /**
+     * Очистить весь кэш Jira
+     */
     public void clearCache() {
         Set<String> issueKeys = redisTemplate.keys(CACHE_PREFIX_ISSUE + "*");
         Set<String> transitionKeys = redisTemplate.keys(CACHE_PREFIX_TRANSITIONS + "*");
@@ -306,7 +325,7 @@ public class JiraCacheService {
     // ==========================================
     // Cache Statistics
     // ==========================================
-
+    
     public CacheStatistics getStatistics() {
         Set<String> issueKeys = redisTemplate.keys(CACHE_PREFIX_ISSUE + "*");
         Set<String> transitionKeys = redisTemplate.keys(CACHE_PREFIX_TRANSITIONS + "*");

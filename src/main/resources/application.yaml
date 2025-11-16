@@ -54,9 +54,6 @@ management:
     prometheus:
       enabled: true
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: project-service
       environment: ${spring.profiles.active:default}
