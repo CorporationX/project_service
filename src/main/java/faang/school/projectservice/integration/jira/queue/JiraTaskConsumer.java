@@ -1,6 +1,6 @@
 package faang.school.projectservice.integration.jira.queue;
 
-import com.rabbitMq.client.Channel;
+import com.rabbitmq.client.Channel;
 import faang.school.projectservice.integration.jira.event.JiraEventPublisher;
 import faang.school.projectservice.integration.jira.queue.config.RabbitMqConfig;
 import faang.school.projectservice.integration.jira.service.JiraIntegrationService;
@@ -8,9 +8,9 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aMqp.rabbit.annotation.RabbitListener;
-import org.springframework.aMqp.rabbit.core.RabbitTemplate;
-import org.springframework.aMqp.support.AMqpHeaders;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class JiraTaskConsumer {
     @RabbitListener(queues = RabbitMqConfig.TASK_CREATE_QUEUE)
     public void handleTaskCreation(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing CREATE task: taskId={}, correlationId={}, retry={}", 
@@ -83,7 +83,7 @@ public class JiraTaskConsumer {
     @RabbitListener(queues = RabbitMqConfig.TASK_UPDATE_QUEUE)
     public void handleTaskUpdate(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing UPDATE task: taskId={}, correlationId={}", 
@@ -137,7 +137,7 @@ public class JiraTaskConsumer {
     @RabbitListener(queues = RabbitMqConfig.TASK_DELETE_QUEUE)
     public void handleTaskDeletion(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing DELETE task: taskId={}, jiraKey={}", 
@@ -179,7 +179,7 @@ public class JiraTaskConsumer {
     @RabbitListener(queues = RabbitMqConfig.TASK_SYNC_QUEUE)
     public void handleProjectSync(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing SYNC project");
@@ -224,7 +224,7 @@ public class JiraTaskConsumer {
     @RabbitListener(queues = RabbitMqConfig.TASK_BULK_QUEUE)
     public void handleBulkUpdate(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing BULK_UPDATE task: taskId={}", message.getTaskId());
@@ -276,7 +276,7 @@ public class JiraTaskConsumer {
     })
     public void handleDeadLetterMessage(
         @Payload JiraTaskMessage message,
-        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.error("Dead Letter message received: {}", message);
