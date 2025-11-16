@@ -1,8 +1,8 @@
 package faang.school.projectservice.integration.jira.service;
 
 import faang.school.projectservice.integration.jira.config.JiraProperties;
-import faang.school.projectservice.integration.jira.dto.response.OAuthTokenResponse;
-import faang.school.projectservice.integration.jira.exception.JiraOAuthException;
+import faang.school.projectservice.integration.jira.dto.response.OauthTokenResponse;
+import faang.school.projectservice.integration.jira.exception.JiraOauthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ import java.util.Base64;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class JiraOAuthService {
+public class JiraOauthService {
 
     private final JiraProperties jiraProperties;
     private final JiraTokenService jiraTokenService;
@@ -57,14 +57,14 @@ public class JiraOAuthService {
     }
 
     public String generateAuthorizationUrl(String state) {
-        JiraProperties.OAuthConfig oauth = jiraProperties.getOauth();
+        JiraProperties.OauthConfig Oauth = jiraProperties.getOauth();
 
         String url = String.format(
                 "%s?client_id=%s&redirect_uri=%s&scope=%s&response_type=code&state=%s&prompt=consent",
-                oauth.getAuthorizationUri(),
-                oauth.getClientId(),
-                URLEncoder.encode(oauth.getRedirectUri(), StandardCharsets.UTF_8),
-                URLEncoder.encode(oauth.getScope(), StandardCharsets.UTF_8),
+                Oauth.getAuthorizationUri(),
+                Oauth.getClientId(),
+                URLEncoder.encode(Oauth.getRedirectUri(), StandardCharsets.UTF_8),
+                URLEncoder.encode(Oauth.getScope(), StandardCharsets.UTF_8),
                 state
         );
 
@@ -75,21 +75,21 @@ public class JiraOAuthService {
     public void exchangeCodeForToken(String code, Long userId) {
         log.info("Exchanging authorization code for tokens, user: {}", userId);
 
-        JiraProperties.OAuthConfig oauth = jiraProperties.getOauth();
+        JiraProperties.OauthConfig Oauth = jiraProperties.getOauth();
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
         formData.add("code", code);
-        formData.add("redirect_uri", oauth.getRedirectUri());
-        formData.add("client_id", oauth.getClientId());
-        formData.add("client_secret", oauth.getClientSecret());
+        formData.add("redirect_uri", Oauth.getRedirectUri());
+        formData.add("client_id", Oauth.getClientId());
+        formData.add("client_secret", Oauth.getClientSecret());
 
         try {
             WebClient webClient = webClientBuilder
-                    .baseUrl(oauth.getTokenUri())
+                    .baseUrl(Oauth.getTokenUri())
                     .build();
 
-            OAuthTokenResponse tokenResponse = webClient.post()
+            OauthTokenResponse tokenResponse = webClient.post()
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData(formData))
                     .retrieve()
@@ -97,8 +97,8 @@ public class JiraOAuthService {
                             status -> status.is4xxClientError(),
                             response -> response.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
-                                        log.error("OAuth token exchange failed (4xx): {}", errorBody);
-                                        return Mono.<Throwable>error(new JiraOAuthException(
+                                        log.error("Oauth token exchange failed (4xx): {}", errorBody);
+                                        return Mono.<Throwable>error(new JiraOauthException(
                                                 "Token exchange failed: " + errorBody
                                         ));
                                     })
@@ -106,17 +106,17 @@ public class JiraOAuthService {
                     .onStatus(
                             status -> status.is5xxServerError(),
                             response -> {
-                                log.error("OAuth token endpoint error (5xx)");
-                                return Mono.error(new JiraOAuthException(
-                                        "Jira OAuth server error"
+                                log.error("Oauth token endpoint error (5xx)");
+                                return Mono.error(new JiraOauthException(
+                                        "Jira Oauth server error"
                                 ));
                             }
                     )
-                    .bodyToMono(OAuthTokenResponse.class)
+                    .bodyToMono(OauthTokenResponse.class)
                     .block();
 
             if (tokenResponse == null) {
-                throw new JiraOAuthException("No response from token endpoint");
+                throw new JiraOauthException("No response from token endpoint");
             }
 
             log.info("Successfully received tokens for user: {}", userId);
@@ -138,33 +138,33 @@ public class JiraOAuthService {
 
             log.info("Tokens saved for user: {}", userId);
 
-        } catch (JiraOAuthException e) {
+        } catch (JiraOauthException e) {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during token exchange", e);
-            throw new JiraOAuthException("Token exchange failed", e);
+            throw new JiraOauthException("Token exchange failed", e);
         }
 
     }
 
-    public OAuthTokenResponse refreshAccessToken(String refreshToken) {
+    public OauthTokenResponse refreshAccessToken(String refreshToken) {
         log.info("Refreshing access token");
 
-        JiraProperties.OAuthConfig oauth = jiraProperties.getOauth();
+        JiraProperties.OauthConfig Oauth = jiraProperties.getOauth();
 
         // Prepare request body
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "refresh_token");
         formData.add("refresh_token", refreshToken);
-        formData.add("client_id", oauth.getClientId());
-        formData.add("client_secret", oauth.getClientSecret());
+        formData.add("client_id", Oauth.getClientId());
+        formData.add("client_secret", Oauth.getClientSecret());
 
         try {
             WebClient webClient = webClientBuilder
-                    .baseUrl(oauth.getTokenUri())
+                    .baseUrl(Oauth.getTokenUri())
                     .build();
 
-            OAuthTokenResponse tokenResponse = webClient.post()
+            OauthTokenResponse tokenResponse = webClient.post()
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData(formData))
                     .retrieve()
@@ -173,7 +173,7 @@ public class JiraOAuthService {
                             response -> response.bodyToMono(String.class)
                                     .flatMap(error -> {
                                         log.error("Token refresh failed (invalid_grant): {}", error);
-                                        return Mono.error(new JiraOAuthException(
+                                        return Mono.error(new JiraOauthException(
                                                 "invalid_grant",
                                                 "Refresh token is invalid or expired"
                                         ));
@@ -184,26 +184,26 @@ public class JiraOAuthService {
                             response -> response.bodyToMono(String.class)
                                     .flatMap(error -> {
                                         log.error("Token refresh failed (4xx): {}", error);
-                                        return Mono.<Throwable>error(new JiraOAuthException(
+                                        return Mono.<Throwable>error(new JiraOauthException(
                                                 "Token refresh failed: " + error
                                         ));
                                     })
                     )
-                    .bodyToMono(OAuthTokenResponse.class)
+                    .bodyToMono(OauthTokenResponse.class)
                     .block();
 
             if (tokenResponse == null) {
-                throw new JiraOAuthException("No response from token endpoint");
+                throw new JiraOauthException("No response from token endpoint");
             }
 
             log.info("Access token refreshed successfully");
             return tokenResponse;
 
-        } catch (JiraOAuthException e) {
+        } catch (JiraOauthException e) {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during token refresh", e);
-            throw new JiraOAuthException("Token refresh failed", e);
+            throw new JiraOauthException("Token refresh failed", e);
         }
     }
 }

@@ -1,7 +1,11 @@
 package faang.school.projectservice.integration.jira.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.integration.jira.event.*;
+import faang.school.projectservice.integration.jira.event.JiraProjectSyncedEvent;
+import faang.school.projectservice.integration.jira.event.TaskCreatedEvent;
+import faang.school.projectservice.integration.jira.event.TaskDeletedEvent;
+import faang.school.projectservice.integration.jira.event.TaskStatusChangedEvent;
+import faang.school.projectservice.integration.jira.event.TaskUpdatedEvent;
 import faang.school.projectservice.model.Task;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

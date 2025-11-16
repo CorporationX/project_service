@@ -2,9 +2,9 @@ package faang.school.projectservice.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.TaskDto;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
-import faang.school.projectservice.integration.jira.oauth.model.UserJiraOAuthToken;
-import faang.school.projectservice.integration.jira.queue.config.RabbitMQConfig;
+import faang.school.projectservice.integration.jira.Oauth.model.JiraOauthTokenRepository;
+import faang.school.projectservice.integration.jira.Oauth.model.UserJiraOauthToken;
+import faang.school.projectservice.integration.jira.queue.config.RabbitMqConfig;
 import faang.school.projectservice.integration.jira.service.JiraIntegrationService;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -13,8 +13,11 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import org.junit.jupiter.api.*;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.aMqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.RabbitMqContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -37,20 +40,30 @@ import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("End-to-End Integration Test")
-class JiraIntegrationE2ETest {
+class JiraIntegrationEndToEndTest {
     
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14")
@@ -59,12 +72,12 @@ class JiraIntegrationE2ETest {
         .withPassword("test");
     
     @Container
-    static RabbitMQContainer rabbitMQ = new RabbitMQContainer("rabbitmq:3.12-management")
+    static RabbitMqContainer rabbitMq = new RabbitMqContainer("rabbitMq:3.12-management")
         .withExposedPorts(5672, 15672);
     
     static {
         postgres.start();
-        rabbitMQ.start();
+        rabbitMq.start();
     }
     
     @DynamicPropertySource
@@ -72,13 +85,13 @@ class JiraIntegrationE2ETest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.rabbitmq.host", rabbitMQ::getHost);
-        registry.add("spring.rabbitmq.port", rabbitMQ::getFirstMappedPort);
-        registry.add("spring.rabbitmq.username", () -> "guest");
-        registry.add("spring.rabbitmq.password", () -> "guest");
+        registry.add("spring.rabbitMq.host", rabbitMq::getHost);
+        registry.add("spring.rabbitMq.port", rabbitMq::getFirstMappedPort);
+        registry.add("spring.rabbitMq.username", () -> "guest");
+        registry.add("spring.rabbitMq.password", () -> "guest");
         
         registry.add("jira.scheduled.enabled", () -> "false");
-        registry.add("jira.oauth.enable", () -> "false");
+        registry.add("jira.Oauth.enable", () -> "false");
         registry.add("jira.system.base-url", () -> "http://localhost:8080");
         registry.add("jira.system.username", () -> "test");
         registry.add("jira.system.api-token", () -> "test-token");
@@ -100,7 +113,7 @@ class JiraIntegrationE2ETest {
     private TaskRepository taskRepository;
     
     @Autowired
-    private JiraOAuthTokenRepository tokenRepository;
+    private JiraOauthTokenRepository tokenRepository;
     
     @Autowired
     private RabbitAdmin rabbitAdmin;
@@ -109,8 +122,8 @@ class JiraIntegrationE2ETest {
     private JiraIntegrationService jiraIntegrationService;
     
     @MockBean
-    @Qualifier("jiraOAuthWebClient")
-    private WebClient jiraOAuthWebClient;
+    @Qualifier("jiraOauthWebClient")
+    private WebClient jiraOauthWebClient;
     
     @MockBean
     private JiraRestClient jiraRestClient;
@@ -124,9 +137,9 @@ class JiraIntegrationE2ETest {
         taskRepository.deleteAll();
         projectRepository.deleteAll();
         
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_CREATE_QUEUE, false);
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_UPDATE_QUEUE, false);
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_DELETE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_CREATE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_UPDATE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_DELETE_QUEUE, false);
         
         testProject = Project.builder()
             .name("Test Project")
@@ -135,8 +148,8 @@ class JiraIntegrationE2ETest {
             .build();
         testProject = projectRepository.save(testProject);
         
-        UserJiraOAuthToken token = tokenRepository.findByUserId(testUserId)
-            .orElse(new UserJiraOAuthToken());
+        UserJiraOauthToken token = tokenRepository.findByUserId(testUserId)
+            .orElse(new UserJiraOauthToken());
         token.setUserId(testUserId);
         token.setAccessToken("test-access-token");
         token.setRefreshToken("test-refresh-token");

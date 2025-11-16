@@ -5,13 +5,11 @@ import faang.school.projectservice.integration.jira.config.JiraProperties;
 import faang.school.projectservice.integration.jira.dto.request.JiraIssueLinkRequest;
 import faang.school.projectservice.integration.jira.dto.request.JiraIssueRequest;
 import faang.school.projectservice.integration.jira.dto.response.JiraIssueResponse;
-import faang.school.projectservice.integration.jira.dto.response.JiraSearchResponse;
 import faang.school.projectservice.integration.jira.dto.response.JiraTransitionsResponse;
 import faang.school.projectservice.integration.jira.exception.JiraApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -19,21 +17,21 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 /**
- * OAuth клиент для работы с Jira API через WebClient
- * Использует OAuth токены пользователей
+ * Oauth клиент для работы с Jira API через WebClient
+ * Использует Oauth токены пользователей
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JiraOAuthClient {
+public class JiraOauthClient {
 
     private final JiraProperties jiraProperties;
-    @Qualifier("jiraOAuthWebClient")
+    @Qualifier("jiraOauthWebClient")
     private final WebClient webClient;
     private final JiraCacheService cacheService;
 
     public String createIssue(String accessToken, JiraIssueRequest request) {
-        log.debug("Creating issue via OAuth client");
+        log.debug("Creating issue via Oauth client");
 
         try {
             JiraIssueResponse response = webClient.post()
@@ -70,7 +68,7 @@ public class JiraOAuthClient {
     }
 
     public void updateIssue(String accessToken, String issueKey, JiraIssueRequest request) {
-        log.debug("Updating issue via OAuth client: {}", issueKey);
+        log.debug("Updating issue via Oauth client: {}", issueKey);
 
         try {
             webClient.put()
@@ -106,7 +104,7 @@ public class JiraOAuthClient {
 
 
     public JiraIssueResponse getIssue(String accessToken, String issueKey) {
-        log.debug("Getting issue via OAuth client: {}", issueKey);
+        log.debug("Getting issue via Oauth client: {}", issueKey);
 
         // Попытка получить из кэша
         Optional<JiraIssueResponse> cached = cacheService.getIssue(issueKey);
@@ -151,7 +149,7 @@ public class JiraOAuthClient {
     }
 
     public JiraTransitionsResponse getTransitions(String accessToken, String issueKey) {
-        log.debug("Getting transitions via OAuth client: {}", issueKey);
+        log.debug("Getting transitions via Oauth client: {}", issueKey);
 
         // Попытка получить из кэша
         Optional<JiraTransitionsResponse> cached = cacheService.getTransitions(issueKey);
@@ -196,7 +194,7 @@ public class JiraOAuthClient {
     }
 
     public void performTransition(String accessToken, String issueKey, String transitionId) {
-        log.debug("Performing transition via OAuth client: issueKey={}, transitionId={}", issueKey, transitionId);
+        log.debug("Performing transition via Oauth client: issueKey={}, transitionId={}", issueKey, transitionId);
 
         try {
             webClient.post()
@@ -231,7 +229,7 @@ public class JiraOAuthClient {
     }
 
     public void linkIssues(String accessToken, JiraIssueLinkRequest request) {
-        log.debug("Linking issues via OAuth client");
+        log.debug("Linking issues via Oauth client");
 
         try {
             webClient.post()

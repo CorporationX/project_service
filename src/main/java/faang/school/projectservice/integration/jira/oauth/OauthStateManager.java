@@ -1,4 +1,4 @@
-package faang.school.projectservice.integration.jira.oauth;
+package faang.school.projectservice.integration.jira.Oauth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 /**
- * Управляет OAuth state в Redis для stateless архитектуры
+ * Управляет Oauth state в Redis для stateless архитектуры
  *
  * Используется для хранения state → userId mapping
  * между authorize и callback запросами
@@ -16,10 +16,10 @@ import java.time.Duration;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuthStateManager {
+public class OauthStateManager {
     private final RedisTemplate<String, Long> redisTemplate;
 
-    private static final String STATE_KEY_PREFIX = "jira:oauth:state:";
+    private static final String STATE_KEY_PREFIX = "jira:Oauth:state:";
     private static final Duration STATE_TTL = Duration.ofMinutes(10);
 
     /**
@@ -33,7 +33,7 @@ public class OAuthStateManager {
 
         redisTemplate.opsForValue().set(key, userId, STATE_TTL);
 
-        log.debug("Saved OAuth state in Redis: {} -> user {}, TTL: {} minutes",
+        log.debug("Saved Oauth state in Redis: {} -> user {}, TTL: {} minutes",
                 state, userId, STATE_TTL.toMinutes());
     }
 
@@ -48,8 +48,8 @@ public class OAuthStateManager {
 
         Long userId = redisTemplate.opsForValue().get(key);
 
-        if(userId == null) {
-            log.warn("OAuth state not found or expired: {}", state);
+        if (userId == null) {
+            log.warn("Oauth state not found or expired: {}", state);
         } else {
             log.debug("Retrieved userId {} for state: {}", userId, state);
         }
@@ -69,9 +69,9 @@ public class OAuthStateManager {
         Boolean deleted = redisTemplate.delete(key);
 
         if (Boolean.TRUE.equals(deleted)) {
-            log.debug("Removed OAuth state from Redis: {}", state);
+            log.debug("Removed Oauth state from Redis: {}", state);
         } else {
-            log.warn("OAuth state not found for deletion: {}", state);
+            log.warn("Oauth state not found for deletion: {}", state);
         }
     }
 

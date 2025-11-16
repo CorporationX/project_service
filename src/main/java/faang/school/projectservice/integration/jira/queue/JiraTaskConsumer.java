@@ -1,16 +1,16 @@
 package faang.school.projectservice.integration.jira.queue;
 
-import com.rabbitmq.client.Channel;
+import com.rabbitMq.client.Channel;
 import faang.school.projectservice.integration.jira.event.JiraEventPublisher;
-import faang.school.projectservice.integration.jira.queue.config.RabbitMQConfig;
+import faang.school.projectservice.integration.jira.queue.config.RabbitMqConfig;
 import faang.school.projectservice.integration.jira.service.JiraIntegrationService;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.aMqp.rabbit.annotation.RabbitListener;
+import org.springframework.aMqp.rabbit.core.RabbitTemplate;
+import org.springframework.aMqp.support.AMqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -33,10 +33,10 @@ public class JiraTaskConsumer {
     // CREATE Operations
     // ==========================================
     
-    @RabbitListener(queues = RabbitMQConfig.TASK_CREATE_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.TASK_CREATE_QUEUE)
     public void handleTaskCreation(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing CREATE task: taskId={}, correlationId={}, retry={}", 
@@ -80,10 +80,10 @@ public class JiraTaskConsumer {
     // UPDATE Operations
     // ==========================================
     
-    @RabbitListener(queues = RabbitMQConfig.TASK_UPDATE_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.TASK_UPDATE_QUEUE)
     public void handleTaskUpdate(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing UPDATE task: taskId={}, correlationId={}", 
@@ -134,10 +134,10 @@ public class JiraTaskConsumer {
     // DELETE Operations
     // ==========================================
     
-    @RabbitListener(queues = RabbitMQConfig.TASK_DELETE_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.TASK_DELETE_QUEUE)
     public void handleTaskDeletion(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing DELETE task: taskId={}, jiraKey={}", 
@@ -146,8 +146,8 @@ public class JiraTaskConsumer {
         );
         
         try {
-            String jiraIssueKey = message.getPayload() != null ? 
-                message.getPayload().getJiraIssueKey() : null;
+            String jiraIssueKey = message.getPayload() != null
+                ? message.getPayload().getJiraIssueKey() : null;
             
             if (jiraIssueKey == null) {
                 log.warn("No Jira key for task {}, skipping deletion", message.getTaskId());
@@ -176,17 +176,18 @@ public class JiraTaskConsumer {
     // SYNC Operations
     // ==========================================
     
-    @RabbitListener(queues = RabbitMQConfig.TASK_SYNC_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.TASK_SYNC_QUEUE)
     public void handleProjectSync(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing SYNC project");
         
         try {
-            Long projectId = message.getPayload() != null && message.getPayload().getProject() != null ?
-                message.getPayload().getProject().getId() : null;
+            Long projectId = message.getPayload() != null
+                && message.getPayload().getProject() != null
+                ? message.getPayload().getProject().getId() : null;
             
             if (projectId == null) {
                 log.warn("No projectId in sync message, skipping");
@@ -220,10 +221,10 @@ public class JiraTaskConsumer {
     // BULK Operations
     // ==========================================
     
-    @RabbitListener(queues = RabbitMQConfig.TASK_BULK_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.TASK_BULK_QUEUE)
     public void handleBulkUpdate(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.info("Processing BULK_UPDATE task: taskId={}", message.getTaskId());
@@ -268,14 +269,14 @@ public class JiraTaskConsumer {
     // ==========================================
     
     @RabbitListener(queues = {
-        RabbitMQConfig.TASK_CREATE_DLQ,
-        RabbitMQConfig.TASK_UPDATE_DLQ,
-        RabbitMQConfig.TASK_DELETE_DLQ,
-        RabbitMQConfig.TASK_SYNC_DLQ
+        RabbitMqConfig.TASK_CREATE_DLQ,
+        RabbitMqConfig.TASK_UPDATE_DLQ,
+        RabbitMqConfig.TASK_DELETE_DLQ,
+        RabbitMqConfig.TASK_SYNC_DLQ
     })
     public void handleDeadLetterMessage(
         @Payload JiraTaskMessage message,
-        @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+        @Header(AMqpHeaders.DELIVERY_TAG) long tag,
         Channel channel
     ) throws IOException {
         log.error("Dead Letter message received: {}", message);

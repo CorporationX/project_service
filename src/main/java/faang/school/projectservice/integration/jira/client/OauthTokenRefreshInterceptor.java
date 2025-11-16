@@ -1,6 +1,6 @@
 package faang.school.projectservice.integration.jira.client;
 
-import faang.school.projectservice.integration.jira.oauth.JiraOAuthTokenManager;
+import faang.school.projectservice.integration.jira.Oauth.JiraOauthTokenManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,15 +12,15 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
 /**
- * Interceptor для автоматического refresh OAuth токена при 401
+ * Interceptor для автоматического refresh Oauth токена при 401
  * можно добавить в WebClient filter chain
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuthTokenRefreshInterceptor implements ExchangeFilterFunction {
+public class OauthTokenRefreshInterceptor implements ExchangeFilterFunction {
 
-    private final JiraOAuthTokenManager tokenManager;
+    private final JiraOauthTokenManager tokenManager;
 
     @Override
     public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {

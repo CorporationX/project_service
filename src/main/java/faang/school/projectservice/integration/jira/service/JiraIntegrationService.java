@@ -5,20 +5,20 @@ import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import faang.school.projectservice.integration.jira.JiraSystemClient;
-import faang.school.projectservice.integration.jira.client.JiraOAuthClient;
+import faang.school.projectservice.integration.jira.client.JiraOauthClient;
 import faang.school.projectservice.integration.jira.dto.request.JiraIssueLinkRequest;
 import faang.school.projectservice.integration.jira.dto.request.JiraIssueRequest;
 import faang.school.projectservice.integration.jira.dto.response.JiraTransitionsResponse;
 import faang.school.projectservice.integration.jira.event.JiraEventPublisher;
 import faang.school.projectservice.integration.jira.exception.JiraApiException;
 import faang.school.projectservice.integration.jira.exception.JiraIntegrationException;
-import faang.school.projectservice.integration.jira.exception.JiraOAuthException;
+import faang.school.projectservice.integration.jira.exception.JiraOauthException;
 import faang.school.projectservice.integration.jira.mapper.JiraMapper;
-import faang.school.projectservice.integration.jira.dto.response.OAuthTokenResponse;
+import faang.school.projectservice.integration.jira.dto.response.OauthTokenResponse;
 import faang.school.projectservice.integration.jira.metrics.JiraMetricsService;
-import faang.school.projectservice.integration.jira.oauth.JiraOAuthTokenManager;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
-import faang.school.projectservice.integration.jira.oauth.model.UserJiraOAuthToken;
+import faang.school.projectservice.integration.jira.Oauth.JiraOauthTokenManager;
+import faang.school.projectservice.integration.jira.Oauth.model.JiraOauthTokenRepository;
+import faang.school.projectservice.integration.jira.Oauth.model.UserJiraOauthToken;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -40,7 +40,7 @@ import java.util.stream.StreamSupport;
  * FACADE для интеграции с Jira
  * 
  * Основная точка входа для работы с Jira API.
- * Решает какой клиент использовать (OAuth или System).
+ * Решает какой клиент использовать (Oauth или System).
  * Реализует fallback логику.
  */
 @Slf4j
@@ -49,11 +49,11 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class JiraIntegrationService {
     
-    private final JiraOAuthClient oauthClient;
+    private final JiraOauthClient OauthClient;
     private final JiraSystemClient systemClient;
-    private final JiraOAuthTokenManager tokenManager;
-    private final JiraOAuthTokenRepository tokenRepository;
-    private final JiraOAuthService oauthService;
+    private final JiraOauthTokenManager tokenManager;
+    private final JiraOauthTokenRepository tokenRepository;
+    private final JiraOauthService OauthService;
     private final JiraMapper mapper;
     private final TaskRepository taskRepository;
     private final JiraEventPublisher eventPublisher;
@@ -80,30 +80,30 @@ public class JiraIntegrationService {
             String accessToken = tokenManager.getValidToken(userId);
             JiraIssueRequest request = mapper.toJiraRequest(task);
             
-            String issueKey = oauthClient.createIssue(accessToken, request);
-            log.info("Task created as user via OAuth: {}", issueKey);
+            String issueKey = OauthClient.createIssue(accessToken, request);
+            log.info("Task created as user via Oauth: {}", issueKey);
             
             task.setJiraIssueKey(issueKey);
             taskRepository.save(task);
    
             eventPublisher.publishTaskCreated(task, issueKey);
             
-            metricsService.recordTaskCreated("oauth");
-            metricsService.recordApiRequestDuration(sample, "create_task_oauth");
+            metricsService.recordTaskCreated("Oauth");
+            metricsService.recordApiRequestDuration(sample, "create_task_Oauth");
             
             return issueKey;
             
-        } catch (JiraOAuthException e) {
-            log.warn("OAuth failed for user {}: {}. Falling back to system client.", userId, e.getMessage());
-            metricsService.recordOAuthFallback();
-            metricsService.recordApiError("oauth_exception");
+        } catch (JiraOauthException e) {
+            log.warn("Oauth failed for user {}: {}. Falling back to system client.", userId, e.getMessage());
+            metricsService.recordOauthFallback();
+            metricsService.recordApiError("Oauth_exception");
             metricsService.recordApiRequestDuration(sample, "create_task_fallback");
             return createTaskAsSystem(task);
             
         } catch (JiraApiException e) {
             if (e.getMessage().contains("token invalid") || e.getMessage().contains("401")) {
-                log.warn("OAuth token invalid for user {}. Falling back to system client.", userId);
-                metricsService.recordOAuthFallback();
+                log.warn("Oauth token invalid for user {}. Falling back to system client.", userId);
+                metricsService.recordOauthFallback();
                 metricsService.recordApiError("invalid_token");
                 metricsService.recordApiRequestDuration(sample, "create_task_fallback");
                 return createTaskAsSystem(task);
@@ -172,7 +172,7 @@ public class JiraIntegrationService {
             String accessToken = tokenManager.getValidToken(userId);
             JiraIssueRequest request = mapper.toJiraRequest(updates);
             
-            oauthClient.updateIssue(accessToken, issueKey, request);
+            OauthClient.updateIssue(accessToken, issueKey, request);
             
             if (updates.getStatus() != null) {
                 updateStatusAsUser(userId, issueKey, updates.getStatus());
@@ -182,15 +182,15 @@ public class JiraIntegrationService {
             Task updatedTask = taskRepository.findByJiraIssueKey(issueKey).orElse(updates);
             eventPublisher.publishTaskUpdated(updatedTask, oldTask, issueKey);
             
-            metricsService.recordTaskUpdated("oauth");
-            metricsService.recordApiRequestDuration(sample, "update_task_oauth");
+            metricsService.recordTaskUpdated("Oauth");
+            metricsService.recordApiRequestDuration(sample, "update_task_Oauth");
             
-            log.info("Task updated as user via OAuth: {}", issueKey);
+            log.info("Task updated as user via Oauth: {}", issueKey);
             
-        } catch (JiraOAuthException | JiraApiException e) {
-            log.warn("OAuth failed for user {}: {}. Falling back to system client.", userId, e.getMessage());
-            metricsService.recordOAuthFallback();
-            metricsService.recordApiError("oauth_exception");
+        } catch (JiraOauthException | JiraApiException e) {
+            log.warn("Oauth failed for user {}: {}. Falling back to system client.", userId, e.getMessage());
+            metricsService.recordOauthFallback();
+            metricsService.recordApiError("Oauth_exception");
             metricsService.recordApiRequestDuration(sample, "update_task_fallback");
             updateTaskAsSystem(issueKey, updates);
         } catch (Exception e) {
@@ -250,17 +250,17 @@ public class JiraIntegrationService {
         try {
             String accessToken = tokenManager.getValidToken(userId);
             
-            JiraTransitionsResponse transitions = oauthClient.getTransitions(accessToken, issueKey);
+            JiraTransitionsResponse transitions = OauthClient.getTransitions(accessToken, issueKey);
        
             String targetJiraStatus = mapper.toJiraStatus(targetStatus);
             String transitionId = findTransitionId(transitions, targetJiraStatus);
     
-            oauthClient.performTransition(accessToken, issueKey, transitionId);
+            OauthClient.performTransition(accessToken, issueKey, transitionId);
             
             log.debug("Status updated to {} for issue: {}", targetStatus, issueKey);
             
         } catch (Exception e) {
-            log.warn("Failed to update status via OAuth, falling back to system client", e);
+            log.warn("Failed to update status via Oauth, falling back to system client", e);
             updateStatusAsSystem(issueKey, targetStatus);
         }
     }
@@ -381,11 +381,11 @@ public class JiraIntegrationService {
                     .build())
                 .build();
             
-            oauthClient.linkIssues(accessToken, request);
-            log.info("Tasks linked via OAuth");
+            OauthClient.linkIssues(accessToken, request);
+            log.info("Tasks linked via Oauth");
             
         } catch (Exception e) {
-            log.warn("Failed to link via OAuth, falling back to system client", e);
+            log.warn("Failed to link via Oauth, falling back to system client", e);
             linkTasksAsSystem(sourceKey, targetKey, linkType);
         }
     }
@@ -409,15 +409,15 @@ public class JiraIntegrationService {
         Timer.Sample sample = metricsService.startApiRequestTimer();
         
         try {
-            if (!hasValidOAuthToken(userId)) {
+            if (!hasValidOauthToken(userId)) {
                 metricsService.recordApiRequestDuration(sample, "delete_task_system");
                 deleteTaskAsSystem(jiraIssueKey);
                 return;
             }
             
             deleteTaskAsSystem(jiraIssueKey);
-            metricsService.recordTaskDeleted("oauth");
-            metricsService.recordApiRequestDuration(sample, "delete_task_oauth");
+            metricsService.recordTaskDeleted("Oauth");
+            metricsService.recordApiRequestDuration(sample, "delete_task_Oauth");
             
         } catch (Exception e) {
             log.error("Failed to delete task", e);
@@ -527,18 +527,18 @@ public class JiraIntegrationService {
     }
     
     // ==========================================
-    // OAuth Token Management
+    // Oauth Token Management
     // ==========================================
     
     @Transactional
-    public void refreshOAuthToken(Long userId) {
-        log.debug("Refreshing OAuth token for user: {}", userId);
+    public void refreshOauthToken(Long userId) {
+        log.debug("Refreshing Oauth token for user: {}", userId);
         
         try {
-            UserJiraOAuthToken token = tokenRepository.findByUserId(userId)
+            UserJiraOauthToken token = tokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new JiraIntegrationException("No token found for user: " + userId));
             
-            OAuthTokenResponse response = oauthService.refreshAccessToken(token.getRefreshToken());
+            OauthTokenResponse response = OauthService.refreshAccessToken(token.getRefreshToken());
             
             token.setAccessToken(response.getAccessToken());
             if (response.getRefreshToken() != null) {
@@ -547,10 +547,10 @@ public class JiraIntegrationService {
             token.setExpiresAt(LocalDateTime.now().plusSeconds(response.getExpiresIn()));
             tokenRepository.save(token);
             
-            log.info("OAuth token refreshed for user: {}", userId);
+            log.info("Oauth token refreshed for user: {}", userId);
             
         } catch (Exception e) {
-            log.error("Failed to refresh OAuth token", e);
+            log.error("Failed to refresh Oauth token", e);
             throw new JiraIntegrationException("Failed to refresh token for user: " + userId, e);
         }
     }
@@ -575,7 +575,7 @@ public class JiraIntegrationService {
         status.setSystemClientAvailable(checkJiraHealth());
         
         long activeTokens = tokenRepository.countActiveTokens(LocalDateTime.now());
-        status.setActiveOAuthTokens(activeTokens);
+        status.setActiveOauthTokens(activeTokens);
         
         long unsyncedTasks = taskRepository.findAll().stream()
             .filter(t -> t.getJiraIssueKey() == null)
@@ -589,7 +589,7 @@ public class JiraIntegrationService {
     // UTILITY
     // ==========================================
     
-    private boolean hasValidOAuthToken(Long userId) {
+    private boolean hasValidOauthToken(Long userId) {
         return tokenRepository.findByUserId(userId)
             .map(token -> token.getExpiresAt().isAfter(LocalDateTime.now()))
             .orElse(false);
@@ -636,7 +636,7 @@ public class JiraIntegrationService {
     @Data
     public static class IntegrationStatus {
         private boolean systemClientAvailable;
-        private long activeOAuthTokens;
+        private long activeOauthTokens;
         private long unsyncedTasks;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class JiraProperties {
 
     private SystemConfig system = new SystemConfig();
-    private OAuthConfig oauth = new OAuthConfig();
+    private OauthConfig Oauth = new OauthConfig();
     private CacheConfig cache = new CacheConfig();
     private String projectKey;
     private String issueType = "Task";
@@ -25,13 +25,13 @@ public class JiraProperties {
     }
 
     @Data
-    public static class OAuthConfig {
+    public static class OauthConfig {
         private boolean enable = false;
         private String clientId;
         private String clientSecret;
         private String redirectUri;
         private String authorizationUri = "https://auth.atlassian.com/authorize";
-        private String tokenUri = "https://auth.atlassian.com/oauth/token";
+        private String tokenUri = "https://auth.atlassian.com/Oauth/token";
         private String scope = "read:jira-work write:jira-work offline_access";
     }
     

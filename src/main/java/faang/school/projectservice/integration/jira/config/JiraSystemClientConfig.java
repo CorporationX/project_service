@@ -89,22 +89,22 @@ public class JiraSystemClientConfig {
     private void validateSystemConfig(JiraProperties.SystemConfig config) {
         if (config.getBaseUrl() == null || config.getBaseUrl().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.system.base-url is required. " +
-                            "Please configure it in application.yml"
+                    "jira.system.base-url is required. "
+                            + "Please configure it in application.yml"
             );
         }
 
         if (config.getUsername() == null || config.getUsername().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.system.username is required. " +
-                            "Please configure it in application.yml"
+                    "jira.system.username is required. "
+                            + "Please configure it in application.yml"
             );
         }
 
         if (config.getApiToken() == null || config.getApiToken().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.system.api-token is required. " +
-                            "Get it from: https://id.atlassian.com/manage-profile/security/api-tokens"
+                    "jira.system.api-token is required. "
+                            + "Get it from: https://id.atlassian.com/manage-profile/security/api-tokens"
             );
         }
 

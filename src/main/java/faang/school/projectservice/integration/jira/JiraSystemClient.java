@@ -1,8 +1,13 @@
 package faang.school.projectservice.integration.jira;
 
 import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.domain.*;
-import com.atlassian.jira.rest.client.api.domain.input.*;
+import com.atlassian.jira.rest.client.api.domain.BasicIssue;
+import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.api.domain.SearchResult;
+import com.atlassian.jira.rest.client.api.domain.Transition;
+import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
+import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput;
+import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import faang.school.projectservice.integration.jira.cache.JiraCacheService;
 import faang.school.projectservice.integration.jira.config.JiraProperties;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +28,7 @@ import java.util.stream.StreamSupport;
  * - Scheduled синхронизация
  * - Массовые операции
  * - Служебные задачи
- * - Fallback когда у пользователя нет OAuth токена
+ * - Fallback когда у пользователя нет Oauth токена
  */
 @Slf4j
 @Component

@@ -1,7 +1,7 @@
 package faang.school.projectservice.integration.jira.service;
 
-import faang.school.projectservice.integration.jira.oauth.model.UserJiraOAuthToken;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
+import faang.school.projectservice.integration.jira.Oauth.model.UserJiraOauthToken;
+import faang.school.projectservice.integration.jira.Oauth.model.JiraOauthTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,10 +15,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JiraTokenService {
 
-    private final JiraOAuthTokenRepository tokenRepository;
+    private final JiraOauthTokenRepository tokenRepository;
 
     @Transactional
-    public UserJiraOAuthToken saveToken(
+    public UserJiraOauthToken saveToken(
             Long userId,
             String accessToken,
             String refreshToken,
@@ -26,11 +26,11 @@ public class JiraTokenService {
             LocalDateTime expiresAt,
             String scope
     ) {
-        log.info("Saving OAuth token for user: {}", userId);
+        log.info("Saving Oauth token for user: {}", userId);
 
-        Optional<UserJiraOAuthToken> existing = tokenRepository.findByUserId(userId);
+        Optional<UserJiraOauthToken> existing = tokenRepository.findByUserId(userId);
 
-        UserJiraOAuthToken token;
+        UserJiraOauthToken token;
 
         if (existing.isPresent()) {
             log.debug("Updating existing tokens for user: {}", userId);
@@ -42,7 +42,7 @@ public class JiraTokenService {
             token.setScope(scope);
         } else {
             log.debug("Creating new tokens for user: {}", userId);
-            token = UserJiraOAuthToken.builder()
+            token = UserJiraOauthToken.builder()
                     .userId(userId)
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
@@ -57,7 +57,7 @@ public class JiraTokenService {
         return token;
     }
 
-    public Optional<UserJiraOAuthToken> getToken(Long userId){
+    public Optional<UserJiraOauthToken> getToken(Long userId) {
         log.debug("Getting tokens for user: {}", userId);
         return tokenRepository.findByUserId(userId);
     }
@@ -69,8 +69,8 @@ public class JiraTokenService {
         log.info("Tokens deleted for user: {}", userId);
     }
 
-    public boolean hasValidToken(Long userId){
-        Optional<UserJiraOAuthToken> token = tokenRepository.findByUserId(userId);
+    public boolean hasValidToken(Long userId) {
+        Optional<UserJiraOauthToken> token = tokenRepository.findByUserId(userId);
 
         if (token.isEmpty()) {
             log.debug("No token found for user: {}", userId);
@@ -84,7 +84,7 @@ public class JiraTokenService {
     }
 
     @Transactional
-    public UserJiraOAuthToken updateTokenAfterRefresh(
+    public UserJiraOauthToken updateTokenAfterRefresh(
             Long userId,
             String newAccessToken,
             String newRefreshToken,
@@ -92,7 +92,7 @@ public class JiraTokenService {
     ) {
         log.info("Updating token after refresh for user: {}", userId);
 
-        UserJiraOAuthToken token = tokenRepository.findByUserId(userId)
+        UserJiraOauthToken token = tokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException(
                         "No tokens found for user: " + userId
                 ));

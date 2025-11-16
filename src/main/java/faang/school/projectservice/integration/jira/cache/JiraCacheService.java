@@ -57,11 +57,11 @@ public class JiraCacheService {
     private static final String CACHE_PREFIX_USERS = "jira:cache:users";
     
     // ==========================================
-    // Issue Cache (OAuth Client - JiraIssueResponse)
+    // Issue Cache (Oauth Client - JiraIssueResponse)
     // ==========================================
     
     /**
-     * Получить Issue из кэша (OAuth Client)
+     * Получить Issue из кэша (Oauth Client)
      */
     public Optional<JiraIssueResponse> getIssue(String issueKey) {
         if (!isCacheEnabled()) {
@@ -91,7 +91,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Сохранить Issue в кэш (OAuth Client)
+     * Сохранить Issue в кэш (Oauth Client)
      */
     public void putIssue(String issueKey, JiraIssueResponse issue) {
         if (!isCacheEnabled()) {
@@ -124,7 +124,7 @@ public class JiraCacheService {
     // ==========================================
     
     /**
-     * Получить Transitions из кэша (OAuth Client)
+     * Получить Transitions из кэша (Oauth Client)
      */
     public Optional<JiraTransitionsResponse> getTransitions(String issueKey) {
         if (!isCacheEnabled()) {
@@ -154,7 +154,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Сохранить Transitions в кэш (OAuth Client)
+     * Сохранить Transitions в кэш (Oauth Client)
      */
     public void putTransitions(String issueKey, JiraTransitionsResponse transitions) {
         if (!isCacheEnabled()) {
@@ -174,7 +174,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Сохранить Transitions в кэш (System Client - List<Transition>)
+     * Сохранить Transitions в кэш (System Client - List of Transition)
      */
     public void putTransitions(String issueKey, List<Transition> transitions) {
         if (!isCacheEnabled()) {
@@ -194,7 +194,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Получить Transitions из кэша (System Client - List<Transition>)
+     * Получить Transitions из кэша (System Client - List of Transition)
      */
     public Optional<List<Transition>> getTransitionsList(String issueKey) {
         if (!isCacheEnabled()) {

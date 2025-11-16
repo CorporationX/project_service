@@ -1,6 +1,6 @@
 package faang.school.projectservice.integration.jira.queue;
 
-import faang.school.projectservice.integration.jira.queue.config.RabbitMQConfig;
+import faang.school.projectservice.integration.jira.queue.config.RabbitMqConfig;
 import faang.school.projectservice.integration.jira.service.JiraIntegrationService;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -9,9 +9,12 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import org.junit.jupiter.api.*;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.aMqp.rabbit.core.RabbitAdmin;
+import org.springframework.aMqp.rabbit.core.RabbitTemplate;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +25,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.RabbitMqContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -30,15 +33,21 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisplayName("RabbitMQ Integration Tests")
-class RabbitMQIntegrationTest {
+@DisplayName("RabbitMq Integration Tests")
+class RabbitMqIntegrationTest {
     
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14")
@@ -47,12 +56,12 @@ class RabbitMQIntegrationTest {
         .withPassword("test");
     
     @Container
-    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.12-management")
+    static RabbitMqContainer rabbitMqContainer = new RabbitMqContainer("rabbitMq:3.12-management")
         .withExposedPorts(5672, 15672);
     
     static {
         postgres.start();
-        rabbitMQContainer.start();
+        rabbitMqContainer.start();
     }
     
     @DynamicPropertySource
@@ -60,12 +69,12 @@ class RabbitMQIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.rabbitmq.host", rabbitMQContainer::getHost);
-        registry.add("spring.rabbitmq.port", rabbitMQContainer::getFirstMappedPort);
-        registry.add("spring.rabbitmq.username", () -> "guest");
-        registry.add("spring.rabbitmq.password", () -> "guest");
+        registry.add("spring.rabbitMq.host", rabbitMqContainer::getHost);
+        registry.add("spring.rabbitMq.port", rabbitMqContainer::getFirstMappedPort);
+        registry.add("spring.rabbitMq.username", () -> "guest");
+        registry.add("spring.rabbitMq.password", () -> "guest");
         registry.add("jira.scheduled.enabled", () -> "false");
-        registry.add("jira.oauth.enable", () -> "false");
+        registry.add("jira.Oauth.enable", () -> "false");
         registry.add("jira.system.base-url", () -> "http://localhost:8080");
         registry.add("jira.system.username", () -> "test");
         registry.add("jira.system.api-token", () -> "test-token");
@@ -87,8 +96,8 @@ class RabbitMQIntegrationTest {
     private JiraIntegrationService integrationService;
     
     @MockBean
-    @Qualifier("jiraOAuthWebClient")
-    private WebClient jiraOAuthWebClient;
+    @Qualifier("jiraOauthWebClient")
+    private WebClient jiraOauthWebClient;
     
     @MockBean
     private JiraRestClient jiraRestClient;
@@ -104,9 +113,9 @@ class RabbitMQIntegrationTest {
     
     @BeforeEach
     void setUp() {
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_CREATE_QUEUE, false);
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_UPDATE_QUEUE, false);
-        rabbitAdmin.purgeQueue(RabbitMQConfig.TASK_DELETE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_CREATE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_UPDATE_QUEUE, false);
+        rabbitAdmin.purgeQueue(RabbitMqConfig.TASK_DELETE_QUEUE, false);
         
         testProject = Project.builder()
             .name("Test Project")
@@ -179,8 +188,8 @@ class RabbitMQIntegrationTest {
     @Test
     @DisplayName("Should handle task deletion")
     void testTaskDeletionQueue() {
-        Long userId = 100L;
-        String jiraIssueKey = "TEST-123";
+        final Long userId = 100L;
+        final String jiraIssueKey = "TEST-123";
         
         doNothing().when(integrationService)
             .deleteTaskAsUser(userId, jiraIssueKey);
@@ -202,7 +211,7 @@ class RabbitMQIntegrationTest {
     @Test
     @DisplayName("Should handle project sync")
     void testProjectSyncQueue() {
-        Long userId = 100L;
+        final Long userId = 100L;
         
         JiraIntegrationService.SyncResult syncResult = new JiraIntegrationService.SyncResult();
         syncResult.setTotalTasks(10);
