@@ -48,7 +48,7 @@ public class OAuthStateManager {
 
         Long userId = redisTemplate.opsForValue().get(key);
 
-        if(userId == null) {
+        if (userId == null) {
             log.warn("OAuth state not found or expired: {}", state);
         } else {
             log.debug("Retrieved userId {} for state: {}", userId, state);

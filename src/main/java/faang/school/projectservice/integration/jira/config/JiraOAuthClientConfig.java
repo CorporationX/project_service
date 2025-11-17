@@ -35,9 +35,9 @@ public class JiraOAuthClientConfig {
 
             validateBaseUrl(systemConfig);
 
-            String baseUrl = systemConfig.getBaseUrl() + "/rest/api/3";
+            final String baseUrl = systemConfig.getBaseUrl() + "/rest/api/3";
 
-            WebClient client = WebClient.builder()
+            final WebClient client = WebClient.builder()
                     .baseUrl(baseUrl)
                     .defaultHeader("Content-Type", "application/json")
                     .defaultHeader("Accept", "application/json")
@@ -75,9 +75,9 @@ public class JiraOAuthClientConfig {
 
         if (config.getClientId() == null || config.getClientId().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.client-id is required when OAuth is enabled. " +
-                            "Get it from Atlassian Developer Console: " +
-                            "https://developer.atlassian.com/console/myapps/"
+                    "jira.oauth.client-id is required when OAuth is enabled. "
+                            + "Get it from Atlassian Developer Console: "
+                            + "https://developer.atlassian.com/console/myapps/"
             );
         }
 
@@ -89,8 +89,8 @@ public class JiraOAuthClientConfig {
 
         if (config.getRedirectUri() == null || config.getRedirectUri().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.redirect-uri is required. " +
-                            "Example: http://localhost:8080/api/jira/oauth/callback"
+                    "jira.oauth.redirect-uri is required. "
+                            + "Example: http://localhost:8080/api/jira/oauth/callback"
             );
         }
 

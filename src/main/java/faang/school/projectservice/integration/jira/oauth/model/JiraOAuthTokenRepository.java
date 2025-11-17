@@ -13,7 +13,9 @@ import java.util.Optional;
 public interface JiraOAuthTokenRepository extends JpaRepository<UserJiraOAuthToken, Long> {
 
     Optional<UserJiraOAuthToken> findByUserId(Long userId);
+
     boolean existsByUserId(Long userId);
+
     void deleteByUserId(Long userId);
 
     @Query("SELECT t FROM UserJiraOAuthToken t WHERE t.expiresAt < :now")

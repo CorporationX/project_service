@@ -142,12 +142,15 @@ public class JiraTaskConsumer {
     ) throws IOException {
         log.info("Processing DELETE task: taskId={}, jiraKey={}", 
             message.getTaskId(), 
-            message.getPayload() != null ? message.getPayload().getJiraIssueKey() : null
+            message.getPayload() != null
+                    ? message.getPayload().getJiraIssueKey()
+                    : null
         );
         
         try {
-            String jiraIssueKey = message.getPayload() != null ? 
-                message.getPayload().getJiraIssueKey() : null;
+            String jiraIssueKey = message.getPayload() != null
+                    ? message.getPayload().getJiraIssueKey()
+                    : null;
             
             if (jiraIssueKey == null) {
                 log.warn("No Jira key for task {}, skipping deletion", message.getTaskId());
@@ -185,8 +188,9 @@ public class JiraTaskConsumer {
         log.info("Processing SYNC project");
         
         try {
-            Long projectId = message.getPayload() != null && message.getPayload().getProject() != null ?
-                message.getPayload().getProject().getId() : null;
+            Long projectId = message.getPayload() != null && message.getPayload().getProject() != null
+                    ? message.getPayload().getProject().getId()
+                    : null;
             
             if (projectId == null) {
                 log.warn("No projectId in sync message, skipping");

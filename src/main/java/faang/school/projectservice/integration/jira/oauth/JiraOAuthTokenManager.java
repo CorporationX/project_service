@@ -24,8 +24,8 @@ public class JiraOAuthTokenManager {
 
         UserJiraOAuthToken token = jiraTokenService.getToken(userId)
                 .orElseThrow(() -> new JiraOAuthException(
-                        "User " + userId + " is not connected to Jira. " +
-                                "Please authorize first."
+                        "User " + userId + " is not connected to Jira. "
+                                + "Please authorize first."
                 ));
 
         if (token.isExpired()) {

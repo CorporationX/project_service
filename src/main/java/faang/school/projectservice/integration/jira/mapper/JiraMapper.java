@@ -139,10 +139,10 @@ public class JiraMapper {
             case "testing", "test" -> TaskStatus.TESTING;
             case "done", "closed", "resolved", "completed" -> TaskStatus.DONE;
             case "cancelled", "canceled", "blocked", "on hold", "impediment" -> TaskStatus.CANCELLED;
-            default -> {
-                log.warn("Unknown Jira status: {}, defaulting to TODO", jiraStatus);
-                yield TaskStatus.TODO;
-            }
+        default -> {
+            log.warn("Unknown Jira status: {}, defaulting to TODO", jiraStatus);
+            yield TaskStatus.TODO;
+        }
         };
     }
     

@@ -1,7 +1,6 @@
 package faang.school.projectservice.integration.jira.controller;
 
 import faang.school.projectservice.integration.jira.dto.response.OAuthStatusResponse;
-import faang.school.projectservice.integration.jira.oauth.JiraOAuthTokenManager;
 import faang.school.projectservice.integration.jira.oauth.OAuthStateManager;
 import faang.school.projectservice.integration.jira.service.JiraOAuthService;
 import faang.school.projectservice.integration.jira.service.JiraTokenService;
