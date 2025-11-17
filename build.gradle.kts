@@ -171,7 +171,7 @@ tasks.withType<JavaCompile> {
 checkstyle {
     toolVersion = "10.17.0"
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
-    checkstyle.enableExternalDtdLoad.set(false)
+    checkstyle.enableExternalDtdLoad.set(true)
 }
 
 tasks.checkstyleMain {
