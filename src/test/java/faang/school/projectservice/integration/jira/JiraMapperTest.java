@@ -20,8 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JiraMapper Tests")
@@ -100,7 +105,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should throw exception when Task has no project")
-    void toJiraRequest_NoProject_ThrowsException() {
+    void toJiraRequestNoProjectThrowsException() {
         testTask.setProject(null);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -118,7 +123,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should throw exception when Task has no project for IssueInput")
-    void toIssueInput_NoProject_ThrowsException() {
+    void toIssueInputNoProjectThrowsException() {
         testTask.setProject(null);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -132,7 +137,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should map Jira Issue to Task")
-    void toTask_FromIssue_Success() {
+    void toTaskFromIssueSuccess() {
         Task task = jiraMapper.toTask(mockIssue);
 
         assertNotNull(task);
@@ -145,7 +150,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should map JiraIssueResponse to Task")
-    void toTask_FromJiraIssueResponse_Success() {
+    void toTaskFromJiraIssueResponseSuccess() {
         JiraIssueResponse response = JiraIssueResponse.builder()
             .key("TEST-123")
             .id("123")
@@ -211,7 +216,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should return default status for null")
-    void toJiraStatus_Null_ReturnsDefault() {
+    void toJiraStatusNullReturnsDefault() {
         assertEquals("To Do", jiraMapper.toJiraStatus(null));
     }
 
@@ -246,13 +251,13 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should return default for unknown Jira status")
-    void fromJiraStatus_Unknown_ReturnsDefault() {
+    void fromJiraStatusUnknownReturnsDefault() {
         assertEquals(TaskStatus.TODO, jiraMapper.fromJiraStatus("Unknown Status"));
     }
 
     @Test
     @DisplayName("Should return default for null Jira status")
-    void fromJiraStatus_Null_ReturnsDefault() {
+    void fromJiraStatusNullReturnsDefault() {
         assertEquals(TaskStatus.TODO, jiraMapper.fromJiraStatus(null));
     }
 
@@ -281,7 +286,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should return null for null status in transition")
-    void getTransitionName_Null_ReturnsNull() {
+    void getTransitionNameNullReturnsNull() {
         assertNull(jiraMapper.getTransitionName(null));
     }
 
@@ -303,7 +308,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should return null for null LocalDate")
-    void toJodaDateTime_Null_ReturnsNull() {
+    void toJodaDateTimeNullReturnsNull() {
         assertNull(jiraMapper.toJodaDateTime(null));
     }
 
@@ -321,7 +326,7 @@ class JiraMapperTest {
 
     @Test
     @DisplayName("Should return null for null Joda DateTime")
-    void fromJodaDateTime_Null_ReturnsNull() {
+    void fromJodaDateTimeNullReturnsNull() {
         assertNull(jiraMapper.fromJodaDateTime(null));
     }
 

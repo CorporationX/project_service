@@ -1,4 +1,4 @@
-package faang.school.projectservice.integration.jira.oauth.model;
+package faang.school.projectservice.integration.jira.Oauth.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_jira_oauth_tokens")
-public class UserJiraOAuthToken {
+@Table(name = "user_jira_Oauth_tokens")
+public class UserJiraOauthToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

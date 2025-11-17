@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
  * - jira.tasks.synced - количество синхронизированных задач
  * - jira.tasks.failed - количество неудачных операций
  * - jira.api.requests.duration - время выполнения запросов к Jira API
- * - jira.oauth.tokens.active - количество активных OAuth токенов
- * - jira.oauth.fallback - количество fallback на System client
+ * - jira.Oauth.tokens.active - количество активных Oauth токенов
+ * - jira.Oauth.fallback - количество fallback на System client
  * - jira.api.errors - количество ошибок API
  */
 @Slf4j
@@ -68,9 +68,9 @@ public class JiraMetricsService {
             .register(meterRegistry);
     }
     
-    private Counter getOAuthFallbackCounter() {
-        return Counter.builder("jira.oauth.fallback")
-            .description("Total number of OAuth fallbacks to System client")
+    private Counter getOauthFallbackCounter() {
+        return Counter.builder("jira.Oauth.fallback")
+            .description("Total number of Oauth fallbacks to System client")
             .register(meterRegistry);
     }
     
@@ -121,9 +121,9 @@ public class JiraMetricsService {
         log.debug("Recorded task failed metric: operation={}, reason={}", operation, reason);
     }
     
-    public void recordOAuthFallback() {
-        getOAuthFallbackCounter().increment();
-        log.debug("Recorded OAuth fallback metric");
+    public void recordOauthFallback() {
+        getOauthFallbackCounter().increment();
+        log.debug("Recorded Oauth fallback metric");
     }
     
     public void recordApiError(String errorType) {
@@ -141,8 +141,8 @@ public class JiraMetricsService {
     }
     
     public void registerActiveTokensGauge(java.util.function.Supplier<Number> supplier) {
-        Gauge.builder("jira.oauth.tokens.active", supplier)
-            .description("Number of active OAuth tokens")
+        Gauge.builder("jira.Oauth.tokens.active", supplier)
+            .description("Number of active Oauth tokens")
             .register(meterRegistry);
     }
     

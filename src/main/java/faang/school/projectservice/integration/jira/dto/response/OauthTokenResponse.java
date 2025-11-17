@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OAuthTokenResponse {
+public class OauthTokenResponse {
     @JsonProperty("access_token")
     private String accessToken;
 

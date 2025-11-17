@@ -3,11 +3,11 @@ package faang.school.projectservice.integration.jira.scheduled;
 import faang.school.projectservice.integration.jira.websocket.JiraWebSocketService;
 
 import faang.school.projectservice.integration.jira.event.JiraEventPublisher;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
-import faang.school.projectservice.integration.jira.oauth.model.UserJiraOAuthToken;
+import faang.school.projectservice.integration.jira.oauth.model.JiraOauthTokenRepository;
+import faang.school.projectservice.integration.jira.oauth.model.UserJiraOauthToken;
 import faang.school.projectservice.integration.jira.queue.JiraTaskQueue;
 import faang.school.projectservice.integration.jira.service.JiraIntegrationService;
-import faang.school.projectservice.integration.jira.service.JiraOAuthService;
+import faang.school.projectservice.integration.jira.service.JiraOauthService;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +29,10 @@ public class JiraSyncScheduler {
     
     private final JiraIntegrationService jiraIntegrationService;
     private final TaskRepository taskRepository;
-    private final JiraOAuthTokenRepository tokenRepository;
+    private final JiraOauthTokenRepository tokenRepository;
     private final JiraTaskQueue queueProducer;
     private final JiraEventPublisher eventPublisher;
-    private final JiraOAuthService oauthService;
+    private final JiraOauthService oauthService;
     private final JiraWebSocketService webSocketService;
     
     // ==========================================
@@ -84,11 +84,11 @@ public class JiraSyncScheduler {
     @Scheduled(fixedDelay = 3600000)
     @Transactional
     public void refreshExpiringTokens() {
-        log.info("Checking OAuth tokens for refresh...");
+        log.info("Checking Oauth tokens for refresh...");
         
         try {
             LocalDateTime expiryThreshold = LocalDateTime.now().plusHours(2);
-            List<UserJiraOAuthToken> expiringTokens = 
+            List<UserJiraOauthToken> expiringTokens = 
                 tokenRepository.findTokensExpiringBefore(LocalDateTime.now(), expiryThreshold);
             
             if (expiringTokens.isEmpty()) {
@@ -105,7 +105,7 @@ public class JiraSyncScheduler {
                 try {
                     log.debug("Refreshing token for user: {}", token.getUserId());
                     
-                    jiraIntegrationService.refreshOAuthToken(token.getUserId());
+                    jiraIntegrationService.refreshOauthToken(token.getUserId());
                     refreshed.incrementAndGet();
                     
                 } catch (Exception e) {
@@ -175,17 +175,17 @@ public class JiraSyncScheduler {
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
     public void cleanupExpiredTokens() {
-        log.info("Starting cleanup of expired OAuth tokens...");
+        log.info("Starting cleanup of expired Oauth tokens...");
         
         try {
             LocalDateTime cleanupThreshold = LocalDateTime.now().minusWeeks(1);
-            List<UserJiraOAuthToken> expiredTokens = tokenRepository
+            List<UserJiraOauthToken> expiredTokens = tokenRepository
                 .findExpiredTokens(cleanupThreshold);
             
             int deleted = expiredTokens.size();
             tokenRepository.deleteAll(expiredTokens);
             
-            log.info("Deleted {} expired OAuth tokens", deleted);
+            log.info("Deleted {} expired Oauth tokens", deleted);
             
         } catch (Exception e) {
             log.error("Failed to cleanup expired tokens", e);

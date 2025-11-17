@@ -167,9 +167,6 @@ tasks.bootJar {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.compilerArgs.add("-parameters")
-    // Ensure annotation processing is enabled
-    options.annotationProcessorPath = configurations.getByName("annotationProcessor")
-    options.isIncremental = true
 }
 checkstyle {
     toolVersion = "10.17.0"

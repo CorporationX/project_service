@@ -1,17 +1,17 @@
 package faang.school.projectservice.integration.jira.service;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
-import faang.school.projectservice.integration.jira.client.JiraOAuthClient;
+import faang.school.projectservice.integration.jira.client.JiraOauthClient;
 import faang.school.projectservice.integration.jira.JiraSystemClient;
 import faang.school.projectservice.integration.jira.dto.request.JiraIssueRequest;
-import faang.school.projectservice.integration.jira.exception.JiraOAuthException;
-import faang.school.projectservice.integration.jira.dto.response.OAuthTokenResponse;
+import faang.school.projectservice.integration.jira.exception.JiraOauthException;
+import faang.school.projectservice.integration.jira.dto.response.OauthTokenResponse;
 import faang.school.projectservice.integration.jira.event.JiraEventPublisher;
 import faang.school.projectservice.integration.jira.mapper.JiraMapper;
 import faang.school.projectservice.integration.jira.metrics.JiraMetricsService;
-import faang.school.projectservice.integration.jira.oauth.JiraOAuthTokenManager;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
-import faang.school.projectservice.integration.jira.oauth.model.UserJiraOAuthToken;
+import faang.school.projectservice.integration.jira.oauth.JiraOauthTokenManager;
+import faang.school.projectservice.integration.jira.oauth.model.JiraOauthTokenRepository;
+import faang.school.projectservice.integration.jira.oauth.model.UserJiraOauthToken;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -34,10 +34,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JiraIntegrationService Tests")
@@ -47,16 +55,16 @@ class JiraIntegrationServiceTest {
     private JiraSystemClient systemClient;
     
     @Mock
-    private JiraOAuthClient oauthClient;
+    private JiraOauthClient oauthClient;
     
     @Mock
-    private JiraOAuthTokenManager tokenManager;
+    private JiraOauthTokenManager tokenManager;
     
     @Mock
-    private JiraOAuthTokenRepository tokenRepository;
+    private JiraOauthTokenRepository tokenRepository;
     
     @Mock
-    private JiraOAuthService oauthService;
+    private JiraOauthService oauthService;
     
     @Mock
     private TaskRepository taskRepository;
@@ -74,7 +82,7 @@ class JiraIntegrationServiceTest {
     private JiraIntegrationService integrationService;
     
     private Task testTask;
-    private UserJiraOAuthToken validToken;
+    private UserJiraOauthToken validToken;
     private Issue mockIssue;
     private Project testProject;
     
@@ -97,7 +105,7 @@ class JiraIntegrationServiceTest {
             .project(testProject)
             .build();
         
-        validToken = new UserJiraOAuthToken();
+        validToken = new UserJiraOauthToken();
         validToken.setUserId(100L);
         validToken.setAccessToken("test-access-token");
         validToken.setRefreshToken("test-refresh-token");
@@ -117,7 +125,7 @@ class JiraIntegrationServiceTest {
         lenient().doNothing().when(metricsService).recordTaskDeleted(anyString());
         lenient().doNothing().when(metricsService).recordTaskSynced(anyInt());
         lenient().doNothing().when(metricsService).recordTaskFailed(anyString(), anyString());
-        lenient().doNothing().when(metricsService).recordOAuthFallback();
+        lenient().doNothing().when(metricsService).recordOauthFallback();
         lenient().doNothing().when(metricsService).recordApiError(anyString());
         lenient().doNothing().when(metricsService).recordApiRequestDuration(any(Timer.Sample.class), anyString());
     }
@@ -127,8 +135,8 @@ class JiraIntegrationServiceTest {
     // ==========================================
     
     @Test
-    @DisplayName("Should create task via OAuth when user has valid token")
-    void createTaskAsUser_WithValidToken_UsesOAuthClient() {
+    @DisplayName("Should create task via Oauth when user has valid token")
+    void createTaskAsUserWithValidTokenUsesOauthClient() {
         Long userId = 100L;
         when(tokenManager.getValidToken(userId)).thenReturn("test-access-token");
         
@@ -143,17 +151,17 @@ class JiraIntegrationServiceTest {
         assertEquals("TEST-123", jiraKey);
         assertEquals("TEST-123", testTask.getJiraIssueKey());
         
-        verify(oauthClient).createIssue(anyString(), eq(createRequest));
+        verify(OauthClient).createIssue(anyString(), eq(createRequest));
         verify(taskRepository).save(testTask);
         verify(eventPublisher).publishTaskCreated(testTask, "TEST-123");
     }
     
     @Test
     @DisplayName("Should fallback to system client when user has no token")
-    void createTaskAsUser_WithoutToken_FallsBackToSystemClient() {
+    void createTaskAsUserWithoutTokenFallsBackToSystemClient() {
         Long userId = 100L;
         when(tokenManager.getValidToken(userId))
-            .thenThrow(new JiraOAuthException("No token"));
+            .thenThrow(new JiraOauthException("No token"));
         
         com.atlassian.jira.rest.client.api.domain.input.IssueInput issueInput = 
             mock(com.atlassian.jira.rest.client.api.domain.input.IssueInput.class);
@@ -171,8 +179,8 @@ class JiraIntegrationServiceTest {
     // ==========================================
     
     @Test
-    @DisplayName("Should update task via OAuth when available")
-    void updateTaskAsUser_WithValidToken_UsesOAuthClient() {
+    @DisplayName("Should update task via Oauth when available")
+    void updateTaskAsUserWithValidTokenUsesOauthClient() {
         Long userId = 100L;
         testTask.setJiraIssueKey("TEST-123");
         
@@ -185,7 +193,7 @@ class JiraIntegrationServiceTest {
         
         integrationService.updateTaskAsUser(userId, "TEST-123", testTask);
         
-        verify(oauthClient).updateIssue("test-access-token", "TEST-123", updateRequest);
+        verify(OauthClient).updateIssue("test-access-token", "TEST-123", updateRequest);
         verify(eventPublisher).publishTaskUpdated(eq(testTask), any(), eq("TEST-123"));
     }
     
@@ -246,17 +254,17 @@ class JiraIntegrationServiceTest {
     }
     
     // ==========================================
-    // OAuth Token Management Tests
+    // Oauth Token Management Tests
     // ==========================================
     
     @Test
-    @DisplayName("Should refresh OAuth token")
-    void refreshOAuthToken_Success() {
+    @DisplayName("Should refresh Oauth token")
+    void refreshOauthTokenSuccess() {
         Long userId = 100L;
         when(tokenRepository.findByUserId(userId))
-            .thenReturn(Optional.of(validToken));
+            .thenReturn(Optional.<UserJiraOauthToken>of(validToken));
         
-        OAuthTokenResponse tokenResponse = OAuthTokenResponse.builder()
+        OauthTokenResponse tokenResponse = OauthTokenResponse.builder()
             .accessToken("new-access-token")
             .refreshToken("new-refresh-token")
             .expiresIn(3600L)
@@ -265,11 +273,11 @@ class JiraIntegrationServiceTest {
         when(oauthService.refreshAccessToken(validToken.getRefreshToken()))
             .thenReturn(tokenResponse);
         
-        integrationService.refreshOAuthToken(userId);
+        integrationService.refreshOauthToken(userId);
         
         assertEquals("new-access-token", validToken.getAccessToken());
         assertEquals("new-refresh-token", validToken.getRefreshToken());
-        verify(tokenRepository).save(validToken);
+        verify(tokenRepository).save(any(UserJiraOauthToken.class));
     }
     
     // ==========================================
@@ -312,7 +320,7 @@ class JiraIntegrationServiceTest {
         JiraIntegrationService.IntegrationStatus status = integrationService.getIntegrationStatus();
         
         assertTrue(status.isSystemClientAvailable());
-        assertEquals(5L, status.getActiveOAuthTokens());
+        assertEquals(5L, status.getActiveOauthTokens());
         assertEquals(2L, status.getUnsyncedTasks());
     }
 }

@@ -28,7 +28,7 @@ import java.util.stream.StreamSupport;
  * - Scheduled синхронизация
  * - Массовые операции
  * - Служебные задачи
- * - Fallback когда у пользователя нет OAuth токена
+ * - Fallback когда у пользователя нет Oauth токена
  */
 @Slf4j
 @Component

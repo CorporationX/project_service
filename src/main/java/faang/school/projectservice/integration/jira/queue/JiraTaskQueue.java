@@ -1,6 +1,6 @@
 package faang.school.projectservice.integration.jira.queue;
 
-import faang.school.projectservice.integration.jira.queue.config.RabbitMQConfig;
+import faang.school.projectservice.integration.jira.queue.config.RabbitMqConfig;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -33,7 +33,7 @@ public class JiraTaskQueue {
             .correlationId(UUID.randomUUID().toString())
             .build();
         
-        sendMessage(RabbitMQConfig.TASK_CREATE_KEY, message);
+        sendMessage(RabbitMqConfig.TASK_CREATE_KEY, message);
         log.info("Task queued for creation: taskId={}, correlationId={}", 
             task.getId(), message.getCorrelationId());
     }
@@ -47,7 +47,7 @@ public class JiraTaskQueue {
             .correlationId(UUID.randomUUID().toString())
             .build();
         
-        sendMessage(RabbitMQConfig.TASK_UPDATE_KEY, message);
+        sendMessage(RabbitMqConfig.TASK_UPDATE_KEY, message);
         log.info("Task queued for update: taskId={}, correlationId={}", 
             task.getId(), message.getCorrelationId());
     }
@@ -65,7 +65,7 @@ public class JiraTaskQueue {
             .correlationId(UUID.randomUUID().toString())
             .build();
         
-        sendMessage(RabbitMQConfig.TASK_DELETE_KEY, message);
+        sendMessage(RabbitMqConfig.TASK_DELETE_KEY, message);
         log.info("Task queued for deletion: taskId={}, jiraKey={}", 
             taskId, jiraIssueKey);
     }
@@ -92,7 +92,7 @@ public class JiraTaskQueue {
             .correlationId(UUID.randomUUID().toString())
             .build();
         
-        sendMessage(RabbitMQConfig.TASK_SYNC_KEY, message);
+        sendMessage(RabbitMqConfig.TASK_SYNC_KEY, message);
         log.info("Project queued for sync: projectId={}", projectId);
     }
     
@@ -110,7 +110,7 @@ public class JiraTaskQueue {
                 .correlationId(UUID.randomUUID().toString())
                 .build();
             
-            sendMessageWithPriority(RabbitMQConfig.TASK_BULK_KEY, message, 5);
+            sendMessageWithPriority(RabbitMqConfig.TASK_BULK_KEY, message, 5);
         }
         
         log.info("{} tasks queued for bulk update", tasks.size());
@@ -123,7 +123,7 @@ public class JiraTaskQueue {
     private void sendMessage(String routingKey, JiraTaskMessage message) {
         try {
             rabbitTemplate.convertAndSend(
-                RabbitMQConfig.JIRA_EXCHANGE,
+                RabbitMqConfig.JIRA_EXCHANGE,
                 routingKey,
                 message
             );
@@ -136,7 +136,7 @@ public class JiraTaskQueue {
     private void sendMessageWithPriority(String routingKey, JiraTaskMessage message, int priority) {
         try {
             rabbitTemplate.convertAndSend(
-                RabbitMQConfig.JIRA_EXCHANGE,
+                RabbitMqConfig.JIRA_EXCHANGE,
                 routingKey,
                 message,
                 m -> {

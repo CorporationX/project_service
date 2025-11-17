@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class JiraProperties {
 
     private SystemConfig system = new SystemConfig();
-    private OAuthConfig oauth = new OAuthConfig();
+    private OauthConfig oauth = new OauthConfig();
     private CacheConfig cache = new CacheConfig();
     private String projectKey;
     private String issueType = "Task";
@@ -25,7 +25,7 @@ public class JiraProperties {
     }
 
     @Data
-    public static class OAuthConfig {
+    public static class OauthConfig {
         private boolean enable = false;
         private String clientId;
         private String clientSecret;

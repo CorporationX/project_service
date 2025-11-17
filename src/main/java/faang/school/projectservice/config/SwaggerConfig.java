@@ -21,7 +21,7 @@ public class SwaggerConfig {
     private int serverPort;
     
     @Bean
-    public OpenAPI openAPI() {
+    public OpenAPI openApi() {
         return new OpenAPI()
             .info(new Info()
                 .title("Project Service API with Jira Integration")
@@ -45,7 +45,7 @@ public class SwaggerConfig {
                     .type(SecurityScheme.Type.APIKEY)
                     .in(SecurityScheme.In.HEADER)
                     .name("X-User-Id")
-                    .description("User ID for OAuth operations"))
+                    .description("User ID for Oauth operations"))
                 .addSecuritySchemes("bearerAuth", new SecurityScheme()
                     .type(SecurityScheme.Type.HTTP)
                     .scheme("bearer")

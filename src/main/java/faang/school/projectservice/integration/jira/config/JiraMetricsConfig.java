@@ -1,7 +1,7 @@
 package faang.school.projectservice.integration.jira.config;
 
 import faang.school.projectservice.integration.jira.metrics.JiraMetricsService;
-import faang.school.projectservice.integration.jira.oauth.model.JiraOAuthTokenRepository;
+import faang.school.projectservice.integration.jira.oauth.model.JiraOauthTokenRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +20,13 @@ import java.time.LocalDateTime;
 public class JiraMetricsConfig {
     
     private final JiraMetricsService metricsService;
-    private final JiraOAuthTokenRepository tokenRepository;
+    private final JiraOauthTokenRepository tokenRepository;
     private final TaskRepository taskRepository;
     
     @Bean
     public ApplicationRunner registerGaugeMetrics() {
         return args -> {
-            // Регистрация Gauge для активных OAuth токенов
+            // Регистрация Gauge для активных Oauth токенов
             metricsService.registerActiveTokensGauge(() -> 
                 tokenRepository.countActiveTokens(LocalDateTime.now())
             );

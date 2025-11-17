@@ -19,7 +19,7 @@ import java.time.ZoneId;
 public class JiraMapper {
     
     // ==========================================
-    // Domain → Jira DTO (для OAuth WebClient)
+    // Domain → Jira DTO (для Oauth WebClient)
     // ==========================================
     
     public JiraIssueRequest toJiraRequest(Task task) {
