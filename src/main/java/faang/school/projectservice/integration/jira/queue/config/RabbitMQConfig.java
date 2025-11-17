@@ -1,6 +1,7 @@
 package faang.school.projectservice.integration.jira.queue.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.ExchangeBuilder;
