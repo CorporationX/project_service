@@ -5,6 +5,7 @@ plugins {
     id("io.swagger.core.v3.swagger-gradle-plugin") version "2.2.40"
     jacoco
     id("checkstyle")
+    checkstyle
 }
 
 group = "faang.school"
@@ -164,23 +165,23 @@ tasks.bootJar {
     archiveFileName.set("service.jar")
 }
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-    options.compilerArgs.add("-parameters")
-}
-
 checkstyle {
-    toolVersion = "10.12.0"
-    configFile = file("config/checkstyle/checkstyle.xml")
+    toolVersion = "10.17.0"
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    checkstyle.enableExternalDtdLoad.set(true)
 }
 
-tasks.withType<Checkstyle> {
-    reports {
-        xml.required.set(false)
-        html.required.set(true)
-    }
+tasks.checkstyleMain {
+    source = fileTree("${project.rootDir}/src/main/java")
+    include("**/*.java")
+    exclude("**/resources/**")
+
+    classpath = files()
 }
 
-tasks.withType<Checkstyle>().configureEach {
-    enabled = false
+tasks.checkstyleTest {
+    source = fileTree("${project.rootDir}/src/test")
+    include("**/*.java")
+
+    classpath = files()
 }
