@@ -1,0 +1,28 @@
+# Prometheus Configuration for Docker
+# Используйте этот файл, если приложение запущено на хосте, а Prometheus в Docker
+
+global:
+  scrape_interval: 15s  # Интервал сбора метрик
+  evaluation_interval: 15s  # Интервал оценки правил
+  external_labels:
+    cluster: 'project-service'
+    environment: 'development'
+
+# Конфигурация scrape для проекта
+scrape_configs:
+  # Метрики приложения Project Service
+  # host.docker.internal работает на Windows/Mac
+  # На Linux используйте IP хоста или --network host
+  - job_name: 'project-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8082']  # URL приложения на хосте
+        labels:
+          application: 'project-service'
+          service: 'jira-integration'
+    
+  # Метрики Prometheus (самописные метрики)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+

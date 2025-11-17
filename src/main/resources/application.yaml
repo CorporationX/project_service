@@ -25,8 +25,38 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
+          max-interval: 10000
+          multiplier: 2
+
 server:
   port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: project-service
+      environment: ${spring.profiles.active:default}
 
 logging:
   level:
@@ -48,3 +78,47 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+# Jira Integration Configuration
+jira:
+  system:
+    base-url: ${JIRA_BASE_URL}
+    username: ${JIRA_USERNAME}
+    api-token: ${JIRA_API_TOKEN}
+  project-key: ${JIRA_PROJECT_KEY}
+  issue-type: Task
+  timeout-seconds: 30
+  max-retries: 3
+  
+  # OAuth 2.0 Configuration
+  oauth:
+    enable: false
+    client-id: ${JIRA_CLIENT_ID}
+    client-secret: ${JIRA_CLIENT_SECRET}
+    redirect-uri: ${JIRA_REDIRECT_URI}
+    authorization-uri: https://auth.atlassian.com/authorize
+    token-uri: https://auth.atlassian.com/oauth/token
+    scope: read:jira-work write:jira-work offline_access
+  
+  # Cache Configuration
+  cache:
+    enabled: true                    # Включить/выключить кэш
+    issue-ttl-minutes: 30            # TTL для Issues (30 минут)
+    transitions-ttl-minutes: 15      # TTL для Transitions (15 минут)
+    projects-ttl-hours: 24           # TTL для Projects (24 часа)
+    users-ttl-hours: 24              # TTL для Users (24 часа)
+
+# Jira Sync Configuration
+jira.sync:
+  enabled: true
+  projects: PROJECT1,PROJECT2
+
+# RabbitMQ Queue Names
+rabbitmq:
+  queue:
+    jira:
+      task:
+        create: jira.task.create
+        update: jira.task.update
+        delete: jira.task.delete
+        sync: jira.task.sync

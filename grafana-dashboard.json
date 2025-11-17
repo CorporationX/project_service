@@ -1,0 +1,155 @@
+{
+  "dashboard": {
+    "title": "Jira Integration - Project Service",
+    "description": "Мониторинг интеграции с Jira",
+    "tags": ["jira", "integration", "project-service"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Задачи созданы (Total)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_created_total[5m]))",
+            "legendFormat": "Created Tasks/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Задачи обновлены (Total)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_updated_total[5m]))",
+            "legendFormat": "Updated Tasks/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Задачи удалены (Total)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_deleted_total[5m]))",
+            "legendFormat": "Deleted Tasks/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Задачи синхронизированы (Total)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_synced_total[5m]))",
+            "legendFormat": "Synced Tasks/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Операции по типу клиента",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_created_total[5m])) by (client_type)",
+            "legendFormat": "Created - {{client_type}}"
+          },
+          {
+            "expr": "sum(rate(jira_tasks_updated_total[5m])) by (client_type)",
+            "legendFormat": "Updated - {{client_type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 6,
+        "title": "Время выполнения API запросов",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(jira_api_requests_duration_seconds_bucket[5m])) by (le, operation))",
+            "legendFormat": "P95 - {{operation}}"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(jira_api_requests_duration_seconds_bucket[5m])) by (le, operation))",
+            "legendFormat": "P99 - {{operation}}"
+          }
+        ],
+        "yaxes": [{"format": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "Ошибки API",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_api_errors_total[5m])) by (error_type)",
+            "legendFormat": "{{error_type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "OAuth Fallback",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_oauth_fallback_total[5m]))",
+            "legendFormat": "OAuth Fallbacks/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 9,
+        "title": "Активные OAuth токены",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "jira_oauth_tokens_active",
+            "legendFormat": "Active Tokens"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 20}
+      },
+      {
+        "id": 10,
+        "title": "Несинхронизированные задачи",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "jira_tasks_unsynced",
+            "legendFormat": "Unsynced Tasks"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 20}
+      },
+      {
+        "id": 11,
+        "title": "Неудачные операции",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(jira_tasks_failed_total[5m])) by (operation, reason)",
+            "legendFormat": "{{operation}} - {{reason}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24}
+      }
+    ]
+  }
+}
+
