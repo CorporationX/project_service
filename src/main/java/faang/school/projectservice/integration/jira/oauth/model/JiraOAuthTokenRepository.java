@@ -10,21 +10,24 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JiraOAuthTokenRepository extends JpaRepository<UserJiraOAuthToken, Long> {
+public interface JiraOauthTokenRepository extends JpaRepository<UserJiraOauthToken, Long> {
 
-    Optional<UserJiraOAuthToken> findByUserId(Long userId);
+    Optional<UserJiraOauthToken> findByUserId(Long userId);
+
+
     boolean existsByUserId(Long userId);
+
     void deleteByUserId(Long userId);
 
-    @Query("SELECT t FROM UserJiraOAuthToken t WHERE t.expiresAt < :now")
-    List<UserJiraOAuthToken> findExpiredTokens(@Param("now") LocalDateTime now);
+    @Query("SELECT t FROM UserJiraOauthToken t WHERE t.expiresAt < :now")
+    List<UserJiraOauthToken> findExpiredTokens(@Param("now") LocalDateTime now);
 
-    @Query("SELECT t FROM UserJiraOAuthToken t WHERE t.expiresAt BETWEEN :now AND :threshold")
-    List<UserJiraOAuthToken> findTokensExpiringBefore(
+    @Query("SELECT t FROM UserJiraOauthToken t WHERE t.expiresAt BETWEEN :now AND :threshold")
+    List<UserJiraOauthToken> findTokensExpiringBefore(
             @Param("now") LocalDateTime now,
             @Param("threshold") LocalDateTime threshold
     );
 
-    @Query("SELECT COUNT(t) FROM UserJiraOAuthToken t WHERE t.expiresAt > :now")
+    @Query("SELECT COUNT(t) FROM UserJiraOauthToken t WHERE t.expiresAt > :now")
     long countActiveTokens(@Param("now") LocalDateTime now);
 }

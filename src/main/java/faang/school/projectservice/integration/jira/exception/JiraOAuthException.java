@@ -22,6 +22,7 @@ public class JiraOAuthException extends RuntimeException {
 
     /**
      * Конструктор для OAuth error response
+     *
      * @param errorCode OAuth error code (invalid_grant, invalid_client, etc.)
      * @param errorDescription Описание ошибки от OAuth сервера
      */

@@ -116,12 +116,12 @@ public class JiraMapper {
         }
         
         return switch (status) {
-            case TODO -> "To Do";
-            case IN_PROGRESS -> "In Progress";
-            case REVIEW -> "In Review";
-            case TESTING -> "Testing";
-            case DONE -> "Done";
-            case CANCELLED -> "Cancelled";
+          case TODO -> "To Do";
+          case IN_PROGRESS -> "In Progress";
+          case REVIEW -> "In Review";
+          case TESTING -> "Testing";
+          case DONE -> "Done";
+          case CANCELLED -> "Cancelled";
         };
     }
     
@@ -133,16 +133,16 @@ public class JiraMapper {
         String normalized = jiraStatus.toLowerCase().trim();
         
         return switch (normalized) {
-            case "to do", "open", "backlog", "new" -> TaskStatus.TODO;
-            case "in progress", "in development" -> TaskStatus.IN_PROGRESS;
-            case "in review", "review" -> TaskStatus.REVIEW;
-            case "testing", "test" -> TaskStatus.TESTING;
-            case "done", "closed", "resolved", "completed" -> TaskStatus.DONE;
-            case "cancelled", "canceled", "blocked", "on hold", "impediment" -> TaskStatus.CANCELLED;
-            default -> {
-                log.warn("Unknown Jira status: {}, defaulting to TODO", jiraStatus);
-                yield TaskStatus.TODO;
-            }
+          case "to do", "open", "backlog", "new" -> TaskStatus.TODO;
+          case "in progress", "in development" -> TaskStatus.IN_PROGRESS;
+          case "in review", "review" -> TaskStatus.REVIEW;
+          case "testing", "test" -> TaskStatus.TESTING;
+          case "done", "closed", "resolved", "completed" -> TaskStatus.DONE;
+          case "cancelled", "canceled", "blocked", "on hold", "impediment" -> TaskStatus.CANCELLED;
+          default -> {
+              log.warn("Unknown Jira status: {}, defaulting to TODO", jiraStatus);
+              yield TaskStatus.TODO;
+          }
         };
     }
     
@@ -156,11 +156,11 @@ public class JiraMapper {
         }
         
         return switch (status) {
-            case IN_PROGRESS -> "Start Progress";
-            case REVIEW -> "Submit for Review";
-            case DONE -> "Done";
-            case CANCELLED -> "Cancel";
-            default -> null;
+          case IN_PROGRESS -> "Start Progress";
+          case REVIEW -> "Submit for Review";
+          case DONE -> "Done";
+          case CANCELLED -> "Cancel";
+          default -> null;
         };
     }
     

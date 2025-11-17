@@ -174,7 +174,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Сохранить Transitions в кэш (System Client - List<Transition>)
+     * Сохранить Transitions в кэш (System Client - List&lt;Transition&gt;)
      */
     public void putTransitions(String issueKey, List<Transition> transitions) {
         if (!isCacheEnabled()) {
@@ -194,7 +194,7 @@ public class JiraCacheService {
     }
     
     /**
-     * Получить Transitions из кэша (System Client - List<Transition>)
+     * Получить Transitions из кэша (System Client - List&lt;Transition&gt;)
      */
     public Optional<List<Transition>> getTransitionsList(String issueKey) {
         if (!isCacheEnabled()) {

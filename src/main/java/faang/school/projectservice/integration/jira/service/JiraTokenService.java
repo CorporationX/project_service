@@ -57,7 +57,7 @@ public class JiraTokenService {
         return token;
     }
 
-    public Optional<UserJiraOAuthToken> getToken(Long userId){
+    public Optional<UserJiraOAuthToken> getToken(Long userId) {
         log.debug("Getting tokens for user: {}", userId);
         return tokenRepository.findByUserId(userId);
     }
@@ -69,7 +69,7 @@ public class JiraTokenService {
         log.info("Tokens deleted for user: {}", userId);
     }
 
-    public boolean hasValidToken(Long userId){
+    public boolean hasValidToken(Long userId) {
         Optional<UserJiraOAuthToken> token = tokenRepository.findByUserId(userId);
 
         if (token.isEmpty()) {

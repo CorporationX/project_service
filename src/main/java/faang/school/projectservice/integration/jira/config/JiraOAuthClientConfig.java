@@ -16,28 +16,31 @@ import java.net.URI;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "jira.oauth", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "jira.Oauth", name = "enabled", havingValue = "true")
 public class JiraOAuthClientConfig {
 
     private final JiraProperties jiraProperties;
 
     @Bean
-    public WebClient jiraOAuthWebClient() {
+    public WebClient jiraOauthWebClient() {
         JiraProperties.SystemConfig systemConfig = jiraProperties.getSystem();
-        JiraProperties.OAuthConfig oauthConfig = jiraProperties.getOauth();
+        JiraProperties.OauthConfig oauthConfig = jiraProperties.getOauth();
 
-        log.info("Initializing Jira OAuth WebClient");
-        log.debug("OAuth enabled: {}", oauthConfig.isEnable());
+        log.info("Initializing Jira Oauth WebClient");
+        log.debug("Oauth enabled: {}", oauthConfig.isEnable());
 
         try {
 
-            validateOAuthConfig(oauthConfig);
+            validateOauthConfig(oauthConfig);
 
             validateBaseUrl(systemConfig);
 
+            log.info("Jira Oauth WebClient initialized successfully");
             String baseUrl = systemConfig.getBaseUrl() + "/rest/api/3";
+            log.info("Base URL: {}", baseUrl);
+            log.info("Redirect URI: {}", oauthConfig.getRedirectUri());
 
-            WebClient client = WebClient.builder()
+            return WebClient.builder()
                     .baseUrl(baseUrl)
                     .defaultHeader("Content-Type", "application/json")
                     .defaultHeader("Accept", "application/json")
@@ -46,51 +49,45 @@ public class JiraOAuthClientConfig {
                     .filter(handleErrors())
                     .build();
 
-            log.info("Jira OAuth WebClient initialized successfully");
-            log.info("Base URL: {}", baseUrl);
-            log.info("Redirect URI: {}", oauthConfig.getRedirectUri());
-
-            return client;
-
         } catch (IllegalArgumentException e) {
-            log.error("Invalid OAuth configuration: {}", e.getMessage());
+            log.error("Invalid Oauth configuration: {}", e.getMessage());
             throw new IllegalStateException(
-                    "Cannot initialize Jira OAuth client: invalid configuration", e);
+                    "Cannot initialize Jira Oauth client: invalid configuration", e);
 
         } catch (Exception e) {
-            log.error("Failed to initialize Jira OAuth WebClient", e);
+            log.error("Failed to initialize Jira Oauth WebClient", e);
             throw new IllegalStateException(
-                    "Cannot initialize Jira OAuth client",
+                    "Cannot initialize Jira Oauth client",
                     e
             );
         }
     }
 
-    private void validateOAuthConfig(JiraProperties.OAuthConfig config) {
+    private void validateOauthConfig(JiraProperties.OauthConfig config) {
         if (!config.isEnable()) {
             throw new IllegalArgumentException(
-                    "OAuth is not enabled. Set jira.oauth.enabled=true"
+                    "Oauth is not enabled. Set jira.Oauth.enabled=true"
             );
         }
 
         if (config.getClientId() == null || config.getClientId().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.client-id is required when OAuth is enabled. " +
-                            "Get it from Atlassian Developer Console: " +
-                            "https://developer.atlassian.com/console/myapps/"
+                    "jira.Oauth.client-id is required when Oauth is enabled. "
+                            + "Get it from Atlassian Developer Console: "
+                            + "https://developer.atlassian.com/console/myapps/"
             );
         }
 
         if (config.getClientSecret() == null || config.getClientSecret().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.client-secret is required when OAuth is enabled"
+                    "jira.Oauth.client-secret is required when Oauth is enabled"
             );
         }
 
         if (config.getRedirectUri() == null || config.getRedirectUri().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.redirect-uri is required. " +
-                            "Example: http://localhost:8080/api/jira/oauth/callback"
+                    "jira.Oauth.redirect-uri is required. "
+                            + "Example: http://localhost:8080/api/jira/Oauth/callback"
             );
         }
 
@@ -98,29 +95,30 @@ public class JiraOAuthClientConfig {
             URI.create(config.getRedirectUri());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "jira.oauth.redirect-uri has invalid format: " + config.getRedirectUri()
+                    "jira.Oauth.redirect-uri has invalid format: "
+                            + config.getRedirectUri()
             );
         }
 
         if (config.getAuthorizationUri() == null || config.getAuthorizationUri().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.authorization-uri is required"
+                    "jira.Oauth.authorization-uri is required"
             );
         }
 
         if (config.getTokenUri() == null || config.getTokenUri().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.oauth.token-uri is required"
+                    "jira.Oauth.token-uri is required"
             );
         }
 
-        log.debug("OAuth config validation passed");
+        log.debug("Oauth config validation passed");
     }
 
     private void validateBaseUrl(JiraProperties.SystemConfig config) {
         if (config.getBaseUrl() == null || config.getBaseUrl().isBlank()) {
             throw new IllegalArgumentException(
-                    "jira.system.base-url is required for OAuth client"
+                    "jira.system.base-url is required for Oauth client"
             );
         }
 
@@ -138,7 +136,7 @@ public class JiraOAuthClientConfig {
     private ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             if (log.isDebugEnabled()) {
-                log.debug("OAuth Request: {} {}", clientRequest.url());
+                log.debug("Oauth Request: {} {}", clientRequest.url());
                 clientRequest.headers().forEach((name, values) -> {
                     if (!"Authorization".equalsIgnoreCase(name)) {
                         log.debug("  {}: {}", name, values);
@@ -152,7 +150,7 @@ public class JiraOAuthClientConfig {
     private ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             if (log.isDebugEnabled()) {
-                log.debug("OAuth Response: Status {}", clientResponse.statusCode());
+                log.debug("Oauth Response: Status {}", clientResponse.statusCode());
             }
             return Mono.just(clientResponse);
         });
@@ -161,7 +159,7 @@ public class JiraOAuthClientConfig {
     private ExchangeFilterFunction handleErrors() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             if (clientResponse.statusCode().isError()) {
-                log.warn("OAuth API returned error: {} {}",
+                log.warn("Oauth API returned error: {} {}",
                         clientResponse.statusCode().value(),
                         getStatusDescription(clientResponse.statusCode())
                 );
