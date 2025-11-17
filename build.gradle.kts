@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("io.swagger.core.v3.swagger-gradle-plugin") version "2.2.40"
     jacoco
+    id("checkstyle")
 }
 
 group = "faang.school"
@@ -34,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /** ------------------------------
@@ -165,4 +167,20 @@ tasks.bootJar {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.compilerArgs.add("-parameters")
+}
+
+checkstyle {
+    toolVersion = "10.12.0"
+    configFile = file("config/checkstyle/checkstyle.xml")
+}
+
+tasks.withType<Checkstyle> {
+    reports {
+        xml.required.set(false)
+        html.required.set(true)
+    }
+}
+
+tasks.withType<Checkstyle>().configureEach {
+    enabled = false
 }
