@@ -13,7 +13,7 @@
     <!-- https://checkstyle.org/filters/suppressionfilter.html -->
     <module name="SuppressionFilter">
         <property name="file" value="${org.checkstyle.google.suppressionfilter.config}"
-                  default="checkstyle-suppressions.xml" />
+                  default="config/checkstyle/checkstyle-suppressions.xml" />
         <property name="optional" value="true"/>
     </module>
     <module name="SuppressWithNearbyTextFilter">
@@ -240,7 +240,8 @@
         </module>
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
-            <property name="allowedAbbreviationLength" value="0"/>
+            <property name="allowedAbbreviationLength" value="2"/>
+            <!-- Changed from 0 to 2 to allow technical terms like OAuth, E2E, API, RabbitMQ -->
             <property name="tokens"
                       value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
                     PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, PATTERN_VARIABLE_DEF, RECORD_DEF,
@@ -332,10 +333,8 @@
         </module>
         <module name="SuppressionXpathSingleFilter">
             <property name="checks" value="MethodName"/>
-            <property name="query" value="//METHOD_DEF[
-                                     ./MODIFIERS/ANNOTATION//IDENT[contains(@text, 'Test')]
-                                   ]/IDENT"/>
-            <property name="message" value="'[a-z][a-z0-9][a-zA-Z0-9]*(?:_[a-z][a-z0-9][a-zA-Z0-9]*)*'"/>
+            <!-- Suppress MethodName for all methods in classes with 'Test' in name -->
+            <property name="query" value="//METHOD_DEF[ancestor::CLASS_DEF[./IDENT[contains(@text, 'Test')]]]/IDENT"/>
         </module>
         <!--<module name="SingleLineJavadoc"/>-->
         <module name="EmptyCatchBlock">

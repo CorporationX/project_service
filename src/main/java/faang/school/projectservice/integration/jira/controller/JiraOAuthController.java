@@ -8,7 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -24,7 +28,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping("/api/jira/oauth")
 @RequiredArgsConstructor
 public class JiraOAuthController {
-    private final OAuthStateManager oAuthStateManager;
+    private final OAuthStateManager oauthStateManager;
     private final JiraTokenService jiraTokenService;
     private final JiraOAuthService jiraOAuthService;
 
@@ -42,7 +46,7 @@ public class JiraOAuthController {
 
         try {
             String state = jiraOAuthService.generateState();
-            oAuthStateManager.saveState(state, userId);
+            oauthStateManager.saveState(state, userId);
             log.debug("Generated state for user {}: {}", userId, state);
 
             String authorizationUrl = jiraOAuthService.generateAuthorizationUrl(state);
@@ -76,7 +80,7 @@ public class JiraOAuthController {
 
         try {
 
-            Long userId = oAuthStateManager.getUserIdByState(state);
+            Long userId = oauthStateManager.getUserIdByState(state);
 
             if (userId == null) {
                 log.error("Invalid or expired state: {}", state);
@@ -89,7 +93,7 @@ public class JiraOAuthController {
 
             log.info("OAuth flow completed successfully for user: {}", userId);
 
-            oAuthStateManager.removeState(state);
+            oauthStateManager.removeState(state);
 
             return new RedirectView("/oauth/success");
 

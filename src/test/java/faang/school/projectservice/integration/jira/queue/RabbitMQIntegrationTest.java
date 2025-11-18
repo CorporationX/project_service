@@ -33,14 +33,20 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisplayName("RabbitMQ Integration Tests")
+@DisplayName("RabbitMq Integration Tests")
 class RabbitMQIntegrationTest {
     
     @Container
@@ -50,12 +56,12 @@ class RabbitMQIntegrationTest {
         .withPassword("test");
     
     @Container
-    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.12-management")
+    static RabbitMQContainer rabbitMqContainer = new RabbitMQContainer("rabbitmq:3.12-management")
         .withExposedPorts(5672, 15672);
     
     static {
         postgres.start();
-        rabbitMQContainer.start();
+        rabbitMqContainer.start();
     }
     
     @DynamicPropertySource
@@ -63,12 +69,12 @@ class RabbitMQIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.rabbitmq.host", rabbitMQContainer::getHost);
-        registry.add("spring.rabbitmq.port", rabbitMQContainer::getFirstMappedPort);
-        registry.add("spring.rabbitmq.username", () -> "guest");
-        registry.add("spring.rabbitmq.password", () -> "guest");
+        registry.add("spring.rabbitMq.host", rabbitMqContainer::getHost);
+        registry.add("spring.rabbitMq.port", rabbitMqContainer::getFirstMappedPort);
+        registry.add("spring.rabbitMq.username", () -> "guest");
+        registry.add("spring.rabbitMq.password", () -> "guest");
         registry.add("jira.scheduled.enabled", () -> "false");
-        registry.add("jira.oauth.enable", () -> "false");
+        registry.add("jira.Oauth.enable", () -> "false");
         registry.add("jira.system.base-url", () -> "http://localhost:8080");
         registry.add("jira.system.username", () -> "test");
         registry.add("jira.system.api-token", () -> "test-token");
@@ -90,8 +96,8 @@ class RabbitMQIntegrationTest {
     private JiraIntegrationService integrationService;
     
     @MockBean
-    @Qualifier("jiraOAuthWebClient")
-    private WebClient jiraOAuthWebClient;
+    @Qualifier("jiraOauthWebClient")
+    private WebClient jiraOauthWebClient;
     
     @MockBean
     private JiraRestClient jiraRestClient;
@@ -182,8 +188,8 @@ class RabbitMQIntegrationTest {
     @Test
     @DisplayName("Should handle task deletion")
     void testTaskDeletionQueue() {
-        Long userId = 100L;
-        String jiraIssueKey = "TEST-123";
+        final Long userId = 100L;
+        final String jiraIssueKey = "TEST-123";
         
         doNothing().when(integrationService)
             .deleteTaskAsUser(userId, jiraIssueKey);
@@ -205,8 +211,6 @@ class RabbitMQIntegrationTest {
     @Test
     @DisplayName("Should handle project sync")
     void testProjectSyncQueue() {
-        Long userId = 100L;
-        
         JiraIntegrationService.SyncResult syncResult = new JiraIntegrationService.SyncResult();
         syncResult.setTotalTasks(10);
         syncResult.setCreatedTasks(5);
@@ -216,6 +220,7 @@ class RabbitMQIntegrationTest {
         when(integrationService.syncProject(testProject.getId()))
             .thenReturn(syncResult);
         
+        final Long userId = 100L;
         producer.queueProjectSync(testProject.getId(), userId);
         
         await()
@@ -291,4 +296,3 @@ class RabbitMQIntegrationTest {
         return taskRepository.save(task);
     }
 }
-
