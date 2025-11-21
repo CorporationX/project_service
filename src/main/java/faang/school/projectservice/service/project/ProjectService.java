@@ -1,7 +1,5 @@
 package faang.school.projectservice.service.project;
 
-
-
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
