@@ -1,7 +1,7 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.exception.vacancy.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,10 +14,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 
-    default Project getByIdOrThrow(long id) {
-        return findById(id).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project %d not found", id))
-        );
+    default Project findByIdOrThrow(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Project with ID %d was not found".formatted(id)));
     }
 }
 

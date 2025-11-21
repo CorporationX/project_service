@@ -164,7 +164,7 @@ public class ResourceService {
     }
 
     private Project updateProjectStorageSize(long projectId, BigInteger fileSize) {
-        Project project = projectRepository.getByIdOrThrow(projectId);
+        Project project = projectRepository.findByIdOrThrow(projectId);
         checkStorageLimit(project, fileSize);
         project.setStorageSize(project.getStorageSize().add(fileSize));
         projectRepository.save(project);

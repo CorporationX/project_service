@@ -25,8 +25,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -67,7 +67,7 @@ public class Vacancy {
     @Builder.Default
     private List<Candidate> candidates = new ArrayList<>();
 
-    @Where(clause = "is_accepted = true")
+    @SQLRestriction("is_accepted = true")
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Candidate> acceptedCandidates = new ArrayList<>();
