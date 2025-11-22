@@ -5,12 +5,13 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.SearchMomentDto;
 import faang.school.projectservice.dto.moment.UpdateMomentDto;
 import lombok.NonNull;
+
 import java.util.List;
 
 public interface MomentService {
-    MomentDto createMoment(@NonNull CreateMomentDto momentDto)  throws Exception;
+    MomentDto createMoment(@NonNull CreateMomentDto momentDto);
 
-    MomentDto updateMoment(long momentID, @NonNull UpdateMomentDto momentDto) throws Exception;
+    MomentDto updateMoment(long momentID, @NonNull UpdateMomentDto momentDto);
 
     MomentDto getById(long momentId);
 
