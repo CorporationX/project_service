@@ -32,6 +32,12 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             @Param("key") String key
     );
 
+    @Query("SELECT r FROM Resource r WHERE r.id = :resourceId AND r.project.id = :projectId")
+    Optional<Resource> findByIdAndProjectId(
+            @Param("resourceId") Long resourceId,
+            @Param("projectId") Long projectId
+    );
+
     @Query("SELECT SUM(r.size) FROM Resource r WHERE r.project.id = :projectId AND r.status = 'ACTIVE'")
     Long calculateProjectStorageSize(@Param("projectId") Long projectId);
 

@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto;
 
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
 
 import lombok.AllArgsConstructor;
@@ -21,4 +22,20 @@ public class ResourceResponse {
     private LocalDateTime uploadedAt;
     private String status;
     private String error;
+
+    public static ResourceResponse from(Resource resource) {
+        return ResourceResponse.builder()
+                .id(resource.getId())
+                .name(resource.getName())
+                .size(resource.getSize() != null ? resource.getSize().longValue() : null)
+                .type(resource.getType())
+                .uploadedAt(resource.getCreatedAt())
+                .build();
+    }
+
+    public static ResourceResponse from(Resource resource, String status) {
+        ResourceResponse response = from(resource);
+        response.setStatus(status);
+        return response;
+    }
 }

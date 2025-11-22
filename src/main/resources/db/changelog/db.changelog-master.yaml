@@ -36,4 +36,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V022_alter_resources.sql
   - include:
-      file: db/changelog/changeset/project_V23_alter_project.sql
+      file: db/changelog/changeset/project_V023_alter_project.sql

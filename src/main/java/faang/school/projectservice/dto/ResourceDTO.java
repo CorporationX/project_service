@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class ResourceDTO {
     private Long id;
     private String name;

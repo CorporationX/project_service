@@ -22,8 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Modifying
     @Query("UPDATE Project p SET p.storageSize = :size WHERE p.id = :id")
     int updateStorageSize(
-      @Param("id")  Long id,
-      @Param("size") Long size
+            @Param("id") Long id,
+            @Param("size") Long size
     );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

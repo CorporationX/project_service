@@ -47,8 +47,7 @@ public class MinioConfig {
 
     }
 
-    @Bean
-    public void createBucketIfExist(MinioClient minioClient) {
+    private void createBucketIfExist(MinioClient minioClient) {
         try {
             boolean exist = minioClient.bucketExists(
                     BucketExistsArgs
