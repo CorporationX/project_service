@@ -14,13 +14,12 @@ public class ImageUtils {
         return ImageIO.read(supplier.getInputStream());
     }
 
-    // Приводим изображение к ограничению (fit into box), сохраняем в формате outputFormat (e.g. "jpg" or "png")
+
     public static byte[] resizeToFit(BufferedImage src, int maxW, int maxH, String outputFormat, float quality) throws IOException {
         int w = src.getWidth();
         int h = src.getHeight();
         double scale = Math.min((double) maxW / w, (double) maxH / h);
         if (scale >= 1.0) {
-            // не нужно менять размер
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(src, outputFormat, baos);
             return baos.toByteArray();
@@ -40,7 +39,6 @@ public class ImageUtils {
         return baos.toByteArray();
     }
 
-    // Вспомогательный интерфейс для ленивого получения InputStream (т.к. MultipartFile.getInputStream() можно вызвать несколько раз после буфера)
     public interface ImageInputStreamWrapper {
         InputStream getInputStream() throws IOException;
     }
