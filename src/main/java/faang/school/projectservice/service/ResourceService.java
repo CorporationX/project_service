@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 @Service
@@ -26,7 +27,7 @@ public class ResourceService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public ResourceDto addResource(long projectId, MultipartFile file) {
+    public ResourceDto addResource(long projectId, MultipartFile file) throws IOException {
         ProjectDto projectDto = projectService.getProjectDtoById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found: " + projectId));
 
@@ -34,7 +35,7 @@ public class ResourceService {
 
         String folder = projectDto.getId() + projectDto.getName();
 
-        ResourceDto resourceDto = s3Service.uploadFile(file, folder);
+        ResourceDto resourceDto = s3Service.uploadImage(file, folder);
         resourceDto.setProject(projectDto);
         resourceRepository.save(resourceMapper.toEntity(resourceDto));
 

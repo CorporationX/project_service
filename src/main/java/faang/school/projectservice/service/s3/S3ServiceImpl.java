@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.utils.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -29,17 +32,22 @@ public class S3ServiceImpl implements S3Service {
     private String bucketName;
 
     @Override
-    public ResourceDto uploadFile(MultipartFile file, String folder) {
+    public ResourceDto uploadImage(MultipartFile file, String folder) throws IllegalArgumentException, IOException {
+        if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Файл не является изображением");
+        }
+
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-        try {
+        byte[] toUploadBytes = zipImage(file);
+        try(InputStream is = new ByteArrayInputStream(toUploadBytes)) {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucketName,
                     key,
-                    file.getInputStream(),
+                    is,
                     objectMetadata
             );
             s3client.putObject(putObjectRequest);
@@ -58,6 +66,37 @@ public class S3ServiceImpl implements S3Service {
         resourceDto.setName(file.getOriginalFilename());
 
         return resourceDto;
+    }
+
+    private byte[] zipImage(MultipartFile file) throws IOException {
+        byte[] originalBytes = file.getBytes();
+        ImageUtils.ImageInputStreamWrapper wrapper = () -> new ByteArrayInputStream(originalBytes);
+        BufferedImage img = ImageUtils.read(wrapper);
+        if (img == null) throw new IllegalArgumentException("Невозможно прочитать изображение");
+
+        int w = img.getWidth();
+        int h = img.getHeight();
+
+        boolean isSquare = w == h;
+        boolean isHorizontal = w > h;
+
+        String outFormat = file.getContentType().equals("image/png") ? "png" : "jpg";
+
+        if (isHorizontal) {
+            if (w > 1080 || h > 566) {
+                return ImageUtils.resizeToFit(img, 1080, 566, outFormat, 0.85f);
+            } else {
+                return originalBytes;
+            }
+        } else if (isSquare) {
+            if (w > 1080) {
+                return ImageUtils.resizeToFit(img, 1080, 1080, outFormat, 0.85f);
+            } else {
+                return originalBytes;
+            }
+        } else {
+            return originalBytes;
+        }
     }
 
     @Override
