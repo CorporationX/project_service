@@ -235,9 +235,13 @@ class ResourceControllerIntegrationTest {
     @DisplayName("Should return 413 when file too large")
     void shouldReturn413WhenFileTooLarge() throws Exception {
         // Given
-        byte[] largeContent = new byte[501 * 1024 * 1024]; // 501MB
-        MockMultipartFile largeFile = new MockMultipartFile(
-                "file", "large.zip", "application/zip", largeContent
+        long oversizedBytes = 501L * 1024 * 1024; // 501MB
+        MockMultipartFile largeFile = new OversizedMockMultipartFile(
+                "file",
+                "large.zip",
+                "application/zip",
+                "placeholder".getBytes(),
+                oversizedBytes
         );
         
         // When & Then
@@ -315,14 +319,16 @@ class ResourceControllerIntegrationTest {
                 .build();
         unauthorizedMember = teamMemberRepository.save(unauthorizedMember);
         
-        // When & Then
+        // When & Then - Exception should be handled and return 403 Forbidden
         mockMvc.perform(
                 delete("/api/v1/projects/{projectId}/resources/{resourceId}",
                         testProject.getId(), testResource.getId())
                         .requestAttr("teamMemberId", unauthorizedMember.getId())
         )
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.errorCode").value("FILE_STORAGE_ERROR"));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.message").value(
+                        "Only file creator or project manager can delete files"));
     }
     
     @Test
@@ -403,6 +409,22 @@ class ResourceControllerIntegrationTest {
         )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
+    }
+
+    private static class OversizedMockMultipartFile extends MockMultipartFile {
+
+        private final long reportedSize;
+
+        OversizedMockMultipartFile(String name, String originalFilename,
+                                   String contentType, byte[] content, long reportedSize) {
+            super(name, originalFilename, contentType, content);
+            this.reportedSize = reportedSize;
+        }
+
+        @Override
+        public long getSize() {
+            return reportedSize;
+        }
     }
 }
 

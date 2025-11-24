@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> downloadFile(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
         
         FileDownloadResponse download = fileStorageService.downloadFile(
                 resourceId, projectId, teamMemberId);
@@ -88,7 +89,7 @@ public class ResourceController {
     public ResponseEntity<Map<String, Object>> getDownloadUrl(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
         String url = fileStorageService.generatePresignedUrl(resourceId, projectId, teamMemberId);
 
         return ResponseEntity.ok(Map.of("url", url, "expiresIn", 3600));
@@ -98,7 +99,7 @@ public class ResourceController {
     public ResponseEntity<Void> deleteFile(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
 
         log.info("Delete request: project={}, resource={}, member={}", projectId, resourceId, teamMemberId);
 

@@ -36,6 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigInteger;
+import java.nio.file.AccessDeniedException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -190,11 +191,12 @@ class FileStorageServiceTest {
         @DisplayName("Should fail when file exceeds size limit")
         void shouldFailWhenFileExceedsSizeLimit() {
             // Given
-            MockMultipartFile largeFile = new MockMultipartFile(
+            MockMultipartFile largeFile = new OversizedMockMultipartFile(
                     "file",
                     "large.zip",
                     "application/zip",
-                    new byte[500_000_001] // 500MB + 1 byte
+                    "dummy".getBytes(),
+                    500_000_001L // 500MB + 1 byte
             );
             
             // When & Then
@@ -307,13 +309,13 @@ class FileStorageServiceTest {
             
             when(resourceRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testResource));
-            when(teamMemberRepository.findByUserIdAndProjectId(100L, 1L))
+            when(teamMemberRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testTeamMember));
             doAnswer(invocation -> mockResponse).when(minioClient)
                     .getObject(any(GetObjectArgs.class));
             
             // When
-            FileDownloadResponse result = fileStorageService.downloadFile(1L, 1L, 100L);
+            FileDownloadResponse result = fileStorageService.downloadFile(1L, 1L, 1L);
             
             // Then
             assertNotNull(result);
@@ -345,12 +347,12 @@ class FileStorageServiceTest {
             testResource.setStatus(ResourceStatus.DELETED);
             when(resourceRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testResource));
-            when(teamMemberRepository.findByUserIdAndProjectId(100L, 1L))
+            when(teamMemberRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testTeamMember));
             
             // When & Then
             assertThrows(FileStorageException.class, () ->
-                    fileStorageService.downloadFile(1L, 1L, 100L)
+                    fileStorageService.downloadFile(1L, 1L, 1L)
             );
         }
         
@@ -362,17 +364,18 @@ class FileStorageServiceTest {
                     .id(2L)
                     .userId(200L)
                     .nickname("Unauthorized")
+                    .team(testTeam)
                     .roles(List.of(TeamRole.TESTER))
                     .build();
             
             when(resourceRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testResource));
-            when(teamMemberRepository.findByUserIdAndProjectId(200L, 1L))
+            when(teamMemberRepository.findByIdAndProjectId(2L, 1L))
                     .thenReturn(Optional.of(unauthorizedMember));
             
             // When & Then
-            assertThrows(FileStorageException.class, () ->
-                    fileStorageService.downloadFile(1L, 1L, 200L)
+            assertThrows(AccessDeniedException.class, () ->
+                    fileStorageService.downloadFile(1L, 1L, 2L)
             );
         }
     }
@@ -464,7 +467,7 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.of(otherMember));
             
             // When & Then
-            assertThrows(FileStorageException.class, () ->
+            assertThrows(AccessDeniedException.class, () ->
                     fileStorageService.deleteFile(1L, 1L, 2L)
             );
             
@@ -503,13 +506,13 @@ class FileStorageServiceTest {
             
             when(resourceRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testResource));
-            when(teamMemberRepository.findByUserIdAndProjectId(100L, 1L))
+            when(teamMemberRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testTeamMember));
             doAnswer(invocation -> expectedUrl).when(minioClient)
                     .getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class));
             
             // When
-            String result = fileStorageService.generatePresignedUrl(1L, 1L, 100L);
+            String result = fileStorageService.generatePresignedUrl(1L, 1L, 1L);
             
             // Then
             assertEquals(expectedUrl, result);
@@ -527,6 +530,21 @@ class FileStorageServiceTest {
             assertThrows(ResourceNotFoundException.class, () ->
                     fileStorageService.generatePresignedUrl(999L, 1L, 100L)
             );
+        }
+    }
+
+    private static class OversizedMockMultipartFile extends MockMultipartFile {
+        private final long reportedSize;
+
+        OversizedMockMultipartFile(String name, String originalFilename,
+                                   String contentType, byte[] content, long reportedSize) {
+            super(name, originalFilename, contentType, content);
+            this.reportedSize = reportedSize;
+        }
+
+        @Override
+        public long getSize() {
+            return reportedSize;
         }
     }
 }

@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,7 +128,8 @@ public class FileStorageService {
         }
     }
 
-    public FileDownloadResponse downloadFile(Long resourceId, Long projectId, Long teamMemberId) {
+    public FileDownloadResponse downloadFile(Long resourceId, Long projectId, Long teamMemberId) 
+            throws AccessDeniedException {
         log.info("Downloading resource {} from project {} for member {}", resourceId, projectId, teamMemberId);
 
         Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
@@ -161,7 +163,8 @@ public class FileStorageService {
     }
 
     @Transactional
-    public void deleteFile(Long resourceId, Long projectId, Long teamMemberId) {
+    public void deleteFile(Long resourceId, Long projectId, Long teamMemberId) 
+            throws AccessDeniedException {
         log.info("Deleting resource {} from project {} by member {}", resourceId, projectId, teamMemberId);
 
         Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
@@ -215,7 +218,8 @@ public class FileStorageService {
         return resources.map(this::toDTO);
     }
 
-    public String generatePresignedUrl(Long resourceId, Long projectId, Long teamMemberId) {
+    public String generatePresignedUrl(Long resourceId, Long projectId, Long teamMemberId) 
+            throws AccessDeniedException {
         Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found or doesn't belong to project"));
 
@@ -328,7 +332,8 @@ public class FileStorageService {
         log.debug("Updated project {} storage size to {}", projectId, totalSize);
     }
 
-    private void validateAccess(Resource resource, Long teamMemberId) {
+    private void validateAccess(Resource resource, Long teamMemberId) 
+            throws AccessDeniedException {
         TeamMember teamMember = teamMemberRepository
                 .findByIdAndProjectId(teamMemberId, resource.getProject().getId())
                 .orElseThrow(() -> new FileStorageException("Not a project member"));
@@ -341,17 +346,18 @@ public class FileStorageService {
                 .anyMatch(resource.getAllowedRoles()::contains);
 
         if (!hasAccess) {
-            throw new FileStorageException("No permission to access this resource");
+            throw new AccessDeniedException("No permission to access this resource");
         }
     }
 
-    private void validateDeletePermission(Resource resource, TeamMember teamMember) {
+    private void validateDeletePermission(Resource resource, TeamMember teamMember) 
+            throws AccessDeniedException {
         boolean isCreator = resource.getCreatedBy().getId().equals(teamMember.getId());
         boolean isManager = teamMember.getRoles().contains(TeamRole.MANAGER);
         boolean canDelete = isCreator || isManager;
 
         if (!canDelete) {
-            throw new FileStorageException(
+            throw new AccessDeniedException(
                     "Only file creator or project manager can delete files");
         }
     }
