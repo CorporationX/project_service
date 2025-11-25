@@ -55,6 +55,7 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     implementation ("net.coobird:thumbnailator:0.4.20")
+    implementation("org.springframework.kafka:spring-kafka")
 
     /**
      * Test containers

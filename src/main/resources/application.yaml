@@ -18,6 +18,9 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
   data:
+    kafka:
+      bootstrap_servers: localhost:9092
+
     redis:
       port: 6379
       host: localhost
