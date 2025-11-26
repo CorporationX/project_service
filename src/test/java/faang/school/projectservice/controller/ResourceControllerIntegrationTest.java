@@ -211,7 +211,7 @@ class ResourceControllerIntegrationTest {
                 multipart("/api/v1/projects/{projectId}/resources", testProject.getId())
                         .file(testFile)
                         .param("allowedRoles", "DEVELOPER")
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test-document.pdf"))
@@ -248,10 +248,10 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 multipart("/api/v1/projects/{projectId}/resources", testProject.getId())
                         .file(largeFile)
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.errorCode").exists());
+                .andExpect(status().isPayloadTooLarge())
+                .andExpect(jsonPath("$.errorCode").value("413 PAYLOAD_TOO_LARGE"));
     }
     
     @Test
@@ -268,7 +268,7 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 get("/api/v1/projects/{projectId}/resources/{resourceId}/download",
                         testProject.getId(), testResource.getId())
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
@@ -293,7 +293,7 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 delete("/api/v1/projects/{projectId}/resources/{resourceId}",
                         testProject.getId(), testResource.getId())
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isNoContent());
         
@@ -323,7 +323,7 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 delete("/api/v1/projects/{projectId}/resources/{resourceId}",
                         testProject.getId(), testResource.getId())
-                        .requestAttr("teamMemberId", unauthorizedMember.getId())
+                        .header("x-team-member-id", unauthorizedMember.getId())
         )
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"))
@@ -340,7 +340,7 @@ class ResourceControllerIntegrationTest {
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "createdAt,desc")
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -366,7 +366,7 @@ class ResourceControllerIntegrationTest {
                 multipart("/api/v1/projects/{projectId}/resources/bulk", testProject.getId())
                         .file(file1)
                         .file(file2)
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("doc1.pdf"))
@@ -389,7 +389,7 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 get("/api/v1/projects/{projectId}/resources/{resourceId}/url",
                         testProject.getId(), testResource.getId())
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url").value(expectedUrl))
@@ -405,7 +405,7 @@ class ResourceControllerIntegrationTest {
         mockMvc.perform(
                 get("/api/v1/projects/{projectId}/resources/{resourceId}/download",
                         testProject.getId(), 99999L)
-                        .requestAttr("teamMemberId", testTeamMember.getId())
+                        .header("x-team-member-id", testTeamMember.getId())
         )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));

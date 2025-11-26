@@ -2,40 +2,31 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
-import feign.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
-    @Query("SELECT r FROM Resource r WHERE r.project.id = :projectId AND r.status = :status")
     Page<Resource> findByProjectIdAndStatus(
-            @Param("projectId") Long projectId,
-            @Param("status") ResourceStatus status,
+            Long projectId,
+            ResourceStatus status,
             Pageable pageable
     );
 
-    @Query("SELECT r FROM Resource r WHERE r.project.id = :projectId AND r.createdBy.id = :memberId")
-    List<Resource> findProjectIdAndCreatedBy(
-            @Param("projectId") Long projectId,
-            @Param("memberId") Long memberId
-    );
+    List<Resource> findByProjectIdAndCreatedById(Long projectId, Long memberId);
 
-    @Query("SELECT r FROM Resource r WHERE r.key = :key")
-    Optional<Resource> findByKey(
-            @Param("key") String key
-    );
+    Optional<Resource> findByKey(String key);
 
-    @Query("SELECT r FROM Resource r WHERE r.id = :resourceId AND r.project.id = :projectId")
     Optional<Resource> findByIdAndProjectId(
-            @Param("resourceId") Long resourceId,
-            @Param("projectId") Long projectId
+            Long resourceId,
+            Long projectId
     );
 
     @Query("SELECT SUM(r.size) FROM Resource r WHERE r.project.id = :projectId AND r.status = 'ACTIVE'")

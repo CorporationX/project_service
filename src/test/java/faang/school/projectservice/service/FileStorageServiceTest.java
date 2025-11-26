@@ -2,9 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.FileDownloadResponse;
 import faang.school.projectservice.enums.Role;
-import faang.school.projectservice.exception.FileStorageException;
 import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.exception.StorageLimitExceededException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -179,9 +180,10 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            assertThrows(FileStorageException.class, () ->
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                     fileStorageService.uploadFile(emptyFile, 1L, 1L, null)
             );
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
             
             verifyNoInteractions(minioClient);
             verifyNoInteractions(resourceRepository);
@@ -200,12 +202,13 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            FileStorageException exception = assertThrows(
-                    FileStorageException.class, 
+            ResponseStatusException exception = assertThrows(
+                    ResponseStatusException.class, 
                     () -> fileStorageService.uploadFile(largeFile, 1L, 1L, null)
             );
             
-            assertTrue(exception.getMessage().contains("exceeds maximum allowed size"));
+            assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("exceeds maximum allowed size"));
         }
         
         @Test
@@ -236,9 +239,10 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            assertThrows(FileStorageException.class, () ->
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                     fileStorageService.uploadFile(executableFile, 1L, 1L, null)
             );
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
         
         @Test
@@ -351,9 +355,10 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.of(testTeamMember));
             
             // When & Then
-            assertThrows(FileStorageException.class, () ->
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                     fileStorageService.downloadFile(1L, 1L, 1L)
             );
+            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
         
         @Test

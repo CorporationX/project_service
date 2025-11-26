@@ -71,9 +71,4 @@ public class MinioConfig {
             throw new RuntimeException("Failed to create bucket", e);
         }
     }
-
-    @Bean
-    public String bucketName() {
-        return bucketName;
-    }
 }

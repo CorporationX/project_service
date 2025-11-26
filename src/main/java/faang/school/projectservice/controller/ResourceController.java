@@ -6,8 +6,8 @@ import faang.school.projectservice.dto.ResourceResponse;
 import faang.school.projectservice.enums.Role;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.FileStorageService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,17 +39,17 @@ import java.util.Set;
 @RequestMapping("/api/v1/projects/{projectId}/resources")
 @Slf4j
 @Validated
+@RequiredArgsConstructor
 public class ResourceController {
 
-    @Autowired
-    private FileStorageService fileStorageService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResourceResponse> uploadFile(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) Set<Role> allowedRoles,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestHeader("x-team-member-id") Long teamMemberId) {
 
         log.info("Upload request: project={}, file={}, size={}",
                 projectId, file.getOriginalFilename(), file.getSize());
@@ -63,7 +63,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> downloadFile(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
+            @RequestHeader("x-team-member-id") Long teamMemberId) throws AccessDeniedException {
         
         FileDownloadResponse download = fileStorageService.downloadFile(
                 resourceId, projectId, teamMemberId);
@@ -89,7 +89,7 @@ public class ResourceController {
     public ResponseEntity<Map<String, Object>> getDownloadUrl(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
+            @RequestHeader("x-team-member-id") Long teamMemberId) throws AccessDeniedException {
         String url = fileStorageService.generatePresignedUrl(resourceId, projectId, teamMemberId);
 
         return ResponseEntity.ok(Map.of("url", url, "expiresIn", 3600));
@@ -99,7 +99,7 @@ public class ResourceController {
     public ResponseEntity<Void> deleteFile(
             @PathVariable Long projectId,
             @PathVariable Long resourceId,
-            @RequestAttribute("teamMemberId") Long teamMemberId) throws AccessDeniedException {
+            @RequestHeader("x-team-member-id") Long teamMemberId) throws AccessDeniedException {
 
         log.info("Delete request: project={}, resource={}, member={}", projectId, resourceId, teamMemberId);
 
@@ -114,7 +114,7 @@ public class ResourceController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestHeader("x-team-member-id") Long teamMemberId) {
 
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
@@ -132,7 +132,7 @@ public class ResourceController {
             @PathVariable Long projectId,
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam(required = false) Set<Role> allowedRoles,
-            @RequestAttribute("teamMemberId") Long teamMemberId) {
+            @RequestHeader("x-team-member-id") Long teamMemberId) {
 
         log.info("Bulk upload: project={}, files={}", projectId, files.size());
 

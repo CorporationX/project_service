@@ -150,7 +150,7 @@ tasks.jacocoTestCoverageVerification {
                 "faang.school.projectservice.config.*",
                 "faang.school.projectservice.enums.ResourceType",
                 "faang.school.projectservice.controller.ResourceController",
-                "faang.school.projectservice.exception.FileStorageExceptionHandler",
+                "faang.school.projectservice.exception.GlobalExceptionHandler",
                 "faang.school.projectservice.integration.jira.config.*",
                 "faang.school.projectservice.integration.jira.event.*",
                 "faang.school.projectservice.integration.jira.exception.*",

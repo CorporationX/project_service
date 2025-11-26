@@ -5,9 +5,10 @@ import faang.school.projectservice.dto.ResourceDTO;
 import faang.school.projectservice.enums.Role;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.exception.FileStorageException;
 import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.exception.StorageLimitExceededException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -22,9 +23,9 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,22 +46,16 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional
+@RequiredArgsConstructor
 public class FileStorageService {
     private static final long MAX_FILE_SIZE = 500_000_000L; // 500MB max per file
     private static final long BYTES_PER_MB = 1_000_000L;
     private static final Set<String> BLOCKED_EXTENSIONS = Set.of("exe", "bat", "cmd", "sh");
 
-    @Autowired
-    private MinioClient minioClient;
-
-    @Autowired
-    private ResourceRepository resourceRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private TeamMemberRepository teamMemberRepository;
+    private final MinioClient minioClient;
+    private final ResourceRepository resourceRepository;
+    private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Value("${minio.bucket-name}")
     private String bucketName;
@@ -72,7 +67,7 @@ public class FileStorageService {
         log.info("Uploading file {} to project {}", file.getOriginalFilename(), projectId);
 
         if (file.isEmpty()) {
-            throw new FileStorageException("File cannot be empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty");
         }
 
         validateFile(file);
@@ -138,7 +133,7 @@ public class FileStorageService {
         validateAccess(resource, teamMemberId);
 
         if (resource.getStatus() != ResourceStatus.ACTIVE) {
-            throw new FileStorageException("Resource is not active");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resource is not active");
         }
 
         try {
@@ -158,7 +153,7 @@ public class FileStorageService {
 
         } catch (Exception e) {
             log.error("Failed to download file", e);
-            throw new FileStorageException("Failed to download file", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to download file", e);
         }
     }
 
@@ -203,14 +198,14 @@ public class FileStorageService {
 
         } catch (Exception e) {
             log.error("Failed to delete file", e);
-            throw new FileStorageException("Failed to delete file", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete file", e);
         }
     }
 
     public Page<ResourceDTO> getProjectFiles(Long projectId, Long teamMemberId, Pageable pageable) {
         TeamMember teamMember = teamMemberRepository
                 .findByIdAndProjectId(teamMemberId, projectId)
-                .orElseThrow(() -> new FileStorageException("Not a project member"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a project member"));
 
         Page<Resource> resources = resourceRepository
                 .findByProjectIdAndStatus(projectId, ResourceStatus.ACTIVE, pageable);
@@ -240,21 +235,21 @@ public class FileStorageService {
 
         } catch (Exception e) {
             log.error("Failed to generate presigned URL", e);
-            throw new FileStorageException("Failed to generate download URL", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate download URL", e);
         }
     }
 
     private void validateFile(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
             long maxSizeMb = MAX_FILE_SIZE / BYTES_PER_MB;
-            throw new FileStorageException(
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
                     String.format("File size exceeds maximum allowed size of %d MB",
                             maxSizeMb));
         }
 
         String extension = getFileExtension(file.getOriginalFilename());
         if (BLOCKED_EXTENSIONS.contains(extension)) {
-            throw new FileStorageException("File type is not allowed: " + extension);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File type is not allowed: " + extension);
         }
     }
 
@@ -336,10 +331,10 @@ public class FileStorageService {
             throws AccessDeniedException {
         TeamMember teamMember = teamMemberRepository
                 .findByIdAndProjectId(teamMemberId, resource.getProject().getId())
-                .orElseThrow(() -> new FileStorageException("Not a project member"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a project member"));
 
         if (resource.getAllowedRoles() == null || resource.getAllowedRoles().isEmpty()) {
-            throw new FileStorageException("Resource has no allowed roles configured");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resource has no allowed roles configured");
         }
 
         boolean hasAccess = teamMember.getRoles().stream()
