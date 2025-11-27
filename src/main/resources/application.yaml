@@ -40,8 +40,8 @@ server:
 logging:
   level:
     root: info
-    io.minio: DEBUG
-    faang.school.projectservice: DEBUG
+    io.minio: INFO
+    faang.school.projectservice: INFO
 
 calculations_messages_processing:
   enabled: true
