@@ -28,21 +28,7 @@ public class OAuthTokenRefreshInterceptor implements ExchangeFilterFunction {
                 .flatMap(response -> {
                     if (response.statusCode() == HttpStatus.UNAUTHORIZED) {
                         log.warn("Received 401 Unauthorized. Token might be expired.");
-
-                        // Извлекаем userId из контекста (нужно передавать отдельно)
-                        // Long userId = getUserIdFromContext(request);
-
-                        // Обновляем токен
-                        // String newToken = tokenManager.getValidToken(userId);
-
-                        // Повторяем запрос с новым токеном
-                        // ClientRequest retryRequest = ClientRequest.from(request)
-                        //     .header("Authorization", "Bearer " + newToken)
-                        //     .build();
-
-                        // return next.exchange(retryRequest);
                     }
-
                     return Mono.just(response);
                 });
     }

@@ -94,7 +94,7 @@ public class JiraTokenService {
 
         UserJiraOAuthToken token = tokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException(
-                        "No tokens found for user: " + userId
+                        String.format("No tokens found for user: %d", userId)
                 ));
 
         token.setAccessToken(newAccessToken);

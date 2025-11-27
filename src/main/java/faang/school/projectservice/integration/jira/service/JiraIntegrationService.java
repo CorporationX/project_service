@@ -280,7 +280,7 @@ public class JiraIntegrationService {
             .filter(t -> t.getName().equalsIgnoreCase(transitionName))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException(
-                "No transition available with name: " + transitionName
+                String.format("No transition available with name: %s", transitionName)
             ));
         
         TransitionInput transitionInput = new TransitionInput(targetTransition.getId());
@@ -295,7 +295,7 @@ public class JiraIntegrationService {
             .map(JiraTransitionsResponse.Transition::getId)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException(
-                "No transition available to status: " + targetStatus
+                String.format("No transition available to status: %s", targetStatus)
             ));
     }
     
@@ -317,7 +317,7 @@ public class JiraIntegrationService {
     public List<Task> getAllProjectTasks(Long projectId) {
         log.debug("Fetching all tasks for project: {}", projectId);
         
-        String jql = "project = " + projectId;
+        String jql = String.format("project = %d", projectId);
         return searchTasks(jql);
     }
     
@@ -328,7 +328,7 @@ public class JiraIntegrationService {
     ) {
         log.debug("Fetching tasks for project: {} with filters", projectId);
         
-        StringBuilder jql = new StringBuilder("project = " + projectId);
+        StringBuilder jql = new StringBuilder(String.format("project = %d", projectId));
         
         if (status != null) {
             String jiraStatus = mapper.toJiraStatus(status);
@@ -469,7 +469,7 @@ public class JiraIntegrationService {
         
         try {
             List<Issue> jiraIssues = systemClient.searchIssues(
-                "project = " + projectId, 
+                String.format("project = %d", projectId),
                 1000
             );
             result.setTotalTasks(jiraIssues.size());
@@ -522,7 +522,7 @@ public class JiraIntegrationService {
             metricsService.recordTaskFailed("sync", e.getClass().getSimpleName());
             metricsService.recordApiError("sync_exception");
             metricsService.recordApiRequestDuration(sample, "sync_project_error");
-            throw new JiraIntegrationException("Failed to sync project: " + projectId, e);
+            throw new JiraIntegrationException(String.format("Failed to sync project: %d", projectId), e);
         }
     }
     
@@ -536,7 +536,7 @@ public class JiraIntegrationService {
         
         try {
             UserJiraOAuthToken token = tokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new JiraIntegrationException("No token found for user: " + userId));
+                .orElseThrow(() -> new JiraIntegrationException(String.format("No token found for user: %d", userId)));
             
             OAuthTokenResponse response = oauthService.refreshAccessToken(token.getRefreshToken());
             
@@ -551,7 +551,7 @@ public class JiraIntegrationService {
             
         } catch (Exception e) {
             log.error("Failed to refresh OAuth token", e);
-            throw new JiraIntegrationException("Failed to refresh token for user: " + userId, e);
+            throw new JiraIntegrationException(String.format("Failed to refresh token for user: %d", userId), e);
         }
     }
     

@@ -98,7 +98,7 @@ public class JiraOAuthClientConfig {
             URI.create(config.getRedirectUri());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "jira.oauth.redirect-uri has invalid format: " + config.getRedirectUri()
+                    String.format("jira.oauth.redirect-uri has invalid format: %s", config.getRedirectUri())
             );
         }
 
@@ -128,7 +128,7 @@ public class JiraOAuthClientConfig {
             URI.create(config.getBaseUrl());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "jira.system.base-url has invalid format: " + config.getBaseUrl()
+                    String.format("jira.system.base-url has invalid format: %s", config.getBaseUrl())
             );
         }
 

@@ -27,7 +27,7 @@ public class JiraOAuthException extends RuntimeException {
      * @param errorDescription Описание ошибки от OAuth сервера
      */
     public JiraOAuthException(String errorCode, String errorDescription) {
-        super("OAuth error: " + errorCode + " - " + errorDescription);
+        super(String.format("OAuth error: %s - %s", errorCode, errorDescription));
         this.errorCode = errorCode;
         this.errorDescription = errorDescription;
     }

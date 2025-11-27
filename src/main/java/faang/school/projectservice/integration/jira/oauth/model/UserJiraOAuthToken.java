@@ -63,6 +63,6 @@ public class UserJiraOAuthToken {
     }
 
     public String getAuthorizationHeader() {
-        return tokenType + " " + accessToken;
+        return String.format("%s %s", tokenType, accessToken);
     }
 }

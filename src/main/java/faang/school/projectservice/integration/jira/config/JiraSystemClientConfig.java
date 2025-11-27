@@ -112,7 +112,7 @@ public class JiraSystemClientConfig {
             URI.create(config.getBaseUrl());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "jira.system.base-url has invalid format: " + config.getBaseUrl()
+                    String.format("jira.system.base-url has invalid format: %s", config.getBaseUrl())
             );
         }
 

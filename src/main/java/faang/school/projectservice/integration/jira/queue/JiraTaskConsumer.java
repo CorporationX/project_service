@@ -48,7 +48,7 @@ public class JiraTaskConsumer {
         try {
             Task task = taskRepository.findById(message.getTaskId())
                 .orElseThrow(() -> new IllegalArgumentException(
-                    "Task not found: " + message.getTaskId()
+                    String.format("Task not found: %d", message.getTaskId())
                 ));
             
             String jiraIssueKey;
@@ -94,7 +94,7 @@ public class JiraTaskConsumer {
         try {
             Task task = taskRepository.findById(message.getTaskId())
                 .orElseThrow(() -> new IllegalArgumentException(
-                    "Task not found: " + message.getTaskId()
+                    String.format("Task not found: %d", message.getTaskId())
                 ));
             
             if (task.getJiraIssueKey() == null) {

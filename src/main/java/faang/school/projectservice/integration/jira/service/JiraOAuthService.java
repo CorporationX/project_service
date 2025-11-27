@@ -98,9 +98,8 @@ public class JiraOAuthService {
                             response -> response.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("OAuth token exchange failed (4xx): {}", errorBody);
-                                        return Mono.<Throwable>error(new JiraOAuthException(
-                                                "Token exchange failed: " + errorBody
-                                        ));
+                                        String message = String.format("Token exchange failed: %s", errorBody);
+                                        return Mono.<Throwable>error(new JiraOAuthException(message));
                                     })
                     )
                     .onStatus(
@@ -184,9 +183,8 @@ public class JiraOAuthService {
                             response -> response.bodyToMono(String.class)
                                     .flatMap(error -> {
                                         log.error("Token refresh failed (4xx): {}", error);
-                                        return Mono.<Throwable>error(new JiraOAuthException(
-                                                "Token refresh failed: " + error
-                                        ));
+                                        String message = String.format("Token refresh failed: %s", error);
+                                        return Mono.<Throwable>error(new JiraOAuthException(message));
                                     })
                     )
                     .bodyToMono(OAuthTokenResponse.class)

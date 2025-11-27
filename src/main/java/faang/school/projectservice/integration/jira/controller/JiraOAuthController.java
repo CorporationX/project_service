@@ -56,7 +56,7 @@ public class JiraOAuthController {
 
         } catch (Exception e) {
             log.error("Failed to start OAuth authorization for user: {}", userId, e);
-            return new RedirectView("/oauth/error?message=" + e.getMessage());
+            return new RedirectView(String.format("/oauth/error?message=%s", e.getMessage()));
         }
     }
 
@@ -99,7 +99,7 @@ public class JiraOAuthController {
 
         } catch (Exception e) {
             log.error("OAuth callback failed", e);
-            return new RedirectView("/oauth/error?message=" + e.getMessage());
+            return new RedirectView(String.format("/oauth/error?message=%s", e.getMessage()));
         }
     }
 

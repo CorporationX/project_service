@@ -18,8 +18,7 @@ public class JiraEventListener {
     
     // Здесь можно инжектить сервисы для уведомлений, аудита и т.д.
     // private final NotificationService notificationService;
-    // private final AuditService auditService;
-    
+
     @Async("jiraEventExecutor")
     @EventListener
     public void onTaskCreated(TaskCreatedEvent event) {
@@ -29,17 +28,14 @@ public class JiraEventListener {
         );
         
         try {
-            // Отправить уведомление assignee
             if (event.getTask().getPerformerUserId() != null) {
                 log.debug("Sending notification to assignee: {}", event.getTask().getPerformerUserId());
                 // notificationService.notifyTaskAssigned(event.getTask());
             }
             
-            // Записать в audit log
             log.debug("Recording task creation in audit log");
             // auditService.logTaskCreation(event.getTask(), event.getJiraIssueKey());
             
-            // Обновить статистику проекта
             log.debug("Updating project statistics");
             // statisticsService.incrementTaskCount(event.getTask().getProject().getId());
             
@@ -57,7 +53,6 @@ public class JiraEventListener {
         log.info("Processing TaskUpdatedEvent: taskId={}", event.getTask().getId());
         
         try {
-            // Записать изменения в audit log
             log.debug("Recording task update in audit log");
             // auditService.logTaskUpdate(event.getTask());
             
@@ -77,11 +72,9 @@ public class JiraEventListener {
         );
         
         try {
-            // Уведомление о смене статуса
             log.debug("Sending status change notification");
             // notificationService.notifyStatusChange(event.getTask());
             
-            // Если задача завершена - уведомить всех участников
             if (event.getNewStatus() == TaskStatus.DONE) {
                 log.debug("Task completed, notifying stakeholders");
                 // notificationService.notifyTaskCompleted(event.getTask());
@@ -103,7 +96,6 @@ public class JiraEventListener {
         );
         
         try {
-            // Обновить метрики синхронизации
             log.debug("Updating sync metrics");
             // metricsService.recordSyncCompleted(event.getProjectId(), event.getTasksCount());
             

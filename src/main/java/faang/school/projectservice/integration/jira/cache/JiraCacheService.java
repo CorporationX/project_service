@@ -272,6 +272,29 @@ public class JiraCacheService {
         evictTransitions(issueKey);
         log.debug("Issue cache invalidated: {}", issueKey);
     }
+
+    // ==========================================
+    // Cache Statistics
+    // ==========================================
+
+    public CacheStatistics getStatistics() {
+        Set<String> issueKeys = redisTemplate.keys(CACHE_PREFIX_ISSUE + "*");
+        Set<String> transitionKeys = redisTemplate.keys(CACHE_PREFIX_TRANSITIONS + "*");
+
+        return CacheStatistics.builder()
+                .issueCount(issueKeys != null ? issueKeys.size() : 0)
+                .transitionsCount(transitionKeys != null ? transitionKeys.size() : 0)
+                .enabled(isCacheEnabled())
+                .build();
+    }
+
+    @Data
+    @Builder
+    public static class CacheStatistics {
+        private int issueCount;
+        private int transitionsCount;
+        private boolean enabled;
+    }
     
     // ==========================================
     // Configuration
@@ -302,28 +325,6 @@ public class JiraCacheService {
         }
         return Duration.ofHours(jiraProperties.getCache().getProjectsTtlHours());
     }
-    
-    // ==========================================
-    // Cache Statistics
-    // ==========================================
 
-    public CacheStatistics getStatistics() {
-        Set<String> issueKeys = redisTemplate.keys(CACHE_PREFIX_ISSUE + "*");
-        Set<String> transitionKeys = redisTemplate.keys(CACHE_PREFIX_TRANSITIONS + "*");
-        
-        return CacheStatistics.builder()
-            .issueCount(issueKeys != null ? issueKeys.size() : 0)
-            .transitionsCount(transitionKeys != null ? transitionKeys.size() : 0)
-            .enabled(isCacheEnabled())
-            .build();
-    }
-    
-    @Data
-    @Builder
-    public static class CacheStatistics {
-        private int issueCount;
-        private int transitionsCount;
-        private boolean enabled;
-    }
 }
 

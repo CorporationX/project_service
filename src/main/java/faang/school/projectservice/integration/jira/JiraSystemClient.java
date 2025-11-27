@@ -1,6 +1,7 @@
 package faang.school.projectservice.integration.jira;
 
 import com.atlassian.jira.rest.client.api.JiraRestClient;
+import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
@@ -8,6 +9,7 @@ import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
+import faang.school.projectservice.integration.jira.exception.ProjectIntegrationException;
 import faang.school.projectservice.integration.jira.cache.JiraCacheService;
 import faang.school.projectservice.integration.jira.config.JiraProperties;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +50,9 @@ public class JiraSystemClient {
 
             log.info("Issue created successfully via System Client: {}", issue.getKey());
             return issue.getKey();
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to create issue via System Client", e);
-            throw new RuntimeException("Failed to create issue", e);
+            throw new ProjectIntegrationException("Failed to create issue via System Client", e);
         }
     }
 
@@ -64,9 +66,9 @@ public class JiraSystemClient {
 
             log.debug("Issue fetched successfully: {}", issueKey);
             return issue;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to fetch issue: {}", issueKey, e);
-            throw new RuntimeException("Failed to fetch issue: " + issueKey, e);
+            throw new ProjectIntegrationException(String.format("Failed to fetch issue: %s", issueKey), e);
         }
     }
 
@@ -82,9 +84,9 @@ public class JiraSystemClient {
             cacheService.invalidateIssue(issueKey);
 
             log.info("Issue updated successfully: {}", issueKey);
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to update issue: {}", issueKey, e);
-            throw new RuntimeException("Failed to update issue: " + issueKey, e);
+            throw new ProjectIntegrationException(String.format("Failed to update issue: %s", issueKey), e);
         }
     }
 
@@ -107,9 +109,9 @@ public class JiraSystemClient {
             log.debug("Found {} issues", issues.size());
             return issues;
 
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to search issues with JQL: {}", jql, e);
-            throw new RuntimeException("Failed to search issues", e);
+            throw new ProjectIntegrationException("Failed to search Jira issues", e);
         }
     }
 
@@ -138,9 +140,10 @@ public class JiraSystemClient {
 
             log.debug("Transitions fetched successfully: {}", issueKey);
             return transitionList;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to fetch transitions for issue: {}", issueKey, e);
-            throw new RuntimeException("Failed to fetch transitions", e);
+            throw new ProjectIntegrationException(
+                    String.format("Failed to fetch transitions for issue: %s", issueKey), e);
         }
     }
 
@@ -157,9 +160,10 @@ public class JiraSystemClient {
 
             log.info("Transition performed successfully for issue: {}", issueKey);
 
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to perform transition for issue: {}", issueKey, e);
-            throw new RuntimeException("Failed to perform transition", e);
+            throw new ProjectIntegrationException(
+                    String.format("Failed to perform transition for issue: %s", issueKey), e);
         }
     }
 
@@ -183,9 +187,9 @@ public class JiraSystemClient {
 
             log.info("Issues linked successfully");
 
-        } catch (Exception e) {
-            log.error("Failed to link issues", e);
-            throw new RuntimeException("Failed to link issues", e);
+        } catch (RestClientException e) {
+            log.error("Failed to link issues {} and {}", sourceKey, targetKey, e);
+            throw new ProjectIntegrationException("Failed to link issues", e);
         }
     }
 
@@ -202,9 +206,9 @@ public class JiraSystemClient {
 
             log.info("Issue deleted successfully: {}", issueKey);
 
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Failed to delete issue: {}", issueKey, e);
-            throw new RuntimeException("Failed to delete issue: " + issueKey, e);
+            throw new ProjectIntegrationException(String.format("Failed to delete issue: %s", issueKey), e);
         }
     }
 }

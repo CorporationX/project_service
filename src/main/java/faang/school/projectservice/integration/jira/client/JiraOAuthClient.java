@@ -36,7 +36,7 @@ public class JiraOAuthClient {
         try {
             JiraIssueResponse response = webClient.post()
                     .uri("/rest/api/3/issue")
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .bodyValue(request)
                     .retrieve()
                     .onStatus(
@@ -44,9 +44,8 @@ public class JiraOAuthClient {
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to create issue: {}", errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to create issue: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to create issue: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(JiraIssueResponse.class)
@@ -73,7 +72,7 @@ public class JiraOAuthClient {
         try {
             webClient.put()
                     .uri("/rest/api/3/issue/{issueKey}", issueKey)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .bodyValue(request)
                     .retrieve()
                     .onStatus(
@@ -81,9 +80,8 @@ public class JiraOAuthClient {
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to update issue {}: {}", issueKey, errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to update issue: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to update issue: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(Void.class)
@@ -98,7 +96,7 @@ public class JiraOAuthClient {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error updating issue", e);
-            throw new JiraApiException("Failed to update issue: " + issueKey, e);
+            throw new JiraApiException(String.format("Failed to update issue: %s", issueKey), e);
         }
     }
 
@@ -116,23 +114,22 @@ public class JiraOAuthClient {
         try {
             JiraIssueResponse response = webClient.get()
                     .uri("/rest/api/3/issue/{issueKey}", issueKey)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .retrieve()
                     .onStatus(
                             status -> status.is4xxClientError() || status.is5xxServerError(),
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to get issue {}: {}", issueKey, errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to get issue: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to get issue: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(JiraIssueResponse.class)
                     .block();
 
             if (response == null) {
-                throw new JiraApiException("No response for issue: " + issueKey);
+                throw new JiraApiException(String.format("No response for issue: %s", issueKey));
             }
 
             // Сохранить в кэш
@@ -144,7 +141,7 @@ public class JiraOAuthClient {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error getting issue", e);
-            throw new JiraApiException("Failed to get issue: " + issueKey, e);
+            throw new JiraApiException(String.format("Failed to get issue: %s", issueKey), e);
         }
     }
 
@@ -161,23 +158,22 @@ public class JiraOAuthClient {
         try {
             JiraTransitionsResponse response = webClient.get()
                     .uri("/rest/api/3/issue/{issueKey}/transitions", issueKey)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .retrieve()
                     .onStatus(
                             status -> status.is4xxClientError() || status.is5xxServerError(),
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to get transitions for {}: {}", issueKey, errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to get transitions: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to get transitions: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(JiraTransitionsResponse.class)
                     .block();
 
             if (response == null) {
-                throw new JiraApiException("No transitions response for issue: " + issueKey);
+                throw new JiraApiException(String.format("No transitions response for issue: %s", issueKey));
             }
 
             // Сохранить в кэш
@@ -189,7 +185,7 @@ public class JiraOAuthClient {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error getting transitions", e);
-            throw new JiraApiException("Failed to get transitions: " + issueKey, e);
+            throw new JiraApiException(String.format("Failed to get transitions: %s", issueKey), e);
         }
     }
 
@@ -199,7 +195,7 @@ public class JiraOAuthClient {
         try {
             webClient.post()
                     .uri("/rest/api/3/issue/{issueKey}/transitions", issueKey)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .bodyValue(java.util.Map.of("transition", java.util.Map.of("id", transitionId)))
                     .retrieve()
                     .onStatus(
@@ -207,9 +203,8 @@ public class JiraOAuthClient {
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to perform transition for {}: {}", issueKey, errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to perform transition: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to perform transition: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(Void.class)
@@ -224,7 +219,7 @@ public class JiraOAuthClient {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error performing transition", e);
-            throw new JiraApiException("Failed to perform transition: " + issueKey, e);
+            throw new JiraApiException(String.format("Failed to perform transition: %s", issueKey), e);
         }
     }
 
@@ -234,7 +229,7 @@ public class JiraOAuthClient {
         try {
             webClient.post()
                     .uri("/rest/api/3/issueLink")
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", bearer(accessToken))
                     .bodyValue(request)
                     .retrieve()
                     .onStatus(
@@ -242,9 +237,8 @@ public class JiraOAuthClient {
                             clientResponse -> clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("Failed to link issues: {}", errorBody);
-                                        return Mono.error(new JiraApiException(
-                                                "Failed to link issues: " + errorBody
-                                        ));
+                                        String message = String.format("Failed to link issues: %s", errorBody);
+                                        return Mono.error(new JiraApiException(message));
                                     })
                     )
                     .bodyToMono(Void.class)
@@ -266,5 +260,9 @@ public class JiraOAuthClient {
             log.error("Unexpected error linking issues", e);
             throw new JiraApiException("Failed to link issues", e);
         }
+    }
+
+    private String bearer(String accessToken) {
+        return String.format("Bearer %s", accessToken);
     }
 }
