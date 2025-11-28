@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Abbreviation exceptions: OAuth, Jira, RabbitMQ, E2E are standard terms -->
+    <suppress checks="AbbreviationAsWordInName" files=".*" />
+    
+    <!-- Test method names use underscores (Given-When-Then pattern) -->
+    <suppress checks="MethodName" files=".*Test\.java" />
+    
+    <!-- Star imports in tests and controllers -->
+    <suppress checks="AvoidStarImport" files=".*Test\.java" />
+    <suppress checks="AvoidStarImport" files=".*Controller\.java" />
+    
+    <!-- Member names (allow oAuthStateManager, etc.) -->
+    <suppress checks="MemberName" files=".*" />
+    
+    <!-- Variable declaration distance in tests -->
+    <suppress checks="VariableDeclarationUsageDistance" files=".*Test\.java" />
+    
+    <!-- Outer type filename (RabbitMQ vs RabbitMq) -->
+    <suppress checks="OuterTypeFilename" files=".*RabbitMQ.*Test\.java" />
+</suppressions>
