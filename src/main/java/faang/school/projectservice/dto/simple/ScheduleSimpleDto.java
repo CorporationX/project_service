@@ -12,4 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ScheduleSimpleDto { private Long id; private String name; }
+public class ScheduleSimpleDto {
+    private Long id;
+    private String name;
+}

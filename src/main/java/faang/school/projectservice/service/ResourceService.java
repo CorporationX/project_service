@@ -35,8 +35,6 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    @Value("${app.project.storage.increment-max-retries}")
-    private int MAX_RETRIES;
     @Value("${app.project.image.max_width}")
     private int MAX_WIDTH;
     @Value("${app.project.image.max_height}")
@@ -49,13 +47,10 @@ public class ResourceService {
         ProjectDto projectDto = projectService.getProjectDtoById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found: " + projectId));
         String folder = projectDto.getId() + projectDto.getName();
-        long fileSize = file.getSize();
 
         ResourceDto resourceDto = s3Service.uploadFile(processImage(file), folder);
         resourceDto.setProject(projectDto);
         resourceRepository.save(resourceMapper.toEntity(resourceDto));
-
-        increaseStorageSize(projectId, fileSize, projectDto);
         return resourceDto;
     }
 
@@ -115,43 +110,5 @@ public class ResourceService {
                     originalName, file.getContentType(), e);
             throw new FileProcessingException("Failed to read uploaded image file", e);
         }
-    }
-
-    private void increaseStorageSize(long projectId, long fileSize, ProjectDto projectDto) {
-        for (int i = 0; i <= MAX_RETRIES; i++) {
-            try {
-                BigInteger newStorageSize = getNewStorageSize(projectId, fileSize, projectDto);
-                projectDto.setStorageSize(newStorageSize);
-                projectRepository.save(projectMapper.toEntity(projectDto));
-            } catch (ObjectOptimisticLockingFailureException e) {
-                if (i == MAX_RETRIES) {
-                    throw e;
-                }
-            }
-        }
-    }
-
-    private BigInteger getNewStorageSize(long projectId, long delta, ProjectDto projectDto) {
-        BigInteger fileSize = BigInteger.valueOf(delta);
-        BigInteger currentStorageSize =
-                projectDto.getStorageSize() == null ? BigInteger.ZERO : projectDto.getStorageSize();
-        BigInteger maxStorageSize = projectDto.getMaxStorageSize();
-        BigInteger newStorageSize = currentStorageSize.add(fileSize);
-        if (maxStorageSize != null && newStorageSize.compareTo(maxStorageSize) > 0) {
-            log.warn("Storage limit exceeded for project. projectId={}, maxStorageSize={}, " +
-                            "currentStorageSize={}, fileSize={}, requestedStorageSize={}",
-                    projectId,
-                    maxStorageSize,
-                    currentStorageSize,
-                    fileSize,
-                    newStorageSize);
-            throw new StorageLimitException(String.format(
-                    "Storage limit exceeded for project %d. " +
-                            "Max storage size is %d, but you want got %d",
-                    projectId,
-                    maxStorageSize.intValue(),
-                    newStorageSize.intValue()));
-        }
-        return newStorageSize;
     }
 }

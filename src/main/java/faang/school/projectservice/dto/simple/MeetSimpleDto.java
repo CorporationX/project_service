@@ -9,4 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeetSimpleDto { private Long id; private String title; }
+public class MeetSimpleDto {
+    private Long id;
+    private String title;
+}

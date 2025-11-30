@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResourceSimpleDto { private Long id; private String name; private ResourceType type; }
+public class ResourceSimpleDto {
+    private Long id;
+    private String name;
+    private ResourceType type;
+}

@@ -1,5 +1,9 @@
 package faang.school.projectservice.utils;
 
+import faang.school.projectservice.exception.FileProcessingException;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.RenderingHints;
@@ -8,10 +12,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+@UtilityClass
+@Slf4j
 public class ImageUtils {
-    public static BufferedImage read(ImageInputStreamWrapper supplier) throws IOException {
-        return ImageIO.read(supplier.getInputStream());
+    public static BufferedImage read(ImageInputStreamWrapper supplier) {
+        try {
+            return ImageIO.read(supplier.getInputStream());
+        } catch (IOException e) {
+            log.error("Failed to read uploaded image file.");
+            throw new FileProcessingException("Failed to read uploaded image file", e);
+        }
     }
 
 

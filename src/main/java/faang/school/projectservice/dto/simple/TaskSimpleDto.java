@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TaskSimpleDto { private Long id; private String title; private TaskStatus status; }
+public class TaskSimpleDto {
+    private Long id;
+    private String name;
+    private TaskStatus status;
+}

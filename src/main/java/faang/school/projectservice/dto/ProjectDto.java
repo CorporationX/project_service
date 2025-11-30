@@ -9,6 +9,8 @@ import faang.school.projectservice.dto.simple.StageSimpleDto;
 import faang.school.projectservice.dto.simple.TaskSimpleDto;
 import faang.school.projectservice.dto.simple.TeamSimpleDto;
 import faang.school.projectservice.dto.simple.VacancySimpleDto;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +27,7 @@ import java.util.List;
 public class ProjectDto {
     private Long id;
     private String name;
+    private Long version;
     private String description;
     private BigInteger storageSize;
     private BigInteger maxStorageSize;
@@ -35,8 +38,8 @@ public class ProjectDto {
     private List<ResourceSimpleDto> resources;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private faang.school.projectservice.model.ProjectStatus status;
-    private faang.school.projectservice.model.ProjectVisibility visibility;
+    private ProjectStatus status;
+    private ProjectVisibility visibility;
     private String coverImageId;
     private List<TeamSimpleDto> teams;
     private ScheduleSimpleDto schedule;

@@ -9,4 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TeamSimpleDto { private Long id;}
+public class TeamSimpleDto {
+    private Long id;
+}

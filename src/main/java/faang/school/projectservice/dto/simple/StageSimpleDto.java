@@ -9,4 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StageSimpleDto { private Long id; private String name; }
+public class StageSimpleDto {
+    private Long stageId;
+    private String stageName;
+}

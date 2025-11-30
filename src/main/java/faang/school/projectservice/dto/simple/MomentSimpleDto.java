@@ -9,4 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MomentSimpleDto { private Long id; private String name; }
+public class MomentSimpleDto {
+    private Long id;
+    private String name;
+}
