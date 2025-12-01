@@ -5,6 +5,11 @@ spring:
     username: user
     password: password
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -31,6 +36,16 @@ server:
 logging:
   level:
     root: info
+
+app:
+  project:
+    image:
+      max_width: 1080
+      max_height: 566
+      quality: 0.85
+
+    storage:
+      increment-max-retries: 3
 
 calculations_messages_processing:
   enabled: true
