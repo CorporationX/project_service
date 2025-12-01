@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -21,32 +23,27 @@ import java.util.Optional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    @Value("${app.project.storage.increment-max-retries}")
-    private int MAX_RETRIES;
+    private final ResourceService resourceService;
 
-    public Optional<ProjectDto> getProjectDtoById(long projectId) {
+    public Optional<ProjectDto> getProjectById(long projectId) {
         return projectRepository.findById(projectId).map(projectMapper::toDto);
     }
 
-    public void addCover(long projectId, ResourceDto resourceDto) {
-        ProjectDto projectDto = getProjectDtoById(projectId)
+    @Retryable(retryFor = ObjectOptimisticLockingFailureException.class)
+    public ResourceDto addCover(long projectId, MultipartFile file) {
+        ProjectDto projectDto = getProjectById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found: " + projectId));
-        increaseStorageSize(resourceDto, projectDto);
-    }
-
-    private void increaseStorageSize(ResourceDto resourceDto, ProjectDto projectDto) {
-        for (int i = 0; i <= MAX_RETRIES; i++) {
-            try {
-                BigInteger newStorageSize = getNewStorageSize(resourceDto.getSize().longValue(), projectDto);
-                projectDto.setStorageSize(newStorageSize);
-                projectDto.setCoverImageId(resourceDto.getKey());
-                projectRepository.save(projectMapper.toEntity(projectDto));
-            } catch (ObjectOptimisticLockingFailureException e) {
-                if (i == MAX_RETRIES) {
-                    throw e;
-                }
-            }
+        ResourceDto resourceDto = resourceService.addCover(projectDto, file);
+        try {
+            BigInteger newStorageSize = getNewStorageSize(resourceDto.getSize().longValue(), projectDto);
+            projectDto.setStorageSize(newStorageSize);
+            projectDto.setCoverImageId(resourceDto.getKey());
+            projectRepository.save(projectMapper.toEntity(projectDto));
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.info("Optimistic lock by database {}", e.getMessage());
+            throw e;
         }
+        return resourceDto;
     }
 
     private BigInteger getNewStorageSize(long delta, ProjectDto projectDto) {
@@ -56,7 +53,7 @@ public class ProjectService {
         BigInteger maxStorageSize = projectDto.getMaxStorageSize();
         BigInteger newStorageSize = currentStorageSize.add(fileSize);
         if (maxStorageSize != null && newStorageSize.compareTo(maxStorageSize) > 0) {
-            log.warn("Storage limit exceeded for project. projectId={}, maxStorageSize={}, " +
+            log.info("Storage limit exceeded for project. projectId={}, maxStorageSize={}, " +
                             "currentStorageSize={}, fileSize={}, requestedStorageSize={}",
                     projectDto.getId(),
                     maxStorageSize,
