@@ -1,14 +1,12 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.FileDownloadResponse;
-import faang.school.projectservice.dto.ResourceDTO;
-import faang.school.projectservice.enums.Role;
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.exception.StorageLimitExceededException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -23,12 +21,14 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +37,7 @@ import java.math.BigInteger;
 import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -45,29 +46,54 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class FileStorageService {
-    private static final long MAX_FILE_SIZE = 500_000_000L; // 500MB max per file
     private static final long BYTES_PER_MB = 1_000_000L;
-    private static final Set<String> BLOCKED_EXTENSIONS = Set.of("exe", "bat", "cmd", "sh");
+    private static final String PROJECT_KEY_TEMPLATE = "project-%d/%s-%s-%s";
+    private static final String SANITIZE_PATTERN = "[^a-zA-Z0-9.-]";
+    private static final String SANITIZE_DUPLICATE_PATTERN = "_{2,}";
+    private static final String UNDERSCORE_REPLACEMENT = "_";
 
     private final MinioClient minioClient;
     private final ResourceRepository resourceRepository;
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final Tika tika;
 
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    private final Tika tika = new Tika();
+    @Value("${file-storage.max-file-size}")
+    private long maxFileSize;
 
-    public Resource uploadFile(MultipartFile file, Long projectId, Long teamMemberId, Set<Role> allowedRoles) {
+    @Value("${file-storage.blocked-extensions}")
+    private String blockedExtensionsString;
 
-        log.info("Uploading file {} to project {}", file.getOriginalFilename(), projectId);
+    @Value("${file-storage.presigned-url-expiry-seconds}")
+    private int presignedUrlExpirySeconds;
+
+    @Value("${file-storage.uuid-substring-length}")
+    private int uuidSubstringLength;
+
+    @Value("${file-storage.default-content-type}")
+    private String defaultContentType;
+
+    private Set<String> blockedExtensions;
+    private long maxFileSizeMb;
+
+    @PostConstruct
+    private void init() {
+        blockedExtensions = Arrays.stream(blockedExtensionsString.split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        maxFileSizeMb = maxFileSize / BYTES_PER_MB;
+    }
+
+    @Transactional
+    public Resource uploadFile(MultipartFile file, Long projectId, Long teamMemberId, Set<TeamRole> allowedRoles) {
 
         if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File cannot be empty");
+            throw new IllegalArgumentException("File cannot be empty");
         }
 
         validateFile(file);
@@ -76,47 +102,27 @@ public class FileStorageService {
             allowedRoles = Set.of();
         }
 
-        Project project = projectRepository.findByIdWithLock(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
-
+        Project project = findProjectById(projectId);
         validateStorageLimit(project, file.getSize());
 
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(()  -> new ResourceNotFoundException("Team member not found"));
-
-        List<TeamRole> teamRoleList;
-        if (allowedRoles == null || allowedRoles.isEmpty()) {
-            teamRoleList = new ArrayList<>(teamMember.getRoles());
-        } else {
-            teamRoleList = convertRolesToTeamRoles(allowedRoles);
-        }
+        TeamMember teamMember = findTeamMemberById(teamMemberId);
+        List<TeamRole> teamRoleList = getAllowedTeamRoles(allowedRoles, teamMember);
 
         try {
             String key = generateStorageKey(projectId, file.getOriginalFilename());
-
             uploadToMinio(file, key);
 
             String contentType = detectContentType(file);
-            Resource resource = Resource.builder()
-                    .name(file.getOriginalFilename())
-                    .key(key)
-                    .size(BigInteger.valueOf(file.getSize()))
-                    .contentType(contentType)
-                    .type(ResourceType.getResourceType(contentType))
-                    .status(ResourceStatus.ACTIVE)
-                    .allowedRoles(teamRoleList)
-                    .project(project)
-                    .createdBy(teamMember)
-                    .updatedBy(teamMember)
-                    .build();
+            Resource resource = buildResource(file, key, contentType, teamRoleList, project, teamMember);
 
             resource = resourceRepository.save(resource);
-
             updateProjectStorageSize(project.getId());
 
-            log.info("File uploaded successfully: {}", key);
+            log.info("File uploaded successfully: {} for project {}", key, projectId);
             return resource;
 
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error uploading file {} to project {}", file.getOriginalFilename(), projectId, e);
             throw new RuntimeException("Failed to upload file", e);
@@ -127,13 +133,14 @@ public class FileStorageService {
             throws AccessDeniedException {
         log.info("Downloading resource {} from project {} for member {}", resourceId, projectId, teamMemberId);
 
-        Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found or doesn't belong to project"));
-
+        Resource resource = findResourceByProjectId(resourceId, projectId);
         validateAccess(resource, teamMemberId);
 
         if (resource.getStatus() != ResourceStatus.ACTIVE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resource is not active");
+            throw new IllegalStateException(
+                    String.format(
+                            "Resource %d is not active (status: %s) in project %d",
+                            resourceId, resource.getStatus(), projectId));
         }
 
         try {
@@ -152,8 +159,9 @@ public class FileStorageService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Failed to download file", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to download file", e);
+            log.error("Failed to download file: resourceId={}, projectId={}", resourceId, projectId, e);
+            throw new RuntimeException(
+                    String.format("Failed to download file: resourceId=%d, projectId=%d", resourceId, projectId), e);
         }
     }
 
@@ -162,16 +170,12 @@ public class FileStorageService {
             throws AccessDeniedException {
         log.info("Deleting resource {} from project {} by member {}", resourceId, projectId, teamMemberId);
 
-        Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found or doesn't belong to project"));
-
-        TeamMember teamMember = teamMemberRepository.findById(teamMemberId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team member not found"));
-
+        Resource resource = findResourceByProjectId(resourceId, projectId);
+        TeamMember teamMember = findTeamMemberById(teamMemberId);
         validateDeletePermission(resource, teamMember);
 
         if (resource.getStatus() == ResourceStatus.DELETED) {
-            log.warn("Resource {} is already deleted", resourceId);
+            log.warn("Resource {} is already deleted in project {}", resourceId, projectId);
             return;
         }
 
@@ -194,30 +198,30 @@ public class FileStorageService {
 
             updateProjectStorageSize(resource.getProject().getId());
 
-            log.info("Resource {} deleted successfully", resourceId);
+            log.info("Resource {} deleted successfully from project {}", resourceId, projectId);
 
         } catch (Exception e) {
-            log.error("Failed to delete file", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete file", e);
+            log.error("Failed to delete file: resourceId={}, projectId={}", resourceId, projectId, e);
+            throw new RuntimeException(
+                    String.format("Failed to delete file: resourceId=%d, projectId=%d", resourceId, projectId), e);
         }
     }
 
-    public Page<ResourceDTO> getProjectFiles(Long projectId, Long teamMemberId, Pageable pageable) {
+    public Page<ResourceDto> getProjectFiles(Long projectId, Long teamMemberId, Pageable pageable) {
         TeamMember teamMember = teamMemberRepository
                 .findByIdAndProjectId(teamMemberId, projectId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a project member"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Team member %d is not a member of project %d", teamMemberId, projectId)));
 
         Page<Resource> resources = resourceRepository
                 .findByProjectIdAndStatus(projectId, ResourceStatus.ACTIVE, pageable);
 
-        return resources.map(this::toDTO);
+        return resources.map(this::toDto);
     }
 
     public String generatePresignedUrl(Long resourceId, Long projectId, Long teamMemberId) 
             throws AccessDeniedException {
-        Resource resource = resourceRepository.findByIdAndProjectId(resourceId, projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found or doesn't belong to project"));
-
+        Resource resource = findResourceByProjectId(resourceId, projectId);
         validateAccess(resource, teamMemberId);
 
         try {
@@ -226,30 +230,33 @@ public class FileStorageService {
                             .method(Method.GET)
                             .bucket(bucketName)
                             .object(resource.getKey())
-                            .expiry(1, TimeUnit.HOURS)
+                            .expiry(presignedUrlExpirySeconds, TimeUnit.SECONDS)
                             .build()
             );
 
-            log.info("Generated presigned URL for resource {}", resourceId);
+            log.info("Generated presigned URL for resource {} in project {}", resourceId, projectId);
             return url;
 
         } catch (Exception e) {
-            log.error("Failed to generate presigned URL", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate download URL", e);
+            log.error("Failed to generate presigned URL: resourceId={}, projectId={}", resourceId, projectId, e);
+            throw new RuntimeException(
+                    String.format(
+                            "Failed to generate download URL: resourceId=%d, projectId=%d",
+                            resourceId, projectId), e);
         }
     }
 
     private void validateFile(MultipartFile file) {
-        if (file.getSize() > MAX_FILE_SIZE) {
-            long maxSizeMb = MAX_FILE_SIZE / BYTES_PER_MB;
-            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
-                    String.format("File size exceeds maximum allowed size of %d MB",
-                            maxSizeMb));
+        if (file.getSize() > maxFileSize) {
+            throw new IllegalArgumentException(
+                    String.format("File size %d bytes exceeds maximum allowed size of %d MB (%d bytes)",
+                            file.getSize(), maxFileSizeMb, maxFileSize));
         }
 
         String extension = getFileExtension(file.getOriginalFilename());
-        if (BLOCKED_EXTENSIONS.contains(extension)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File type is not allowed: " + extension);
+        if (blockedExtensions.contains(extension)) {
+            throw new IllegalArgumentException(
+                    String.format("File type is not allowed: %s. File: %s", extension, file.getOriginalFilename()));
         }
     }
 
@@ -283,17 +290,16 @@ public class FileStorageService {
     }
 
     private String generateStorageKey(Long projectId, String fileName) {
-        String timestamp = Instant.now().toEpochMilli() + "";
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String timestamp = String.valueOf(Instant.now().toEpochMilli());
+        String uuid = UUID.randomUUID().toString().substring(0, uuidSubstringLength);
         String sanitizedFileName = sanitizeFileName(fileName);
 
-        return String.format("project-%d/%s-%s-%s",
-                projectId, timestamp, uuid, sanitizedFileName);
+        return String.format(PROJECT_KEY_TEMPLATE, projectId, timestamp, uuid, sanitizedFileName);
     }
 
     private String sanitizeFileName(String fileName) {
-        return fileName.replaceAll("[^a-zA-Z0-9.-]", "_")
-                .replaceAll("_{2,}", "_")
+        return fileName.replaceAll(SANITIZE_PATTERN, UNDERSCORE_REPLACEMENT)
+                .replaceAll(SANITIZE_DUPLICATE_PATTERN, UNDERSCORE_REPLACEMENT)
                 .toLowerCase();
     }
 
@@ -303,11 +309,19 @@ public class FileStorageService {
             if (detected != null && !detected.isBlank()) {
                 return detected;
             }
-            return "application/octet-stream";
+            return getDefaultContentType();
         } catch (Exception e) {
-            return file.getContentType() != null
-                    ? file.getContentType() : "application/octet-stream";
+            String fileContentType = file.getContentType();
+            return fileContentType != null && !fileContentType.isBlank()
+                    ? fileContentType : getDefaultContentType();
         }
+    }
+
+    private String getDefaultContentType() {
+        if (defaultContentType != null && !defaultContentType.isBlank()) {
+            return defaultContentType;
+        }
+        return MediaType.APPLICATION_OCTET_STREAM_VALUE;
     }
 
 
@@ -331,17 +345,23 @@ public class FileStorageService {
             throws AccessDeniedException {
         TeamMember teamMember = teamMemberRepository
                 .findByIdAndProjectId(teamMemberId, resource.getProject().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a project member"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Team member %d is not a member of project %d",
+                                teamMemberId, resource.getProject().getId())));
 
         if (resource.getAllowedRoles() == null || resource.getAllowedRoles().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resource has no allowed roles configured");
+            throw new IllegalStateException(
+                    String.format("Resource %d has no allowed roles configured in project %d",
+                            resource.getId(), resource.getProject().getId()));
         }
 
         boolean hasAccess = teamMember.getRoles().stream()
                 .anyMatch(resource.getAllowedRoles()::contains);
 
         if (!hasAccess) {
-            throw new AccessDeniedException("No permission to access this resource");
+            throw new AccessDeniedException(
+                    String.format("Team member %d does not have permission to access resource %d in project %d",
+                            teamMemberId, resource.getId(), resource.getProject().getId()));
         }
     }
 
@@ -353,17 +373,19 @@ public class FileStorageService {
 
         if (!canDelete) {
             throw new AccessDeniedException(
-                    "Only file creator or project manager can delete files");
+                    String.format(
+                            "Team member %d cannot delete resource %d in project %d. "
+                                    + "Only file creator or project manager can delete files",
+                            teamMember.getId(), resource.getId(), resource.getProject().getId()));
         }
     }
 
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    private ResourceDTO toDTO(Resource resource) {
+    private ResourceDto toDto(Resource resource) {
         Long size = resource.getSize() != null
                 ? resource.getSize().longValue()
                 : null;
 
-        return ResourceDTO.builder()
+        return ResourceDto.builder()
                 .id(resource.getId())
                 .name(resource.getName())
                 .size(size)
@@ -374,7 +396,7 @@ public class FileStorageService {
                 .build();
     }
 
-    private List<TeamRole> convertRolesToTeamRoles(Set<Role> roles) {
+    private List<TeamRole> convertRolesToTeamRoles(Set<TeamRole> roles) {
         return roles.stream()
                 .map(role -> {
                     try {
@@ -386,6 +408,49 @@ public class FileStorageService {
                 })
                 .filter(teamRole -> teamRole != null)
                 .collect(Collectors.toList());
+    }
+
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findByIdWithLock(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Project not found: projectId=%d", projectId)));
+    }
+
+    private TeamMember findTeamMemberById(Long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Team member not found: teamMemberId=%d", teamMemberId)));
+    }
+
+    private Resource findResourceByProjectId(Long resourceId, Long projectId) {
+        return resourceRepository.findByIdAndProjectId(resourceId, projectId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Resource %d not found or doesn't belong to project %d",
+                                resourceId, projectId)));
+    }
+
+    private List<TeamRole> getAllowedTeamRoles(Set<TeamRole> allowedRoles, TeamMember teamMember) {
+        if (allowedRoles == null || allowedRoles.isEmpty()) {
+            return new ArrayList<>(teamMember.getRoles());
+        } else {
+            return convertRolesToTeamRoles(allowedRoles);
+        }
+    }
+
+    private Resource buildResource(MultipartFile file, String key, String contentType,
+                                  List<TeamRole> teamRoleList, Project project, TeamMember teamMember) {
+        return Resource.builder()
+                .name(file.getOriginalFilename())
+                .key(key)
+                .size(BigInteger.valueOf(file.getSize()))
+                .contentType(contentType)
+                .type(ResourceType.getResourceType(contentType))
+                .status(ResourceStatus.ACTIVE)
+                .allowedRoles(teamRoleList)
+                .project(project)
+                .createdBy(teamMember)
+                .updatedBy(teamMember)
+                .build();
     }
 
 }

@@ -88,6 +88,16 @@ minio:
   bucket-name: ${MINIO_BUCKET:projectbucket}
   region: ${MINIO_REGION:us-east-1}
 
+# File Storage Configuration
+file-storage:
+  max-file-size: 500000000  # 500MB in bytes
+  blocked-extensions: exe,bat,cmd,sh
+  presigned-url-expiry-hours: 1
+  presigned-url-expiry-seconds: 3600  # expiresIn in seconds for API response
+  uuid-substring-length: 8
+  default-content-type: application/octet-stream
+  bulk-upload-max-files: 10
+
 # S3 Configuration (старая конфигурация, можно удалить если используете только minio)
 services:
   s3:

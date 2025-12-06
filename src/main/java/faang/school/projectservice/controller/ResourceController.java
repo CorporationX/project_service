@@ -1,17 +1,18 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.FileDownloadResponse;
-import faang.school.projectservice.dto.ResourceDTO;
+import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.dto.ResourceResponse;
-import faang.school.projectservice.enums.Role;
+import faang.school.projectservice.dto.ResourceUploadStatus;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,11 +45,17 @@ public class ResourceController {
 
     private final FileStorageService fileStorageService;
 
+    @Value("${file-storage.presigned-url-expiry-seconds}")
+    private int presignedUrlExpirySeconds;
+
+    @Value("${file-storage.bulk-upload-max-files}")
+    private int bulkUploadMaxFiles;
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResourceResponse> uploadFile(
             @PathVariable Long projectId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) Set<Role> allowedRoles,
+            @RequestParam(required = false) Set<TeamRole> allowedRoles,
             @RequestHeader("x-team-member-id") Long teamMemberId) {
 
         log.info("Upload request: project={}, file={}, size={}",
@@ -92,7 +99,7 @@ public class ResourceController {
             @RequestHeader("x-team-member-id") Long teamMemberId) throws AccessDeniedException {
         String url = fileStorageService.generatePresignedUrl(resourceId, projectId, teamMemberId);
 
-        return ResponseEntity.ok(Map.of("url", url, "expiresIn", 3600));
+        return ResponseEntity.ok(Map.of("url", url, "expiresIn", presignedUrlExpirySeconds));
     }
 
     @DeleteMapping("/{resourceId}")
@@ -109,19 +116,16 @@ public class ResourceController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ResourceDTO>> getProjectFiles(
+    public ResponseEntity<Page<ResourceDto>> getProjectFiles(
             @PathVariable Long projectId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @PageableDefault(
+                    size = 20,
+                    sort = "createdAt",
+                    direction = org.springframework.data.domain.Sort.Direction.DESC
+            ) Pageable pageable,
             @RequestHeader("x-team-member-id") Long teamMemberId) {
 
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
-        Page<ResourceDTO> resources = fileStorageService.getProjectFiles(
+        Page<ResourceDto> resources = fileStorageService.getProjectFiles(
                 projectId, teamMemberId, pageable);
 
         return ResponseEntity.ok(resources);
@@ -131,13 +135,14 @@ public class ResourceController {
     public ResponseEntity<List<ResourceResponse>> uploadMultipleFiles(
             @PathVariable Long projectId,
             @RequestParam("files") List<MultipartFile> files,
-            @RequestParam(required = false) Set<Role> allowedRoles,
+            @RequestParam(required = false) Set<TeamRole> allowedRoles,
             @RequestHeader("x-team-member-id") Long teamMemberId) {
 
         log.info("Bulk upload: project={}, files={}", projectId, files.size());
 
-        if (files.size() > 10) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maximum 10 files can be uploaded at once");
+        if (files.size() > bulkUploadMaxFiles) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    String.format("Maximum %d files can be uploaded at once", bulkUploadMaxFiles));
         }
 
         List<ResourceResponse> responses = new ArrayList<>();
@@ -147,13 +152,13 @@ public class ResourceController {
                 Resource resource = fileStorageService.uploadFile(
                         file, projectId, teamMemberId, allowedRoles);
 
-                responses.add(ResourceResponse.from(resource, "SUCCESS"));
+                responses.add(ResourceResponse.from(resource, ResourceUploadStatus.SUCCESS));
 
             } catch (Exception e) {
                 log.error("Failed to upload file: {}", file.getOriginalFilename(), e);
                 responses.add(ResourceResponse.builder()
                         .name(file.getOriginalFilename())
-                        .status("FAILED")
+                        .status(ResourceUploadStatus.FAILED)
                         .error(e.getMessage())
                         .build());
             }

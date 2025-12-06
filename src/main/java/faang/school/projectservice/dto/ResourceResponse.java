@@ -20,7 +20,7 @@ public class ResourceResponse {
     private Long size;
     private ResourceType type;
     private LocalDateTime uploadedAt;
-    private String status;
+    private ResourceUploadStatus status;
     private String error;
 
     public static ResourceResponse from(Resource resource) {
@@ -33,7 +33,7 @@ public class ResourceResponse {
                 .build();
     }
 
-    public static ResourceResponse from(Resource resource, String status) {
+    public static ResourceResponse from(Resource resource, ResourceUploadStatus status) {
         ResourceResponse response = from(resource);
         response.setStatus(status);
         return response;

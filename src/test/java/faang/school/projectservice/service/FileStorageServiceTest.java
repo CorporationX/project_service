@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.FileDownloadResponse;
-import faang.school.projectservice.enums.Role;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.exception.StorageLimitExceededException;
 import org.springframework.http.HttpStatus;
@@ -40,9 +40,11 @@ import java.math.BigInteger;
 import java.nio.file.AccessDeniedException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,13 +91,25 @@ class FileStorageServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(fileStorageService, "bucketName", BUCKET_NAME);
+        long maxFileSize = 500_000_000L; // 500 MB
+        ReflectionTestUtils.setField(fileStorageService, "maxFileSize", maxFileSize);
+        ReflectionTestUtils.setField(fileStorageService, "maxFileSizeMb", maxFileSize / 1_000_000L);
+        String blockedExtensionsString = "exe,bat,sh";
+        ReflectionTestUtils.setField(fileStorageService, "blockedExtensionsString", blockedExtensionsString);
+        Set<String> blockedExtensions = Arrays.stream(blockedExtensionsString.split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        ReflectionTestUtils.setField(fileStorageService, "blockedExtensions", blockedExtensions);
+        ReflectionTestUtils.setField(fileStorageService, "presignedUrlExpirySeconds", 3600); // 1 hour
+        ReflectionTestUtils.setField(fileStorageService, "uuidSubstringLength", 8);
+        ReflectionTestUtils.setField(fileStorageService, "defaultContentType", "application/octet-stream");
         
         testProject = Project.builder()
                 .id(1L)
                 .name("Test Project")
                 .storageSize(BigInteger.ZERO)
                 .maxStorageSize(BigInteger.valueOf(2_147_483_648L)) // 2GB
-                .status(ProjectStatus.ACTIVE)
+                .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         
@@ -154,7 +168,7 @@ class FileStorageServiceTest {
             
             // When
             Resource result = fileStorageService.uploadFile(
-                    testFile, 1L, 1L, Set.of(Role.DEVELOPER)
+                    testFile, 1L, 1L, Set.of(TeamRole.DEVELOPER)
             );
             
             // Then
@@ -180,10 +194,10 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                     fileStorageService.uploadFile(emptyFile, 1L, 1L, null)
             );
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+            assertTrue(exception.getMessage().contains("File cannot be empty"));
             
             verifyNoInteractions(minioClient);
             verifyNoInteractions(resourceRepository);
@@ -202,13 +216,12 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            ResponseStatusException exception = assertThrows(
-                    ResponseStatusException.class, 
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class, 
                     () -> fileStorageService.uploadFile(largeFile, 1L, 1L, null)
             );
             
-            assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, exception.getStatusCode());
-            assertTrue(exception.getReason().contains("exceeds maximum allowed size"));
+            assertTrue(exception.getMessage().contains("exceeds maximum allowed size"));
         }
         
         @Test
@@ -239,10 +252,10 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                     fileStorageService.uploadFile(executableFile, 1L, 1L, null)
             );
-            assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+            assertTrue(exception.getMessage().contains("blocked"));
         }
         
         @Test
@@ -279,7 +292,7 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.empty());
             
             // When & Then
-            assertThrows(ResourceNotFoundException.class, () ->
+            assertThrows(EntityNotFoundException.class, () ->
                     fileStorageService.uploadFile(testFile, 1L, 1L, null)
             );
         }
@@ -294,7 +307,7 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.empty());
             
             // When & Then
-            assertThrows(ResourceNotFoundException.class, () ->
+            assertThrows(EntityNotFoundException.class, () ->
                     fileStorageService.uploadFile(testFile, 1L, 1L, null)
             );
         }
@@ -353,11 +366,12 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.of(testResource));
             when(teamMemberRepository.findByIdAndProjectId(1L, 1L))
                     .thenReturn(Optional.of(testTeamMember));
-            
+
             // When & Then
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
                     fileStorageService.downloadFile(1L, 1L, 1L)
             );
+            assertTrue(exception.getMessage().contains("not active"));
             assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
         

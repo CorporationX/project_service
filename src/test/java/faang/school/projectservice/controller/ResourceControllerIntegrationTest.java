@@ -111,7 +111,15 @@ class ResourceControllerIntegrationTest {
             registry.add("spring.datasource.username", postgres::getUsername);
             registry.add("spring.datasource.password", postgres::getPassword);
             registry.add("spring.liquibase.enabled", () -> "false");
+            registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+            registry.add("spring.jpa.show-sql", () -> "false");
         }
+
+        registry.add("minio.endpoint", () -> "http://localhost:9000");
+        registry.add("minio.access-key", () -> "test");
+        registry.add("minio.secret-key", () -> "test");
+        registry.add("minio.bucket-name", () -> "test-bucket");
+        registry.add("minio.region", () -> "us-east-1");
     }
     
     @BeforeEach
@@ -156,7 +164,7 @@ class ResourceControllerIntegrationTest {
                 .name("Test Project")
                 .storageSize(BigInteger.ZERO)
                 .maxStorageSize(BigInteger.valueOf(2_147_483_648L)) // 2GB
-                .status(ProjectStatus.ACTIVE)
+                .status(ProjectStatus.IN_PROGRESS)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         testProject = projectRepository.save(testProject);
