@@ -22,6 +22,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +35,7 @@ import java.util.List;
 @Entity
 @Table(name = "task")
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +71,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "parent_task_id")
+    @JsonIgnore
     private Task parentTask;
 
     @ManyToMany
@@ -76,6 +80,7 @@ public class Task {
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "linked_task_id")
     )
+    @JsonIgnore
     private List<Task> linkedTasks;
 
     @ManyToOne
@@ -85,5 +90,11 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    @Column(name = "jira_issue_key")
+    private String jiraIssueKey;
+
+    @Column(name = "jira_issue_id")
+    private String jiraIssueId;
 }
 
