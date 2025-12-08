@@ -84,6 +84,7 @@ dependencies {
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.7")
     implementation("com.atlassian.jira:jira-rest-java-client-api:5.2.7")
     implementation("io.atlassian.fugue:fugue:4.7.2")
+    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
     /** ------------------------------
      *  Testcontainers

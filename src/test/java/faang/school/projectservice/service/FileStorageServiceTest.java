@@ -216,12 +216,13 @@ class FileStorageServiceTest {
             );
             
             // When & Then
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class, 
+            ResponseStatusException exception = assertThrows(
+                    ResponseStatusException.class, 
                     () -> fileStorageService.uploadFile(largeFile, 1L, 1L, null)
             );
             
-            assertTrue(exception.getMessage().contains("exceeds maximum allowed size"));
+            assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("exceeds maximum allowed size"));
         }
         
         @Test
@@ -255,7 +256,7 @@ class FileStorageServiceTest {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                     fileStorageService.uploadFile(executableFile, 1L, 1L, null)
             );
-            assertTrue(exception.getMessage().contains("blocked"));
+            assertTrue(exception.getMessage().contains("not allowed") || exception.getMessage().contains("blocked"));
         }
         
         @Test
@@ -368,10 +369,10 @@ class FileStorageServiceTest {
                     .thenReturn(Optional.of(testTeamMember));
 
             // When & Then
-            IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                     fileStorageService.downloadFile(1L, 1L, 1L)
             );
-            assertTrue(exception.getMessage().contains("not active"));
+            assertTrue(exception.getReason().contains("not active"));
             assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         }
         

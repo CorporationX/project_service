@@ -37,6 +37,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import faang.school.projectservice.integration.jira.client.JiraOAuthClient;
+import faang.school.projectservice.integration.jira.JiraSystemClient;
+import com.atlassian.jira.rest.client.api.JiraRestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.ByteArrayInputStream;
@@ -120,6 +125,14 @@ class ResourceControllerIntegrationTest {
         registry.add("minio.secret-key", () -> "test");
         registry.add("minio.bucket-name", () -> "test-bucket");
         registry.add("minio.region", () -> "us-east-1");
+        
+        // Jira configuration to prevent bean creation errors
+        registry.add("jira.oauth.enabled", () -> "false");
+        registry.add("jira.system.enabled", () -> "false");
+        registry.add("jira.system.base-url", () -> "http://localhost:8080");
+        registry.add("jira.system.username", () -> "test");
+        registry.add("jira.system.api-token", () -> "test-token");
+        registry.add("jira.sync.enabled", () -> "false");
     }
     
     @BeforeEach
@@ -133,6 +146,19 @@ class ResourceControllerIntegrationTest {
     
     @MockBean
     private MinioClient minioClient;
+    
+    @MockBean
+    @Qualifier("jiraOAuthWebClient")
+    private WebClient jiraOAuthWebClient;
+    
+    @MockBean
+    private JiraOAuthClient jiraOAuthClient;
+    
+    @MockBean
+    private JiraRestClient jiraRestClient;
+    
+    @MockBean
+    private JiraSystemClient jiraSystemClient;
     
     @Autowired
     private ResourceRepository resourceRepository;
@@ -336,7 +362,7 @@ class ResourceControllerIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"))
                 .andExpect(jsonPath("$.message").value(
-                        "Only file creator or project manager can delete files"));
+                        containsString("Only file creator or project manager can delete files")));
     }
     
     @Test

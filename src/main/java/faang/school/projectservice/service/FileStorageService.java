@@ -28,10 +28,12 @@ import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigInteger;
 import java.nio.file.AccessDeniedException;
@@ -137,7 +139,8 @@ public class FileStorageService {
         validateAccess(resource, teamMemberId);
 
         if (resource.getStatus() != ResourceStatus.ACTIVE) {
-            throw new IllegalStateException(
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
                     String.format(
                             "Resource %d is not active (status: %s) in project %d",
                             resourceId, resource.getStatus(), projectId));
@@ -248,7 +251,8 @@ public class FileStorageService {
 
     private void validateFile(MultipartFile file) {
         if (file.getSize() > maxFileSize) {
-            throw new IllegalArgumentException(
+            throw new ResponseStatusException(
+                    HttpStatus.PAYLOAD_TOO_LARGE,
                     String.format("File size %d bytes exceeds maximum allowed size of %d MB (%d bytes)",
                             file.getSize(), maxFileSizeMb, maxFileSize));
         }

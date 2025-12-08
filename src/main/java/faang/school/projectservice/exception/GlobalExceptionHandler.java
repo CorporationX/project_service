@@ -96,9 +96,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResponseStatusException(
             ResponseStatusException e) {
         log.warn("ResponseStatusException: {}", e.getReason());
+        String errorCode;
+        if (e.getStatusCode() instanceof HttpStatus) {
+            HttpStatus httpStatus = (HttpStatus) e.getStatusCode();
+            errorCode = httpStatus.value() + " " + httpStatus.name();
+        } else {
+            errorCode = e.getStatusCode().value() + " " + e.getStatusCode().toString();
+        }
         return ResponseEntity.status(e.getStatusCode())
                 .body(ErrorResponse.builder()
-                        .errorCode(e.getStatusCode().toString())
+                        .errorCode(errorCode)
                         .message(e.getReason())
                         .build());
     }

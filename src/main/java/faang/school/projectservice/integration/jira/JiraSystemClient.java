@@ -14,6 +14,7 @@ import faang.school.projectservice.integration.jira.cache.JiraCacheService;
 import faang.school.projectservice.integration.jira.config.JiraProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "jira.system.enabled", havingValue = "true", matchIfMissing = false)
 public class JiraSystemClient {
     private final JiraProperties jiraProperties;
     private final JiraRestClient jiraClient;
