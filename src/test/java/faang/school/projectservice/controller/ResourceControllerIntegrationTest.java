@@ -120,6 +120,8 @@ class ResourceControllerIntegrationTest {
             registry.add("spring.jpa.show-sql", () -> "false");
         }
 
+        // MinIO configuration - disable MinIO in tests to prevent connection attempts
+        registry.add("minio.enabled", () -> "false");
         registry.add("minio.endpoint", () -> "http://localhost:9000");
         registry.add("minio.access-key", () -> "test");
         registry.add("minio.secret-key", () -> "test");

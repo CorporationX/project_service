@@ -81,6 +81,8 @@ class RabbitMQIntegrationTest {
         registry.add("spring.liquibase.enabled", () -> "false");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.show-sql", () -> "false");
+        // MinIO configuration - disable MinIO in tests to prevent connection attempts
+        registry.add("minio.enabled", () -> "false");
     }
     
     @Autowired

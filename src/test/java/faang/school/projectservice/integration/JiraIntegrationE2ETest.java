@@ -103,7 +103,8 @@ class JiraIntegrationE2ETest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.show-sql", () -> "false");
         
-        // MinIO configuration to prevent connection attempts
+        // MinIO configuration - disable MinIO in tests to prevent connection attempts
+        registry.add("minio.enabled", () -> "false");
         registry.add("minio.endpoint", () -> "http://localhost:9000");
         registry.add("minio.access-key", () -> "test");
         registry.add("minio.secret-key", () -> "test");

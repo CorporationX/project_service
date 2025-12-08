@@ -6,6 +6,7 @@ import io.minio.errors.ErrorResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -15,6 +16,7 @@ import java.net.ConnectException;
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = true)
 public class MinioConfig {
 
     private final MinioProperties minioProperties;
