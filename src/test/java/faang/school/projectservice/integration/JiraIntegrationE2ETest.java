@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
+import io.minio.MinioClient;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -60,6 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("End-to-End Integration Test")
@@ -92,12 +95,21 @@ class JiraIntegrationE2ETest {
         
         registry.add("jira.scheduled.enabled", () -> "false");
         registry.add("jira.oauth.enable", () -> "false");
+        registry.add("jira.system.enabled", () -> "false");
         registry.add("jira.system.base-url", () -> "http://localhost:8080");
         registry.add("jira.system.username", () -> "test");
         registry.add("jira.system.api-token", () -> "test-token");
         registry.add("spring.liquibase.enabled", () -> "false");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.show-sql", () -> "false");
+        
+        // MinIO configuration - disable MinIO in tests to prevent connection attempts
+        registry.add("minio.enabled", () -> "false");
+        registry.add("minio.endpoint", () -> "http://localhost:9000");
+        registry.add("minio.access-key", () -> "test");
+        registry.add("minio.secret-key", () -> "test");
+        registry.add("minio.bucket-name", () -> "test-bucket");
+        registry.add("minio.region", () -> "us-east-1");
     }
     
     @Autowired
@@ -127,6 +139,9 @@ class JiraIntegrationE2ETest {
     
     @MockBean
     private JiraRestClient jiraRestClient;
+    
+    @MockBean
+    private MinioClient minioClient;
     
     private Project testProject;
     private Long testUserId = 100L;

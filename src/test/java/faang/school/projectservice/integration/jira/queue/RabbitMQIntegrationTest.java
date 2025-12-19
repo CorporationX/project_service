@@ -16,6 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -81,6 +82,8 @@ class RabbitMQIntegrationTest {
         registry.add("spring.liquibase.enabled", () -> "false");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.show-sql", () -> "false");
+        // MinIO configuration - disable MinIO in tests to prevent connection attempts
+        registry.add("minio.enabled", () -> "false");
     }
     
     @Autowired
@@ -101,6 +104,9 @@ class RabbitMQIntegrationTest {
     
     @MockBean
     private JiraRestClient jiraRestClient;
+    
+    @MockBean
+    private MinioClient minioClient;
     
     @Autowired
     private TaskRepository taskRepository;

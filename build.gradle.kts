@@ -84,6 +84,7 @@ dependencies {
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.7")
     implementation("com.atlassian.jira:jira-rest-java-client-api:5.2.7")
     implementation("io.atlassian.fugue:fugue:4.7.2")
+    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
     /** ------------------------------
      *  Testcontainers
@@ -101,6 +102,21 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.awaitility:awaitility:4.2.0")
+
+    /** ------------------------------
+     * MinIO Client
+     * ------------------------------ */
+    implementation("io.minio:minio:8.5.7")
+
+    /** ------------------------------
+     * AWS SDK (альтернатива для S3 API)
+     * ------------------------------ */
+    implementation("software.amazon.awssdk:s3:2.20.26")
+
+    /** ------------------------------
+     * Apache Tika (определение MIME типов)
+     * ------------------------------ */
+    implementation("org.apache.tika:tika-core:2.9.1")
 }
 
 tasks.withType<Test> {
@@ -133,6 +149,9 @@ tasks.jacocoTestCoverageVerification {
                 "faang.school.projectservice.dto.*",
                 "faang.school.projectservice.model.*",
                 "faang.school.projectservice.config.*",
+                "faang.school.projectservice.enums.ResourceType",
+                "faang.school.projectservice.controller.ResourceController",
+                "faang.school.projectservice.exception.GlobalExceptionHandler",
                 "faang.school.projectservice.integration.jira.config.*",
                 "faang.school.projectservice.integration.jira.event.*",
                 "faang.school.projectservice.integration.jira.exception.*",
@@ -163,6 +182,13 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
+}
+
+
+tasks.configureEach {
+    if (name.startsWith("checkstyle")) {
+        enabled = true
+    }
 }
 
 checkstyle {
