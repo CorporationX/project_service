@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("""
-            SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END 
-            FROM Project p 
+            SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END\s
+            FROM Project p\s
             WHERE p.ownerId = :ownerId AND p.name = :name
             """
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    Project findById(long id);
 }
 
